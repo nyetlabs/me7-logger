@@ -1,0 +1,654 @@
+# Measurements. Selector cases locate RAM variables from the catalog.
+# A row here is written when a needle of the same name is supplied, from
+# config/user. That needle's label is the mem operand; generate maps it through
+# the image DPP. When that address is inside a selector case, the case supplies
+# the result type and the catalog is not used for that case.
+# A stub is not written. There is no address in this file.
+# Where a name was in both hand lists, the torque factor and comment are kept.
+#
+# A measurement may omit size, bitmask, unit, signed, inverse, factor, and
+# offset. Omitted, those are 2, 0, "", false, false, 1, and 0. The conversions
+# in config/names.yaml map a size and a unit onto omitted signed, inverse,
+# factor, and offset. An omitted conversion size is 2. A field written on the
+# row wins. conversion selects a named scale, which is not a size+unit
+# default. torque is unit "" and 100/0x10000. twice is 200/0x10000 and keeps
+# the row's unit. half is the 1/2 byte percent. retard is °KW -3/4; the °KW
+# default stays signed +3/4. amp is a blank byte, 800/0x10000, not the 1/100
+# timer. config/user/*.yaml can add, replace, or drop
+# pairs and rows.
+# A word with no unit uses 1/4. Signed speed differences set signed.
+# A "%" word uses 100/0x10000, one percent of a 16-bit word. 1/0x10000 is the
+# fraction of the word. A byte scale is n/256, as in 1/256 or 10/256.
+# Other percent words set factor.
+# A byte with no unit uses 1/100. A single-bit bitmask is a flag and
+# does not take that pair.
+measurements:
+# Selector case, not the size-2 rpm word (1/4). Factor 40 matches the catalog row.
+- name: nmot
+  unit: rpm
+  factor: 40
+  comment: Motordrehzahl
+- name: dzwb
+  conversion: retard
+# retard and unsigned; °KW default is signed +3/4
+- name: wkrdy
+  conversion: retard
+  signed: false
+# unsigned; °KW default is signed
+- name: zaldy
+  size: 1
+  unit: "°KW"
+  signed: false
+# unsigned; °KW default is signed
+- name: zwbas
+  size: 1
+  unit: "°KW"
+  signed: false
+- name: miistoar_w
+  unit: "%"
+  comment: Istmoment ohne Antiruckel-Anteil
+# signed 1/200, not the torque-word factor
+- name: ldimxr_w
+  unit: "%"
+  signed: true
+  factor: 1/200
+- name: psmx_w
+  unit: mbar
+- name: B_ldimxp
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0200'
+- name: B_ldimxa
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0080'
+- name: B_ldipos
+  size: 1
+  bitmask: '0x02'
+- name: B_krldya
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x8000'
+- name: B_krldyv
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0004'
+- name: B_ehfm
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0020'
+- name: B_ehfm1
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0040'
+- name: etazaist
+  conversion: half
+  comment: actual cylinder masking effectiveness
+- name: miopt_w
+  unit: "%"
+  comment: optimum indicated torque
+- name: mizsol_div_redist_ne_0_w
+  conversion: torque
+  comment: "mizsol divisor when redist <> 0"
+- name: mizsol_div_redist_0_w
+  conversion: torque
+  comment: mizsol divisor when redist = 0
+- name: B_zwvz
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0020'
+  comment: condition for ignition angle intervention of torque interface
+- name: dmaufr_w
+  signed: true
+  conversion: twice
+  comment: delta torque rise
+- name: B_syn
+  bitmask: '0x0100'
+  comment: Synchro schedule
+- name: mibas_w
+  conversion: torque
+  comment: indicated basic torque
+- name: mdzw_max_w
+  conversion: torque
+  comment: "max(mizsol_w, mizwmn_w, misol_w)"
+- name: mizwmn_w
+  conversion: torque
+  comment: indicated engine torque at the latest spark angle
+- name: dmaufn_out_w
+  conversion: torque
+  comment: delta torque rise after torque intervention
+- name: mizsol_w
+  conversion: torque
+  comment: indicated resultant nominal torque for ignition angle intervention
+- name: B_zwvs
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0010'
+  comment: condition for fast external ignition angle intervention of torque interface
+- name: B_nozwe
+  bitmask: '0x0080'
+  comment: condition no ignition angle intervention of torque structure
+- name: etazws
+  conversion: half
+  comment: nominal ignition angle effectiveness
+- name: dzws
+  conversion: retard
+  comment: difference ignition timing (between zwopt and zwsol)
+- name: mimax_w
+  unit: "%"
+  alias: TorqueLimit
+  comment: maximum attainable indicated torque
+- name: miextv_w
+  unit: "%"
+  comment: external torque demand from stalling protection
+# factor 40 on a percent unit
+- name: nasnottm
+  size: 1
+  unit: "%"
+  factor: 40.0
+  comment: Speed threshold due to stalling protection as a function of tmot
+- name: mibgr_w
+  unit: "%"
+  comment: Indicated desired torque for gear-dependent limiting of the clutch torque
+- name: minmx_w
+  unit: "%"
+  comment: indicated nominal torque for NMAX limiting
+- name: mivmx_w
+  unit: "%"
+  comment: indicated nominal torque for VMAX control
+- name: mibeg_w
+  unit: "%"
+  comment: limit torque
+- name: mimsr_w
+  unit: "%"
+  comment: desired indicated torque from MSR
+- name: misolv_w
+  unit: "%"
+  alias: TorqueBeforeLimitation
+  comment: indicated resultant nominal torque before torque limitation
+- name: B_asr
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x4000'
+  comment: condition for ASR active
+- name: B_msr
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0002'
+  comment: Condition MSR
+- name: B_mdein
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x8000'
+  comment: Condition actions on the torque are active
+- name: mizsolv_w
+  unit: "%"
+  alias: TorqueForTimingIntervention
+  comment: ind. torque for an ignition timing intervention before torque limiting
+- name: miszull_w
+  unit: "%"
+  comment: maximum permissible indicated torque for air path?
+- name: dmzms_w
+  signed: true
+  conversion: torque
+  comment: difference between internal nominal engine torque and permissible nominal torque
+- name: B_zwvzvb
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0040'
+  comment: condition for ignition angle intervention of torque interface before limitation
+- name: mitebg_w
+  unit: "%"
+  comment: torque value for minimum charge canister purge
+- name: milres_w
+  unit: "%"
+  comment: torque request for air path including all torque reserves
+- name: milsol_w
+  unit: "%"
+  comment: torque request for air path capped by miszull?
+- name: milsolv_w
+  unit: "%"
+  comment: torque request for air path?
+- name: B_kupplv
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0200'
+  alias: CondClutchPedalSwitch
+  comment: Condition clutch delayed
+- name: B_dash
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0040'
+  comment: 'condition: limitation of negative torque gradient active'
+- name: B_lsd
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0020'
+  comment: 'condition: limitation of positive torque gradient active'
+- name: B_fil
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x4000'
+  comment: 'condition: low pass filter for transition to or from fuel cut-off active'
+- name: B_mgbget
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0040'
+  comment: 'Condition: torque gradient limiting active'
+- name: mitebg_milres_flag
+  size: 1
+  bitmask: '0x0001'
+  comment: CWTEZW=odd and mitebg_w = milres_w
+- name: B_kw
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0004'
+  comment: Condition catalyst warming
+# factor 1, not the 3/4 byte percent
+- name: dmrkh
+  size: 1
+  unit: "%"
+  factor: 1.0
+  comment: torque reserve for catalyzer heating
+# factor 1, not the torque-word factor
+- name: dmrkh_w
+  unit: "%"
+  factor: 1
+  comment: torque reserve for catalyzer heating
+# load word 6/256, not the torque-word factor
+- name: rlmin_w
+  unit: "%"
+  factor: 6/256
+  comment: minimum permissible rl
+- name: dmrkt_w
+  unit: "%"
+  comment: Torque reserve during quicktest
+- name: dmrllr_w
+  unit: "%"
+  conversion: twice
+  comment: torque reserve for idle speed control
+- name: B_zwnget
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0008'
+  comment: ignition angle intervention not by gearbox
+- name: B_zwget
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0004'
+  comment: ignition angle intervention by gearbox
+- name: TMVER_debounce_w
+  unit: s
+  comment: 'Debounce time: ETC torque limitation is activ for a longer time'
+- name: TVMIBEG_debounce
+  size: 1
+  unit: s
+  factor: 1/100
+  comment: debounce time for activation of ignition intervention during torque limitation
+- name: THDMB_debounce
+  size: 1
+  unit: s
+  comment: "dwell time, healing for fault path for permanent torque limitation"
+- name: B_llrein
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0400'
+  comment: Condition idle speed control is active
+- name: etalab
+  conversion: half
+  comment: lambda efficiency without intervention based on optimal torque during lambda=1?
+- name: etazwb
+  conversion: half
+  comment: ignition angle efficiency of basic ignition angle
+- name: dmllr_w
+  unit: "%"
+  signed: true
+  conversion: twice
+  comment: desired torque change from the idle speed control (PD-part)
+- name: B_clmdb
+  bitmask: '0x0080'
+  comment: 'Flag for clearence: ETC torque limitation is activ'
+- name: B_mdmin
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0020'
+  comment: Condition minimal possible indicated torque reached
+- name: B_stend
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0002'
+  comment: condition end of start
+- name: mkar_w
+  unit: "%"
+  signed: true
+  conversion: twice
+  comment: calculated clutch torque for anti-jerk function
+- name: mlast_w
+  unit: "%"
+  comment: Estimated load moment
+- name: mdbes_w
+  unit: "%"
+  comment: Acceleration torque
+- name: B_iniar
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0040'
+  comment: condition initialization of anti-jerk function
+# unit t is the T4 register, not a mass
+- name: currentT4_w
+  stub: true
+  note: no needle yet; not written
+  unit: t
+  comment: current T4 register for nmod integrator
+# unit t is the T4 register, not a mass
+- name: lastT4_w
+  unit: t
+  comment: previous T4 register for nmod integrator
+# 19/256, not the speed-word 1/4
+- name: kifz_MDH_w
+  stub: true
+  note: no needle yet; not written
+  factor: 19/256
+  comment: kifz MDH register for nmod integrator
+# 19/256, not the speed-word 1/4
+- name: kifz_w
+  factor: 19/256
+  comment: amplification of vehicle model
+- name: nmoti_w
+  comment: calculated RPM from speed for transition
+# factor 1, not the speed-word 1/4
+- name: nmod_int_reset_w
+  stub: true
+  note: no needle yet; not written
+  factor: 1
+  comment: integrator reset from B_iniar
+- name: nmod_w
+  comment: engine speed from model
+- name: ndiff_w
+  signed: true
+  comment: engine speed difference for ISC amplification
+- name: ndiff_wk1
+  signed: true
+  comment: engine speed difference K1
+- name: ndiff_wk2
+  signed: true
+  comment: engine speed difference K2
+- name: ndiff_A0_low_w
+  signed: true
+  comment: "ndiff * A0 MDL register"
+- name: ndiff_A0_high_w
+  signed: true
+  comment: "ndiff * A0 MDH register"
+- name: ndiff_A1_low_w
+  signed: true
+  comment: "ndiff * A1 MDL register"
+- name: ndiff_A1_high_w
+  signed: true
+  comment: "ndiff * A1 MDH register"
+- name: ndiff_A2_low_w
+  stub: true
+  note: no needle yet; not written
+  signed: true
+  comment: "ndiff * A2 MDL register"
+- name: ndiff_A2_high_w
+  stub: true
+  note: no needle yet; not written
+  signed: true
+  comment: "ndiff * A2 MDH register"
+- name: ndiff_low_w
+  signed: true
+  comment: "ndiff * A1 low + ndiff * A2 low"
+- name: ndiff_high_w
+  stub: true
+  note: no needle yet; not written
+  signed: true
+  comment: "ndiff * A1 high + ndiff * A2 high"
+# 1/16, not the 1/100 timer scale
+- name: flrar
+  size: 1
+  factor: 1/16
+  comment: amplification factor for modelling of external load
+- name: B_tpnmot
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0002'
+  comment: amplification factor for modelling of external load
+- name: timerTVKUPHS
+  size: 1
+  comment: delay time for clutch switch during shifting in higher gear
+- name: timerTVKUPRS
+  stub: true
+  note: no needle yet; not written
+  size: 1
+  comment: delay time for clutch switch during shifting in lower gear
+- name: timerTVARS
+  size: 1
+  comment: delay time until antisurge is inactive again
+- name: timerTVKUPAR
+  size: 1
+  comment: delay time for clutch anti-jerk
+- name: B_hpnmot
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x1000'
+  comment: condition high-point speed oscillation
+- name: B_kupgw
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0001'
+  comment: condition clutch applied until shifting of gear is detected
+- name: ndiffog_w
+  stub: true
+  note: no needle yet; not written
+  comment: Threshold engine speed difference for reset of AR during braking
+- name: timerTMLAST
+  size: 1
+  comment: blocking time until the initialization of the AR is triggered at deceleration
+- name: timerTVARSS
+  size: 1
+  comment: delay time for AR inactive again while steady state
+- name: B_inTMLAST_armd_iniarv
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0800'
+  comment: "ndiff_w > ndiffog_w"
+- name: "B_!cwarmd1_&_kuppl/gw"
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0200'
+  comment: "!CWARMD.0 and (B_kuppl or B_kupgw)"
+- name: timerTZSPINI
+  size: 1
+  comment: Resting time for filter initialisation
+- name: "B_!iniar1_spini_&_ndfil"
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0400'
+  comment: "!B_iniar1 for TZSPINI and ndfil_w > thresh."
+- name: B_iniar1
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x4000'
+  comment: preliminary initialization condition ARMD
+- name: B_iniarv
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x8000'
+  comment: condition initialization of the filter function is delayed
+- name: timerTAREIN
+  size: 1
+  comment: lockup time for anti-jerk function
+- name: B_argf
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0400'
+  comment: condition transition anti-jerk
+- name: B_last_argf
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0080'
+  comment: B_argf previous state for rising edge
+- name: abs_ndfil_w
+  comment: absolute value ndfil_w
+- name: ndfil_w
+  signed: true
+  comment: filtered engine speed difference
+- name: ndfil_wk1
+  signed: true
+  comment: filtered engine speed difference K1
+- name: ndfil_wk2
+  signed: true
+  comment: filtered engine speed difference K2
+- name: ndfil_B1_low_w
+  signed: true
+  comment: "ndfil * B1 MDL register"
+- name: ndfil_B1_high_w
+  signed: true
+  comment: "ndfil * B1 MDH register"
+- name: ndfil_B2_low_w
+  stub: true
+  note: no needle yet; not written
+  signed: true
+  comment: "ndfil * B2 MDL register"
+- name: ndfil_B2_high_w
+  stub: true
+  note: no needle yet; not written
+  signed: true
+  comment: "ndfil * B2 MDH register"
+- name: ndfil_low_w
+  signed: true
+  comment: "ndfil * B1 low + nfil * B2 low"
+- name: ndfil_high_w
+  stub: true
+  note: no needle yet; not written
+  signed: true
+  comment: "ndiff * B1 high + ndfil * B2 high"
+- name: abs_ndfil_w_ndfil_wk1
+  comment: absolute value of ndfil_w - ndfil_wk1
+- name: nmodiv_w
+  comment: calculated RPM from speed
+- name: B_last_wk
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0020'
+  comment: B_wk previous state for rising edge
+- name: B_wk
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0001'
+  comment: 'condition: converter lockup clutch closed'
+- name: B_vfzg_hysteresis
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0010'
+  comment: vfzg hysteresis active
+- name: B_tmot_tmar
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0100'
+  comment: "tmot > TMAR"
+- name: B_ar
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0200'
+  comment: condition anti-jerk active
+# factor 1, not the 1/100 timer scale
+- name: ndar_init_switch
+  size: 1
+  factor: 1
+- name: ndar_w
+  signed: true
+  comment: Difference RPM for torque control
+- name: B_tvarss
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0008'
+  comment: condition anti-jerking function active steady state
+- name: nvquot_w
+  stub: true
+  note: no needle yet; not written
+  comment: Quotient engine speed nmot / speed vfzg
+- name: B_gfen
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0800'
+  comment: condition transition
+- name: B_gwhs
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x1000'
+  comment: Condition gear change on manual transmission vehicle
+# factor 1, not the 1/100 timer scale
+- name: resetB_argf
+  size: 1
+  factor: 1
+  comment: B_argf reset from flip-flop
+- name: B_autget
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0200'
+  comment: condition automatic gearbox
+- name: B_lowra
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0002'
+  comment: condition low range active
+- name: fdar
+  conversion: amp
+  comment: amplification factor for anti-jerk intervention
+- name: fdars
+  conversion: amp
+  comment: "amplification factor anti-jerk at AT, WK closed for steady state"
+- name: SMK08MDSW_w
+  conversion: torque
+  comment: antisurge torque dependent basic point (number =8)
+# factor 1, not the speed-word 1/4
+- name: SGA06MDUB_w
+  factor: 1
+  comment: condition end of start
+- name: out_KFDMDARO_w
+  stub: true
+  note: no needle yet; not written
+  conversion: torque
+  comment: Upper threshold for torque intervention
+- name: out_KFDMDAROS_w
+  stub: true
+  note: no needle yet; not written
+  conversion: torque
+  comment: upper threshold for torque-intervention steady state
+- name: out_KFDMDADP_w
+  conversion: torque
+  comment: upper threshold for torque-intervention during dashpot
+# 100/256, not a torque or speed word
+- name: out_DMARMX_w
+  factor: 100/256
+  comment: upper threshold steady torque intervention of anti-jerk
+- name: B_bit2_CWARMD
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x1000'
+  comment: CWARMD bit 2
+- name: B_bit3_CWARMD
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x2000'
+  comment: CWARMD bit 3
+- name: B_fgr
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x2000'
+  comment: "condition: driver's set engine torque determined by cruise control"
+- name: B_dashv
+  stub: true
+  note: no needle yet; not written
+  bitmask: '0x0080'
+  comment: condition dashpot delayed
+- name: dmar_w
+  unit: "%"
+  signed: true
+  conversion: twice
+  comment: delta torque anti-jerk
+- name: nmot_last_w
+  comment: nmot value previous cycle for armd-kupgw
+- name: nmot_last2_w
+  comment: nmot value two previous cycles for armd-kupgw

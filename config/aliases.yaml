@@ -1,0 +1,1942 @@
+# Alias for each Bosch name. A row with no alias is kept here and omitted from output.
+# $1 in an alias is a regex reference used by ecuxplot loggers.yaml. It is not a literal.
+# was is the previous alias when this name was renamed. The Bosch name is unchanged.
+aliases:
+- name: abo
+  alias: CountStartsWithOilInFuel
+  comment: Anzahl Starts mit Benzin im Öl
+- name: agrr_w
+  comment: Abgasrueckfuehrrate word
+- name: ahkat
+  comment: Mittelwert der Amplitude Sondensignal hinter Kat. korrigiert mit KB
+- name: ahkat2
+  comment: Mittelwert der Amplitude Sondensignal hinter Kat. korrigiert mit KB Bank2
+- name: ahkatn
+  comment: Amplitude Sondensignal hinter Katalysator normiert
+- name: ahkatn2
+  comment: Amplitude Sondensignal hinter Katalysator normiert Bank 2
+- name: ahktki_w
+  comment: Amplitude Sondensignal hinter Katalysator korrigiert und integiert
+- name: ahktki2_w
+  comment: Amplitude Sondensignal hinter Katalysator korrigiert und integiert Bank 2
+- name: ahktnk
+  comment: Korrigierte Sondensignal-Amplitude normiert
+- name: ahktnk2
+  comment: Korrigierte Sondensignal-Amplitude normiert Bank 2
+- name: akatbn
+  comment: Amplitude der Katalysatorbelastungssignal
+- name: akatbn2
+  comment: Amplitude der Katalysatorbelastungssignal Bank 2
+- name: anzdyn
+  comment: Anzahl der Dynamikmessungen LSU
+- name: anzmsls_w
+  comment: Anzahl der dürchgeführten Sekundärluftmessungen
+- name: anzumrl_w
+  comment: Anzahl der Umschaltungen auf rl aus DK-Signal berechnet
+- name: apedkt
+  comment: Anzahl der Prüfungen mit Fehlerergebnis bei Katdiagnose
+- name: apedkt2
+  comment: Anzahl der Prüfungen mit Fehlerergebnis bei Katdiagnose Bank 2
+- name: atv
+  comment: aktueller Lernkennfeld-Integratorwert der Regelung hinter Kat
+- name: atv2
+  comment: aktueller Lernkennfeld-Integratorwert der Regelung hinter Kat Bank 2
+- name: avdtev
+  comment: Anzahl der nicht erfolgreichen DTEV Prüfversuche
+- name: bbdcy
+  comment: Byte für Bedingung B_dcy als Triggerevent in DCLA
+- name: bbdmdmil
+- name: bbwuc
+  comment: Byte für Bedingung B_wuc als Triggerevent in DCLA
+- name: cd_bits3_w
+- name: cmibeg_w
+  comment: Zähler aktiver Begrenzungen des inneren Moments
+- name: ctr_phada
+  comment: Zähler Adaptionen Nockenwellenposition zu Kurbelwellenposition Auslaß-NW
+- name: ctr_phade
+  comment: Zähler Adaptionen Nockenwellenposition zu Kurbelwellenposition Einlaß-NW
+- name: ctrerf1
+  comment: Zähler für Anzahl  Fehlerflags E_dfp = 1 im System seit powerfail (gefiltert)
+- name: ctrzyf0
+  comment: Zähler für Anzahl ungeprüfter Fehlerpfade im System seit Start
+- name: ctrzyf1
+  comment: Zähler für Anzahl geprüfter Fehlerpfade im System seit Start
+- name: detazwbs
+  comment: Delta ZW-Wirkungsgrad für Bauteileschutz
+- name: dfrmoff_w
+  comment: 'frm-Offset: zur Kontrolle von Problemen der Vorsteuerung'
+- name: dgafram_w
+  comment: Gemischfehler multiplikativer Anteil (Mittelwert)
+- name: dkatakt_w
+  comment: aktive Überwachungszeit für DKAT
+- name: dkatakt2_w
+  comment: aktive Überwachungszeit für DKAT Bank 2
+- name: dlahi_w
+  alias: LambdaPID-I
+  comment: I-Anteil der stetigen LRHK
+- name: dlahi2_w
+  alias: LambdaPID-I_Bank2
+  comment: I-Anteil der stetigen LRHK Bank 2
+- name: dlahp_w
+  alias: LambdaPID-P
+  comment: P-Anteil der stetigen LRHK
+- name: dlahp2_w
+  alias: LambdaPID-P_Bank2
+  comment: P-Anteil der stetigen LRHK Bank 2
+- name: dlamatr_w
+  comment: Delta Lambdasoll aus Abgastemperaturregelung
+- name: dlamatr2_w
+  comment: Delta Lambdasoll aus Abgastemperaturregelung Bank 2
+- name: dlashkm_w
+  comment: Delta-Lambda aus Lambdaregelung hinter Kat (Ist-Wert fr-synchron gemittelt)
+- name: dmdafmb
+  comment: Anzahl Fahrzeiten mit blinkender MIL
+- name: dmdlfmb
+  comment: längste Fahrzeit mit blinkender MIL
+- name: dmdsfmb_w
+  comment: Summe Fahrzeiten mit blinkender MIL
+- name: dmletan_w
+  comment: Abweichung Produkt Luftmasse * Zündwinkelwirkungsgrad bei Prüfung DTEV 16 Bits
+- name: dmletanf_w
+  comment: gefilterter Wert für Abweichung Leerlaufenergiebedarf während DTEV
+- name: dmllri_w
+  alias: IdleSpeedPID-I
+  comment: geforderte Drehmomentänderung von der LLR (I-Anteil)
+- name: dmrlash_w
+  comment: Momenten-Reserve für Lambdasonden-Alterungsüberwachung hinter Kat
+- name: dmvad_w
+  comment: Delta-Motordrehmoment aus Verlustmoment-Adaption
+- name: dmvadfk_w
+  comment: Delta-Motordrehmoment aus Verlustmoment-Adaption (B_fs=1 & B_ko=1)
+- name: dmvadfs_w
+  comment: Delta-Motordrehmoment aus Verlustmoment-Adaption (B_fs=1)
+- name: dmvadko_w
+  comment: Delta-Motordrehmoment aus Verlustmoment-Adaption (B_ko=1)
+- name: dmvadll_w
+  comment: Delta-Motordrehmoment aus Verlustmoment-Adaption (B_ll=1)
+- name: drldkzu_w
+  comment: Differenz zwischen rl aus Hauptlastsignal zu Nebenlastsignal
+- name: drlfue_w
+  comment: Lastkorrektur des Füllungsreglers
+- name: drlmaxo
+  comment: Delta Maximalfuellung bei Overboost
+- name: dtmtka
+  comment: Delta Kühlmitteltemperatur zu Kühleraustrittstemperatur
+- name: dveadast
+  comment: DVE Adaptionsstatus
+- name: dwkrz_0
+  alias: IgnitionRetardCyl$1
+  comment: zyl.ind. ZW-Spätverstellung inkl. Dyn.vorhalt
+- name: dwkrz_1
+  alias: IgnitionRetardCyl$2
+  comment: zyl.ind. ZW-Spätverstellung inkl. Dyn.vorhalt
+- name: dwkrz_2
+  alias: IgnitionRetardCyl$3
+  comment: zyl.ind. ZW-Spätverstellung inkl. Dyn.vorhalt
+- name: dwkrz_3
+  alias: IgnitionRetardCyl$4
+  comment: zyl.ind. ZW-Spätverstellung inkl. Dyn.vorhalt
+- name: dwkrz_4
+  alias: IgnitionRetardCyl$5
+  comment: zyl.ind. ZW-Spätverstellung inkl. Dyn.vorhalt
+- name: dwkrz_5
+  alias: IgnitionRetardCyl$6
+  comment: zyl.ind. ZW-Spätverstellung inkl. Dyn.vorhalt
+- name: dwkrz_6
+  alias: IgnitionRetardCyl$7
+  comment: zyl.ind. ZW-Spätverstellung inkl. Dyn.vorhalt
+- name: dwkrz_7
+  alias: IgnitionRetardCyl$8
+  comment: zyl.ind. ZW-Spätverstellung inkl. Dyn.vorhalt
+- name: dwnwfde_w
+  comment: Differenz Ist - Sollwinkel Nockenwelle gefiltert für Diagnose Einlass
+- name: dwnwsp_w
+  comment: Abweichung des Adaptionswinkels vom fahrzeugspez. Sollwinkel der Nockenwelle
+- name: dwnwsp2_w
+  comment: Abweichung des Adaptionswinkels vom fahrzeugspez. Sollwinkel der Nockenwelle Bank 2
+- name: dwped
+  comment: Gradient des normierten Fahrpedalwinkels
+- name: dynlsu_w
+  alias: DynamicFactorO2S
+  comment: Dynamikwert der LSU
+- name: dynlsu2_w
+  alias: DynamicFactorO2SBank2
+  comment: Dynamikwert der LSU Bank 2
+- name: etazwbm
+  alias: EtaIgnitionAngleAvg
+  comment: gemittelter Zündwinkelwirkungsgrad des Basiszündwinkels
+- name: evz_austot
+  alias: Inj-Cut-Mask
+  comment: Einspritzausblendmuster total
+- name: fcmEnd
+  alias: NumberFaults
+  comment: Anzahl Einträge im Fehlerspeicher
+- name: ffon
+  comment: Statusbyte Übersicht fuel-on Adaption
+- name: ffonn1
+  comment: Statusbyte fuel-on/-off Adaption (KF-Bereiche fertig gelernt)
+- name: ffonn2
+  comment: Statusbyte fuel-on/-off Adaption (KF-Bereiche fertig gelernt)
+- name: ffonn3
+  comment: Statusbyte fuel-on/-off Adaption (KF-Bereiche fertig gelernt)
+- name: fforn1
+  comment: Statusbyte fuel-on/-off Adaption (n-Bereiche fertig gelernt)
+- name: fho
+  alias: AltitudeCorrectionFactor_8
+  was: AltitudeCorrectionFactor
+  comment: Korrekturfaktor Höhe
+- name: fho_w
+  alias: AltitudeCorrectionFactor
+  comment: Korrekturfaktor Höhe (word)
+- name: fkatei
+  comment: Faktor Kraftstoffanteil Tankentlüftung (aktueller Istwert)
+- name: fkmsdk_w
+  comment: Korrekturfaktor Massenstrom Nebenfüllungssignal
+- name: fkmsdks_w
+  comment: Korrekturfaktor schneller Massenstromabgleich
+- name: fkpvdk_w
+  comment: Korrekturfaktor langsamer Massenstromabgleich
+- name: flakh
+  comment: Faktor Lambda-Steuerung bei Katheizen
+- name: fldrrx_w
+  comment: Korrekturfaktor Maximalfuellung aus Klopfregelung
+- name: fldrxl_w
+  comment: Faktor zur LDR rlmax-Korrektur durch den Langzeitanteil
+- name: flg_m
+  comment: Monitor Status Laufunruhe-Berechnung
+- name: fmdkh
+  comment: Faktor Steuerung Drehmomentreserve für Katheizen
+- name: fmsla
+  comment: Korrekturfaktor Sekundärluftmasse adaptiv
+- name: fmsla2
+  comment: Korrekturfaktor Sekundärluftmasse adaptiv Bank 2
+- name: fnwue
+  comment: Gewichtungsfaktor Nockenwellenüberschneidung (Einlaß)
+- name: fprstep_c
+  comment: Schrittzähler DK-Rückstellfeder-Prüfung
+- name: fpvdk
+  comment: Korrekturfaktor Druck vor Drosselklappe
+- name: fpvdk_w
+  comment: Korrekturfaktor Druck vor Drosselklappe 16-Bit
+- name: fr_w
+  alias: LambdaControl
+  comment: Lambda-Regler-Ausgang (Word)
+- name: fr2_w
+  alias: LambdaControlBank2
+  comment: Lambda-Regler-Ausgang (Word) Bank 2
+- name: fra_w
+  alias: AdaptationPartial
+  comment: multiplikative Gemischkorrektur der Gemischadaption (Word)
+- name: fra2_w
+  alias: AdaptationPartialBank2
+  comment: multiplikative Gemischkorrektur der Gemischadaption (Word) Bank 2
+- name: frao_w
+  comment: multiplikativer Gemischadaptionsfaktor oberer Lastbereich (Word)
+- name: frao2_w
+  comment: multiplikativer Gemischadaptionsfaktor oberer Lastbereich (Word) Bank 2
+- name: frau_w
+  comment: multiplikativer Gemischadaptionsfaktor unterer mult. Bereich (Word)
+- name: frau2_w
+  comment: multiplikativer Gemischadaptionsfaktor unterer mult. Bereich (Word) Bank 2
+- name: frm_w
+  alias: LambdaControlAvg
+  comment: schneller Mittelwert des Lambdaregelfaktors (Word)
+- name: frm2_w
+  alias: LambdaControlAvgBank2
+  comment: schneller Mittelwert des Lambdaregelfaktors (Word) Bank 2
+- name: frmfdif_w
+  comment: Differenzwert zwischen Probewert und Momentanwert
+- name: frmfref_w
+  comment: gefilterter Referenzwert fr für DTEV Ausfsteuerprüfung
+- name: frmitf_w
+  comment: gefilterter Mittelwert fr für DTEV
+- name: frmxaf_w
+  comment: 'fr-Max-Ausschlag: Bei Stereo LR der fr, der am weitesten von 1.0 weg (gefiltert)'
+- name: frxt
+  alias: LoadCorrectFactorCoolantTemp
+  comment: Faktor zur Korrektur rlmx als Funktion von Motor- und Öltemperatur
+- name: frxta_w
+  alias: LoadCorrectFactorIntakeTemp
+  comment: Faktor zur Korrektur rlmx als Funktion von tans
+- name: ftead_w
+  comment: Beladung des Aktivkohlefilters
+- name: ftefsoll_w
+  comment: Sollwert der Spülrate Tankentlüftung
+- name: ftefva_w
+  comment: Spülrate Tankentlüftung
+- name: ftvdk
+  comment: Korrekturfaktor Temperatur vor Drosselklappe
+- name: fukabak_w
+  comment: ÜK-Adaptionsfaktor (kalter Motor) BA
+- name: fukabaw_w
+  comment: ÜK-Adaptionsfaktor (warmer Motor) BA
+- name: fukavak_w
+  comment: ÜK-Adaptionsfaktor (kalter Motor) VA
+- name: fukavaw_w
+  comment: ÜK-Adaptionsfaktor (warmer Motor) VA
+- name: fzabg_w_0
+  alias: CountMisfireCyl$1
+  comment: Aussetzerzähler
+- name: fzabg_w_1
+  alias: CountMisfireCyl$2
+  comment: Aussetzerzähler
+- name: fzabg_w_2
+  alias: CountMisfireCyl$3
+  comment: Aussetzerzähler
+- name: fzabg_w_3
+  alias: CountMisfireCyl$4
+  comment: Aussetzerzähler
+- name: fzabg_w_4
+  alias: CountMisfireCyl$5
+  comment: Aussetzerzähler
+- name: fzabg_w_5
+  alias: CountMisfireCyl$6
+  comment: Aussetzerzähler
+- name: fzabg_w_6
+  alias: CountMisfireCyl$7
+  comment: Aussetzerzähler
+- name: fzabg_w_7
+  alias: CountMisfireCyl$8
+  comment: Aussetzerzähler
+- name: fzabg_w_8
+  alias: CountMisfireCyl_9
+  comment: Aussetzerzähler
+- name: fzabg_w_9
+  alias: CountMisfireCyl_10
+  comment: Aussetzerzähler
+- name: fzabg_w_10
+  alias: CountMisfireCyl_11
+  comment: Aussetzerzähler
+- name: fzabg_w_11
+  alias: CountMisfireCyl_12
+  comment: Aussetzerzähler
+- name: fzabgs_w
+  alias: CountMisfireTotal
+  comment: Fehlerzähler Summe, zählt abgasrelevante Aussetzer über alle Zylinder
+- name: fzmd_0
+  comment: Aussetzer-Zähler
+- name: fzmd_1
+  comment: Aussetzer-Zähler
+- name: fzmd_2
+  comment: Aussetzer-Zähler
+- name: fzmd_3
+  comment: Aussetzer-Zähler
+- name: fzmd_4
+  comment: Aussetzer-Zähler
+- name: fzmd_5
+  comment: Aussetzer-Zähler
+- name: fzmd_6
+  comment: Aussetzer-Zähler
+- name: fzmd_7
+  comment: Aussetzer-Zähler
+- name: fzmd_8
+  comment: Aussetzer-Zähler
+- name: fzmd_9
+  comment: Aussetzer-Zähler
+- name: fzmd_10
+  comment: Aussetzer-Zähler
+- name: fzmd_11
+  comment: Aussetzer-Zähler
+- name: gangi
+  alias: Gear
+  was: SelectedGear
+  comment: Ist-Gang vom CAN bei AT oder aus n/v bei HS
+- name: hagr
+  comment: Hub AGR-Ventil
+- name: idxfob
+  comment: 'Index: Kennzeichnet den aktuellen KF-Bereich (Drehz., Last)'
+- name: imlatm_w
+  comment: integr. Luftmassenfluss ab Startende bis max. Wert, (Word)
+- name: imlbbo
+  comment: Integrator Luftmasse für Erkennung Benzin im Öl
+- name: imlkvs_w
+  comment: Luftmasse nach Auftreten eines DKVS Fehles bei leerem Tank
+- name: imllaka_w
+  comment: Integrator Fettfläche für Katalysator-Ausräumen
+- name: imlpr
+  comment: Relatives Luftmassenintegral bei Katheizung
+- name: katbf
+  comment: Signal nach Speicher normiert vergleichbar mit ushk
+- name: katbf2
+  comment: Signal nach Speicher normiert vergleichbar mit ushk Bank 2
+- name: katbfs
+  comment: Signal nach Speicher (Kat-Modell)
+- name: katbfs2
+  comment: Signal nach Speicher (Kat-Modell, Stereo 2.Bank)
+- name: katbfi_w
+  comment: Sauerstoff-Anteil vor dem Speicher (Kat-Modell)
+- name: katbfi2_w
+  comment: Sauerstoff-Anteil vor dem Speicher (Kat-Modell) Bank 2
+- name: katbshd_w
+  comment: Signal für Fett-Verschiebung des Modells
+- name: katbshd2_w
+  comment: Signal für Fett-Verschiebung des Modells Bank 2
+- name: kldfpwm
+  comment: Generatorsignal (Kl. DFM) als PWM-Signal filtriert
+- name: kmdp1km_w
+  comment: Zurückgelegte Fahrstrecke seit Fehlerspeicher Löschen oder Powerfail (1km/Ink.)
+- name: kmst_w
+  comment: Zurückgelegte Fahrstrecke seit Powerfail
+- name: kmstmil_w
+  comment: Zurückgelegte Fahrstrecke mit MIL on
+- name: ksta0
+  alias: ColdStartEnrichmentRange0
+  comment: Kaltstartanreicherung Bereich 0, gepuffert
+- name: ksta1
+  alias: ColdStartEnrichmentRange1
+  comment: Kaltstartanreicherung Bereich 1, gepuffert
+- name: ksta2
+  alias: ColdStartEnrichmentRange2
+  comment: Kaltstartanreicherung Bereich 2, gepuffert
+- name: kstaa
+  comment: Aktueller Startmengenadaptionsfaktor
+- name: kusvk_w
+  comment: Korrekturwert der LSU-Spannung vor Kat
+- name: kusvk2_w
+  comment: Korrekturwert der LSU-Spannung vor Kat Bank2
+- name: ladiff_w
+  comment: Regelabweichung Lambda
+- name: ladiff2_w
+  comment: Regelabweichung Lambda Bank 2
+- name: lambts_w
+  alias: LambdaPartProtection
+  comment: Lambda für Bauteileschutz
+- name: lamelsh_w
+  comment: Lambdasoll für elektrische Sondendiagnose hinter KAT (Kurztrip)
+- name: lamelsh2_w
+  comment: Lambdasoll für elektrische Sondendiagnose hinter KAT (Kurztrip) Bank 2
+- name: lamfa_w
+  alias: TargetAFRDriverRequest
+  comment: Lambdasoll Fahrerwunsch (word)
+- name: lamlash_w
+  comment: Lambdasoll für Test Schwingungsprüfung hinter KAT
+- name: lamlash2_w
+  comment: Lambdasoll für Test Schwingungsprüfung hinter KAT Bank 2
+- name: lamsbg_w
+  alias: AirFuelRatioDesired
+  comment: Lambdasoll Begrenzung (word)
+- name: lamsbg2_w
+  alias: AirFuelRatioDesiredBank2
+  comment: Lambdasoll Begrenzung (word) Bank 2
+- name: lamsoni_w
+  alias: AirFuelRatioActual
+  was: AirFuelRatioCurrent
+  comment: Lambda-Istwert
+- name: lamsoni2_w
+  alias: AirFuelRatioActualBank2
+  was: AirFuelRatioCurrentBank2
+  comment: Lambda-Istwert Bank 2
+- name: lamsons_w
+  comment: Lambda-Sollwert bezogen auf Einbauort Lambda-Sensor
+- name: lamsons2_w
+  comment: Lambda-Sollwert bezogen auf Einbauort Lambda-Sensor Bank 2
+- name: lamzak_w
+  comment: Lambdasondenistwert, korrigiert um Zusatzamplitude
+- name: lbz
+  alias: BatteryChargeBalance
+  comment: Ladebilanz der Batterie
+- name: ldimn_w
+  alias: BoostPID-I-Min
+  comment: Aktueller Wert zur Minimalwertbegrenzung I-Anteil LDR
+- name: ldimx_w
+  alias: BoostPID-I-Max
+  comment: Aktueller Wert zur Maximalwertbegrenzung I-Anteil LDR
+- name: ldimxa_0
+  alias: BoostCorrectFactorPID-IRange1
+  comment: Adaptive Korrektur der LDR I-Regler Maximalwertbegrenzung
+- name: ldimxa_1
+  alias: BoostCorrectFactorPID-IRange2
+  comment: Adaptive Korrektur der LDR I-Regler Maximalwertbegrenzung
+- name: ldimxa_2
+  alias: BoostCorrectFactorPID-IRange3
+  comment: Adaptive Korrektur der LDR I-Regler Maximalwertbegrenzung
+- name: ldimxa_3
+  alias: BoostCorrectFactorPID-IRange4
+  comment: Adaptive Korrektur der LDR I-Regler Maximalwertbegrenzung
+- name: ldimxa_4
+  alias: BoostCorrectFactorPID-IRange5
+  comment: Adaptive Korrektur der LDR I-Regler Maximalwertbegrenzung
+- name: ldimxak_w
+  alias: ChargeLimitPID-I
+  comment: Aktueller korrigierter Begrenzungswert I-Anteil LDR
+- name: lditv_w
+  alias: BoostPID-I-Result
+  comment: LDR, Tastverhältnis vom I-Regler (word)
+- name: ldptv
+  alias: BoostPID-P-Result
+  comment: LDR, Tastverhältnis vom P-Regler
+- name: ldrdtv
+  alias: BoostPID-D-Result
+  comment: LDR Tastverhältnis vom D-Regler
+- name: ldrlms_w
+  alias: ChargeLimitEngineProtection
+  comment: Begrenzungswert für maximale Füllung LDR für Motorschutz
+- name: ldrlts_w
+  alias: ChargeLimitTurboProtection
+  comment: Begrenzungswert für maximale Füllung LDR für ATL-Schutz
+- name: ldtv
+  alias: WastegateDutyCycleAfterLin
+  comment: LDR Tastverhältnis
+- name: ldtvm
+  alias: WastegateDutyCycle
+  comment: LDR Tastverhältnis , moduliert (Endergebnis)
+- name: ldtvr_w
+  alias: WastegateDutyCycleBeforeLin
+  comment: LDR Tastverhältnis vom Regler
+- name: lrnstat
+  comment: Statusbyte DV-E-Adaption für Testerkommunikation
+- name: lrnstep_c
+  comment: Zähler für Lerndauer eines Lernsteps
+- name: lws_w
+  comment: Lenkwinkel
+- name: m6smsl_w
+  comment: 'Mode 6 - Speicher: Schwellwert bei Prüfung Sekundärluftmasse'
+- name: m6wmsl_w
+  comment: 'Mode 6 - Speicher: Messwert Sekundärluftmasse bei SL-Einblasung'
+- name: m6wmslv_w
+  comment: 'Mode 6 - Speicher: Messwert Ventildichtheit'
+- name: mds_w
+  comment: Motorschleppmoment
+- name: mdverb
+  comment: Momentenbedarf der Nebenaggregate
+- name: mdverl_w
+  alias: EngineLossTorque
+  comment: Motor-Verlustmoment
+- name: miasrl_w
+  alias: RequestedTorqueTractionControl
+  comment: Indiziertes Soll-Motormoment ASR für langsamen Eingriff
+- name: miext_w
+  comment: von außen (ASR, GS, usw.) angefordertes indiziertes Motormoment
+- name: mifa_w
+  alias: TorqueDesired
+  comment: desired indicated engine torque
+- name: mifab_w
+  comment: Begrenztes indiziertes Fahrerwunschmoment
+- name: miges_w
+  comment: Indiziertes Soll-Motormoment für Getriebeschutz
+- name: misol_w
+  comment: Indiziertes resultierendes Sollmoment
+- name: miszul_w
+  alias: TorqueForTimingInterventionLimit
+  comment: Maximal zulässiges indiziertes Moment
+- name: ml_w
+  comment: Luftmassenfluß gefiltert (Word)
+- name: mldmn_w
+  comment: minimale Luftmasse aus Kennfeld KFMLDMN
+- name: mldmx_w
+  comment: maximale Luftmasse aus Kennfeld KFMLDMX
+- name: mldyn_w
+  comment: Luftmassenintegral im Schubbetrieb für Sonde hinter Kat
+- name: mlhfmm_w
+  comment: Luftmassen HFM-Mittelwert 16Bit-Wert
+- name: mrfa_w
+  alias: DriverRequestedRelTorque
+  comment: Relatives Fahrerwunschmoment aus FGR und Pedal
+- name: msabg_w
+  comment: Abgasmassenstrom gefiltert (Word), Bank 1
+- name: msabg2_w
+  comment: Abgasmassenstrom gefiltert (Word), Bank 2
+- name: msdk_w
+  alias: MassAirFlowAtThrottlePlate
+  comment: Massenstrom über Drosselklappe (word)
+- name: mshfm_w
+  alias: MassAirFlow
+  comment: Massenstrom HFM 16-Bit Größe
+- name: msl
+  comment: Sekundärluftmassenstrom
+- name: mslift
+  comment: Istwert Sekundärluftmasse, gefiltert, temporär
+- name: mslift2
+  comment: Istwert Sekundärluftmasse, gefiltert, temporär (Bank 2)
+- name: mslt_w
+  comment: temporäre Sekundärluftmasse
+- name: mslt2_w
+  comment: temporäre Sekundärluftmasse Bank 2
+- name: mslv_w
+  comment: Sekundärluftmasse für Ventildichtheitsprüfung (word)
+- name: mslv2_w
+  comment: Sekundärluftmasse für Ventildichtheitsprüfung (word) Bank 2
+- name: mslvt_w
+  comment: temporäre Ventilleckage
+- name: mslvt2_w
+  comment: temporäre Ventilleckage Bank 2
+- name: msndko_w
+  comment: normierter Leckluftmassenstrom über Drosselklappe (word)
+- name: mspcv
+  comment: Massenstrom über PCV Ventil
+- name: mstedtef_w
+  comment: Massenstrom Tankentlüftungsventil (gefiltert) für DTEV
+- name: nllkh
+  comment: Leerlaufdrehzahl bei Katheizen
+- name: nmot
+  alias: RPM_8
+  was: EngineSpeed
+  comment: Motordrehzahl
+- name: nmot_w
+  alias: RPM
+  was: EngineSpeed
+  comment: Motordrehzahl
+- name: nmotll
+  alias: EngineIdlingSpeed
+  comment: Motordrehzahl im Leerlaufbereich
+- name: nsol
+  alias: RequestedEngineIdlingSpeed
+  comment: Leerlaufsolldrehzahl
+- name: palsu_w
+  comment: Absolutdruck Abgassystem
+- name: pbkv
+  comment: Bremskraftverstärker-Druck von DS
+- name: perffilt_w
+  alias: CPU-Load
+  comment: Gefilterte Rechnerauslastung
+- name: perfmax_w
+  alias: MAX-Load
+  comment: Maximale Rechnerauslastung
+- name: phlsnh
+  comment: normierte Heizleistung der Lambdasonde hinter Kat
+- name: phlsnh2
+  comment: normierte Heizleistung der Lambdasonde hinter Kat Bank 2
+- name: pklimakmtr
+  comment: Druck Klimaanlage für KMTR
+- name: pkodrc
+  comment: Kompressordrucksignal
+- name: plgrus_w
+  comment: Grundladedruck Sollwert
+- name: plsol
+  alias: BoostPressureDesired_8
+  was: BoostPressureDesired
+  comment: Soll-Ladedruck
+- name: plsol_w
+  alias: BoostPressureDesired
+  comment: Soll-Ladedruck
+- name: plsolr_w
+  comment: Relativer Solladedruck LDR
+- name: ps_w
+  comment: Saugrohr-Absolutdruck (Word)
+- name: psagr_w
+  comment: Partialdruck durch externes Restgas (Restluft+Inertgas)
+- name: psdss_w
+  comment: Saugrohrdruck gemessen (word)
+- name: pspvdk_w
+  comment: Quotient Saugrohrdruck/Druck vor Drosselklappe (word)
+- name: pssol_w
+  comment: Sollsaugrohrdruck
+- name: pu
+  alias: BaroPressure_8
+  was: BaroPressure
+  comment: Umgebungsdruck
+- name: pu_w
+  alias: BaroPressure
+  comment: Umgebungsdruck
+- name: pus_w
+  alias: BaroPressure
+  comment: Umgebungsdruck ohne Umschaltung auf Ersatzwert bei Sensorfehler
+- name: pvdk
+  comment: Druck vor Drosselklappe
+- name: pvdk_w
+  comment: Druck vor Drosselklappe 16-Bit
+- name: pvdkds
+  comment: Druck vor Drosselklappe von Drucksensor
+- name: pvdkds_w
+  alias: BoostPressureActual
+  comment: Druck vor Drosselklappe von Drucksensor (word)
+- name: pvdkdsl_w
+  comment: Druck vor Drosselklappe von Ladedrucksensor (word)
+- name: pvdkdsu_w
+  comment: Druck vor Drosselklappe von Umgebungsdrucksensor (word)
+- name: pvdks_w
+  alias: BoostPressureActual
+  comment: Druck vor Drosselklappe ohne Umschaltung auf Ersatzwert bei Sensorfehler
+- name: pvdksf_w
+  comment: gefilterter Druck vor Drosselklappe (Ladedruck) vom Drucksensor
+- name: ready
+  alias: ReadynessByte
+  comment: readiness-Byte für Ausgabe SAE J1979 Mode2
+- name: redist
+  alias: Inj-Reduction
+  comment: Ist-Reduzierstufe
+- name: rinh_w
+  alias: ResistanceSensor2
+  comment: Istwert (word) Innenwiderstand Ri-Nernstzelle der Lambdasonde hinter KAT
+- name: rinh2_w
+  alias: ResistanceSensor2Bank2
+  comment: Istwert (word) Innenwiderstand Ri-Nernstzelle der Lambdasonde hinter KAT Bank 2
+- name: rinsh_w
+  comment: Grenzwert Innenwiderstand Nernstzelle der Lambdasonde hinter Kat
+- name: rinsh2_w
+  comment: Grenzwert Innenwiderstand Nernstzelle der Lambdasonde hinter Kat Bank 2
+- name: rinv_w
+  alias: ResistanceSensor1
+  comment: Istwert (word) Innenwiderstand Ri-Nernstzelle der Lambdasonde vor KAT
+- name: rinv2_w
+  alias: ResistanceSensor1Bank2
+  comment: Istwert (word) Innenwiderstand Ri-Nernstzelle der Lambdasonde vor KAT Bank 2
+- name: rk_w
+  comment: relative Kraftstoffmasse
+- name: rk2_w
+  comment: relative Kraftstoffmasse Bank 2
+- name: rkat_w
+  alias: AdaptationIdle
+  comment: additive Gemischkorrektur (pro Zeit) der Gemischdaption (Word)
+- name: rkat2_w
+  alias: AdaptationIdleBank2
+  comment: additive Gemischkorrektur (pro Zeit) der Gemischadaption Bank 2 (Word)
+- name: rkaz_w
+  comment: additive Gemischkorrektur (pro Zündung) der Gemischadaption
+- name: rkaz2_w
+  comment: additive Gemischkorrektur (pro Zündung) der Gemischadaption Bank2 (Word)
+- name: rkrn_w_0
+  alias: KnockVoltageCyl$1
+  comment: normierter Referenzpegel Klopfregelung
+- name: rkrn_w_1
+  alias: KnockVoltageCyl$2
+  comment: normierter Referenzpegel Klopfregelung
+- name: rkrn_w_2
+  alias: KnockVoltageCyl$3
+  comment: normierter Referenzpegel Klopfregelung
+- name: rkrn_w_3
+  alias: KnockVoltageCyl$4
+  comment: normierter Referenzpegel Klopfregelung
+- name: rkrn_w_4
+  alias: KnockVoltageCyl$5
+  comment: normierter Referenzpegel Klopfregelung
+- name: rkrn_w_5
+  alias: KnockVoltageCyl$6
+  comment: normierter Referenzpegel Klopfregelung
+- name: rkrn_w_6
+  alias: KnockVoltageCyl$7
+  comment: normierter Referenzpegel Klopfregelung
+- name: rkrn_w_7
+  alias: KnockVoltageCyl$8
+  comment: normierter Referenzpegel Klopfregelung
+- name: rkte_w
+  comment: Relativer Gemischanteil Tankentlüftung
+- name: rl
+  alias: EngineLoad_8
+  was: EngineLoad
+  comment: relative Luftfüllung
+- name: rl_w
+  alias: EngineLoad
+  comment: relative Luftfüllung (Word)
+- name: rldkofk_w
+  comment: relative Luftfüllung aus DK-Signal berechnet ohne Einrechnung von fkmsdk
+- name: rlmax_w
+  alias: EngineLoadCorrected
+  comment: maximal erreichbare Füllung bei Turbo
+- name: rlmx_w
+  alias: EngineLoadSpecified
+  comment: Rohwert Maximalfuellung
+- name: rlmxko_w
+  comment: Maximalfüllung korrigiert (ohne Begrenzungen)
+- name: rlroh_w
+  comment: 'relative Luftfüllung: Rohwert vom Lastsensor (word)'
+- name: rlsol_w
+  alias: EngineLoadRequested
+  comment: Soll-Füllung
+- name: rlzuhfs_w
+  comment: relative Luftfüllung (zufließend) mit Hauptfüllungssensor bestimmt
+- name: rmsl
+  comment: relative Sekundärluftmasse
+- name: rmsl2
+  comment: relative Sekundärluftmasse Bank 2
+- name: rmslf
+  comment: relative Sekundärluftmasse gefiltert
+- name: rmslt
+  alias: SecondaryAirMass
+  comment: relative Sekundärluftmasse ohne Offset- Korrektur
+- name: rmslt2
+  alias: SecondaryAirMassBank2
+  comment: relative Sekundärluftmasse ohne Offset- Korrektur Bank 2
+- name: rmstevuf_w
+  comment: aktueller, unsigned Messwert für relative TEV-Güte
+- name: sfpenws
+  comment: 'Status Fehlerpfad: Nockenwellensteuerung (Einlaß, Bank1)'
+- name: sfpfrau
+  comment: 'Status Fehlerpfad: LR Adaption unterer multiplikativer Bereich'
+- name: sfpfrst
+  comment: 'Status Fehlerpfad: LR-Abweichung'
+- name: sfpkat
+  comment: 'Status Fehlerpfad: Katalysator-Überwachung'
+- name: sfpks1
+  comment: 'Status Fehlerpfad: Klopfsensor 1'
+- name: sfplash
+  comment: 'Status Fehlerpfad: Lambdasondenalterung hinter Kat'
+- name: sfplsh
+  comment: 'Status Fehlerpfad: Diagnose Lambdasonde hinter Kat'
+- name: sfplsv
+  comment: 'Status Fehlerpfad: Diagnose Lambdasonde vor Kat'
+- name: sfpmd
+  comment: 'Statuswort:  Aussetzer, Summenfehler (multiple)'
+- name: sfptes
+  comment: 'Status Fehlerpfad: Tankdiagnose, TEV defekt offen'
+- name: taagr
+  comment: Tastverhaeltnis AGR-Ventil
+- name: taats_w
+  comment: Tastverhaeltnis Abgastemperatursensor
+- name: taats2_w
+  comment: Tastverhaeltnis Abgastemperatursensor Bank 2
+- name: tabgbts_w
+  alias: EGTForPartProtection
+  comment: Abgastemperatur für Bauteileschutz
+- name: tabgm
+  alias: EGTModelBeforeCat8
+  was: EGTModelBeforeCat
+  comment: Abgastemperatur vor Kat aus Modell
+- name: tabgm_w
+  alias: EGTModelBeforeCat
+  comment: Abgastemperatur vor Kat aus Modell (Word)
+- name: tabgm2
+  alias: EGTModelBeforeCatBank2
+  comment: Abgastemperatur vor Kat aus Modell Bank 2
+- name: tadtea
+  comment: TEV-Tastverhältnis aus Tankentlüftungsdiagnose
+- name: tahsomf_w
+  comment: gefilterte Abgastemperatur an Sonde hinter Kat aus Modell
+- name: talsuf
+  alias: EGTModelFiltered
+  comment: gefilterte Abgastemperatur aus Modell
+- name: tans
+  alias: IntakeAirTemperature
+  comment: Ansaugluft - Temperatur
+- name: tanslin
+  alias: IntakeAirTemperature
+  comment: Ansauglufttemperatur, linearisiert und umgerechnet
+- name: tanwr2a
+  comment: Tastverhältnis Nockenwellenregelung Auslaß Bank2
+- name: tanwr2e
+  comment: Tastverhältnis Einlaßnockenwellenregelung Bank2
+- name: tanwra
+  comment: Tastverhältnis Nockenwellenregelung Auslaß
+- name: tanwre
+  comment: Tastverhältnis Einlaßnockenwellenregelung
+- name: tateout
+  alias: ACFValveDutyCycle
+  comment: ausgegebenes Tastverhältnis für Tankentlüftungsventil
+- name: tats_w
+  alias: EGTSensor
+  comment: Abgastemperatur aus Sensor
+- name: tats2_w
+  alias: EGTSensorBank2
+  comment: Abgastemperatur aus Sensor Bank 2
+- name: tavvkm_w
+  alias: EGTModelBeforePreCat
+  comment: Abgastemperatur vor Vorkat aus Modell
+- name: tc6ldpc
+  comment: Ausgabe Code SCAN-Tool Mode 6 aus LDP-Diagnose
+- name: tc6ldps
+  comment: Ausgabe Schwellwert SCAN-Tool Mode 6 aus LDP-Diagnose
+- name: tc6ldpw
+  comment: Ausgabe Prüfwert SCAN-Tool Mode 6 aus LDP-Diagnose
+- name: te_w
+  alias: EffInjectionTime
+  comment: effektive Einspritzzeit (word)
+- name: te2_w
+  alias: EffInjectionTimeBank2
+  comment: effektive Einspritzzeit (word) Bank 2
+- name: tedtml
+  comment: Einschaltdauer der LSU-Heizung abhängig von der Abgastemperatur und ml
+- name: tedtml2
+  comment: Einschaltdauer der LSU-Heizung abhängig von der Abgastemperatur und ml Bank 2
+- name: tedub
+  comment: korrigierte Einschaltdauer der LSU-Heizung
+- name: tedub2
+  comment: korrigierte Einschaltdauer der LSU-Heizung Bank 2
+- name: tephc
+  comment: Phasenzähler Grundadaption / Tankentlüftung
+- name: tevfakge_w
+  comment: Adressierung Kennfeld FKKVS mit effektiver Einspritzzeit vor Feinabgleich
+- name: ti_avg
+  alias: FuelInjectorOnTimeAverage
+  comment: Mittlere Einspritzzeit für EV's Bank1 und Bank2
+- name: ti_b1
+  alias: FuelInjectorOnTime
+  comment: Einspritzzeit für EV's auf Bank1
+- name: ti_b2
+  alias: FuelInjectorOnTimeBank2
+  comment: Einspritzzeit für EV's auf Bank2
+- name: tikatm_w
+  alias: EGTModelInCat
+  comment: Abgastemperatur im Katalysator aus Modell
+- name: timrs
+  comment: Timer für Reed-Switch Closed Check
+- name: timx_w
+  alias: MaxInjectionTime
+  comment: maximale Einspritzzeit
+- name: timxth_w
+  alias: TheorMaxInjectionTime
+  comment: theoretische maximale Einspritzzeit
+- name: timzldp
+- name: tispldp_w
+  comment: Zeit für Initialspülung bis LDP-Membran abgefallen ist
+- name: tispldpx_w
+  comment: Schwelle für Zeit für Initialspülung bis LDP-Membran abgefallen ist
+- name: tkatm
+  alias: CatTemperatureModel
+  comment: Katalysatortemperatur aus Modell
+- name: tkatm2
+  alias: CatTemperatureModelBank2
+  comment: Katalysatortemperatur aus Modell Bank 2
+- name: tkihkm_w
+  alias: MainCatTemperatureModel
+  comment: Temperatur Katalysator im Hauptkat aus Modell
+- name: tldppmw
+  comment: Gleitender Mittelwert Periodendauer bei Leckdiagnose
+- name: tmadb
+  comment: Bereich Motortemperatur für Startmengenadaption
+- name: tmki
+  comment: Motortemperatur aus Kombiinstrument
+- name: tmkic
+  comment: Motortemperatur aus Kombibotschaft
+- name: tmot
+  alias: CoolantTemperature
+  comment: Motor-Temperatur
+- name: tmotlin
+  alias: CoolantTemperature
+  comment: Motortemperatur, linearisiert und umgerechnet
+- name: tmotsoll
+  alias: CoolantTemperatureRequested
+  comment: Soll-Wassertemperatur für Kühlmitteltemperaturregelung
+- name: tmst
+  alias: EngineStartTemperature
+  comment: Motorstarttemperatur
+- name: tnst_w
+  alias: TimeSinceStart
+  comment: Zeit nach Startende
+- name: top_w
+  comment: Operating time seit powerfail
+- name: tpfifo
+  comment: FIFO-Speicher für Periodendauer
+- name: tpldptc_w
+  comment: Zeit für bis LDP-Membran abgefallen ist nachdem TEV geöffnet wurde
+- name: tpldptcx_w
+  comment: Schwelle Zeit für bis LDP-Membran abgefallen ist nachdem TEV geöffnet wurde
+- name: tplsu
+  comment: Tripanzahlcounter
+- name: tpsvkmf_w
+  comment: gefilterter Periodendauerwert des Sondensignals vor Kat. (Word)
+- name: tpsvkmf2_w
+  comment: gefilterter Periodendauerwert des Sondensignals vor Kat. (Word) Bank 2
+- name: tstarte
+  comment: Summierte Startzeit von Drehbeginn bis Startende (mehrere Starts)
+- name: tvkmtr
+  comment: Tastverhältnis elektrischer Thermostat
+- name: tvlr
+  comment: 'LR: Summenwert für verzögerte Reglerumschaltung tv'
+- name: tvlr2
+  comment: 'LR: Summenwert für verzögerte Reglerumschaltung tv Bank 2'
+- name: tvlues1
+  comment: Tastverhältnis Lüfter 1
+- name: tvlues2
+  comment: Tastverhältnis Lüfter 2
+- name: ub
+  alias: BatteryVoltage
+  comment: Batteriespannung
+- name: udknlp1r
+  alias: EmergencyAirGapSensorG187
+  comment: 'Dauer-RAM: Spannung DK-Poti 1 im NLP'
+- name: udknlp2r
+  alias: EmergencyAirGapSensorG188
+  comment: 'Dauer-RAM: Spannung DK-Poti 2 im NLP'
+- name: udkp1_w
+  alias: ThrottlePlateSensorG187
+  comment: Spannung DK-Poti 1
+- name: udkp2_w
+  alias: ThrottlePlateSensorG188
+  comment: Spannung DK-Poti 2
+- name: udkp1asr_w
+  alias: LowerValueSensorG187
+  comment: 'Dauer-RAM: Spannung DK-Poti 1 am unteren DK-Anschlag, stationärer Anteil'
+- name: udkp2asr_w
+  alias: LowerValueSensorG188
+  comment: 'Dauer-RAM: Spannung DK-Poti 2 am unteren DK-Anschlag, stationärer Anteil'
+- name: uhepoti
+  comment: Spannung Heizungspoti
+- name: uhfm_w
+  alias: MAFSensorVoltage
+  comment: HFM-Spannung
+- name: uhsv
+  comment: Spannung an der Heizerendstufe vor Kat
+- name: uhsv2
+  comment: Spannung an der Heizerendstufe vor Kat Bank 2
+- name: upwg1_w
+  alias: AccelPedalSensorG79
+  comment: Spannung PWG-Poti 1 (Word)
+- name: upwg2_w
+  alias: AccelPedalSensorG185
+  comment: Spannung PWG-Poti 2 (Word)
+- name: upwkd_w
+  comment: Gelernte Spannung von PWG-Poti 1 in der Kick-Down-Position
+- name: ushfmxstg
+  comment: Gefilterte maximale Steigung der Sondenspannung hinter KAT
+- name: ushfmxstg2
+  comment: Gefilterte maximale Steigung der Sondenspannung hinter KAT Bank 2
+- name: ushk
+  alias: O2SVoltageSensor2
+  comment: Spannung Lambdasonde hinter Katalysator
+- name: ushk2
+  alias: O2SVoltageSensor2Bank2
+  comment: Spannung Lambdasonde hinter Katalysator Bank 2
+- name: ushkmxstg
+  comment: Maximale Steigung der Sondenspannung hinter KAT
+- name: ushkmxstg2
+  comment: Maximale Steigung der Sondenspannung hinter KAT Bank 2
+- name: ushksteig
+  comment: Steigung der Sondenspannung hinter KAT
+- name: usvk
+  alias: O2SVoltageSensor1
+  comment: Spannung Lambdasonde vor Kat
+- name: usvk2
+  alias: O2SVoltageSensor1Bank2
+  comment: Spannung Lambdasonde vor Kat Bank 2
+- name: usvkk_w
+  comment: LSU-Spannung vor Kat, korrigiert
+- name: uulsuv_w
+  alias: O2SVoltageWideband
+  comment: Sondenspannung vor Kat einer Breitbandlambdasonde (ADC-Wert)
+- name: uulsuv2_w
+  alias: O2SVoltageWidebandBank2
+  comment: Sondenspannung vor Kat einer Breitbandlambdasonde Bank2 (ADC-Wert)
+- name: vfil_w
+  alias: VehicleSpeed
+  comment: gefilterte Geschwindigkeit (16-Bit)
+- name: vfzg
+  alias: VehicleSpeed
+  comment: Fahrzeuggeschwindigkeit
+- name: vfzroh_w
+  alias: VehicleSpeed
+  comment: Fahrzeuggeschwindigkeit Ausgabewert an SCAN-Tool
+- name: vkASRAntrieb
+- name: vpssplg_w
+  comment: Druckverhältnis Saugrohrsolldruck zu Grundladedruck
+- name: vpsspls_w
+  comment: Verhältnis Soll-Saugrohrdruck zu Druck Sollladedruck
+- name: vpsspu_w
+  comment: Solldruckverhältnis Umgebung/Saugrohr
+- name: vziel_w
+  alias: TargetSpeedCruiseControl
+  comment: Zielgeschwindigkeit FGR
+- name: wdkba
+  alias: ThrottlePlateAngle
+  comment: Drosselklappenwinkel bezogen auf unteren Anschlag
+- name: wdks
+  alias: ThrottlePlateAngleRequested
+  comment: Sollwert DK-Winkel, bezogen auf unteren Anschlag
+- name: wkr_0
+  alias: IgnitionRetardCyl$1
+  was: IgnRetardKnockControlCyl$1
+  comment: zylinderindividuelle Zündwinkelspätverstellung KR
+- name: wkr_1
+  alias: IgnitionRetardCyl$2
+  was: IgnRetardKnockControlCyl$2
+  comment: zylinderindividuelle Zündwinkelspätverstellung KR
+- name: wkr_2
+  alias: IgnitionRetardCyl$3
+  was: IgnRetardKnockControlCyl$3
+  comment: zylinderindividuelle Zündwinkelspätverstellung KR
+- name: wkr_3
+  alias: IgnitionRetardCyl$4
+  was: IgnRetardKnockControlCyl$4
+  comment: zylinderindividuelle Zündwinkelspätverstellung KR
+- name: wkr_4
+  alias: IgnitionRetardCyl$5
+  was: IgnRetardKnockControlCyl$5
+  comment: zylinderindividuelle Zündwinkelspätverstellung KR
+- name: wkr_5
+  alias: IgnitionRetardCyl$6
+  was: IgnRetardKnockControlCyl$6
+  comment: zylinderindividuelle Zündwinkelspätverstellung KR
+- name: wkr_6
+  alias: IgnitionRetardCyl$7
+  was: IgnRetardKnockControlCyl$7
+  comment: zylinderindividuelle Zündwinkelspätverstellung KR
+- name: wkr_7
+  alias: IgnitionRetardCyl$8
+  was: IgnRetardKnockControlCyl$8
+  comment: zylinderindividuelle Zündwinkelspätverstellung KR
+- name: wkra_0
+  comment: last und drehzahlabh. Adaptionskennfeld f. wkr
+- name: wkra_159
+  comment: last und drehzahlabh. Adaptionskennfeld f. wkr
+- name: wkraa_0
+  comment: Monitor der wkra des aktuellen Adaptionsbereiches, wkra_0, _1...
+- name: wkraa_1
+  comment: Monitor der wkra des aktuellen Adaptionsbereiches, wkra_0, _1...
+- name: wkraa_2
+  comment: Monitor der wkra des aktuellen Adaptionsbereiches, wkra_0, _1...
+- name: wkraa_3
+  comment: Monitor der wkra des aktuellen Adaptionsbereiches, wkra_0, _1...
+- name: wkraa_4
+  comment: Monitor der wkra des aktuellen Adaptionsbereiches, wkra_0, _1...
+- name: wkraa_5
+  comment: Monitor der wkra des aktuellen Adaptionsbereiches, wkra_0, _1...
+- name: wkraa_6
+  comment: Monitor der wkra des aktuellen Adaptionsbereiches, wkra_0, _1...
+- name: wkraa_7
+  comment: Monitor der wkra des aktuellen Adaptionsbereiches, wkra_0, _1...
+- name: wkrdya_0
+  alias: AdaptedIgnitionAngleDynRange1
+  comment: adaptierter Zündwinkel bei KR-Dynamik
+- name: wkrdya_1
+  alias: AdaptedIgnitionAngleDynRange2
+  comment: adaptierter Zündwinkel bei KR-Dynamik
+- name: wkrdya_2
+  alias: AdaptedIgnitionAngleDynRange3
+  comment: adaptierter Zündwinkel bei KR-Dynamik
+- name: wkrdya_3
+  alias: AdaptedIgnitionAngleDynRange4
+  comment: adaptierter Zündwinkel bei KR-Dynamik
+- name: wkrdya_4
+  alias: AdaptedIgnitionAngleDynRange5
+  comment: adaptierter Zündwinkel bei KR-Dynamik
+- name: wkrm
+  alias: AvgIgnitionRetardKnockControl
+  comment: Mittelwert der zylinderindividuellen ZW-Spätverstellungen durch KR
+- name: wkrma
+  alias: AvgIgnitionRetardKnockControl
+  comment: Mittelwert der ZW-Spätverstellungen KR, allgemein (im Notlauf mit Sicherheit)
+- name: wkrmdy_w
+  comment: Dynamischer Mittelwert der zylinderindividuellen ZW Spätverstellungen
+- name: wkrmstat_w
+  comment: Quasistationärer Mittelwert der zylinderindividuellen ZW Spätverstellwerte
+- name: wnwadmna_w
+  comment: Minimalwertauswahl von adaptierten Werten (Auslass)
+- name: wnwadmne_w
+  comment: Minimalwertauswahl von adaptierten Werten (Einlass)
+- name: wnwass
+  comment: Sollwinkel für Nockenwelle Auslaß öffnet
+- name: wnwe_w
+  comment: Winkel Einlassventil oeffnet bezogen auf LWOT
+- name: wnweos
+  comment: Sollwinkel für Nockenwelle Einlaß öffnet
+- name: wnweos2
+  comment: Sollwinkel für Nockenwelle Einlaß öffnet (Bank2)
+- name: wnwi_w
+  alias: CamshaftAngle
+  comment: Istwinkel für Nockenwelle (word)
+- name: wnwi2_w
+  alias: CamshaftAngleBank2
+  comment: Istwinkel für Nockenwelle (word) Bank 2
+- name: wnwisa_w
+  alias: OutletCamshaftAngle
+  comment: Istwinkel für Auslaßnockenwelle
+- name: wnwise_w
+  alias: IntakeCamshaftAngle
+  comment: Istwinkel für Einlaßnockenwelle
+- name: wnwis2a_w
+  alias: OutletCamshaftAngleBank2
+  comment: Istwinkel für Auslaßnockenwelle (Bank2)
+- name: wnwis2e_w
+  alias: IntakeCamshaftAngleBank2
+  comment: Istwinkel für Einlaßnockenwelle (Bank2)
+- name: wnwkwas_w
+  comment: Winkel Nockenwelle zur Kurbelwelle im Arbeitsspiel
+- name: wnwse_w
+  comment: Sollwinkel Nockenwelle Einlass öffnet
+- name: wnwsenp_w
+  comment: Sollwinkel bei Detektierung einer nicht plausiblen NW-Stellung  (Einlass)
+- name: wnwsfae_w
+  comment: Sollwinkel bei Testereingriff Einlassnockenwelle
+- name: wnwsp_w
+  comment: Adaptionswinkel Nockenwelle (Spätanschlag)
+- name: wnwsp2_w
+  comment: Adaptionswinkel Nockenwelle 2 (Spätanschlag)
+- name: wped
+  alias: AccelPedalPosition_8
+  was: AccelPedalPosition
+  comment: Normierter Fahrpedalwinkel
+- name: wped_w
+  alias: AccelPedalPosition
+  comment: normierter Fahrpedalwinkel
+- name: wub
+  alias: BatteryVoltage
+  comment: Batteriespannung; vom AD-Wandler erfaßter Wert
+- name: wubr
+  alias: SupplyVoltage
+  comment: Batteriespannung über Hauptrelais; vom AD-Wandler erfaßter Wert
+- name: zhklsu
+  comment: Zähler Heizerkopplung LSU
+- name: zhklsu2
+  comment: Zähler Heizerkopplung LSU Bank 2
+- name: zkrvf_0
+  comment: Zähler, bestimmt die Frequenz der zyl.-individuellen Zündwinkelfrühverstellung
+- name: zkrvf_1
+  comment: Zähler, bestimmt die Frequenz der zyl.-individuellen Zündwinkelfrühverstellung
+- name: zkrvf_2
+  comment: Zähler, bestimmt die Frequenz der zyl.-individuellen Zündwinkelfrühverstellung
+- name: zkrvf_3
+  comment: Zähler, bestimmt die Frequenz der zyl.-individuellen Zündwinkelfrühverstellung
+- name: zkrvf_4
+  comment: Zähler, bestimmt die Frequenz der zyl.-individuellen Zündwinkelfrühverstellung
+- name: zkrvf_5
+  comment: Zähler, bestimmt die Frequenz der zyl.-individuellen Zündwinkelfrühverstellung
+- name: zkrvf_6
+  comment: Zähler, bestimmt die Frequenz der zyl.-individuellen Zündwinkelfrühverstellung
+- name: zkrvf_7
+  comment: Zähler, bestimmt die Frequenz der zyl.-individuellen Zündwinkelfrühverstellung
+- name: zlash2_w
+  comment: Zeitzähler für Sondenspannung hinter KAT ober/unterhalb des Sollwertes Bank 2
+- name: zlash_w
+  comment: Zeitzähler für Sondenspannung hinter KAT ober/unterhalb des Sollwertes
+- name: zlkd
+  comment: Zustand Kick-Down-Lernen
+- name: zwbasar_0
+  comment: Basiszündwinkelarray
+- name: zwbasar_1
+  comment: Basiszündwinkelarray
+- name: zwbasar_2
+  comment: Basiszündwinkelarray
+- name: zwbasar_3
+  comment: Basiszündwinkelarray
+- name: zwdynsh
+  comment: Zähler für Anzahl der Dynamikmessungen für Sonde hinter KAT
+- name: zwdynsh2
+  comment: Zähler für Anzahl der Dynamikmessungen für Sonde hinter KAT Bank 2
+- name: zwist
+  alias: IgnitionTimingAngle
+  comment: Ist-Zündwinkel
+- name: zwmnms
+  comment: dauerhaft spätest möglicher Zündwinkel
+- name: zwopt
+  comment: optimaler Zündwinkel
+- name: zwout
+  alias: IgnitionTimingAngleOverall
+  comment: Zündwinkel-Ausgabe
+- name: zwoutar_0
+  comment: Zündwinkel-Ausgabe Array
+- name: zwoutar_1
+  comment: Zündwinkel-Ausgabe Array
+- name: zwoutar_2
+  comment: Zündwinkel-Ausgabe Array
+- name: zwoutar_3
+  comment: Zündwinkel-Ausgabe Array
+- name: zwsol
+  comment: '{Soll-Zündwinkel aus Momenteneingriff'
+- name: zzylkr
+  comment: Zylinderzähler der Klopfregelung
+- name: ANWSE_bits1
+- name: B_acc
+  comment: 'Bedingung: ACC-Steuergerät vorhanden'
+- name: B_adshs
+  comment: Bedingung Adernschluß "setzen" bei Lambdasonden hinter Kat
+- name: B_airbag
+  comment: Bedingung Airbag ausgelöst
+- name: B_airbz
+  comment: Bedingung Botschaftszähler der Airbag-Botschaft unplausibel
+- name: B_aircan
+  comment: Bedingung Crash vom Airbag-SG
+- name: B_atmtpa
+  comment: Bedingung Taupunkt vor Kat ueberschritten
+- name: B_atmtpk
+  comment: Bedingung Taupunkt hinter Kat ueberschritten
+- name: B_ba
+  comment: Bedingung Anreicherung
+- name: B_bevab
+  comment: Bedingung EV-Abschaltung auf Bank/Bank1
+- name: B_bl
+  alias: CondBrakeLightSwitch
+  comment: Bedingung Bremslichtschalter betätigt
+- name: B_bm
+  comment: Bedingung Bezugsmarke erkannt
+- name: B_br
+  alias: CondBrakePedalSwitch
+  comment: Bedingung Bremstestschalter betätigt
+- name: B_brlmx
+  comment: Bedingung LDR Begrenzung der Maximalfuellung
+- name: B_bxf2
+  comment: 'Flip-Flop2: Untere vfz-Schwelle überschrittenh für 0.5 mm - Diagnose'
+- name: B_bxf3
+  comment: 'Flip-Flop3: Beschleunigung größer Maximalschwelle für 0.5 mm - Diagnose'
+- name: B_bxf4
+  comment: 'Flip-Flop4: Laständerung größer Maximalschwelle für 0.5 mm - Diagnose'
+- name: B_bxf5
+  comment: 'Flip-Flop5: Motortemperatur größer Maximalschwelle für 0.5 mm - Diagnose'
+- name: B_bxf6
+  comment: 'Flip-Flop6: Ansauglufttemperatur größer Maximalschwelle für 0.5 mm - Diagnose'
+- name: B_bxf7
+  comment: 'Flip-Flop7: Motortemperaturdifferenz im Start kleiner Minimalschwelle für 0.5 mm'
+- name: B_bxf8
+  comment: 'Flip-Flop8: Bergabfahrt während 0.5 mm - Diagnose erkannt'
+- name: B_bxf9
+  comment: 'Flip-Flop9: Maximalzeit nach Start für 0.5 mm - Diagnose überschritten'
+- name: B_crcan
+  comment: Bedingung Crash erkannt (aus plausibilisiertem CAN-Signal)
+- name: B_ddylash
+  comment: Bedingung Sonde hinter KAT dynamisch langsam
+- name: B_dfrmoff
+  comment: 'frm-Offset-Schwelle überschritten: zeigt Vorsteuerproblem'
+- name: B_dktnr
+  comment: 'DKAT: n/rl-Bereich verlassen'
+- name: B_dktsb
+  comment: Bankspezifische Stoppbedingung
+- name: B_dktsp
+  comment: physikalische Stoppbedingung
+- name: B_dkvsf
+  comment: 'Bedingung: Freigabe des Fehlers'
+- name: B_dlahieg
+  comment: I-Anteil der Führungsregelung eingeschwungen
+- name: B_dlash
+  comment: Bedingung Freigabe Schwingungsprüfung hinter Kat.
+- name: B_dldp
+  comment: 'Aktive Diagnose: Leckdiagnosemodul'
+- name: B_dllr
+  comment: 'Aktive diagnose: Leerlaufstellerdiagnose'
+- name: B_drlmx
+  comment: Laständerung unterhalb Schwellwert
+- name: B_dsl
+  comment: Bedingung Diagnoseanforderung
+- name: B_dsl1
+  comment: 'Diagnose Phase 1: Bestimmung Sekundärluftmasse'
+- name: B_dsl2
+  comment: 'Diagnose Phase 2: Ventildichtheit'
+- name: B_dsl3
+  comment: 'Diagnose Phase3: Offset Sekundärluftmasse'
+- name: B_dsl4
+  comment: 'Bedingung Phase 4: Sekundärluftmasse aus Adaption/Zusatzdiagnose'
+- name: B_dsl5
+  comment: 'Diagnose Phase 5: Offset Sekundärluftmasse'
+- name: B_dslerr
+  comment: Zusammenfassung Abbruchmerkmale Sekundärluftdiagnose
+- name: B_dslmab
+  comment: Diagnose Sekundärluftmasse, Meßabbruch
+- name: B_dslme
+  comment: Diagnose Sekundärluftmasse, Meßfreigabe
+- name: B_dslmes
+  comment: 'Bedingung: Freigabe Meßfenster'
+- name: B_dslo
+  comment: Diagnose Sekundärluftmassenoffset
+- name: B_dsloab
+  comment: Diagnose Sekundärluftoffset, Meßabbruch
+- name: B_dsloe
+  comment: Diagnose Sekundärluftoffset, Meßfreigabe
+- name: B_dslset
+  comment: 'Bedingung: Setzen Sekundärluftadaption/Kurztest'
+- name: B_dsltab
+  comment: Diagnose Ventilichtheit, Meßabbruch
+- name: B_dteaa
+  comment: Bedingung Aufsteuerprüfung für TEV Diagnose aktiv
+- name: B_dteaab
+  comment: Bedingung DTEV-Abbruch wegen Verlassen Aktivierungsbedingungen
+- name: B_dteaam
+  comment: Bedingung Aufsteuerprüfung für TEV Diagnose aktiv möglich
+- name: B_dteabu
+  comment: Bedingung Abbruch TE Diagnose ohne Prüfergebnis
+- name: B_dteanfl
+  comment: abgelaufene Zeit ab die, das Tastverhälnis aus DTEV größer Schwelle
+- name: B_dteendl
+  comment: Bedingung Diagnose TEV über Luftprüfung erfolgreich zu Ende
+- name: B_dteenf
+  comment: Bedingung Diagnose TEV wegen System-Error nicht freigegeben
+- name: B_dtelbm
+  comment: Bedingung Bewertung des Lambda Reglers bei Diagnose TEV möglich
+- name: B_dtelbr
+  comment: Bedingung Reset Flip-Flop Passiv-Prüfung DTEV möglich
+- name: B_dtelnm
+  comment: LL-Prüfung Diagnose TEV nicht möglich
+- name: B_dtenam
+  comment: Bedingung TEV Diagnose nur über Aufsteuerprüfung möglich
+- name: B_dtephm
+  comment: Bedingung physikalische Freigabe DTEV
+- name: B_dtepm
+  comment: Bedingung passive TEV Diagnose möglich
+- name: B_dteres
+  comment: Bedingung TEV Diagnose Reset
+- name: B_dternm
+  comment: Bedingung kein fr-Hub für Diagnose TEV vorhanden
+- name: B_dtes
+  comment: 'Aktive Diagnose: Tankentlüftungssystem'
+- name: B_dtest
+  comment: Start für TEV-Ansteuerung
+- name: B_dushsch
+  comment: Bedingung Schwelle für Sonde hinter KAT im Schub nicht unterschritten
+- name: B_dylash
+  comment: Bedingung Sonde hinter KAT dynamisch langsam
+- name: B_dylsuav
+  comment: Dynamiküberwachung LSU aktiv
+- name: B_edkvs
+  comment: Bedingung Adaptionsfehlerschwellen aktuell überschritten
+- name: B_ehfs
+  comment: Bedingung Ersatzwert Hauptfüllungssensor
+- name: B_ehlsu
+  comment: Bedingung Fehler Heizung LSU
+- name: B_ehsh
+  comment: Bedingung Error HSH
+- name: B_elaof
+  comment: Bedingung Error Lambda-Offset LSU
+- name: B_elsu
+  comment: Bedingung Fehler oder Fehler-Vormerkung LSU (keine Betriebsbereitschaft)
+- name: B_enlash
+  comment: Bedingung Test für Schwingungsprüfung abgeschlossen hinteer Kat
+- name: B_entest
+  comment: Bedingung Wartezeit abgeschlossen für Test-Überprüfung Sonde hinter KAT
+- name: B_epwmcs
+  comment: Bedingung PWM-Crash-Sensor-Signal ist fehlerhaft
+- name: B_errofs
+  comment: 'Bedingung: zulässige Sekundärluftmassen-Offset überschritten'
+- name: B_evloc
+  comment: 'Status: alle lokalen Einspritzventile werden angesteuert, = B_EVTOT bei einem SG'
+- name: B_fakat
+  comment: Bedingung Funktionsanforderung Katalysatorüberwachung
+- name: B_fakvs
+  comment: Funktionsaufforderung Diagnose Kraftstoffsystem für Schnelltest
+- name: B_falrshk
+  comment: Bedingung Funktionsanforderung LRSHK
+- name: B_falsh
+  comment: Bedingung Funktionsanforderung Lambda-Sonde hinter KAT
+- name: B_falsu
+  comment: Bedingung Funktionsanforderung Lambda-Sonde vor KAT
+- name: B_fash
+  comment: Bedingung Funktionsanforderung Schwingungsprüfung
+- name: B_fasla
+  comment: 'Bedingung: externe Anforderung an Sekundärluft aktiv'
+- name: B_faslarq
+  comment: 'Bedingung: lokale Anforderung Testdurchlauf Sekundärluft starten'
+- name: B_fev10
+  comment: Bedingung kurze Lastüberschreitung rl über Maxwert
+- name: B_fev11
+  comment: Bedingung TEV nicht erfüllt
+- name: B_fev12
+  comment: Bedingung Reedkontakt öffnet in der Fast Pulse Phase
+- name: B_fev5
+  comment: Bedingung Differenz zwischen Motorabstell- und Motorstarttemperatur erkannt
+- name: B_fev6
+  comment: Bedingung Höhe>Maximalwert erkannt
+- name: B_fev7
+  comment: Bedingung Fahrzeuggeschwindigkeit<Minimalwert erfüllt
+- name: B_fev8
+  comment: Bedingung Bergabfahrt erkannt
+- name: B_fev9
+  comment: Bedingung lange Lastüberschreitung rl über Maxwert
+- name: B_fgratc
+  comment: Bedingung FGR-Tipschalter Aus betätigt (vom CAN)
+- name: B_fgrhsc
+  comment: Bedingung FGR-Hauptschalter ein (vom CAN)
+- name: B_fgrsec
+  comment: Bedingung FGR-Tipschalter Setzen betätigt (vom CAN)
+- name: B_fgrtdc
+  comment: Bedingung FGR-Tipschalter Verzögern betätigt (vom CAN)
+- name: B_fgrte
+  comment: Bedingung FGR vom Tester freigegeben
+- name: B_fgrtuc
+  comment: Bedingung FGR-Tipschalter Beschleunigen betätigt (vom CAN)
+- name: B_fgrwac
+  comment: Bedingung FGR-Tipschalter Wiederaufnahme betätigt (vom CAN)
+- name: B_fkmsmn
+  comment: schnelle Massenstromadaption fkmsdks im unteren Anschlag
+- name: B_fkmsmx
+  comment: schnelle Massenstromadaption fkmsdks im oberen Anschlag
+- name: B_fkpvdk
+  comment: Bedingung für die Freigabe des langsamen multiplikativen Füllungsabgleichs
+- name: B_fkpvmn
+  comment: langsame Massenstromadaption fkpvdk im unteren Anschlag
+- name: B_fkpvmx
+  comment: langsame Massenstromadaption fkpvdk im oberen Anschlag
+- name: B_fofstp
+  comment: Bedingung fuel-off Adaption gestoppt
+- name: B_forn_m
+  comment: Monitor, Bedingung Adaption im aktuellen Drehzahlbereich ready
+- name: B_fprrdy
+  comment: DK-Rückstellfeder-Prüfung beendet
+- name: B_fprzab
+  comment: 'Bedingung: DV-E-Rückstellfederprüfung Abbruch, Feder schließt nicht'
+- name: B_fprzok
+  comment: 'Bedingung: DV-E-Rückstellfederprüfung i.O.'
+- name: B_frao
+  comment: Einschaltbedingung für Adaption von frao
+- name: B_frau
+  comment: Einschaltbedingung für Adaption von frau
+- name: B_fraur
+  comment: Bedingung frau-Integrator außerhalb reduzierter Bereich
+- name: B_frmax
+  comment: Lambda-Regelung setzt Bit sobald FR am Anschlag FRMAX
+- name: B_frmin
+  comment: Lambda-Regelung setzt Bit sobald FR am Anschlag FRMIN
+- name: B_fs
+  comment: Bedingung Fahrstufe
+- name: B_furena
+  comment: Bedingung Aktivierung des Füllungsreglers
+- name: B_gaefra
+  comment: Bedingung Grundadaption (fra-Integrator) eingeschwungen
+- name: B_gaeing
+  comment: Bedingung Grundadaption Bank 1 eingeschwungen
+- name: B_gap
+  comment: Bedingung Gemischadaptionsphase aktiv
+- name: B_gasp
+  comment: Bedingung Grundadaption gesperrt
+- name: B_heatf
+  comment: Freigabe Heizerkopplung LSU
+- name: B_helsu
+  comment: Diagnose Heizerkopplung LSU erfolgt
+- name: B_hfm
+  comment: Bedingung HFM messbereit
+- name: B_hshe
+  comment: Bedingung Endstufe Sondenheizung hinter Kat angesteuert
+- name: B_hshe2
+  comment: Bedingung Heizung Sonde hinter Kat ein Bank2
+- name: B_hshe2
+  comment: Bedingung Heizung Sonde hinter Kat ein Bank2
+- name: B_hsokh
+  comment: Bedingung Sondenheizung OK hinter Kat
+- name: B_hsve
+  comment: Bedingung Endstufe Sondenheizung vor Kat angesteuert
+- name: B_hsve2
+  comment: Bedingung Endstufe Sondenheizung vor Kat angesteuert Bank2
+- name: B_kfzk
+  comment: Bedingung Kennfeld Klopfschutz
+- name: B_kh
+  comment: Bedingung Kat-Heizung
+- name: B_khab
+  comment: Bedingung Katheizen Abbruch
+- name: B_khll
+  comment: Bedingung Katheizen Leerlauf (Abbruchbedingung)
+- name: B_khoab
+  comment: Bedingung Katheizen ohne Abbruchkriterium durchgeführt
+- name: B_koe
+  comment: Bedingung für Kompressoreinschalten
+- name: B_kr
+  comment: Bedingung Klopregelung aktiv
+- name: B_krldy
+  comment: Bedingung Lastdynamik für Klopferkennung aktiv
+- name: B_krndy
+  comment: Bedingung Drehzahldynamik für Klopferkennung aktiv
+- name: B_kuppl
+  alias: CondClutchPedalSwitch
+  comment: Bedingung Kupplung betätigt
+- name: B_lalgf
+  comment: Bedingung Laufgrenze "Lambda fett" aktiv
+- name: B_lambts
+  alias: CondLambdaPartProtectionActive
+  comment: Lambda für Bauteileschutz ist aktiv
+- name: B_lamfas
+  comment: Verbot  für Lambda Fahrerwunsch Aktivierung
+- name: B_lamka
+  comment: Lambda für Kat-Ausräumen aktiv
+- name: B_lamlash
+  comment: Bedingung für Abmagern/Anfetten in %LAMKO
+- name: B_lamnswl
+  comment: Lambda-Motor-Soll für Nachstart und Warmlauf aktiv
+- name: B_lamverg
+  comment: Bedingung Vergleich Lambdasoll in %DLSAHK mit %LAMKO übereinstimmend
+- name: B_ldb
+  comment: Bedingung für Ladedruckregelbereitschaft
+- name: B_ldob
+  alias: CondOverboostActive
+  comment: 'Bedingung: Overboost aktiv'
+- name: B_ldobsp
+  alias: CondOverboostDuringBlockPeriod
+  comment: Bedingung LDR Overboost innerhalb Sperrzeit
+- name: B_ldp
+  comment: Bedingung LDP wird angesteuert erfüllt
+- name: B_ldpi
+  comment: Bedingung Reed-Kontakt Leckdiagnosepumpe
+- name: B_ldr
+  comment: Flag für Bedingung LDR aktiv
+- name: B_lds
+  comment: Flag für Bedingung LDR Steuerung
+- name: B_ldsua
+  comment: Bedingung LDR Schubumluftventil aktiv (offen)
+- name: B_ldsuad
+  comment: Bedingung Turbo Umluftsteuerung dynamisch aktiv
+- name: B_ldsuas
+  comment: Bedingung Turbo Umluftsteuerung stationär aktiv
+- name: B_ll
+  comment: Bedingung Leerlauf
+- name: B_lr
+  comment: 'LREB: Bedingung Lambdaregelung (vor Kat); (Bank 1)'
+- name: B_lr2
+  comment: 'LREB: Bedingung Lambdaregelung (vor Kat); (Bank 2)'
+- name: B_lra
+  comment: Bedingung Gemischadaption freigegeben
+- name: B_lrar
+  comment: Bedingung reduzierte Korrekturbereiche in der LRA
+- name: B_lrasp
+  comment: Bedingung stop LRA wegen LSU-Fehler
+- name: B_lrhk
+  comment: Bedingung Lambdaregelung hinter Kat
+- name: B_lrhk2
+  comment: Bedingung Lambdaregelung hinter Kat Bank2
+- name: B_lrhkp
+  comment: 'LRHK: Freigabebedingung P-Anteil Lambdaregelung hinter Kat'
+- name: B_lrnerf
+  comment: Lernerfolg Bit
+- name: B_lrnws
+  comment: Lernwertspeicherung Bit
+- name: B_lsahksp
+  comment: allgemeine Stop-Bedingungen für die DLSAHK
+- name: B_lshkpft
+  comment: Bedingung Lambdasondensignal hinter dem Kat. plausibel fett
+- name: B_lshkpmr
+  comment: Bedingung Lambdasondensignal hinter dem Kat. plausibel mager
+- name: B_lshswok
+  comment: Bedingung Sonde hinter KAT nach Schwingungsprüfung in Ordnung
+- name: B_lsuabgl
+  comment: Bedingung Abgleichleitung stetige Lambda-Sonde LSU unterbrochen
+- name: B_lsufta
+  comment: LSU Bank1 fett, nicht plausibel
+- name: B_lsuftb
+  comment: LSU Bank1 fett, nicht plausibel
+- name: B_lsulone
+  comment: Bedingung Lambdasondensignal ist Lambda = 1
+- name: B_lsumra
+  comment: LSU Bank1 mager, nicht plausibel
+- name: B_lsumrb
+  comment: LSU Bank1 mager, nicht plausibel
+- name: B_lsumx
+  comment: Maximalwert der LSU-Spannung überschritten (CJ110)
+- name: B_lsuna
+  comment: LSU nicht aktiv, Bank1
+- name: B_lsupft
+  comment: Bedingung Lambdasondensignal plausibel fett
+- name: B_lsupmr
+  comment: Bedingung Lambdasondensignal plausibel mager
+- name: B_luft
+  comment: LSU an Luft
+- name: B_madfk
+  comment: Bedingung Momentenadaption Fahrstufe und Klimakompressor ein
+- name: B_madfs
+  comment: Bedingung Momentenadaption Fahrstufe ein
+- name: B_madko
+  comment: Bedingung Momentenadaption Klimakompressor ein
+- name: B_madll
+  comment: Bedingung Momentenadaption ohne Last
+- name: B_maxflsu
+  comment: Lambdaoffset vor / hinter Kat zu groß, Bank1
+- name: B_mdarv
+  comment: kritische Aussetzerrate vorhanden
+- name: B_mdkat
+  comment: Katschädigende Aussetzerrate überschritten (zur Ausblendung anderer Funktionen)
+- name: B_mdstop_m
+  comment: Monitor, Misfire Detection gesperrt
+- name: B_mibeg
+  comment: Bedingung Momentenbegrenzung ist aktiv
+- name: B_mil
+  comment: MIL-Ansteuerung
+- name: B_milabg
+  comment: Mil leuchtet Abgasrelevant
+- name: B_milkat
+  comment: Mil blinkt wegen Kat schädigende Aussetzer
+- name: B_minflsu
+  comment: Dynamikfehler LSU, Bank1
+- name: B_mldyn
+  comment: Bedingung erforderliche Luftmasse im Schubbetrieb für Dynamikmessung erreicht
+- name: B_mlustest
+  comment: Bedingung ml ist innerhalb den Schwellen
+- name: B_mnslspr
+  comment: 'Fehlerart lokal: Sekundärluftmasse zu gering'
+- name: B_mola
+  comment: Motorlagersteuerung aktiv
+- name: B_mslmin
+  comment: Bedingung sehr geringe Sekundärluftmasse aus Meßphase
+- name: B_msloff
+  comment: Sekundärluftmasse ausgeräumt nach Sekundärluftphase
+- name: B_mslon
+  comment: Sekundärluftmasse eingeschwungen nach Start der Sekundärluft
+- name: B_mxslvpr
+  comment: 'Fehlerart lokal: Sekundärluftmasse bei Ventildichtheitsprüfung zu groß'
+- name: B_nac
+  comment: Bedingung für erhöhte LL-Drehzahl bei Klimaanlage
+- name: B_nlperf
+  comment: 'Dauer-RAM, Bedingung: NLP-Erfassung erfolgreich'
+- name: B_nowuc
+  comment: Bedingung 'kein warm up cycle' erkannt
+- name: B_nphlsu
+  comment: Bedingung Signal LSU1 ist unplausibel
+- name: B_nplflsh
+  comment: Adernschluß bei Sonde hinter KAT erkannt
+- name: B_nplflsu
+  comment: Lambdasignal nicht plausibel
+- name: B_npsna
+  comment: 'Bedingung nicht plaus.: Sonde nicht aktiv'
+- name: B_npvshns
+  comment: 'Bedingung nicht plaus.: Gemisch vor dem Kat Lambda=1, hinter dem Kat nicht'
+- name: B_nwflade
+  comment: Bedingung Flankenadaption Nockenwelle Einlaß angefordert
+- name: B_nwrpose
+  comment: 'Bedingung: Ansteuerung der Nockenwellen-Referenzposition durch Steller (Einlass)'
+- name: B_nws
+  comment: Bedingung Nockenwellensteuerung
+- name: B_phad
+  comment: Adaption Kurbel/Nockenwelle erfolgt
+- name: B_phade
+  comment: Adaption Kurbel/Einlaßnockenwelle erfolgt
+- name: B_plenvh
+  comment: Freigabe DLSU Plauspfad
+- name: B_rinh
+  comment: Bedingung Innenwiderstand Ri-Messung der Nernstsonde aktiv hinter Kat
+- name: B_risigh
+  comment: Bedingung Signalunterbrechung Sondenmasse mit Ri-Diagnose hinter KAT
+- name: B_rkam
+  comment: Bedingung einer der beiden additiven Bereiche aktiv
+- name: B_rkat
+  comment: Bedingung Lernbereich additive Korrektur pro Zeit aktiv
+- name: B_rkatr
+  comment: Bedingung rkat-Integrator außerhalb reduzierten Bereich
+- name: B_sa
+  alias: CondFuelCutoff
+  comment: Bedingung Schubabschalten
+- name: B_sbbhk
+  comment: Bedingung Sonde betriebsbereit hinter Kat
+- name: B_sbbhk2
+  comment: Bedingung Sonde betriebsbereit hinter Kat Bank2
+- name: B_sbbvk
+  comment: Bedingung Sonde betriebsbereit vor Kat
+- name: B_sbbvk2
+  comment: Bedingung Sonde betriebsbereit vor Kat Bank2
+- name: B_sigflsh
+  comment: Signalunterbrechung (Kabelbruch) Bei Sonde hinter KAT erkannt
+- name: B_sigflsu
+  comment: Übersprechen vom Heizertakt auf Lambdasignal
+- name: B_sksc
+  comment: Bedingung heizb. Heckscheibe eingeschaltet aus CAN-Botschaft Clima1
+- name: B_sl
+  comment: Bedingung Servo-Lenkung
+- name: B_sla
+  comment: Anforderung Sekundärluftadaptionsphase
+- name: B_slar
+  comment: Anforderung Sekundärluftadaptionsphase zurücksetzen
+- name: B_slas
+  comment: Anforderung Sekundärluftadaptionsphase setzen
+- name: B_slkhof
+  comment: Bedingung Abschalten der Sekundärluftpumpe durch imlpr-Schwelle
+- name: B_slpena
+  comment: Bedingung Einschalten der Sekundärluftpumpe
+- name: B_slpoff
+  comment: Sekundärluftpumpe abgeschaltet
+- name: B_slpofst
+  comment: Bedingung für Setzen Flip Flop  B_slpoff
+- name: B_slsinhi
+  comment: Bedingung sperrt Setzen von Bit B_sls
+- name: B_slsoab
+  comment: Bedingung SLS ohne Abbruchkriterium durchgeführt
+- name: B_slsoff
+  comment: Sekundärlufteinblasung nach Ausräumen der Sekundärluft beendet
+- name: B_spsa
+  comment: Bedingung Winkeladaption Kurbel- zu Nockenwelle zulässig
+- name: B_steigm
+  comment: Bedingung Steigung des Sondensignals messen hinter KAT
+- name: B_su
+  comment: Bedingung SU-V eingeschaltet
+- name: B_synph
+  comment: Bedingung Synchronisation Phase
+- name: B_syserrk
+  comment: Bedingung für mind. 1 Fehler (E_abc) im System erkannt (unmaskiert)
+- name: B_tabgbts
+  alias: CondEGTForPartProtection
+  comment: Bedingung Abgastemperatur für Bauteileschutz überschritten
+- name: B_tal
+  alias: CondFuelTankEmpty
+  comment: Bedingung Tank leer bzw. Reserve
+- name: B_talval
+  comment: 'Bedingung : Bit Tank leer gültig'
+- name: B_teslash
+  comment: Bedingung Test ausführen für Überprüfung Sonde hinter KAT
+- name: B_tevioi
+  comment: Bedingung TEV durch DLDP (Initialspülung) als i.O. erkannt.
+- name: B_teviol
+  comment: Bedingung TEV aus der Reaktion der Leerlaufregelung als i.O. erkannt
+- name: B_teviop
+  comment: Bedingung TEV in passiver Prüfung als i.O. erkannt.
+- name: B_tevior
+  comment: Bedingung TEV aus fr-Abweichung als i.O. erkannt.
+- name: B_teviot
+  comment: Bedingung TEV durch DLDP (Abfallzeiterhöhung) als i.O. erkannt.
+- name: B_tevnio
+  comment: Bedingung TEV in aktiver Prüfung als defekt erkannt
+- name: B_tkatbts
+  comment: Bedingung Katalysatortemperatur für Bauteileschutz überschritten
+- name: B_trfash
+  comment: Bedingung Kurztrip einleiten für Schwingungsprüfung Sonde hinter KAT
+- name: B_trip
+  comment: Flag für erfüllten 'trip'
+- name: B_trkh
+  comment: Bedingung Katheizen, Thermoreaktor wirksam
+- name: B_trsah
+  comment: Bedingung Kabelbruch für Sonde hinter KAT
+- name: B_ttbmhh
+  comment: Bedingung theoretische Sondenbetriebsbereitschaft hinter KAT mit Heizung
+- name: B_uhsig
+  comment: Bedingung Sondenspannung hinter KAT im Spannungsband für Signalunterbrechung
+- name: B_ushkf
+  comment: Bedingung Sondenspannung hinter Kat "Fett" (Sollwert überschritten)
+- name: B_ushkm
+  comment: Bedingung Sondenspannung hinter KAT "Mager" (Sollwert unterschritten)
+- name: B_ushsch
+  comment: Bed. Schwelle für Sonde h. KAT im Schub nicht unterschritten `statichisch`
+- name: B_vekat
+  comment: Fehlerverdacht bei Katdiagnose
+- name: B_vl
+  comment: Bedingung Vollast
+- name: B_wnws0e
+  comment: Bedingung NW-Sollwertvorgabe ist 0
+- name: DSLSLRSlokBits1
+- name: DTEVNonVolbits
+- name: E_dk
+  comment: 'Errorflag: DK - Potentiometer'
+- name: E_dvef
+  comment: 'Errorflag: DV-E Fehler bei Federprüfung'
+- name: E_dven
+  comment: 'Errorflag: DV-E Fehler bei Prüfung Notluftposition'
+- name: E_dveu
+  comment: 'Errorflag: DV-E Fehler beim UMA-Lernen'
+- name: E_dvev
+  comment: 'Errorflag: DV-E Fehler bei Verstärkerabgleich'
+- name: E_frau
+  comment: 'Errorflag: LR-Adaption unterer multiplikativer Bereich'
+- name: E_frst
+  comment: 'Errorflag: Fehler aus Diagnose Kraftstoffversorgungssystem (Kurztest)'
+- name: E_hsh
+  comment: 'Errorflag: Lambdasonden-Heizung hinter Katalysator'
+- name: E_hshe
+  comment: 'Errorflag: Lambdasonden-Heizung hinter Katalysator (Endstufe)'
+- name: E_hsv
+  comment: 'Errorflag: Lambdasonden-Heizung vor Katalysator'
+- name: E_hsvsa
+  comment: 'Errorflag: reduzierte  LSU-Heizung oder LSU-Kennlinie abgeflacht'
+- name: E_kat
+  comment: 'Errorflag: Katalysator-Konvertierung'
+- name: E_ks4
+  comment: 'Errorflag: Klopfsensor 4'
+- name: E_lash
+  comment: 'Errorflag: Lambda-Sondenalterung hinter Katalysator'
+- name: E_ldpe
+  comment: 'Errorflag: Leckdiagnosepumpe Endstufe'
+- name: E_llr
+  comment: 'Errorflag: Leerlaufregelung'
+- name: E_lm
+  comment: 'Errorflag: Hauptlastsensor'
+- name: E_lsh
+  comment: 'Errorflag: Lambda-Sonde hinter Kat'
+- name: E_lsv
+  comment: 'Errorflag: Lambda-Sonde vor Kat'
+- name: E_md00
+  comment: 'Errorflag: Aussetzer Zündung 0'
+- name: E_md01
+  comment: 'Errorflag: Aussetzer Zündung 1'
+- name: E_md02
+  comment: 'Errorflag: Aussetzer Zündung 2'
+- name: E_md03
+  comment: 'Errorflag: Aussetzer Zündung 3'
+- name: E_nwkw
+  comment: 'Errorflag: Zuordnung Nockenwelle zu Kurbelwelle'
+- name: E_ph
+  comment: 'Errorflag: Phasensensor'
+- name: E_rkat
+  comment: Errorflag DKVS (additive Korrektur pro Zeit)
+- name: E_scr
+  comment: 'Errorflag: CRAS-Signal'
+- name: E_sls
+  comment: 'Errorflag: Sekundärluft-System'
+- name: E_slv
+  comment: 'Errorflag: Sekundärluftventil'
+- name: E_tes
+  comment: 'Errorflag: Tankentlüftungssystem'
+- name: E_tesg
+  comment: 'Errorflag: Tankentlüftungssystem Grobleck'
+- name: E_vfz
+  comment: 'Errorflag: Fahrzeug-Geschwindigkeit'
+- name: GGFSTbits
+- name: S_fgrat
+  alias: SwitchOffTipCruiseControl
+  comment: Schalter Aus-Tip am FGR-Bedienhebelschalter
+- name: S_fgrhs
+  alias: MainSwitchCruiseControl
+  comment: Hauptschalter am FGR-Bedienhebel
+- name: S_fgrsv
+  alias: TipSetDecCruiseControl
+  comment: Schalter Setzen/Verzögern am FGR-Bedienhebel
+- name: S_fgrwb
+  alias: TipResetAccCruiseControl
+  comment: Schalter Wiederaufnahme/Beschleunigen am FGR-Bedienhebel
+- name: TYP_hsv
+  comment: 'Fehlertyp: Heizung Lambdasonde 1 vor Kat'
+- name: TYP_hsvsa
+- name: TYP_hsvsa2
+- name: TYP_lsv
+  comment: 'Fehlertyp: Lambdasonde 1 vor Kat'
+- name: TYP_nwkw
+- name: TYP_scr
+- name: TYP_sls
+  comment: 'Fehlertyp: Sekundärluftsystem'
+- name: Z_brems
+  comment: 'Zyklusflag: BREMS (Bremsschalter)'
+- name: Z_dk
+  comment: "Zyklusflag:\tDK - Potentiometer"
+- name: Z_dvef
+  comment: 'Zyklusflag: DV-E Fehler bei Federprüfung'
+- name: Z_dven
+  comment: 'Zyklusflag: DV-E Fehler bei Prüfung Notluftposition'
+- name: Z_dveu
+  comment: 'Zyklusflag: DV-E Fehler beim UMA-Lernen'
+- name: Z_dvev
+  comment: 'Zyklusflag: DV-E Fehler bei Verstärkerabgleich'
+- name: Z_egfe
+  comment: 'Zyklusflag: Eingangsgrößen Füllungserfassung'
+- name: Z_enws
+  comment: 'Zyklusflag: Nockenwellensteuerung (Einlaß,Bank1)'
+- name: Z_frau
+  comment: Zyklusflag:LR-Adaption unterer multiplikativer Bereich
+- name: Z_frst
+  comment: Zyklusmeldung Diagnose Kraftstoffversorgungssystem (Kurztest)
+- name: Z_grbh
+  comment: 'Zyklusflag: GRA Bedienhebel'
+- name: Z_hsh
+  comment: Zyklusflag:Lambdasonden-Heizung hinter Katalysator
+- name: Z_hshe
+  comment: Zyklusflag:Lambdasonden-Heizung hinter Katalysator (Endstufe)
+- name: Z_hsv
+  comment: Zyklusflag:Lambdasonden-Heizung vor Katalysator
+- name: Z_hsvsa
+  comment: 'Zyklusflag:  reduzierte  LSU-Heizung oder LSU-Kennlinie abgeflacht'
+- name: Z_kat
+  comment: "Zyklusflag:\tKatalysator-Konvertierung"
+- name: Z_ks1
+  comment: 'Zyklusflag: Klopfsensor 1'
+- name: Z_ks2
+  comment: 'Zyklusflag: Klopfsensor 2'
+- name: Z_ks3
+  comment: 'Zyklusflag: Klopfsensor 3'
+- name: Z_ks4
+  comment: 'Zyklusflag: Klopfsensor 4'
+- name: Z_kuppl
+  comment: 'Zyklusflag: Kupplung betaetigt'
+- name: Z_lash
+  comment: Zyklusflag:Lambda-Sondenalterung hinter Kat.
+- name: Z_ldra
+  comment: "Zyklusflag:\tLadedruckregelabweichung"
+- name: Z_llr
+  comment: 'Zyklusflag: Diagnose Leerlaufregelung, Steller'
+- name: Z_lm
+  comment: "Zyklusflag:\tLMM/HLM/HFM"
+- name: Z_lsh
+  comment: 'Zyklusflag: Lambda-Sonde hinter Kat'
+- name: Z_lsv
+  comment: 'Zyklusflag: Lambda-Sonde vor Kat'
+- name: Z_md00
+  comment: 'Zyklusflag: Aussetzer Zündung 0'
+- name: Z_md01
+  comment: 'Zyklusflag: Aussetzer Zündung 1'
+- name: Z_md02
+  comment: 'Zyklusflag: Aussetzer Zündung 2'
+- name: Z_md03
+  comment: 'Zyklusflag: Aussetzer Zündung 3'
+- name: Z_nwkw
+  comment: 'Zyklusflag: Zuordnung Nockenwelle zu Kurbelwelle'
+- name: Z_ph
+  comment: 'Zyklusflag: Phasensensor'
+- name: Z_rkat
+  comment: Zyklusflag:LR-Adaption additiv pro Zeit
+- name: Z_rkaz
+  comment: Zyklusflag:LR-Adaption additiv pro Einspritzung
+- name: Z_scr
+  comment: 'Zyklusflag: CRAS-Signal'
+- name: Z_sls
+  comment: 'Zyklusflag: Sekundärluft-System'
+- name: Z_tes
+  comment: 'Zyklusflag: Tankentlüftungssystem'
+- name: Z_tesg
+  comment: 'Zyklusflag: Tankentlüftungssystem Grobleck'
+- name: Z_thm
+  comment: Zyklusflg Kühlwasser-Thermostat
+- name: Z_tm
+  comment: "Zyklusflag:\tTMOT"
+- name: Z_vfz
+  comment: 'Zyklusflag: Fahrzeug-Geschwindigkeit'

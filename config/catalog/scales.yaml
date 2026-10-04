@@ -1,0 +1,102 @@
+# Named catalog scales. A row selects one with scale.
+# A field written on the row wins. One unit can have more than one scale.
+scales:
+  kw_retard:
+    unit: °KW
+    factor: -3/4
+  kw:
+    unit: °KW
+    signed: true
+    factor: 3/4
+  kw_cam:
+    unit: °KW
+    signed: true
+    factor: 2/256
+  kw_fine:
+    unit: °KW
+    signed: true
+    factor: 1/256
+  kw_half:
+    unit: °KW
+    factor: 1/2
+  kw_step:
+    unit: °KW
+    factor: 4/256
+  kw_word:
+    size: 2
+    unit: °KW
+    factor: 3/16
+  v_ref:
+    unit: V
+    factor: 5/256
+  v_lambda:
+    unit: V
+    factor: 0.00521569
+    offset: 0.2
+  v_word:
+    unit: V
+    factor: 320/0x10000
+  v_asr:
+    unit: V
+    factor: 80/0x10000
+  frac_2:
+    unit: '-'
+    factor: 2/0x10000
+  pct:
+    unit: '%'
+    factor: 100/0x10000
+  frac_16:
+    unit: '-'
+    factor: 16/0x10000
+  pressure:
+    unit: mbar
+    factor: 10/256
+  pct_byte:
+    unit: '%'
+    factor: 100/256
+  frac_byte2:
+    unit: '-'
+    factor: 2/256
+  frac_byte:
+    unit: '-'
+    factor: 1/256
+  frac_4:
+    unit: '-'
+    factor: 4/0x10000
+  seconds:
+    unit: s
+    factor: 1/100
+  air:
+    unit: g/s
+    factor: 1/36
+  load:
+    unit: '%'
+    factor: 6/256
+  frac_2s:
+    unit: '-'
+    signed: true
+    factor: 2/0x10000
+  temp:
+    unit: °C
+    factor: 3/4
+    offset: 48
+  pct_200:
+    unit: '%'
+    signed: true
+    factor: 1/200
+  injection:
+    unit: ms
+    factor: 1/375
+  cat_temp:
+    unit: °C
+    factor: 5
+    offset: 50
+  pct_twice:
+    unit: '%'
+    signed: true
+    factor: 200/0x10000
+  ohm:
+    unit: Ohm
+    factor: 2
+  count:
+    unit: '#'

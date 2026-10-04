@@ -1,0 +1,13 @@
+*.swp
+*~
+.DS_Store
+
+/.cursor/
+/.idea/
+/.vscode/
+/build/
+/me7-logger
+/me7-logger.exe
+/plans/
+/config/user/*.yaml
+/config/user/*.yml

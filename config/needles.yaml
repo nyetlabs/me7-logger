@@ -1,0 +1,164 @@
+# Byte-pattern needles. Edit this file. me7-logger does not read a needle list from another checkout.
+# Field rules match the me7-core language: needle_hex, optional mask_hex, word-aligned hits,
+# back_up or an even [min, max] range with entry_after, unique.
+#
+# needle_hex:  hex bytes, spaces allowed, "??" is a wildcard byte. Only word-aligned hits count.
+# mask_hex:    optional per-byte mask ANDed with the "??" mask; a byte matches when
+#              (b & m) == (n & m) (ME7Sum FindData style).
+# back_up:     label = hit - back_up (negative moves the label forward). Omitted, this
+#              is 0. A range [min, max] (even span, needs entry_after) takes the
+#              closest label to the hit, from hit - min down to hit - max, that
+#              passes entry_after; for code whose length before the needle differs
+#              between builds.
+# unique:      skip and report if the needle hits more than once. Omitted, this is true.
+# entry_after: byte strings, one of which must precede the label (RETS or erased padding).
+#
+# data:        the label is a table or other bytes. It is not a function entry.
+# functions:   the label is a function entry. Callers of an interpolation entry
+#              pass the map address.
+#
+# Checksum and flash-kernel patterns are in config/examples/needles.yaml.
+# This program does not load that file.
+
+data:
+  # First row of the 5-baud address table. Byte 0 is 0x01 or 0x11 (bit 4 masked).
+  # Byte 6 is that address complemented, 0xFE or 0xEE. Byte 31 is the next row's
+  # sync 0x55, so a single copy of the row does not match. The label is the row.
+  - name: slow_init_table
+    needle_hex: "01 55 EF 8F 70 00 EE 01 3C 00 2C 01 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? 55"
+    mask_hex: "EF FF FF FF FF FF EF FF FF FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 FF"
+
+  # Application store of the fast-init physical target. The immediate is 0x10
+  # (back_up -14 lands on that byte). Images that compare a literal 0x01 in the
+  # address filter do not have this store, so Fast stays unset there.
+  - name: fast_init_physical
+    needle_hex: "E6 F5 06 02 F6 F4 ?? E2 F6 F5 ?? E2 E7 F8 10 00 F7 F8 ?? E2"
+    back_up: -14
+
+  # Selector 0, and the dispatcher table in front of it. The anchor is 38 bytes
+  # before the prefix. The bytes between them are SHR R5,#4 / CMP R5,#max /
+  # ADD R5,#table / JMPI [R5]; generate walks every table entry that is a prefix.
+  # Byte 40 of the prefix is 0x12 or 0x14. Images that SUB R5,#1 instead of the
+  # shift do not have this prefix.
+  - name: result_selector_0
+    needle_hex: "E0 09 E6 F8 ?? ?? E1 0E E1 0C E0 04 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? D4 40 ?? 00 66 F4 0F 00"
+    back_up: -38
+
+functions:
+  # 8-bit table (two inputs). Callers pass the map body in R12 and an
+  # axis header in R13 (MOV R12,#imm / MOV R13,#imm / MOV R14,mem /
+  # MOV R15,mem / CALLS). The map address is that R12 immediate, resolved
+  # through the runtime DPP. Rows and columns come from this image. The same
+  # 20 bytes begin sibling helpers that nothing calls, so a hit is not unique.
+  - name: map_interp_table8
+    needle_hex: "26 F4 00 80 8D 04 7D 06 E6 F4 FF 7F 0D 03 6D 02 E6 F4 00 80"
+    unique: false
+
+  # Second 8-bit table entry, same call. One hit on the images that have it.
+  - name: map_interp_table8_b
+    needle_hex: "E4 8F F6 8E DE 8F F6 8E 06 90 F6 8E"
+
+  # 16-bit table, same R12/R13 call. Two copies of the body. Rows and columns
+  # come from this image.
+  - name: map_interp_table16
+    needle_hex: "A9 2D C0 2D F0 1E C0 31 1B 1D F2 F1"
+    unique: false
+
+  # 8-bit table. Same call as table16; this is that routine's 8-bit body.
+  # Two entries share the prefix.
+  - name: map_interp_table8_twin
+    needle_hex: "A9 4D C0 4D F0 1E C0 31 1B 1D F2 F1"
+    unique: false
+
+  # 8-bit curve (one row). The column count comes from this image. R12 is the
+  # near address and R13 is the page. Three bodies share these eight bytes;
+  # the bytes after them differ.
+  - name: map_interp_curve8
+    needle_hex: "F0 3E C0 72 00 C2 DC 4D"
+    unique: false
+
+  # 16-bit curve. R13 is the page. Two copies of the body. The column count
+  # comes from this image.
+  - name: map_interp_curve16
+    needle_hex: "F0 3E C0 72 5C 12 00 C2 DC 4D 98 4C"
+    unique: false
+
+  # 8-bit curve. R13 is the page. The input is a register move, not a memory load.
+  - name: map_interp_curve8_reg
+    needle_hex: "F0 3E DC 4D 99 2C F0 2C"
+
+  # 8-bit table outside the default DPP window. R13 is the page and R12 is
+  # the low 14 bits. Two copies.
+  - name: map_interp_table8_page
+    needle_hex: "D4 A0 00 00 D4 B0 02 00 DC 4F A9 4E"
+    unique: false
+
+  # 16-bit table, same page calling convention. Two copies.
+  - name: map_interp_table16_page
+    needle_hex: "D4 A0 00 00 D4 B0 02 00 DC 4F A9 2E"
+    unique: false
+
+  # 16-bit curve. R12 is the DPP pointer, not a page. Callers also pass axis
+  # breakpoints this way.
+  - name: map_interp_curve16_direct
+    needle_hex: "E7 F2 80 00 75 F2 C2 8F"
+
+  # 8-bit curve. R12 is the DPP pointer.
+  - name: map_interp_curve8_direct
+    needle_hex: "F6 8E A0 B4 F6 8E 98 B4 F7 8E 4A B2 F7 8E 4B B2 F7 8E 4D B2 F2 F4"
+
+  # 16-bit curve. Callers enter here, twelve bytes into a copy of the table8
+  # prefix. The table8 needle labels the earlier byte, and nothing calls that byte.
+  - name: map_interp_curve16_entry
+    needle_hex: "0D 03 6D 02 E6 F4 00 80 F6 F4 C8 8F"
+
+  # Ignition-timing caller. config/maps.yaml names the maps at fixed distances
+  # from this label. One hit on the images that have it.
+  - name: ign_zw
+    needle_hex: "88 90 88 80 88 70 88 60 9A 58 03 00"
+
+  # Caller for the LDRQ maps. config/maps.yaml names each map at a fixed
+  # distance from this label. One hit on the images that have it.
+  - name: ldrq
+    needle_hex: "88 90 88 80 88 70 88 60 28 02 9A 4B"
+
+  # Callers for the other wiki maps. config/maps.yaml names each map at a
+  # fixed distance from the label. "??" is an R12 or R13 immediate: that
+  # address changes per ECU, so it is not part of the pattern. One hit on
+  # the images that have the caller.
+  - name: kfmped
+    needle_hex: "88 60 F2 F4 0C 8E 68 43 EA 30 B0 57"
+  - name: rlsalun
+    needle_hex: "88 90 88 80 F2 F4 C0 8D"
+  - name: nllm
+    needle_hex: "88 90 88 70 88 60 28 02 C2 F4"
+  - name: nllm_b
+    needle_hex: "88 C0 88 90 88 80 88 70 88 60 28 04 F4 80"
+  - name: wdkugdn
+    needle_hex: "28 04 F2 F4 D2 A1 F2 F5"
+  - name: lamkr
+    needle_hex: "88 90 88 80 88 70 88 60 28 02 F2 F4 18 A9"
+  - name: kflbts
+    needle_hex: "88 90 88 80 88 70 88 60 28 04 E6 FC ?? ?? F2 FD E8 9C"
+  - name: dwkr
+    needle_hex: "9A 04 0B 60 E6 FC ?? ??"
+  - name: kfvpdks
+    needle_hex: "8A 4B 04 D0 8A 4B 02 C0"
+  - name: kfvplgu
+    needle_hex: "E6 FC ?? ?? F2 FD 8A A2 F2 FE 3C A7"
+  - name: ldiopu
+    needle_hex: "88 90 88 80 88 70 88 60 28 02 F2 F4 58 8F"
+  - name: ldhbn
+    needle_hex: "88 90 88 80 C2 F4 B3 F9"
+  - name: nfsm
+    needle_hex: "88 70 88 60 9A 02 02 80 EA 00 8A 13"
+  - name: kfmres
+    needle_hex: "88 90 88 80 88 70 88 60 28 04 C2 F8"
+  - name: kfdmd
+    needle_hex: "28 04 9A 00 05 90 8A 0D"
+  - name: kfmiop
+    needle_hex: "88 90 88 80 88 70 F2 F7"
+  - name: kfzwop
+    needle_hex: "88 90 88 80 88 70 88 60 28 04 E6 FC ?? ?? F2 FD 90 F9"
+  - name: kfmizu
+    needle_hex: "88 90 88 80 88 60 28 04 9A 55 0C 70"

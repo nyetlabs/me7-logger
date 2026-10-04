@@ -1,0 +1,2495 @@
+# Rows with no bitmask. Omitted size is 0. Omitted bitmask, unit,
+# signed, inverse, factor, and offset are 0, "", false, false, 1, and 0.
+# A field on the row wins. scale names a row in scales.yaml.
+# Size 1 and 2 also use config/names.yaml.
+# Result type 0 is last, so a repeated key here wins.
+variables:
+- rt: '0x0001'
+  name: nmot
+  unit: rpm
+  factor: 40
+  comment: Motordrehzahl
+- rt: '0x0002'
+  name: rl
+  unit: '%'
+  factor: 3/4
+  comment: relative Luftfüllung
+- rt: '0x0003'
+  name: rk_w
+  unit: '%'
+  factor: 12/256
+  comment: relative Kraftstoffmasse
+- rt: '0x0004'
+  name: rk2_w
+  unit: '%'
+  factor: 12/256
+  comment: relative Kraftstoffmasse Bank 2
+- rt: '0x0005'
+  name: te_w
+  scale: injection
+  comment: effektive Einspritzzeit (word)
+- rt: '0x0006'
+  name: te2_w
+  scale: injection
+  comment: effektive Einspritzzeit (word) Bank 2
+- rt: '0x0007'
+  name: wdkba
+  unit: '% DK'
+  factor: 100/255
+  comment: Drosselklappenwinkel bezogen auf unteren Anschlag
+- rt: '0x0008'
+  name: wped_w
+  unit: '% PED'
+  factor: 100/0x10000
+  comment: normierter Fahrpedalwinkel
+- rt: '0x0009'
+  name: zwout
+  scale: kw
+  comment: Zündwinkel-Ausgabe
+- rt: '0x000A'
+  name: mshfm_w
+  scale: air
+  comment: Massenstrom HFM 16-Bit Größe
+- rt: '0x000B'
+  name: tmot
+  scale: temp
+  comment: Motor-Temperatur
+- rt: '0x000C'
+  name: tans
+  scale: temp
+  comment: Ansaugluft - Temperatur
+- rt: '0x000E'
+  name: nmotll
+  unit: rpm
+  factor: 10
+  comment: Motordrehzahl im Leerlaufbereich
+- rt: '0x000F'
+  name: nsol
+  unit: rpm
+  factor: 10
+  comment: Leerlaufsolldrehzahl
+- rt: '0x0010'
+  name: mds_w
+  scale: pct
+  comment: Motorschleppmoment
+- rt: '0x0011'
+  name: mdverb
+  scale: pct_byte
+  comment: Momentenbedarf der Nebenaggregate
+- rt: '0x0012'
+  name: mdverl_w
+  scale: pct
+  comment: Motor-Verlustmoment
+- rt: '0x0013'
+  name: dmvad_w
+  scale: pct_twice
+  comment: Delta-Motordrehmoment aus Verlustmoment-Adaption
+- rt: '0x0015'
+  name: mifab_w
+  scale: pct
+  comment: Begrenztes indiziertes Fahrerwunschmoment
+- rt: '0x0016'
+  name: misol_w
+  scale: pct
+  comment: Indiziertes resultierendes Sollmoment
+- rt: '0x0017'
+  name: miext_w
+  scale: pct
+  comment: von außen (ASR, GS, usw.) angefordertes indiziertes Motormoment
+- rt: '0x0018'
+  name: ub
+  unit: V
+  factor: 0.0704
+  comment: Batteriespannung
+- rt: '0x0019'
+  name: vfzg
+  unit: km/h
+  factor: 1.25
+  comment: Fahrzeuggeschwindigkeit
+- rt: '0x001A'
+  name: hagr
+  scale: pct
+  comment: Hub AGR-Ventil
+- rt: '0x001B'
+  name: taagr
+  scale: pct
+  comment: Tastverhaeltnis AGR-Ventil
+- rt: '0x001C'
+  name: fr_w
+  scale: frac_2
+  comment: Lambda-Regler-Ausgang (Word)
+- rt: '0x001D'
+  name: fr2_w
+  scale: frac_2
+  comment: Lambda-Regler-Ausgang (Word) Bank 2
+- rt: '0x001E'
+  name: dveadast
+  unit: '-'
+  comment: DVE Adaptionsstatus
+- rt: '0x0021'
+  name: fra_w
+  scale: frac_2
+  comment: multiplikative Gemischkorrektur der Gemischadaption (Word)
+- rt: '0x0022'
+  name: fra2_w
+  scale: frac_2
+  comment: multiplikative Gemischkorrektur der Gemischadaption (Word) Bank 2
+- rt: '0x0023'
+  name: tvlr
+  unit: s
+  signed: true
+  factor: 1/100
+  comment: 'LR: Summenwert für verzögerte Reglerumschaltung tv'
+- rt: '0x0024'
+  name: tvlr2
+  unit: s
+  signed: true
+  factor: 1/100
+  comment: 'LR: Summenwert für verzögerte Reglerumschaltung tv Bank 2'
+- rt: '0x0025'
+  name: usvk
+  scale: v_lambda
+  comment: Spannung Lambdasonde vor Kat
+- rt: '0x0026'
+  name: usvk2
+  scale: v_lambda
+  comment: Spannung Lambdasonde vor Kat Bank 2
+- rt: '0x0027'
+  name: ushk
+  scale: v_lambda
+  comment: Spannung Lambdasonde hinter Katalysator
+- rt: '0x0028'
+  name: ushk2
+  scale: v_lambda
+  comment: Spannung Lambdasonde hinter Katalysator Bank 2
+- rt: '0x0029'
+  name: lamelsh_w
+  scale: frac_16
+  comment: Lambdasoll für elektrische Sondendiagnose hinter KAT (Kurztrip)
+- rt: '0x002A'
+  name: lamelsh2_w
+  scale: frac_16
+  comment: Lambdasoll für elektrische Sondendiagnose hinter KAT (Kurztrip) Bank 2
+- rt: '0x002B'
+  name: lamsbg_w
+  scale: frac_16
+  comment: Lambdasoll Begrenzung (word)
+- rt: '0x002C'
+  name: lamsbg2_w
+  scale: frac_16
+  comment: Lambdasoll Begrenzung (word) Bank 2
+- rt: '0x002D'
+  name: lamsoni_w
+  scale: frac_16
+  comment: Lambda-Istwert
+- rt: '0x002E'
+  name: lamsoni2_w
+  scale: frac_16
+  comment: Lambda-Istwert Bank 2
+- rt: '0x0033'
+  name: wkrdya_0
+  scale: kw_retard
+  comment: adaptierter Zündwinkel bei KR-Dynamik
+- rt: '0x0034'
+  name: rkrn_w_0
+  scale: v_ref
+  comment: normierter Referenzpegel Klopfregelung
+- rt: '0x0035'
+  name: wkrdya_1
+  scale: kw_retard
+  comment: adaptierter Zündwinkel bei KR-Dynamik
+- rt: '0x0036'
+  name: rkrn_w_1
+  scale: v_ref
+  comment: normierter Referenzpegel Klopfregelung
+- rt: '0x0037'
+  name: wkrdya_2
+  scale: kw_retard
+  comment: adaptierter Zündwinkel bei KR-Dynamik
+- rt: '0x0038'
+  name: rkrn_w_2
+  scale: v_ref
+  comment: normierter Referenzpegel Klopfregelung
+- rt: '0x0039'
+  name: wkrdya_3
+  scale: kw_retard
+  comment: adaptierter Zündwinkel bei KR-Dynamik
+- rt: '0x003A'
+  name: rkrn_w_3
+  scale: v_ref
+  comment: normierter Referenzpegel Klopfregelung
+- rt: '0x003B'
+  name: wkrdya_4
+  scale: kw_retard
+  comment: adaptierter Zündwinkel bei KR-Dynamik
+- rt: '0x003C'
+  name: rkrn_w_4
+  scale: v_ref
+  comment: normierter Referenzpegel Klopfregelung
+- rt: '0x003D'
+  name: wkrma
+  scale: kw_retard
+  comment: Mittelwert der ZW-Spätverstellungen KR, allgemein (im Notlauf mit Sicherheit)
+- rt: '0x003E'
+  name: rkrn_w_5
+  scale: v_ref
+  comment: normierter Referenzpegel Klopfregelung
+- rt: '0x003F'
+  name: wkrmdy_w
+  scale: kw_word
+  comment: Dynamischer Mittelwert der zylinderindividuellen ZW Spätverstellungen
+- rt: '0x0040'
+  name: rkrn_w_6
+  scale: v_ref
+  comment: normierter Referenzpegel Klopfregelung
+- rt: '0x0041'
+  name: wkrmstat_w
+  scale: kw_word
+  comment: Quasistationärer Mittelwert der zylinderindividuellen ZW Spätverstellwerte
+- rt: '0x0042'
+  name: rkrn_w_7
+  scale: v_ref
+  comment: normierter Referenzpegel Klopfregelung
+- rt: '0x0043'
+  name: fpvdk
+  unit: '-'
+  factor: 4/256
+  comment: Korrekturfaktor Druck vor Drosselklappe
+- rt: '0x0044'
+  name: fho
+  unit: '-'
+  factor: 4/256
+  comment: Korrekturfaktor Höhe
+- rt: '0x0045'
+  name: rlmx_w
+  scale: load
+  comment: Rohwert Maximalfuellung
+- rt: '0x0046'
+  name: rlmax_w
+  scale: load
+  comment: maximal erreichbare Füllung bei Turbo
+- rt: '0x0047'
+  name: rlsol_w
+  scale: load
+  comment: Soll-Füllung
+- rt: '0x0048'
+  name: drlmaxo
+  unit: '%'
+  factor: 3/4
+  comment: Delta Maximalfuellung bei Overboost
+- rt: '0x0049'
+  name: fldrrx_w
+  scale: frac_2
+  comment: Korrekturfaktor Maximalfuellung aus Klopfregelung
+- rt: '0x004A'
+  name: ti_b1
+  scale: injection
+  comment: Einspritzzeit für EV's auf Bank1
+- rt: '0x004B'
+  name: ldrlms_w
+  scale: load
+  comment: Begrenzungswert für maximale Füllung LDR für Motorschutz
+- rt: '0x004C'
+  name: plsol
+  unit: mbar
+  factor: 10
+  comment: Soll-Ladedruck
+- rt: '0x004D'
+  name: pvdks_w
+  scale: pressure
+  comment: Druck vor Drosselklappe ohne Umschaltung auf Ersatzwert bei Sensorfehler
+- rt: '0x004E'
+  name: ldtvm
+  scale: pct_byte
+  comment: LDR Tastverhältnis , moduliert (Endergebnis)
+- rt: '0x0050'
+  name: tmotlin
+  scale: temp
+  comment: Motortemperatur, linearisiert und umgerechnet
+- rt: '0x0051'
+  name: wub
+  unit: V
+  factor: 0.0704
+  comment: Batteriespannung; vom AD-Wandler erfaßter Wert
+- rt: '0x0052'
+  name: ti_avg
+  scale: injection
+  comment: Mittlere Einspritzzeit für EV's Bank1 und Bank2
+- rt: '0x0053'
+  name: ti_b2
+  scale: injection
+  comment: Einspritzzeit für EV's auf Bank2
+- rt: '0x0054'
+  name: ps_w
+  scale: pressure
+  comment: Saugrohr-Absolutdruck (Word)
+- rt: '0x0055'
+  name: tanslin
+  scale: temp
+  comment: Ansauglufttemperatur, linearisiert und umgerechnet
+- rt: '0x0056'
+  name: vfil_w
+  unit: km/h
+  factor: 2/256
+  comment: gefilterte Geschwindigkeit (16-Bit)
+- rt: '0x0058'
+  name: dwkrz_0
+  scale: kw
+  comment: zyl.ind. ZW-Spätverstellung inkl. Dyn.vorhalt
+- rt: '0x0059'
+  name: dwkrz_1
+  scale: kw
+  comment: zyl.ind. ZW-Spätverstellung inkl. Dyn.vorhalt
+- rt: '0x005A'
+  name: dwkrz_2
+  scale: kw
+  comment: zyl.ind. ZW-Spätverstellung inkl. Dyn.vorhalt
+- rt: '0x005B'
+  name: dwkrz_3
+  scale: kw
+  comment: zyl.ind. ZW-Spätverstellung inkl. Dyn.vorhalt
+- rt: '0x005C'
+  name: dwkrz_4
+  scale: kw
+  comment: zyl.ind. ZW-Spätverstellung inkl. Dyn.vorhalt
+- rt: '0x005D'
+  name: dwkrz_5
+  scale: kw
+  comment: zyl.ind. ZW-Spätverstellung inkl. Dyn.vorhalt
+- rt: '0x005E'
+  name: dwkrz_6
+  scale: kw
+  comment: zyl.ind. ZW-Spätverstellung inkl. Dyn.vorhalt
+- rt: '0x005F'
+  name: dwkrz_7
+  scale: kw
+  comment: zyl.ind. ZW-Spätverstellung inkl. Dyn.vorhalt
+- rt: '0x0060'
+  name: afnmn
+  unit: rpm
+  factor: 40
+  comment: Bereichsfenster Aussetzer, minimale Drehzahl
+- rt: '0x0061'
+  name: afnmx
+  unit: rpm
+  factor: 40
+  comment: Bereichsfenster Aussetzer, maximale Drehzahl
+- rt: '0x0062'
+  name: afrlmn
+  unit: '%'
+  factor: 3/4
+  comment: Bereichsfenster Aussetzer, minimale Last
+- rt: '0x0063'
+  name: afrlmx
+  unit: '%'
+  factor: 3/4
+  comment: Bereichsfenster Aussetzer, maximale Last
+- rt: '0x0064'
+  name: zwist
+  scale: kw
+  comment: Ist-Zündwinkel
+- rt: '0x0065'
+  name: fzabgs_w
+  scale: count
+  comment: Fehlerzähler Summe, zählt abgasrelevante Aussetzer über alle Zylinder
+- rt: '0x0066'
+  name: etazwbm
+  unit: '%'
+  factor: 1/2
+  comment: gemittelter Zündwinkelwirkungsgrad des Basiszündwinkels
+- rt: '0x0067'
+  name: fkmsdks_w
+  scale: frac_4
+  comment: Korrekturfaktor schneller Massenstromabgleich
+- rt: '0x0068'
+  name: msndko_w
+  scale: air
+  comment: normierter Leckluftmassenstrom über Drosselklappe (word)
+- rt: '0x006A'
+  name: tkatm
+  scale: cat_temp
+  comment: Katalysatortemperatur aus Modell
+- rt: '0x006B'
+  name: tpsvkmf_w
+  scale: seconds
+  comment: gefilterter Periodendauerwert des Sondensignals vor Kat. (Word)
+- rt: '0x006C'
+  name: tpsvkmf2_w
+  scale: seconds
+  comment: gefilterter Periodendauerwert des Sondensignals vor Kat. (Word) Bank 2
+- rt: '0x006D'
+  name: atv
+  unit: s
+  signed: true
+  factor: 1/100
+  comment: aktueller Lernkennfeld-Integratorwert der Regelung hinter Kat
+- rt: '0x006E'
+  name: atv2
+  unit: s
+  signed: true
+  factor: 1/100
+  comment: aktueller Lernkennfeld-Integratorwert der Regelung hinter Kat Bank 2
+- rt: '0x006F'
+  name: sfplsv
+  comment: 'Status Fehlerpfad: Diagnose Lambdasonde vor Kat'
+- rt: '0x0071'
+  name: sfplsh
+  comment: 'Status Fehlerpfad: Diagnose Lambdasonde hinter Kat'
+- rt: '0x0073'
+  name: sfplsv
+  comment: 'Status Fehlerpfad: Diagnose Lambdasonde vor Kat'
+- rt: '0x0075'
+  name: tkatm2
+  scale: cat_temp
+  comment: Katalysatortemperatur aus Modell Bank 2
+- rt: '0x0076'
+  name: rinv_w
+  scale: ohm
+  comment: Istwert (word) Innenwiderstand Ri-Nernstzelle der Lambdasonde vor KAT
+- rt: '0x0077'
+  name: rinv2_w
+  scale: ohm
+  comment: Istwert (word) Innenwiderstand Ri-Nernstzelle der Lambdasonde vor KAT Bank 2
+- rt: '0x0078'
+  name: rinh_w
+  scale: ohm
+  comment: Istwert (word) Innenwiderstand Ri-Nernstzelle der Lambdasonde hinter KAT
+- rt: '0x0079'
+  name: rinh2_w
+  scale: ohm
+  comment: Istwert (word) Innenwiderstand Ri-Nernstzelle der Lambdasonde hinter KAT Bank 2
+- rt: '0x007E'
+  name: katbfi_w
+  unit: 1/s
+  signed: true
+  factor: 4/256
+  comment: Sauerstoff-Anteil vor dem Speicher (Kat-Modell)
+- rt: '0x007F'
+  name: katbfi2_w
+  unit: 1/s
+  signed: true
+  factor: 4/256
+  comment: Sauerstoff-Anteil vor dem Speicher (Kat-Modell) Bank 2
+- rt: '0x0080'
+  name: sfpkat
+  comment: 'Status Fehlerpfad: Katalysator-Überwachung'
+- rt: '0x0082'
+  name: gangi
+  unit: gear
+  comment: Ist-Gang vom CAN bei AT oder aus n/v bei HS
+- rt: '0x0085'
+  name: lbz
+  scale: pct_byte
+  comment: Ladebilanz der Batterie
+- rt: '0x0086'
+  name: wdks
+  unit: '% DK'
+  factor: 100/255
+  comment: Sollwert DK-Winkel, bezogen auf unteren Anschlag
+- rt: '0x0087'
+  name: dmllri_w
+  scale: pct_twice
+  comment: geforderte Drehmomentänderung von der LLR (I-Anteil)
+- rt: '0x0088'
+  name: ml_w
+  scale: air
+  comment: Luftmassenfluß gefiltert (Word)
+- rt: '0x008C'
+  name: sfpenws
+  comment: 'Status Fehlerpfad: Nockenwellensteuerung (Einlaß, Bank1)'
+- rt: '0x0091'
+  name: migs_w
+  scale: pct
+  comment: Indiziertes Soll-Motormoment GS für schnellen Eingriff
+- rt: '0x0092'
+  name: miasrs_w
+  scale: pct
+  comment: Indiziertes Soll-Motormoment ASR für schnellen Eingriff
+- rt: '0x0093'
+  name: miist_w
+  scale: pct
+  comment: indiziertes Motormoment Hochdruckphase Istwert
+- rt: '0x0094'
+  name: miasrl_w
+  size: 2
+  unit: '%'
+  comment: Indiziertes Soll-Motormoment ASR für langsamen Eingriff
+- rt: '0x0095'
+  name: miges_w
+  scale: pct
+  comment: Indiziertes Soll-Motormoment für Getriebeschutz
+- rt: '0x0097'
+  name: pus_w
+  scale: pressure
+  comment: Umgebungsdruck ohne Umschaltung auf Ersatzwert bei Sensorfehler
+- rt: '0x0098'
+  name: tats_w
+  unit: °C
+  factor: 5/256
+  offset: 50
+  comment: Abgastemperatur aus Sensor
+- rt: '0x0099'
+  name: tats2_w
+  unit: °C
+  factor: 5/256
+  offset: 50
+  comment: Abgastemperatur aus Sensor Bank 2
+- rt: '0x009A'
+  name: udkp1_w
+  unit: V
+  factor: 0.001222
+  comment: Spannung DK-Poti 1
+- rt: '0x009B'
+  name: udkp2_w
+  unit: V
+  factor: 0.001222
+  comment: Spannung DK-Poti 2
+- rt: '0x009C'
+  name: upwg1_w
+  scale: v_word
+  comment: Spannung PWG-Poti 1 (Word)
+- rt: '0x009D'
+  name: upwg2_w
+  scale: v_word
+  comment: Spannung PWG-Poti 2 (Word)
+- rt: '0x00A0'
+  name: frao_w
+  scale: frac_2
+  comment: multiplikativer Gemischadaptionsfaktor oberer Lastbereich (Word)
+- rt: '0x00A1'
+  name: frao2_w
+  scale: frac_2
+  comment: multiplikativer Gemischadaptionsfaktor oberer Lastbereich (Word) Bank 2
+- rt: '0x00A2'
+  name: ahkat
+  scale: frac_byte
+  comment: Mittelwert der Amplitude Sondensignal hinter Kat. korrigiert mit KB
+- rt: '0x00A3'
+  name: ahkat2
+  scale: frac_byte
+  comment: Mittelwert der Amplitude Sondensignal hinter Kat. korrigiert mit KB Bank2
+- rt: '0x00A4'
+  name: lrnstep_c
+  scale: count
+  comment: Zähler für Lerndauer eines Lernsteps
+- rt: '0x00A5'
+  name: sfpks1
+  comment: 'Status Fehlerpfad: Klopfsensor 1'
+- rt: '0x00A7'
+  name: avdtev
+  scale: count
+  comment: Anzahl der nicht erfolgreichen DTEV Prüfversuche
+- rt: '0x00A8'
+  name: ftead_w
+  unit: '-'
+  signed: true
+  factor: 128/0x10000
+  comment: Beladung des Aktivkohlefilters
+- rt: '0x00A9'
+  name: ftefva_w
+  unit: '-'
+  factor: 1/0x20000
+  comment: Spülrate Tankentlüftung
+- rt: '0x00AA'
+  name: tateout
+  scale: pct_byte
+  comment: ausgegebenes Tastverhältnis für Tankentlüftungsventil
+- rt: '0x00AB'
+  name: rkte_w
+  unit: '%'
+  signed: true
+  factor: 12/256
+  comment: Relativer Gemischanteil Tankentlüftung
+- rt: '0x00AC'
+  name: ready
+  comment: readiness-Byte für Ausgabe SAE J1979 Mode2
+- rt: '0x00B3'
+  name: wnwi_w
+  scale: kw_fine
+  comment: Istwinkel für Nockenwelle (word)
+- rt: '0x00B4'
+  name: wnwi2_w
+  scale: kw_fine
+  comment: Istwinkel für Nockenwelle (word) Bank 2
+- rt: '0x00B5'
+  name: dwnwsp_w
+  unit: °KW
+  signed: true
+  factor: 4/256
+  comment: Abweichung des Adaptionswinkels vom fahrzeugspez. Sollwinkel der Nockenwelle
+- rt: '0x00B6'
+  name: dwnwsp2_w
+  unit: °KW
+  signed: true
+  factor: 4/256
+  comment: Abweichung des Adaptionswinkels vom fahrzeugspez. Sollwinkel der Nockenwelle Bank 2
+- rt: '0x00B7'
+  name: wnwsfae_w
+  scale: kw_cam
+  comment: Sollwinkel bei Testereingriff Einlassnockenwelle
+- rt: '0x00BB'
+  name: tmki
+  scale: temp
+  comment: Motortemperatur aus Kombiinstrument
+- rt: '0x00BC'
+  name: drlfue_w
+  unit: '%/seg'
+  signed: true
+  factor: 6/256
+  comment: Lastkorrektur des Füllungsreglers
+- rt: '0x00BE'
+  name: frau_w
+  scale: frac_2
+  comment: multiplikativer Gemischadaptionsfaktor unterer mult. Bereich (Word)
+- rt: '0x00BF'
+  name: frau2_w
+  scale: frac_2
+  comment: multiplikativer Gemischadaptionsfaktor unterer mult. Bereich (Word) Bank 2
+- rt: '0x00C0'
+  name: vziel_w
+  unit: km/h
+  factor: 2/256
+  comment: Zielgeschwindigkeit FGR
+- rt: '0x00C3'
+  name: sfptes
+  comment: 'Status Fehlerpfad: Tankdiagnose, TEV defekt offen'
+- rt: '0x00C4'
+  name: dlamatr_w
+  unit: '-'
+  signed: true
+  factor: 16/0x10000
+  comment: Delta Lambdasoll aus Abgastemperaturregelung
+- rt: '0x00C5'
+  name: dlamatr2_w
+  unit: '-'
+  signed: true
+  factor: 16/0x10000
+  comment: Delta Lambdasoll aus Abgastemperaturregelung Bank 2
+- rt: '0x00C6'
+  name: fldrxl_w
+  scale: frac_2
+  comment: Faktor zur LDR rlmax-Korrektur durch den Langzeitanteil
+- rt: '0x00C7'
+  name: wkrm
+  scale: kw_retard
+  comment: Mittelwert der zylinderindividuellen ZW-Spätverstellungen durch KR
+- rt: '0x00C8'
+  name: ldimxa_0
+  scale: pct_200
+  comment: Adaptive Korrektur der LDR I-Regler Maximalwertbegrenzung
+- rt: '0x00C9'
+  name: ldimxa_1
+  scale: pct_200
+  comment: Adaptive Korrektur der LDR I-Regler Maximalwertbegrenzung
+- rt: '0x00CA'
+  name: ldimxa_2
+  scale: pct_200
+  comment: Adaptive Korrektur der LDR I-Regler Maximalwertbegrenzung
+- rt: '0x00CB'
+  name: ldimxa_3
+  scale: pct_200
+  comment: Adaptive Korrektur der LDR I-Regler Maximalwertbegrenzung
+- rt: '0x00CC'
+  name: ldimxa_4
+  scale: pct_200
+  comment: Adaptive Korrektur der LDR I-Regler Maximalwertbegrenzung
+- rt: '0x00CD'
+  name: msdk_w
+  scale: air
+  comment: Massenstrom über Drosselklappe (word)
+- rt: '0x00CE'
+  name: fkmsdk_w
+  scale: frac_4
+  comment: Korrekturfaktor Massenstrom Nebenfüllungssignal
+- rt: '0x00D0'
+  name: frxt
+  scale: frac_byte2
+  comment: Faktor zur Korrektur rlmx als Funktion von Motor- und Öltemperatur
+- rt: '0x00D1'
+  name: frxta_w
+  scale: frac_2
+  comment: Faktor zur Korrektur rlmx als Funktion von tans
+- rt: '0x00D2'
+  name: fkatei
+  unit: '-'
+  signed: true
+  factor: 2/256
+  comment: Faktor Kraftstoffanteil Tankentlüftung (aktueller Istwert)
+- rt: '0x00D3'
+  name: tnst_w
+  scale: seconds
+  comment: Zeit nach Startende
+- rt: '0x00D5'
+  name: sfpfrst
+  comment: 'Status Fehlerpfad: LR-Abweichung'
+- rt: '0x00D6'
+  name: sfprkaz
+  comment: 'Status Fehlerpfad: LR Adaption additive Korrektur pro Zündung'
+- rt: '0x00D7'
+  name: sfpfrau
+  comment: 'Status Fehlerpfad: LR Adaption unterer multiplikativer Bereich'
+- rt: '0x00D8'
+  name: taats_w
+  scale: pct
+  comment: Tastverhaeltnis Abgastemperatursensor
+- rt: '0x00D9'
+  name: taats2_w
+  scale: pct
+  comment: Tastverhaeltnis Abgastemperatursensor Bank 2
+- rt: '0x00DA'
+  name: vkASRAntrieb
+  comment: ''
+- rt: '0x00DB'
+  name: vkASRAntrieb
+  comment: ''
+- rt: '0x00DE'
+  name: dlahi_w
+  scale: frac_2s
+  comment: I-Anteil der stetigen LRHK
+- rt: '0x00DF'
+  name: dlahi2_w
+  scale: frac_2s
+  comment: I-Anteil der stetigen LRHK Bank 2
+- rt: '0x00E0'
+  name: fzabg_w_0
+  scale: count
+  comment: Aussetzerzähler
+- rt: '0x00E1'
+  name: fzabg_w_1
+  scale: count
+  comment: Aussetzerzähler
+- rt: '0x00E2'
+  name: fzabg_w_2
+  scale: count
+  comment: Aussetzerzähler
+- rt: '0x00E3'
+  name: fzabg_w_3
+  scale: count
+  comment: Aussetzerzähler
+- rt: '0x00E4'
+  name: fzabg_w_4
+  scale: count
+  comment: Aussetzerzähler
+- rt: '0x00E5'
+  name: fzabg_w_5
+  scale: count
+  comment: Aussetzerzähler
+- rt: '0x00E6'
+  name: fzabg_w_6
+  scale: count
+  comment: Aussetzerzähler
+- rt: '0x00E7'
+  name: fzabg_w_7
+  scale: count
+  comment: Aussetzerzähler
+- rt: '0x00E8'
+  name: flg_m
+  comment: Monitor Status Laufunruhe-Berechnung
+- rt: '0x00EF'
+  name: DSLSLRSlokBits1
+  comment: ''
+- rt: '0x00F0'
+  name: rmsl
+  scale: frac_byte2
+  comment: relative Sekundärluftmasse
+- rt: '0x00F1'
+  name: rmsl2
+  scale: frac_byte2
+  comment: relative Sekundärluftmasse Bank 2
+- rt: '0x00F2'
+  name: rmslt
+  scale: frac_byte2
+  comment: relative Sekundärluftmasse ohne Offset- Korrektur
+- rt: '0x00F3'
+  name: rmslt2
+  scale: frac_byte2
+  comment: relative Sekundärluftmasse ohne Offset- Korrektur Bank 2
+- rt: '0x00F9'
+  name: agrr_w
+  scale: pct
+  comment: Abgasrueckfuehrrate word
+- rt: '0x00FA'
+  name: psdss_w
+  scale: pressure
+  comment: Saugrohrdruck gemessen (word)
+- rt: '0x00FB'
+  name: pvdkds_w
+  scale: pressure
+  comment: Druck vor Drosselklappe von Drucksensor (word)
+- rt: '0x0100'
+  name: frm_w
+  scale: frac_2
+  comment: schneller Mittelwert des Lambdaregelfaktors (Word)
+- rt: '0x0101'
+  name: frm2_w
+  scale: frac_2
+  comment: schneller Mittelwert des Lambdaregelfaktors (Word) Bank 2
+- rt: '0x0102'
+  name: katbf
+  scale: v_lambda
+  comment: Signal nach Speicher normiert vergleichbar mit ushk
+- rt: '0x0103'
+  name: katbf2
+  scale: v_lambda
+  comment: Signal nach Speicher normiert vergleichbar mit ushk Bank 2
+- rt: '0x0104'
+  name: katbfs
+  unit: '-'
+  signed: true
+  factor: 2/256
+  comment: Signal nach Speicher (Kat-Modell)
+- rt: '0x0105'
+  name: katbfs2
+  unit: '-'
+  signed: true
+  factor: 2/256
+  comment: Signal nach Speicher (Kat-Modell, Stereo 2.Bank)
+- rt: '0x0106'
+  name: ahkatn
+  scale: frac_byte
+  comment: Amplitude Sondensignal hinter Katalysator normiert
+- rt: '0x0107'
+  name: ahkatn2
+  scale: frac_byte
+  comment: Amplitude Sondensignal hinter Katalysator normiert Bank 2
+- rt: '0x0108'
+  name: akatbn
+  scale: frac_byte
+  comment: Amplitude der Katalysatorbelastungssignal
+- rt: '0x0109'
+  name: akatbn2
+  scale: frac_byte
+  comment: Amplitude der Katalysatorbelastungssignal Bank 2
+- rt: '0x010A'
+  name: ahktnk
+  scale: frac_byte
+  comment: Korrigierte Sondensignal-Amplitude normiert
+- rt: '0x010B'
+  name: ahktnk2
+  scale: frac_byte
+  comment: Korrigierte Sondensignal-Amplitude normiert Bank 2
+- rt: '0x010C'
+  name: ahktki_w
+  unit: s
+  factor: 1/80
+  comment: Amplitude Sondensignal hinter Katalysator korrigiert und integiert
+- rt: '0x010D'
+  name: ahktki2_w
+  unit: s
+  factor: 1/80
+  comment: Amplitude Sondensignal hinter Katalysator korrigiert und integiert Bank 2
+- rt: '0x010E'
+  name: katbshd_w
+  unit: g/s
+  signed: true
+  factor: 1/1152
+  comment: Signal für Fett-Verschiebung des Modells
+- rt: '0x010F'
+  name: katbshd2_w
+  unit: g/s
+  signed: true
+  factor: 1/1152
+  comment: Signal für Fett-Verschiebung des Modells Bank 2
+- rt: '0x0110'
+  name: dkatakt_w
+  unit: s
+  factor: 1/20
+  comment: aktive Überwachungszeit für DKAT
+- rt: '0x0111'
+  name: dkatakt2_w
+  unit: s
+  factor: 1/20
+  comment: aktive Überwachungszeit für DKAT Bank 2
+- rt: '0x0112'
+  name: apedkt
+  scale: count
+  comment: Anzahl der Prüfungen mit Fehlerergebnis bei Katdiagnose
+- rt: '0x0113'
+  name: apedkt2
+  scale: count
+  comment: Anzahl der Prüfungen mit Fehlerergebnis bei Katdiagnose Bank 2
+- rt: '0x0114'
+  name: fmsla
+  scale: frac_byte2
+  comment: Korrekturfaktor Sekundärluftmasse adaptiv
+- rt: '0x0115'
+  name: fmsla2
+  scale: frac_byte2
+  comment: Korrekturfaktor Sekundärluftmasse adaptiv Bank 2
+- rt: '0x0116'
+  name: mslt_w
+  scale: air
+  comment: temporäre Sekundärluftmasse
+- rt: '0x0117'
+  name: mslt2_w
+  scale: air
+  comment: temporäre Sekundärluftmasse Bank 2
+- rt: '0x0118'
+  name: mslift
+  unit: g/s
+  factor: 4/36
+  comment: Istwert Sekundärluftmasse, gefiltert, temporär
+- rt: '0x0119'
+  name: dfrmoff_w
+  scale: frac_2s
+  comment: 'frm-Offset: zur Kontrolle von Problemen der Vorsteuerung'
+- rt: '0x011A'
+  name: psagr_w
+  scale: pressure
+  comment: Partialdruck durch externes Restgas (Restluft+Inertgas)
+- rt: '0x011D'
+  name: zlkd
+  comment: Zustand Kick-Down-Lernen
+- rt: '0x011E'
+  name: mslvt_w
+  unit: g/s
+  signed: true
+  factor: 1/36
+  comment: temporäre Ventilleckage
+- rt: '0x011F'
+  name: mslvt2_w
+  unit: g/s
+  signed: true
+  factor: 1/36
+  comment: temporäre Ventilleckage Bank 2
+- rt: '0x0120'
+  name: mslv_w
+  unit: g/s
+  factor: 1/2304
+  comment: Sekundärluftmasse für Ventildichtheitsprüfung (word)
+- rt: '0x0121'
+  name: mslv2_w
+  unit: g/s
+  factor: 1/2304
+  comment: Sekundärluftmasse für Ventildichtheitsprüfung (word) Bank 2
+- rt: '0x0122'
+  name: dmletan_w
+  unit: g/s
+  signed: true
+  factor: 1/1152
+  comment: Abweichung Produkt Luftmasse * Zündwinkelwirkungsgrad bei Prüfung DTEV 16 Bits
+- rt: '0x0123'
+  name: frmfref_w
+  scale: frac_2
+  comment: gefilterter Referenzwert fr für DTEV Ausfsteuerprüfung
+- rt: '0x0124'
+  name: frmitf_w
+  scale: frac_2
+  comment: gefilterter Mittelwert fr für DTEV
+- rt: '0x0125'
+  name: ftefsoll_w
+  unit: '-'
+  factor: 1/0x20000
+  comment: Sollwert der Spülrate Tankentlüftung
+- rt: '0x0126'
+  name: mstedtef_w
+  unit: g/s
+  factor: 1/1152
+  comment: Massenstrom Tankentlüftungsventil (gefiltert) für DTEV
+- rt: '0x0127'
+  name: DTEVNonVolbits
+  comment: ''
+- rt: '0x0128'
+  name: dlahp_w
+  scale: frac_2s
+  comment: P-Anteil der stetigen LRHK
+- rt: '0x0129'
+  name: dlahp2_w
+  scale: frac_2s
+  comment: P-Anteil der stetigen LRHK Bank 2
+- rt: '0x012A'
+  name: dynlsu_w
+  scale: frac_16
+  comment: Dynamikwert der LSU
+- rt: '0x012B'
+  name: dynlsu2_w
+  scale: frac_16
+  comment: Dynamikwert der LSU Bank 2
+- rt: '0x012C'
+  name: ladiff_w
+  scale: frac_2s
+  comment: Regelabweichung Lambda
+- rt: '0x012D'
+  name: ladiff2_w
+  scale: frac_2s
+  comment: Regelabweichung Lambda Bank 2
+- rt: '0x012E'
+  name: msabg_w
+  size: 2
+  unit: g/s
+  comment: Abgasmassenstrom gefiltert (Word), Bank 1
+- rt: '0x012F'
+  name: msabg2_w
+  scale: air
+  comment: Abgasmassenstrom gefiltert (Word), Bank 2
+- rt: '0x0130'
+  name: zhklsu
+  scale: count
+  comment: Zähler Heizerkopplung LSU
+- rt: '0x0131'
+  name: zhklsu2
+  scale: count
+  comment: Zähler Heizerkopplung LSU Bank 2
+- rt: '0x0132'
+  name: kusvk_w
+  unit: V
+  signed: true
+  factor: 320/0x10000
+  comment: Korrekturwert der LSU-Spannung vor Kat
+- rt: '0x0133'
+  name: kusvk2_w
+  unit: V
+  signed: true
+  factor: 320/0x10000
+  comment: Korrekturwert der LSU-Spannung vor Kat Bank2
+- rt: '0x0134'
+  name: tabgm
+  scale: cat_temp
+  comment: Abgastemperatur vor Kat aus Modell
+- rt: '0x0135'
+  name: tabgm2
+  scale: cat_temp
+  comment: Abgastemperatur vor Kat aus Modell Bank 2
+- rt: '0x0136'
+  name: tedtml
+  scale: seconds
+  comment: Einschaltdauer der LSU-Heizung abhängig von der Abgastemperatur und ml
+- rt: '0x0137'
+  name: tedtml2
+  scale: seconds
+  comment: Einschaltdauer der LSU-Heizung abhängig von der Abgastemperatur und ml Bank 2
+- rt: '0x0138'
+  name: tedub
+  scale: seconds
+  comment: korrigierte Einschaltdauer der LSU-Heizung
+- rt: '0x0139'
+  name: tedub2
+  scale: seconds
+  comment: korrigierte Einschaltdauer der LSU-Heizung Bank 2
+- rt: '0x013A'
+  name: uhsv
+  scale: v_ref
+  comment: Spannung an der Heizerendstufe vor Kat
+- rt: '0x013B'
+  name: uhsv2
+  scale: v_ref
+  comment: Spannung an der Heizerendstufe vor Kat Bank 2
+- rt: '0x013C'
+  name: rinsh_w
+  scale: ohm
+  comment: Grenzwert Innenwiderstand Nernstzelle der Lambdasonde hinter Kat
+- rt: '0x013D'
+  name: rinsh2_w
+  scale: ohm
+  comment: Grenzwert Innenwiderstand Nernstzelle der Lambdasonde hinter Kat Bank 2
+- rt: '0x013E'
+  name: phlsnh
+  unit: '-'
+  factor: 1/100
+  comment: normierte Heizleistung der Lambdasonde hinter Kat
+- rt: '0x013F'
+  name: phlsnh2
+  unit: '-'
+  factor: 1/100
+  comment: normierte Heizleistung der Lambdasonde hinter Kat Bank 2
+- rt: '0x0140'
+  name: lamsons_w
+  scale: frac_16
+  comment: Lambda-Sollwert bezogen auf Einbauort Lambda-Sensor
+- rt: '0x0141'
+  name: lamsons2_w
+  scale: frac_16
+  comment: Lambda-Sollwert bezogen auf Einbauort Lambda-Sensor Bank 2
+- rt: '0x0142'
+  name: dmrlash_w
+  scale: pct
+  comment: Momenten-Reserve für Lambdasonden-Alterungsüberwachung hinter Kat
+- rt: '0x0143'
+  name: lamlash_w
+  scale: frac_16
+  comment: Lambdasoll für Test Schwingungsprüfung hinter KAT
+- rt: '0x0144'
+  name: lamlash2_w
+  scale: frac_16
+  comment: Lambdasoll für Test Schwingungsprüfung hinter KAT Bank 2
+- rt: '0x0145'
+  name: mldyn_w
+  unit: g
+  factor: 1/360
+  comment: Luftmassenintegral im Schubbetrieb für Sonde hinter Kat
+- rt: '0x0146'
+  name: ushfmxstg
+  unit: mV/ms
+  factor: 0.52
+  comment: Gefilterte maximale Steigung der Sondenspannung hinter KAT
+- rt: '0x0147'
+  name: ushfmxstg2
+  unit: mV/ms
+  factor: 0.52
+  comment: Gefilterte maximale Steigung der Sondenspannung hinter KAT Bank 2
+- rt: '0x0148'
+  name: ushkmxstg
+  unit: mV/ms
+  factor: 0.52
+  comment: Maximale Steigung der Sondenspannung hinter KAT
+- rt: '0x0149'
+  name: ushkmxstg2
+  unit: mV/ms
+  factor: 0.52
+  comment: Maximale Steigung der Sondenspannung hinter KAT Bank 2
+- rt: '0x014A'
+  name: zlash_w
+  unit: s
+  factor: 1/10
+  comment: Zeitzähler für Sondenspannung hinter KAT ober/unterhalb des Sollwertes
+- rt: '0x014B'
+  name: zlash2_w
+  unit: s
+  factor: 1/10
+  comment: Zeitzähler für Sondenspannung hinter KAT ober/unterhalb des Sollwertes Bank 2
+- rt: '0x014C'
+  name: zwdynsh
+  scale: count
+  comment: Zähler für Anzahl der Dynamikmessungen für Sonde hinter KAT
+- rt: '0x014D'
+  name: zwdynsh2
+  scale: count
+  comment: Zähler für Anzahl der Dynamikmessungen für Sonde hinter KAT Bank 2
+- rt: '0x014E'
+  name: tispldp_w
+  comment: Zeit für Initialspülung bis LDP-Membran abgefallen ist
+- rt: '0x014F'
+  name: tispldpx_w
+  comment: Schwelle für Zeit für Initialspülung bis LDP-Membran abgefallen ist
+- rt: '0x0150'
+  name: tpldptc_w
+  comment: Zeit für bis LDP-Membran abgefallen ist nachdem TEV geöffnet wurde
+- rt: '0x0151'
+  name: tpldptcx_w
+  comment: Schwelle Zeit für bis LDP-Membran abgefallen ist nachdem TEV geöffnet wurde
+- rt: '0x0152'
+  name: tpfifo
+  scale: seconds
+  comment: FIFO-Speicher für Periodendauer
+- rt: '0x0153'
+  name: tc6ldpc
+  comment: Ausgabe Code SCAN-Tool Mode 6 aus LDP-Diagnose
+- rt: '0x0154'
+  name: tc6ldps
+  comment: Ausgabe Schwellwert SCAN-Tool Mode 6 aus LDP-Diagnose
+- rt: '0x0155'
+  name: tc6ldpw
+  comment: Ausgabe Prüfwert SCAN-Tool Mode 6 aus LDP-Diagnose
+- rt: '0x0156'
+  name: timzldp
+  scale: seconds
+  comment: ''
+- rt: '0x0157'
+  name: timrs
+  scale: seconds
+  comment: Timer für Reed-Switch Closed Check
+- rt: '0x0158'
+  name: fukabak_w
+  scale: frac_4
+  comment: ÜK-Adaptionsfaktor (kalter Motor) BA
+- rt: '0x0159'
+  name: tldppmw
+  scale: seconds
+  comment: Gleitender Mittelwert Periodendauer bei Leckdiagnose
+- rt: '0x015E'
+  name: imlkvs_w
+  unit: kg
+  factor: 0.00355556
+  comment: Luftmasse nach Auftreten eines DKVS Fehles bei leerem Tank
+- rt: '0x015F'
+  name: tephc
+  unit: s
+  factor: 1/10
+  comment: Phasenzähler Grundadaption / Tankentlüftung
+- rt: '0x0160'
+  name: ushksteig
+  unit: mV/ms
+  factor: 0.52
+  comment: Steigung der Sondenspannung hinter KAT
+- rt: '0x0161'
+  name: kmstmil_w
+  unit: km
+  comment: Zurückgelegte Fahrstrecke mit MIL on
+- rt: '0x0162'
+  name: m6wmsl_w
+  comment: 'Mode 6 - Speicher: Messwert Sekundärluftmasse bei SL-Einblasung'
+- rt: '0x0163'
+  name: m6smsl_w
+  comment: 'Mode 6 - Speicher: Schwellwert bei Prüfung Sekundärluftmasse'
+- rt: '0x0164'
+  name: m6wmslv_w
+  comment: 'Mode 6 - Speicher: Messwert Ventildichtheit'
+- rt: '0x0165'
+  name: dmletanf_w
+  unit: g/s
+  signed: true
+  factor: 1/1152
+  comment: gefilterter Wert für Abweichung Leerlaufenergiebedarf während DTEV
+- rt: '0x0166'
+  name: rmstevuf_w
+  unit: '%'
+  factor: 200/0x10000
+  comment: aktueller, unsigned Messwert für relative TEV-Güte
+- rt: '0x0167'
+  name: frmfdif_w
+  scale: frac_2s
+  comment: Diffrenzwert zwischen Probewert und Momentanwert
+- rt: '0x0168'
+  name: tadtea
+  scale: pct_byte
+  comment: TEV-Tastverhältnis aus Tankentlüftungsdiagnose
+- rt: '0x0169'
+  name: frmxaf_w
+  scale: frac_2
+  comment: 'fr-Max-Ausschlag: Bei Stereo LR der fr, der am weitesten von 1.0 weg (gefiltert)'
+- rt: '0x016A'
+  name: msl
+  unit: g/s
+  factor: 4/36
+  comment: Sekundärluftmassenstrom
+- rt: '0x016B'
+  name: imlpr
+  scale: frac_byte
+  comment: Relatives Luftmassenintegral bei Katheizung
+- rt: '0x016C'
+  name: fkpvdk_w
+  scale: frac_4
+  comment: Korrekturfaktor langsamer Massenstromabgleich
+- rt: '0x016D'
+  name: dmvadll_w
+  scale: pct_twice
+  comment: Delta-Motordrehmoment aus Verlustmoment-Adaption (B_ll=1)
+- rt: '0x016E'
+  name: dmvadko_w
+  scale: pct_twice
+  comment: Delta-Motordrehmoment aus Verlustmoment-Adaption (B_ko=1)
+- rt: '0x016F'
+  name: dmvadfs_w
+  scale: pct_twice
+  comment: Delta-Motordrehmoment aus Verlustmoment-Adaption (B_fs=1)
+- rt: '0x0170'
+  name: dmvadfk_w
+  scale: pct_twice
+  comment: Delta-Motordrehmoment aus Verlustmoment-Adaption (B_fs=1 & B_ko=1)
+- rt: '0x0171'
+  name: mlhfmm_w
+  scale: air
+  comment: Luftmassen HFM-Mittelwert 16Bit-Wert
+- rt: '0x0172'
+  name: mldmn_w
+  unit: g/s
+  signed: true
+  factor: 1/36
+  comment: minimale Luftmasse aus Kennfeld KFMLDMN
+- rt: '0x0173'
+  name: mldmx_w
+  scale: air
+  comment: maximale Luftmasse aus Kennfeld KFMLDMX
+- rt: '0x0174'
+  name: GGFSTbits
+  comment: ''
+- rt: '0x0175'
+  name: fprstep_c
+  comment: Schrittzähler DK-Rückstellfeder-Prüfung
+- rt: '0x0176'
+  name: miszul_w
+  scale: pct
+  comment: Maximal zulässiges indiziertes Moment
+- rt: '0x0177'
+  name: mrfa_w
+  unit: '%'
+  factor: 200/0x10000
+  comment: Relatives Fahrerwunschmoment aus FGR und Pedal
+- rt: '0x0178'
+  name: lamfa_w
+  scale: frac_16
+  comment: Lambdasoll Fahrerwunsch (word)
+- rt: '0x0179'
+  name: lambts_w
+  scale: frac_16
+  comment: Lambda für Bauteileschutz
+- rt: '0x017A'
+  name: sfplash
+  comment: 'Status Fehlerpfad: Lambdasondenalterung hinter Kat'
+- rt: '0x0180'
+  name: ffonn1
+  comment: Statusbyte fuel-on/-off Adaption (KF-Bereiche fertig gelernt)
+- rt: '0x0181'
+  name: ffonn2
+  comment: Statusbyte fuel-on/-off Adaption (KF-Bereiche fertig gelernt)
+- rt: '0x0182'
+  name: ffonn3
+  comment: Statusbyte fuel-on/-off Adaption (KF-Bereiche fertig gelernt)
+- rt: '0x01A0'
+  name: kldfpwm
+  scale: pct_byte
+  comment: Generatorsignal (Kl. DFM) als PWM-Signal filtriert
+- rt: '0x01A1'
+  name: pkodrc
+  unit: bar
+  factor: 1/5
+  comment: Kompressordrucksignal
+- rt: '0x01A2'
+  name: uulsuv_w
+  scale: v_word
+  comment: Sondenspannung vor Kat einer Breitbandlambdasonde (ADC-Wert)
+- rt: '0x01A3'
+  name: ldtv
+  scale: pct_200
+  comment: LDR Tastverhältnis
+- rt: '0x01A4'
+  name: ldimx_w
+  scale: pct_200
+  comment: Aktueller Wert zur Maximalwertbegrenzung I-Anteil LDR
+- rt: '0x01A5'
+  name: ldimn_w
+  scale: pct_200
+  comment: Aktueller Wert zur Minimalwertbegrenzung I-Anteil LDR
+- rt: '0x01A6'
+  name: dwped
+  unit: '%'
+  signed: true
+  factor: 100/256
+  comment: Gradient des normierten Fahrpedalwinkels
+- rt: '0x01A8'
+  name: ctrzyf0
+  scale: count
+  comment: Zähler für Anzahl ungeprüfter Fehlerpfade im System seit Start
+- rt: '0x01A9'
+  name: ctrzyf1
+  scale: count
+  comment: Zähler für Anzahl geprüfter Fehlerpfade im System seit Start
+- rt: '0x01AA'
+  name: ctrerf1
+  scale: count
+  comment: Zähler für Anzahl  Fehlerflags E_dfp = 1 im System seit powerfail (gefiltert)
+- rt: '0x01AB'
+  name: anzdyn
+  scale: count
+  comment: Anzahl der Dynamikmessungen LSU
+- rt: '0x01AC'
+  name: tplsu
+  scale: count
+  comment: Tripanzahlcounter
+- rt: '0x01AD'
+  name: tstarte
+  unit: s
+  factor: 1/10
+  comment: Summierte Startzeit von Drehbeginn bis Startende (mehrere Starts)
+- rt: '0x01AF'
+  name: dlashkm_w
+  scale: frac_2s
+  comment: Delta-Lambda aus Lambdaregelung hinter Kat (Ist-Wert fr-synchron gemittelt)
+- rt: '0x01B0'
+  name: ksta0
+  scale: frac_byte2
+  comment: Kaltstartanreicherung Bereich 0, gepuffert
+- rt: '0x01B1'
+  name: ksta1
+  scale: frac_byte2
+  comment: Kaltstartanreicherung Bereich 1, gepuffert
+- rt: '0x01B2'
+  name: ksta2
+  scale: frac_byte2
+  comment: Kaltstartanreicherung Bereich 2, gepuffert
+- rt: '0x01B3'
+  name: anzumrl_w
+  scale: count
+  comment: Anzahl der Umschaltungen auf rl aus DK-Signal berechnet
+- rt: '0x01B4'
+  name: mslift2
+  unit: g/s
+  factor: 4/36
+  comment: Istwert Sekundärluftmasse, gefiltert, temporär (Bank 2)
+- rt: '0x01B5'
+  name: rldkofk_w
+  scale: load
+  comment: relative Luftfüllung aus DK-Signal berechnet ohne Einrechnung von fkmsdk
+- rt: '0x01B6'
+  name: rlzuhfs_w
+  scale: load
+  comment: relative Luftfüllung (zufließend) mit Hauptfüllungssensor bestimmt
+- rt: '0x01B7'
+  name: drldkzu_w
+  unit: '%/seg'
+  signed: true
+  factor: 6/256
+  comment: Differenz zwischen rl aus Hauptlastsignal zu Nebenlastsignal
+- rt: '0x01B9'
+  name: ldimxak_w
+  size: 2
+  unit: '%'
+  signed: true
+  factor: 1/200
+  comment: Aktueller korrigierter Begrenzungswert I-Anteil LDR
+- rt: '0x01BA'
+  name: tmst
+  size: 1
+  unit: °C
+  comment: Motorstarttemperatur
+- rt: '0x01BB'
+  name: bbdmdmil
+  comment: ''
+- rt: '0x01BC'
+  name: idxfob
+  comment: 'Index: Kennzeichnet den aktuellen KF-Bereich (Drehz., Last)'
+- rt: '0x01BD'
+  name: fukabaw_w
+  scale: frac_4
+  comment: ÜK-Adaptionsfaktor (warmer Motor) BA
+- rt: '0x01BE'
+  name: fukavak_w
+  scale: frac_4
+  comment: ÜK-Adaptionsfaktor (kalter Motor) VA
+- rt: '0x01BF'
+  name: fukavaw_w
+  scale: frac_4
+  comment: ÜK-Adaptionsfaktor (warmer Motor) VA
+- rt: '0x01C0'
+  name: flg_m
+  comment: Monitor Status Laufunruhe-Berechnung
+- rt: '0x01C3'
+  name: ffon
+  comment: Statusbyte Übersicht fuel-on Adaption
+- rt: '0x01C6'
+  name: dmdlfmb
+  unit: s
+  comment: längste Fahrzeit mit blinkender MIL
+- rt: '0x01C7'
+  name: dmdsfmb_w
+  unit: s
+  comment: Summe Fahrzeiten mit blinkender MIL
+- rt: '0x01C8'
+  name: dmdafmb
+  scale: count
+  comment: Anzahl Fahrzeiten mit blinkender MIL
+- rt: '0x01CA'
+  name: B_mola
+  comment: Motorlagersteuerung aktiv
+- rt: '0x01CD'
+  name: wnweos
+  scale: kw_half
+  comment: Sollwinkel für Nockenwelle Einlaß öffnet
+- rt: '0x01CE'
+  name: wnwass
+  scale: kw_half
+  comment: Sollwinkel für Nockenwelle Auslaß schließt
+- rt: '0x01CF'
+  name: wnwise_w
+  scale: kw_fine
+  comment: Istwinkel für Einlaßnockenwelle
+- rt: '0x01D0'
+  name: wnwisa_w
+  scale: kw_fine
+  comment: Istwinkel für Auslaßnockenwelle
+- rt: '0x01D1'
+  name: upwkd_w
+  scale: v_word
+  comment: Gelernte Spannung von PWG-Poti 1 in der Kick-Down-Position
+- rt: '0x01D8'
+  name: udkp1asr_w
+  scale: v_asr
+  comment: 'Dauer-RAM: Spannung DK-Poti 1 am unteren DK-Anschlag, stationärer Anteil'
+- rt: '0x01D9'
+  name: udkp2asr_w
+  scale: v_asr
+  comment: 'Dauer-RAM: Spannung DK-Poti 2 am unteren DK-Anschlag, stationärer Anteil'
+- rt: '0x01DA'
+  name: udknlp1r
+  scale: v_asr
+  comment: 'Dauer-RAM: Spannung DK-Poti 1 im NLP'
+- rt: '0x01DB'
+  name: udknlp2r
+  scale: v_asr
+  comment: 'Dauer-RAM: Spannung DK-Poti 2 im NLP'
+- rt: '0x01DC'
+  name: tvlues1
+  scale: pct_byte
+  comment: Tastverhältnis Lüfter 1
+- rt: '0x01DD'
+  name: tvlues2
+  scale: pct_byte
+  comment: Tastverhältnis Lüfter 2
+- rt: '0x01DE'
+  name: tvkmtr
+  scale: pct_byte
+  comment: Tastverhältnis elektrischer Thermostat
+- rt: '0x01DF'
+  name: tmotsoll
+  scale: temp
+  comment: Soll-Wassertemperatur  für Kühlmitteltemperaturregelung
+- rt: '0x01E0'
+  name: wnwadmne_w
+  scale: kw_cam
+  comment: Minimalwertauswahl von adaptierten Werten (Einlass
+- rt: '0x01E1'
+  name: wnwadmna_w
+  scale: kw_cam
+  comment: Minimalwertauswahl von adaptierten Werten (Auslass
+- rt: '0x01E2'
+  name: wnwadmne_w
+  scale: kw_cam
+  comment: Minimalwertauswahl von adaptierten Werten (Einlass
+- rt: '0x01E3'
+  name: wnwadmna_w
+  scale: kw_cam
+  comment: Minimalwertauswahl von adaptierten Werten (Auslass
+- rt: '0x01E8'
+  name: mslv_w
+  unit: g/s
+  factor: 1/2304
+  comment: Sekundärluftmasse für Ventildichtheitsprüfung (word)
+- rt: '0x01E9'
+  name: mslv2_w
+  unit: g/s
+  factor: 1/2304
+  comment: Sekundärluftmasse für Ventildichtheitsprüfung (word) Bank 2
+- rt: '0x01EB'
+  name: vfzroh_w
+  unit: km/h
+  factor: 2/256
+  comment: Fahrzeuggeschwindigkeit Ausgabewert an SCAN-Tool
+- rt: '0x01EC'
+  name: uulsuv2_w
+  scale: v_word
+  comment: Sondenspannung vor Kat einer Breitbandlambdasonde Bank2 (ADC-Wert)
+- rt: '0x01ED'
+  name: dwnwfde_w
+  scale: kw_cam
+  comment: Differenz Ist - Sollwinkel Nockenwelle gefiltert für Diagnose Einlass
+- rt: '0x01EE'
+  name: wnwsp_w
+  scale: kw_step
+  comment: Adaptionswinkel Nockenwelle (Spätanschlag)
+- rt: '0x01EF'
+  name: dgafram_w
+  factor: 4/0x10000
+  offset: 1
+  comment: Gemischfehler multiplikativer Anteil (Mittelwert)
+- rt: '0x0203'
+  name: pbkv
+  unit: mbar
+  factor: 5
+  comment: Bremskraftverstärker-Druck von DS
+- rt: '0x0209'
+  name: tkihkm_w
+  unit: °C
+  factor: 6/256
+  offset: 273.15
+  comment: Temperatur Katalysator im Hauptkat aus Modell
+- rt: '0x020C'
+  name: wnwsenp_w
+  scale: kw_cam
+  comment: Sollwinkel bei Detektierung einer nicht plausiblen NW-Stellung  (Einlass)
+- rt: '0x0220'
+  name: ldrlts_w
+  scale: load
+  comment: Begrenzungswert für maximale Füllung LDR für ATL-Schutz
+- rt: '0x0221'
+  name: kmst_w
+  unit: km
+  factor: 6
+  comment: Zurückgelegte Fahrstrecke seit Powerfail
+- rt: '0x0222'
+  name: top_w
+  unit: min
+  factor: 6
+  comment: Operating time seit powerfail
+- rt: '0x0223'
+  name: fforn1
+  comment: Statusbyte fuel-on/-off Adaption (n-Bereiche fertig gelernt)
+- rt: '0x0224'
+  name: vkASRAntrieb
+  comment: ''
+- rt: '0x0226'
+  name: rlmxko_w
+  scale: load
+  comment: Maximalfüllung korrigiert (ohne Begrenzungen)
+- rt: '0x0229'
+  name: tmkic
+  scale: temp
+  comment: Motortemperatur aus Kombibotschaft
+- rt: '0x022C'
+  name: fzabg_w_8
+  scale: count
+  comment: Aussetzerzähler
+- rt: '0x022D'
+  name: fzabg_w_9
+  scale: count
+  comment: Aussetzerzähler
+- rt: '0x022E'
+  name: fzabg_w_10
+  scale: count
+  comment: Aussetzerzähler
+- rt: '0x022F'
+  name: f abg_w_11
+  scale: count
+  comment: Aussetzerzähler
+- rt: '0x0234'
+  name: wnwis2e_w
+  scale: kw_fine
+  comment: Istwinkel für Einlaßnockenwelle (Bank2)
+- rt: '0x0235'
+  name: wnwis2a_w
+  scale: kw_fine
+  comment: Istwinkel für Auslaßnockenwelle (Bank2)
+- rt: '0x0236'
+  name: wnweos2
+  scale: kw_half
+  comment: Sollwinkel für Nockenwelle Einlaß öffnet (Bank2)
+- rt: '0x0237'
+  name: ctr_phade
+  scale: count
+  comment: Zähler Adaptionen Nockenwellenposition zu Kurbelwellenposition Einlaß-NW
+- rt: '0x0238'
+  name: ctr_phada
+  scale: count
+  comment: Zähler Adaptionen Nockenwellenposition zu Kurbelwellenposition Auslaß-NW
+- rt: '0x0239'
+  name: tanwre
+  scale: pct_byte
+  comment: Tastverhältnis Einlaßnockenwellenregelung
+- rt: '0x0239'
+  name: tanwr2e
+  scale: pct_byte
+  comment: Tastverhältnis Einlaßnockenwellenregelung Bank2
+- rt: '0x023B'
+  name: wubr
+  unit: V
+  factor: 0.1113
+  comment: Batteriespannung über Hauptrelais; vom AD-Wandler erfaßter Wert
+- rt: '0x023E'
+  name: kstaa
+  scale: frac_byte2
+  comment: Aktueller Startmengenadaptionsfaktor
+- rt: '0x023F'
+  name: tmadb
+  comment: Bereich Motortemperatur für Startmengenadaption
+- rt: '0x0240'
+  name: abo
+  scale: count
+  comment: Anzahl Starts mit Benzin im Öl
+- rt: '0x0241'
+  name: nllkh
+  unit: rpm
+  factor: 10
+  comment: Leerlaufdrehzahl bei Katheizen
+- rt: '0x0242'
+  name: flakh
+  scale: frac_byte
+  comment: Faktor Lambda-Steuerung bei Katheizen
+- rt: '0x0243'
+  name: fmdkh
+  scale: frac_byte
+  comment: Faktor Steuerung Drehmomentreserve für Katheizen
+- rt: '0x0244'
+  name: imlatm_w
+  size: 2
+  unit: kg
+  factor: 0.000355556
+  comment: integr. Luftmassenfluss ab Startende bis max. Wert, (Word)
+- rt: '0x0245'
+  name: imlbbo
+  unit: kg
+  factor: 0.0910222
+  comment: Integrator Luftmasse für Erkennung Benzin im Öl
+- rt: '0x0246'
+  name: mspcv
+  scale: air
+  comment: Massenstrom über PCV Ventil
+- rt: '0x0254'
+  name: dtmtka
+  unit: °C
+  signed: true
+  factor: 3/4
+  comment: Delta Kühlmitteltemperatur zu Kühleraustrittstemperatur
+- rt: '0x0255'
+  name: uhepoti
+  comment: Spannung Heizungspoti
+- rt: '0x0259'
+  name: cd_bits3_w
+  comment: ''
+- rt: '0x025A'
+  name: cd_bits3_w
+  comment: ''
+- rt: '0x025B'
+  name: cd_bits3_w
+  comment: ''
+- rt: '0x025C'
+  name: tanwra
+  scale: pct_byte
+  comment: Tastverhältnis Nockenwellenregelung Auslaß
+- rt: '0x025D'
+  name: tanwr2a
+  scale: pct_byte
+  comment: Tastverhältnis Nockenwellenregelung Auslaß Bank2
+- rt: '0x025F'
+  name: ANWSE_bits1
+  comment: ''
+- rt: '0x0263'
+  name: sfplsv
+  comment: 'Status Fehlerpfad: Diagnose Lambdasonde vor Kat'
+- rt: '0x0265'
+  name: sfplsh
+  comment: 'Status Fehlerpfad: Diagnose Lambdasonde hinter Kat'
+- rt: '0x0267'
+  name: sfpkat
+  comment: 'Status Fehlerpfad: Katalysator-Überwachung'
+- rt: '0x026E'
+  name: wnwsp2_w
+  scale: kw_step
+  comment: Adaptionswinkel Nockenwelle 2 (Spätanschlag)
+- rt: '0x0270'
+  name: pklimakmtr
+  unit: bar
+  factor: 1/5
+  comment: Druck Klimaanlage für KMTR
+- rt: '0x0288'
+  name: tikatm_w
+  unit: °C
+  factor: 5/256
+  offset: 50
+  comment: Abgastemperatur im Katalysator aus Modell
+- rt: '0x028B'
+  name: lamzak_w
+  scale: frac_16
+  comment: Lambdasondenistwert, korrigiert um Zusatzamplitude
+- rt: '0x0290'
+  name: imllaka_w
+  comment: Integrator Fettfläche für Katalysator-Ausräumen
+- rt: '0x029A'
+  name: vkASRAntrieb
+  comment: ''
+- rt: '0x02A4'
+  name: usvkk_w
+  scale: v_word
+  comment: LSU-Spannung vor Kat, korrigiert
+- rt: '0x02A5'
+  name: tavvkm_w
+  unit: °C
+  factor: 6/256
+  offset: 273.15
+  comment: Abgastemperatur vor Vorkat aus Modell
+- rt: '0x02B4'
+  name: tabgbts_w
+  size: 2
+  unit: °C
+  factor: 5/256
+  offset: 50
+  comment: Abgastemperatur für Bauteileschutz
+- rt: '0x02B5'
+  name: rmslf
+  scale: frac_byte2
+  comment: relative Sekundärluftmasse gefiltert
+- rt: '0x02B6'
+  name: anzmsls_w
+  scale: count
+  comment: Anzahl der dürchgeführten Sekundärluftmessungen
+- rt: '0x02B9'
+  name: lrnstat
+  comment: Statusbyte DV-E-Adaption für Testerkommunikation
+- rt: '0x02BA'
+  name: lrnstat
+  comment: Statusbyte DV-E-Adaption für Testerkommunikation
+- rt: '0x02BC'
+  name: fzmd_0
+  scale: count
+  comment: Aussetzer-Zähler
+- rt: '0x02BD'
+  name: fzmd_1
+  scale: count
+  comment: Aussetzer-Zähler
+- rt: '0x02BE'
+  name: fzmd_2
+  scale: count
+  comment: Aussetzer-Zähler
+- rt: '0x02BF'
+  name: fzmd_3
+  scale: count
+  comment: Aussetzer-Zähler
+- rt: '0x02C0'
+  name: fzmd_4
+  scale: count
+  comment: Aussetzer-Zähler
+- rt: '0x02C1'
+  name: fzmd_5
+  scale: count
+  comment: Aussetzer-Zähler
+- rt: '0x02C2'
+  name: fzmd_6
+  scale: count
+  comment: Aussetzer-Zähler
+- rt: '0x02C3'
+  name: fzmd_7
+  scale: count
+  comment: Aussetzer-Zähler
+- rt: '0x02C4'
+  name: fzmd_8
+  scale: count
+  comment: Aussetzer-Zähler
+- rt: '0x02C5'
+  name: fzmd_9
+  scale: count
+  comment: Aussetzer-Zähler
+- rt: '0x02C6'
+  name: fzmd_10
+  scale: count
+  comment: Aussetzer-Zähler
+- rt: '0x02C7'
+  name: fzmd_11
+  scale: count
+  comment: Aussetzer-Zähler
+- rt: '0x02CA'
+  name: timx_w
+  scale: injection
+  comment: maximale Einspritzzeit
+- rt: '0x02CB'
+  name: timxth_w
+  scale: injection
+  comment: theoretische maximale Einspritzzeit
+- rt: '0x02D3'
+  name: lws_w
+  unit: °Steer
+  signed: true
+  factor: 0.0437635
+  comment: Lenkwinkel
+- rt: '0x02F0'
+  name: kmdp1km_w
+  unit: km
+  comment: Zurückgelegte Fahrstrecke seit Fehlerspeicher Löschen oder Powerfail (1km/Ink.)
+- rt: '0x02F1'
+  name: cmibeg_w
+  scale: count
+  comment: Zähler aktiver Begrenzungen des inneren Moments
+- rt: '0x02F3'
+  name: talsuf
+  scale: cat_temp
+  comment: gefilterte Abgastemperatur aus Modell
+- rt: '0x02F5'
+  name: tahsomf_w
+  unit: °C
+  factor: 6/256
+  offset: 273.15
+  comment: gefilterte Abgastemperatur an Sonde hinter Kat aus Modell
+- rt: '0x02F9'
+  name: wnwe_w
+  scale: kw_cam
+  comment: Winkel Einlassventil oeffnet bezogen auf LWOT
+- rt: '0x02FB'
+  name: wnwse_w
+  scale: kw_cam
+  comment: Sollwinkel Nockenwelle Einlass öffnet
+- rt: '0x0301'
+  name: wnwkwas_w
+  scale: kw_step
+  comment: Winkel Nockenwelle zur Kurbelwelle im Arbeitsspiel
+- rt: '0x0337'
+  name: dynlsu_w
+  scale: frac_16
+  comment: Dynamikwert der LSU
+- rt: '0x0000'
+  name: palsu_w
+  scale: pressure
+  comment: Absolutdruck Abgassystem
+- rt: '0x0000'
+  name: evz_austot
+  size: 1
+  factor: 1
+  comment: Einspritzausblendmuster total
+- rt: '0x0000'
+  name: fho_w
+  scale: frac_4
+  comment: Korrekturfaktor Höhe (word)
+- rt: '0x0000'
+  name: fnwue
+  scale: frac_byte
+  comment: Gewichtungsfaktor Nockenwellenüberschneidung (Einlaß)
+- rt: '0x0000'
+  name: fpvdk_w
+  scale: frac_4
+  comment: Korrekturfaktor Druck vor Drosselklappe 16-Bit
+- rt: '0x0000'
+  name: ftvdk
+  scale: frac_byte2
+  comment: Korrekturfaktor Temperatur vor Drosselklappe
+- rt: '0x0000'
+  name: lamfaws_w
+  size: 2
+  unit: '-'
+  factor: 16/0x10000
+  comment: Lambdasoll Fahrerwunsch stationärer Anteil
+- rt: '0x0000'
+  name: lamfawkr_w
+  size: 2
+  unit: '-'
+  factor: 16/0x10000
+  comment: Lambdasoll Fahrerwunsch bei Zündwinkelspätverstellung KR, WL
+- rt: '0x0000'
+  name: lamfaw_w
+  size: 2
+  unit: '-'
+  factor: 16/0x10000
+  comment: Lambdasoll Fahrerwunsch Anteil aus Kennfeld LAMFA
+- rt: '0x0000'
+  name: lamfwl_w
+  size: 2
+  unit: '-'
+  factor: 16/0x10000
+  comment: Offset Motor-Lambda-Soll im Warmlauf
+- rt: '0x0000'
+  name: lamrlmn_w
+  size: 2
+  unit: '-'
+  factor: 16/0x10000
+  comment: Lambdasollvorsteuerung zur Verbesserung der Brennbarkeit bei kleinem rl
+- rt: '0x0000'
+  name: lditv_w
+  size: 2
+  unit: '%'
+  signed: true
+  factor: 1/200
+  comment: LDR, Tastverhältnis vom I-Regler (word)
+- rt: '0x0000'
+  name: ldptv
+  size: 2
+  unit: '%'
+  signed: true
+  factor: 1/200
+  comment: LDR, Tastverhältnis vom P-Regler
+- rt: '0x0000'
+  name: ldrdtv
+  size: 2
+  unit: '%'
+  signed: true
+  factor: 1/200
+  comment: LDR Tastverhältnis vom D-Regler
+- rt: '0x0000'
+  name: nmot_w
+  unit: rpm
+  factor: 1/4
+  comment: Motordrehzahl
+- rt: '0x0000'
+  name: perffilt_w
+  size: 2
+  unit: '%'
+  factor: 1/40
+  comment: Gefilterte Rechnerauslastung
+- rt: '0x0000'
+  name: perfmax_w
+  size: 2
+  unit: '%'
+  factor: 1/40
+  comment: Maximale Rechnerauslastung
+- rt: '0x0000'
+  name: plsol_w
+  scale: pressure
+  comment: Soll-Ladedruck
+- rt: '0x0000'
+  name: pspvdk_w
+  scale: frac_2
+  comment: Quotient Saugrohrdruck/Druck vor Drosselklappe (word)
+- rt: '0x0000'
+  name: pssol_w
+  scale: pressure
+  comment: Sollsaugrohrdruck
+- rt: '0x0000'
+  name: pu
+  unit: mbar
+  factor: 5
+  comment: Umgebungsdruck
+- rt: '0x0000'
+  name: pu_w
+  scale: pressure
+  comment: Umgebungsdruck
+- rt: '0x0000'
+  name: pvdksf_w
+  scale: pressure
+  comment: gefilterter Druck vor Drosselklappe (Ladedruck) vom Drucksensor
+- rt: '0x0000'
+  name: pvdkdsl_w
+  scale: pressure
+  comment: Druck vor Drosselklappe von Ladedrucksensor (word)
+- rt: '0x0000'
+  name: pvdkds
+  unit: mbar
+  factor: 10
+  comment: Druck vor Drosselklappe von Drucksensor
+- rt: '0x0000'
+  name: pvdkdsu_w
+  scale: pressure
+  comment: Druck vor Drosselklappe von Umgebungsdrucksensor (word)
+- rt: '0x0000'
+  name: pvdk_w
+  scale: pressure
+  comment: Druck vor Drosselklappe 16-Bit
+- rt: '0x0000'
+  name: pvdk
+  unit: mbar
+  factor: 10
+  comment: Druck vor Drosselklappe
+- rt: '0x0000'
+  name: plgrus_w
+  scale: pressure
+  comment: Grundladedruck Sollwert
+- rt: '0x0000'
+  name: redist
+  size: 1
+  factor: 1
+  comment: Ist-Reduzierstufe
+- rt: '0x0000'
+  name: rkat_w
+  unit: '%'
+  signed: true
+  factor: 12/256
+  comment: additive Gemischkorrektur (pro Zeit) der Gemischdaption (Word)
+- rt: '0x0000'
+  name: rkat2_w
+  unit: '%'
+  signed: true
+  factor: 12/256
+  comment: additive Gemischkorrektur (pro Zeit) der Gemischadaption Bank 2 (Word)
+- rt: '0x0000'
+  name: rkaz_w
+  unit: '%'
+  signed: true
+  factor: 12/256
+  comment: additive Gemischkorrektur (pro Zündung) der Gemischadaption
+- rt: '0x0000'
+  name: rkaz2_w
+  unit: '%'
+  signed: true
+  factor: 12/256
+  comment: additive Gemischkorrektur (pro Zündung) der Gemischadaption Bank2 (Word)
+- rt: '0x0000'
+  name: rl_w
+  scale: load
+  comment: relative Luftfüllung (Word)
+- rt: '0x0000'
+  name: rlroh_w
+  scale: load
+  comment: 'relative Luftfüllung: Rohwert vom Lastsensor (word)'
+- rt: '0x0000'
+  name: tabgm_w
+  unit: °C
+  factor: 5/256
+  offset: 50
+  comment: Abgastemperatur vor Kat aus Modell (Word)
+- rt: '0x0000'
+  name: uhfm_w
+  size: 2
+  unit: V
+  factor: 320/0x10000
+  comment: HFM-Spannung
+- rt: '0x0000'
+  name: vpssplg_w
+  scale: frac_4
+  comment: Druckverhältnis Saugrohrsolldruck zu Grundladedruck
+- rt: '0x0000'
+  name: vpsspls_w
+  scale: frac_2
+  comment: Verhältnis Soll-Saugrohrdruck zu Druck Sollladedruck
+- rt: '0x0000'
+  name: vpsspu_w
+  scale: frac_4
+  comment: Solldruckverhältnis Umgebung/Saugrohr
+- rt: '0x0000'
+  name: wkr_0
+  scale: kw_retard
+  comment: zylinderindividuelle Zündwinkelspätverstellung KR
+- rt: '0x0000'
+  name: wkr_1
+  scale: kw_retard
+  comment: zylinderindividuelle Zündwinkelspätverstellung KR
+- rt: '0x0000'
+  name: wkr_2
+  scale: kw_retard
+  comment: zylinderindividuelle Zündwinkelspätverstellung KR
+- rt: '0x0000'
+  name: wkr_3
+  scale: kw_retard
+  comment: zylinderindividuelle Zündwinkelspätverstellung KR
+- rt: '0x0000'
+  name: wkr_4
+  scale: kw_retard
+  comment: zylinderindividuelle Zündwinkelspätverstellung KR
+- rt: '0x0000'
+  name: wkr_5
+  scale: kw_retard
+  comment: zylinderindividuelle Zündwinkelspätverstellung KR
+- rt: '0x0000'
+  name: wkr_6
+  scale: kw_retard
+  comment: zylinderindividuelle Zündwinkelspätverstellung KR
+- rt: '0x0000'
+  name: wkr_7
+  scale: kw_retard
+  comment: zylinderindividuelle Zündwinkelspätverstellung KR
+- rt: '0x0000'
+  name: wkra_0
+  scale: kw_retard
+  comment: last und drehzahlabh. Adaptionskennfeld f. wkr
+- rt: '0x0000'
+  name: wkra_159
+  scale: kw_retard
+  comment: last und drehzahlabh. Adaptionskennfeld f. wkr
+- rt: '0x0000'
+  name: wkraa_0
+  scale: kw_retard
+  comment: Monitor der wkra des aktuellen Adaptionsbereiches, wkra_0, _1...
+- rt: '0x0000'
+  name: wkraa_1
+  scale: kw_retard
+  comment: Monitor der wkra des aktuellen Adaptionsbereiches, wkra_0, _1...
+- rt: '0x0000'
+  name: wkraa_2
+  scale: kw_retard
+  comment: Monitor der wkra des aktuellen Adaptionsbereiches, wkra_0, _1...
+- rt: '0x0000'
+  name: wkraa_3
+  scale: kw_retard
+  comment: Monitor der wkra des aktuellen Adaptionsbereiches, wkra_0, _1...
+- rt: '0x0000'
+  name: wkraa_4
+  scale: kw_retard
+  comment: Monitor der wkra des aktuellen Adaptionsbereiches, wkra_0, _1...
+- rt: '0x0000'
+  name: wkraa_5
+  scale: kw_retard
+  comment: Monitor der wkra des aktuellen Adaptionsbereiches, wkra_0, _1...
+- rt: '0x0000'
+  name: wkraa_6
+  scale: kw_retard
+  comment: Monitor der wkra des aktuellen Adaptionsbereiches, wkra_0, _1...
+- rt: '0x0000'
+  name: wkraa_7
+  scale: kw_retard
+  comment: Monitor der wkra des aktuellen Adaptionsbereiches, wkra_0, _1...
+- rt: '0x0000'
+  name: wped
+  unit: '% PED'
+  factor: 100/255
+  comment: Normierter Fahrpedalwinkel
+- rt: '0x0000'
+  name: zkrvf_0
+  comment: Zähler, bestimmt die Frequenz der zyl.-individuellen Zündwinkelfrühverstellung
+- rt: '0x0000'
+  name: zkrvf_1
+  comment: Zähler, bestimmt die Frequenz der zyl.-individuellen Zündwinkelfrühverstellung
+- rt: '0x0000'
+  name: zkrvf_2
+  comment: Zähler, bestimmt die Frequenz der zyl.-individuellen Zündwinkelfrühverstellung
+- rt: '0x0000'
+  name: zkrvf_3
+  comment: Zähler, bestimmt die Frequenz der zyl.-individuellen Zündwinkelfrühverstellung
+- rt: '0x0000'
+  name: zkrvf_4
+  comment: Zähler, bestimmt die Frequenz der zyl.-individuellen Zündwinkelfrühverstellung
+- rt: '0x0000'
+  name: zkrvf_5
+  comment: Zähler, bestimmt die Frequenz der zyl.-individuellen Zündwinkelfrühverstellung
+- rt: '0x0000'
+  name: zkrvf_6
+  comment: Zähler, bestimmt die Frequenz der zyl.-individuellen Zündwinkelfrühverstellung
+- rt: '0x0000'
+  name: zkrvf_7
+  comment: Zähler, bestimmt die Frequenz der zyl.-individuellen Zündwinkelfrühverstellung
+- rt: '0x0000'
+  name: zwbasar_0
+  scale: kw
+  comment: Basiszündwinkelarray
+- rt: '0x0000'
+  name: zwbasar_1
+  scale: kw
+  comment: Basiszündwinkelarray
+- rt: '0x0000'
+  name: zwbasar_2
+  scale: kw
+  comment: Basiszündwinkelarray
+- rt: '0x0000'
+  name: zwbasar_3
+  scale: kw
+  comment: Basiszündwinkelarray
+- rt: '0x0000'
+  name: zwoutar_0
+  scale: kw
+  comment: Zündwinkel-Ausgabe Array
+- rt: '0x0000'
+  name: zwoutar_1
+  scale: kw
+  comment: Zündwinkel-Ausgabe Array
+- rt: '0x0000'
+  name: zwoutar_2
+  scale: kw
+  comment: Zündwinkel-Ausgabe Array
+- rt: '0x0000'
+  name: zwoutar_3
+  scale: kw
+  comment: Zündwinkel-Ausgabe Array
+- rt: '0x0000'
+  name: zwgru
+  size: 1
+  unit: °KW
+  comment: Grundzündwinkel
+- rt: '0x0000'
+  name: zwmnms
+  scale: kw
+  comment: dauerhaft spätest möglicher Zündwinkel
+- rt: '0x0000'
+  name: zwnws
+  scale: kw
+  comment: Grundzündwinkel mit Berücksichtigung von Nockenwellensteuerung
+- rt: '0x0000'
+  name: zwopt
+  scale: kw
+  comment: optimaler Zündwinkel
+- rt: '0x0000'
+  name: zwsol
+  size: 1
+  unit: °KW
+  comment: Soll-Zündwinkel aus Momenteneingriff
+- rt: '0x0000'
+  name: zzylkr
+  comment: Zylinderzähler der Klopfregelung
+- rt: '0x0000'
+  name: B_ns2
+  size: 2
+  factor: 1
+  comment: Bedingung Solldrehzahl 2 aktiv
+- rt: '0x0000'
+  name: B_brems
+  size: 2
+  factor: 1
+  comment: Bedingung Bremse betätigt
+- rt: '0x0000'
+  name: B_epcl
+  size: 2
+  factor: 1
+  comment: EPCL-Ansteuerung
+- rt: '0x0000'
+  name: S_epcl
+  size: 2
+  factor: 1
+  comment: Schalter EPCL
+- rt: '0x0000'
+  name: S_mil
+  size: 2
+  factor: 1
+  comment: Schalter MIL
+- rt: '0x0000'
+  name: detazwbs
+  size: 1
+  unit: '%'
+  factor: 1/2
+  comment: Delta ZW-Wirkungsgrad für Bauteileschutz
+- rt: '0x0000'
+  name: dns
+  size: 1
+  unit: rpm
+  signed: true
+  factor: 10
+  comment: 'LLR: Drehzahlabweichung zur stationären Solldrehzahl'
+- rt: '0x0000'
+  name: dzwg
+  size: 1
+  unit: °KW
+  comment: Delta Zündwinkel Grund-ZW zu Optimal-ZW
+- rt: '0x0000'
+  name: dzwlamfaw
+  size: 1
+  unit: °KW
+  signed: false
+  factor: -3/4
+  comment: Delta Zündwinkel bei KR-Eingriff oder Warmlauf für Anfettung über Lambda
+- rt: '0x0000'
+  name: fkhfm
+  size: 1
+  unit: '-'
+  factor: 2/256
+  comment: HFM-Korrekturfaktor
+- rt: '0x0000'
+  name: frkte_w
+  size: 2
+  unit: ms/%
+  factor: 1/9000
+  comment: Faktor Umrechnung rel. Kraftstoffmasse rk in effekt. Einspritzzeit te
+- rt: '0x0000'
+  name: ftek_w
+  size: 2
+  unit: '-'
+  factor: 2/0x10000
+  comment: Korrekturfaktor für effektive Einspritzzeit
+- rt: '0x0000'
+  name: gangllr
+  size: 1
+  factor: 1
+  comment: Ganginformation zur Berechnung der Leerlaufdrehzahl
+- rt: '0x0000'
+  name: imlatm
+  size: 1
+  unit: kg
+  factor: 0.0910222
+  comment: integr. Luftmassenfluss ab Motorstart bis Max.wert
+- rt: '0x0000'
+  name: lde
+  size: 1
+  unit: mBar
+  signed: true
+  factor: 10
+  comment: LDR-Regelabweichung (Sollwert - Istwert)
+- rt: '0x0000'
+  name: ldtvr_w
+  size: 2
+  unit: '%'
+  signed: true
+  factor: 1/200
+  comment: LDR Tastverhältnis vom Regler
+- rt: '0x0000'
+  name: mifa
+  size: 1
+  unit: '%'
+  factor: 100/256
+  comment: indiziertes Motormoment Fahrerwunsch
+- rt: '0x0000'
+  name: mifa_w
+  size: 2
+  unit: '%'
+  comment: indiziertes Motormoment Fahrerwunsch
+- rt: '0x0000'
+  name: misopl1_w
+  size: 2
+  unit: '%'
+  comment: Solluftmoment, rückgerechnet auf Lambda=1 und zwopt
+- rt: '0x0000'
+  name: msabg
+  size: 1
+  unit: g/s
+  factor: 1.11111111
+  comment: Abgasmassenfluss gefiltert, Bank 1
+- rt: '0x0000'
+  name: ngfil
+  size: 1
+  unit: rpm/s
+  signed: true
+  factor: 100
+  comment: gefilterter Drehzahlgradient
+- rt: '0x0000'
+  name: ngfil_w
+  size: 2
+  unit: rpm/s
+  signed: true
+  factor: 100/256
+  comment: gefilterter Drehzahlgradient
+- rt: '0x0000'
+  name: nmot_um
+  size: 1
+  unit: rpm
+  comment: Motordrehzahl in der Funktionsüberwachung
+- rt: '0x0000'
+  name: plsolr_w
+  size: 2
+  unit: mbar
+  comment: Relativer Solladedruck LDR
+- rt: '0x0000'
+  name: rl_um
+  size: 1
+  unit: '%'
+  comment: relative Luftfüllung in der Funktionsüberwachung
+- rt: '0x0000'
+  name: tsel
+  size: 1
+  unit: °C
+  comment: Selektierte Temperatur (tans/tumc)
+- rt: '0x0000'
+  name: tsrldyn
+  size: 1
+  unit: ms
+  factor: 1/10
+  comment: Last- und Dynamikkorrigierte Schließzeit
+- rt: '0x0000'
+  name: uzue
+  size: 1
+  unit: V
+  factor: 0.0704
+  comment: ''
+- rt: '0x0000'
+  name: wkrmsu_w
+  scale: kw_word
+  comment: Summenwert aus dynamischem und statischem Mittelwert der KR Verstellwinkel
+- rt: '0x0000'
+  name: wdkbadmn_w
+  size: 2
+  unit: '% DK'
+  signed: true
+  factor: 1600/0x10000
+  comment: Winkel-DK für Adressierung von KFMLDMN
+- rt: '0x0000'
+  name: wdkbadmx_w
+  size: 2
+  unit: '% DK'
+  signed: true
+  factor: 1600/0x10000
+  comment: Winkel-DK für Adressierung von KFMLDMX
+- rt: '0x0000'
+  name: tevfa_w
+  size: 2
+  unit: ms
+  factor: 1/375
+  comment: effektive Einspritzzeit vor Feinabgleich (word)
+- rt: '0x0000'
+  name: tevfakge_w
+  size: 2
+  unit: ms
+  factor: 1/375
+  comment: Adressierung Kennfeld FKKVS mit effektiver Einspritzzeit vor Feinabgleich
+- rt: '0x0000'
+  name: tmotrvmx
+  size: 1
+  unit: °C
+  comment: Resultierende Motortemperatur für Berechnung Maximalgeschwindigkeit
+- rt: '0x0000'
+  name: tmotrvmx_b2w
+  size: 2
+  unit: °C
+  factor: 3/4
+  offset: 48
+  comment: DUMMY axis ariable (byte -> word)
+- rt: '0x0000'
+  name: tnst
+  size: 1
+  unit: s
+  comment: Zeit nach Startende
+- rt: '0x0000'
+  name: toelk_w
+  size: 2
+  unit: °C
+  factor: 6/256
+  offset: 273.15
+  comment: (Motor-) Öltemperatur, Ausgabe in Grad C, intern in Kelvin
+- rt: '0x0000'
+  name: tolc
+  size: 1
+  unit: °C
+  offset: 60
+  factor: 1
+  comment: Öltemperatur aus Kombibotschaft od. aus COWIV abhängig von LH
+- rt: '0x0000'
+  name: tolc_b2w
+  size: 2
+  unit: °C
+  offset: 60
+  comment: DUMMY axis variable (byte -> word)
+- rt: '0x0000'
+  name: zwspae
+  size: 1
+  unit: °KW
+  comment: Spätester Zündwinkel
+- rt: '0x0000'
+  name: zwbas
+  size: 1
+  unit: °KW
+  comment: Basiszündwinkel
