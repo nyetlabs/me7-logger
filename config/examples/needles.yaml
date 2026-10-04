@@ -1,0 +1,66 @@
+# By name inside data and inside functions.
+# Not loaded by default. Field rules are the same as config/needles.yaml.
+# Copy an entry into config/user, or point another program at this file.
+# These locate checksum code and the flash-kernel KWP handlers. The logger
+# does not write flash.
+
+data:
+  # Application: bit 7 of page 30 byte 8 -> P0602 / P1681 fault path. Not present in CH.
+  - name: app_flash_fault_test
+    needle_hex: "DB 00 28 02 84 00 ?? ?? C2 F4 ?? ?? 66 F4 80 00 2D"
+    back_up: -8
+
+  # MOV R12,#lo / MOV R13,#hi / MOV R14,#len / CALLS
+  - name: CrcPreBlockRef
+    needle_hex: "e6fc0000e6fd8000e00eda000000f6f4"
+    mask_hex: "ffff0000fffff0ffff0fff000000ffff"
+    unique: false
+
+  # ME7Sum FindCRCTab / FindMainCRCPreBlk needles with ME7Sum's masks. The labels mark the
+  # code that loads the address, not the table itself.
+  # MOV R4,#lo / MOV R5,#hi (0x80-0x83) / CRC table walk (needle0)
+  - name: CrcTableRef
+    needle_hex: "e6f40000e6f58000a960c0625c22"
+    mask_hex: "ffff0100fffffcffffffffffffff"
+    unique: false
+
+  # needle1, tried by ME7Sum when needle0 finds 0 or more than 2
+  - name: CrcTableRef_B
+    needle_hex: "e6f40000e6f58000c0c25c22"
+    mask_hex: "ffff0100fffffcffffffffff"
+    unique: false
+
+functions:
+  # Flash programming kernel handlers (flash copy; the kernel runs from a RAM copy at 0x38xxxx).
+  # KWP 0x27. Hit is the setup just before the key-ok path that sets page 30 byte 8 bit 7
+  # (arm); the steps right after it differ between builds (551M, 551C/D/E), so the needle
+  # stops there. 0x188 after the entry, 0x17A in 551C/D/E and 4B0906018.
+  - name: k_27_SecurityAccess
+    needle_hex: "D4 50 10 00 B9 85 E6 F4 00 18 74 F4 ?? ?? E6 F4 FF BF 64 F4 ?? ??"
+    back_up: [0x17A, 0x188]
+    entry_after: ["DB 00", "FF FF"]
+
+  # KWP 0x31. Hit is the C4 tool code copy.
+  - name: k_31_StartRoutine
+    needle_hex: "F4 A4 08 00 B9 A0 F4 64 09 00"
+    back_up: 0x32
+    entry_after: ["DB 00", "FF FF"]
+
+  # KWP 33 C5. Hit is the 73 C5 positive response: 0x26 after the entry in builds without the
+  # match-streak / flash state 0x88 check (551M), 0x8E with it (NL), 0x9E in 4D1/4E0/006410.
+  - name: k_33_C5_Result
+    needle_hex: "E1 3C E7 F8 73 00 F0 59 08 91 B9 85 E7 F8 C5 00 F0 59 08 91 B9 85 E1 08 B9 89"
+    back_up: [0x26, 0x9E]
+    entry_after: ["DB 00", "FF FF"]
+
+  # KWP 0x35. Hit is the upload latch = 1 store.
+  - name: k_35_RequestUpload
+    needle_hex: "E6 F5 FF FD 64 F5 ?? ?? E0 12 F6 F2 ?? ??"
+    back_up: 0x112
+    entry_after: ["DB 00", "FF FF"]
+
+  # CRC32 table walk (IDA ME7.1 FindBinary seed; the leading "??" word-aligns the hit).
+  - name: XORChkSumGenerate
+    needle_hex: "?? 8c f0 9d 0d 1e dc 09 a9 88 f0 56 51 a8 b9 a0"
+    back_up: 0x14
+    entry_after: ["DB 00"]

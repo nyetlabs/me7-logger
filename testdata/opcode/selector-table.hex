@@ -1,0 +1,8 @@
+# Max index 2. The middle table word is not a selector prefix.
+size 0x100
+20: 80 00 00 00 C0 00
+5A: E0 09 E6 F8 00 00 E1 0E E1 0C E0 04
+    B8 40 D4 50 12 00 7C 45 46 F5 02 00
+    EA E0 00 00 5C 15 06 F5 20 00 A8 55 9C 05
+80: D4 40 12 00 66 F4 0F 00
+C0: D4 40 12 00 66 F4 0F 00

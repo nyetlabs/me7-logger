@@ -1,0 +1,103 @@
+# Document keys stay. injection and ambient by name, factors by MHz.
+# Unnamed conversions by size then unit, named conversions by name.
+# ME7 names the generator uses. Edit this file. Nothing in this list is compiled into the program.
+# Clock factors are milliseconds per timer tick.
+# 20 and 40 MHz are 1/312.5, 24 MHz is 1/375, 32 MHz is 1/250.
+# KRKTE uses the injection factor divided by 24.
+
+map_name: catalog.yaml
+
+connect:
+  slow_init_needle: slow_init_table
+  fast_init_needle: fast_init_physical
+  kwp_key1: "0xEF"
+  kwp_key2: "0x8F"
+  prefer_address: "0x11"
+  fallback_address: "0x01"
+  fast_targets: ["0x01", "0x10"]
+
+clock:
+  default_mhz: 24
+  krkte: KRKTE
+  injection:
+    - DTEPRU
+    - DTIABS
+    - te2_w
+    - te_w
+    - TEMIN
+    - TEMINVA
+    - ti_avg
+    - ti_b1
+    - ti_b2
+    - timx_w
+    - timxth_w
+    - TVTSPEP
+    - TVUB
+  factors:
+    "20": 1/312.5
+    "24": 1/375
+    "32": 1/250
+    "40": 1/312.5
+
+scale_5120:
+  units: [mbar, mBar]
+  ambient: [PUE, PUMN, PUMX]
+  low_mbar: 400
+  high_mbar: 1200
+
+selector_prefixes:
+  - "D440120066F40F00"
+  - "D440140066F40F00"
+selector_end: "0x3F7"
+
+# Shared scales. An omitted size is 2. A measurement, and a catalog row whose
+# size is 1 or 2, uses the matching pair for omitted signed, inverse, factor,
+# and offset. A catalog row with size 0 does not. A field written on the row
+# wins. A single-bit measurement bitmask does not use the table.
+# A name is selected by a measurement with conversion. It is not a size+unit
+# default, so its unit may be "". The row keeps a field it sets.
+conversions:
+- size: 1
+  unit: ""
+  factor: 1/100
+- size: 1
+  unit: "%"
+  factor: 3/4
+- size: 1
+  unit: rpm
+  factor: 40
+- size: 1
+  unit: "°C"
+  factor: 3/4
+  offset: 48
+- size: 1
+  unit: "°KW"
+  signed: true
+  factor: 3/4
+- unit: ""
+  factor: 1/4
+- unit: "%"
+  factor: 100/0x10000
+- unit: g/s
+  factor: 1/36
+- unit: mbar
+  factor: 10/256
+- unit: rpm
+  factor: 1/4
+- name: amp
+  size: 1
+  unit: ""
+  factor: 800/0x10000
+- name: half
+  size: 1
+  unit: "%"
+  factor: 1/2
+- name: retard
+  size: 1
+  unit: "°KW"
+  factor: -3/4
+- name: torque
+  unit: ""
+  factor: 100/0x10000
+- name: twice
+  factor: 200/0x10000

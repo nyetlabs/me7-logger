@@ -1,0 +1,6 @@
+# JMPR before the compares is result type 0. Compare 1 still reaches 0x20.
+size 0x40
+00: D4 40 12 00 66 F4 0F 00
+08: 2D 00 46 F4 01 00 2D 08
+10: 46 F4 F7 03 2D 08
+20: F2 F4 00 81 DB 00

@@ -1,0 +1,10 @@
+# A KWP row at 0x40 is not the table. The row at 0x80 selects SLOW-0x11.
+size 0x140
+40: FE 55 EF 8F 70 00 01 01 3C 00 2C 01
+5F: 55
+80: 11 55 EF 8F 70 00 EE 01 3C 00 2C 01
+    05 00 14 00 00 00 14 00 19 00 32 00
+    47 00 C8 02 82 00
+    33 55
+100: E6 F5 06 02 F6 F4 40 E2 F6 F5 42 E2
+     E7 F8 10 00 F7 F8 08 E2

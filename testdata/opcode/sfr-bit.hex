@@ -1,0 +1,6 @@
+# 9A bit 0x20, top nibble 0xC, then a word load and JMPR.
+size 0x40
+00: D4 40 12 00 66 F4 0F 00
+08: 46 F4 01 00 2D 09
+0E: 46 F4 F7 03 2D 10
+20: 9A 20 03 C0 E6 F4 00 81 0D 02 00 00

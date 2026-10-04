@@ -1,0 +1,6 @@
+# [020] is E7 F8, F3 FA, 21 A8. F3 FA is the byte read into R10.
+size 0x40
+00: D4 40 12 00 66 F4 0F 00
+08: 46 FC 25 00 2D 09
+0E: 46 F4 F7 03 2D 0C
+20: E7 F8 26 00 F3 FA A6 8A 21 A8 00 00

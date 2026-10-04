@@ -1,0 +1,7 @@
+# Needle at 0, selector at 0x26. The jump at 0x30 lands on the load at 0x60.
+size 0x80
+00: E0 09 E6 F8 10 00 E1 0E E1 0C E0 04
+26: D4 40 12 00 66 F4 0F 00
+2E: 48 41 2D 17
+32: 46 F4 F7 03 2D 17
+60: F2 F4 00 81 DB 00

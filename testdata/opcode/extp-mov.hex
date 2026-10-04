@@ -1,0 +1,6 @@
+# The last instruction is F3 FC. The EXTP before it sets the page.
+size 0x40
+00: D4 40 14 00 66 F4 0F 00
+08: 46 FC 02 00 2D 09
+0E: 46 F4 F7 03 2D 0A
+20: D7 40 E1 00 F3 FC 00 01

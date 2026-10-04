@@ -1,0 +1,11 @@
+# Axis bytes at 0x10110. The call frame at 0xA0 passes that address.
+size 0x10400
+40: 26 F4 00 80 8D 04 7D 06
+    E6 F4 FF 7F 0D 03 6D 02
+    E6 F4 00 80
+A0: E6 FC 00 02
+    E6 FD 10 01
+    F2 FE 00 00
+    F2 FF 00 00
+    DA 00 40 00
+10110: 04 01 02 03 04

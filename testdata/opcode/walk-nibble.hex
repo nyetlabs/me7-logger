@@ -1,0 +1,5 @@
+# CMP #1 at offset 8. The jump at offset 10 lands on 0x20.
+size 0x40
+00: D4 40 12 00 66 F4 0F 00
+08: 48 41 2D 0A
+0C: 46 F4 F7 03 2D 10

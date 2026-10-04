@@ -1,0 +1,4 @@
+# The hit is 7C 80. The load eight bytes earlier is tabgm_w.
+size 0x5000
+4008: F2 F4 00 00 F2 F4 20 81
+4010: 7C 80 F7 F4 00 81

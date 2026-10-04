@@ -1,0 +1,264 @@
+package parity
+
+import (
+	"os"
+	"path/filepath"
+	"testing"
+
+	"me7-logger/record"
+)
+
+func TestMatchECU(t *testing.T) {
+	got := []record.Item{{Name: "nmot", Addr: 0xF878, Size: 1, Bitmask: 0}}
+	want := []record.Item{
+		{Name: "nmot", Addr: 0xF878, Size: 1},
+		{Name: "rl", Addr: 0x380100, Size: 2},
+	}
+	hit, n := matchECU(got, want)
+	if hit != 1 || n != 2 {
+		t.Fatalf("%d/%d", hit, n)
+	}
+}
+
+func TestMatchMapsFileOffset(t *testing.T) {
+	got := []Map{{Name: "KFZW", Addr: needleBase + 0x1234}}
+	want := []Map{{Name: "KFZW", Addr: 0x1234}, {Name: "LAMFA", Addr: 0x2000}}
+	hit, n := matchMaps(got, want)
+	if hit != 1 || n != 2 {
+		t.Fatalf("%d/%d", hit, n)
+	}
+}
+
+const needleBase = 0x800000
+
+func TestParseXDF(t *testing.T) {
+	b := []byte(`<?xml version="1.0"?>
+<XDFFORMAT>
+<XDFCONSTANT><title>KRKTE</title><EMBEDDEDDATA mmedaddress="0x10" /></XDFCONSTANT>
+<XDFTABLE><title>LAMFA</title>
+<XDFAXIS id="x"><EMBEDDEDDATA mmedaddress="0x1" /></XDFAXIS>
+<XDFAXIS id="z"><EMBEDDEDDATA mmedaddress="0x20" /></XDFAXIS>
+</XDFTABLE>
+</XDFFORMAT>`)
+	got, err := ParseXDF(b)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got) != 2 || got[0].Name != "KRKTE" || got[0].Addr != 0x10 || got[1].Name != "LAMFA" || got[1].Addr != 0x20 {
+		t.Fatalf("%+v", got)
+	}
+}
+
+func TestParseXDFAxes(t *testing.T) {
+	b := []byte(`<?xml version="1.0"?>
+<XDFFORMAT>
+<XDFTABLE><title>LAMFA</title>
+<XDFAXIS id="x">
+<EMBEDDEDDATA mmedaddress="0x100FF" mmedelementsizebits="8" />
+<indexcount>12</indexcount>
+</XDFAXIS>
+<XDFAXIS id="y"><indexcount>16</indexcount></XDFAXIS>
+<XDFAXIS id="z"><EMBEDDEDDATA mmedaddress="0x20" mmedelementsizebits="8" /></XDFAXIS>
+</XDFTABLE>
+</XDFFORMAT>`)
+	got, err := ParseXDFAxes(b)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got) != 1 || got[0].Name != "LAMFA" || got[0].ID != "x" || got[0].Addr != 0x100FF || got[0].Count != 12 || got[0].Bits != 8 {
+		t.Fatalf("%+v", got)
+	}
+}
+
+func TestMatchAxes(t *testing.T) {
+	got := []Axis{{Name: "LAMFA", ID: "x", Addr: needleBase + 0x100FF, Count: 12, Bits: 8}}
+	want := []Axis{
+		{Name: "LAMFA", ID: "x", Addr: 0x100FF, Count: 12, Bits: 8},
+		{Name: "LAMFA", ID: "y", Addr: 0x100C2, Count: 16, Bits: 8},
+	}
+	hit, n := matchAxes(got, want)
+	if hit != 1 || n != 2 {
+		t.Fatalf("%d/%d", hit, n)
+	}
+	got[0].Bits = 16
+	hit, n = matchAxes(got, want)
+	if hit != 0 || n != 2 {
+		t.Fatalf("width %d/%d", hit, n)
+	}
+}
+
+func TestCoverCountsNameOnce(t *testing.T) {
+	got := cover([]string{"nmot", "rl"}, [][]string{{"nmot"}, {"nmot"}})
+	if got.String() != "50.0% (1/2)" {
+		t.Fatal(got)
+	}
+}
+
+func TestCoverMissUntilLocated(t *testing.T) {
+	miss := cover([]string{"wkrdy"}, [][]string{{"nmot"}})
+	if miss.String() != "0.0% (0/1)" {
+		t.Fatal(miss)
+	}
+	hit := cover([]string{"wkrdy"}, [][]string{{"nmot"}, {"wkrdy"}})
+	if hit.String() != "100.0% (1/1)" {
+		t.Fatal(hit)
+	}
+}
+
+func TestScoreWikiOneAddress(t *testing.T) {
+	maps := []record.Map{
+		{Name: "KFZW", Addr: needleBase + 0x10, X: &record.Axis{Addr: needleBase + 0x11, Count: 8, Bits: 8}},
+		{Name: "KFZW", Addr: needleBase + 0x10},
+		{Name: "LAMFA", Addr: needleBase + 0x20, X: &record.Axis{Addr: needleBase + 0x21, Count: 4, Bits: 8}},
+		{Name: "LAMFA", Addr: needleBase + 0x30, X: &record.Axis{Addr: needleBase + 0x31, Count: 4, Bits: 8}},
+		{Name: "KFKHFM", Addr: needleBase + 0x40},
+	}
+	got := scoreWiki([]string{"KFZW", "LAMFA", "KFKHFM"}, nil, maps)
+	if got.String() != "33.3% (1/3)" {
+		t.Fatal(got)
+	}
+	got = scoreWiki([]string{"KFZW", "LAMFA", "KFKHFM"}, map[string]struct{}{"KFKHFM": {}}, maps)
+	if got.String() != "66.7% (2/3)" {
+		t.Fatal(got)
+	}
+}
+
+func TestRunLayout(t *testing.T) {
+	dir := t.TempDir()
+	write := func(name, body string) {
+		t.Helper()
+		path := filepath.Join(dir, name)
+		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	ecu := "[Measurements]\nnmot,{},0xF878,1,0,rpm,0,0,40,0,speed\nrl,{},0x380100,2,0,%,0,0,0.01,0,load\n"
+	xdf := "<?xml version=\"1.0\"?><XDFFORMAT><XDFCONSTANT><title>KRKTE</title><EMBEDDEDDATA mmedaddress=\"0x10\" /></XDFCONSTANT><XDFCONSTANT><title>EXTRA</title><EMBEDDEDDATA mmedaddress=\"0x20\" /></XDFCONSTANT></XDFFORMAT>"
+	write("bin/a.bin", "")
+	write("bin/b.bin", "")
+	write("ecu/me7info/a.ecu", ecu)
+	write("ecu/me7info/b.ecu", "")
+	write("xdf/s4wiki/names.yaml", "names:\n- KFZW\n- LAMFA\n")
+	write("xdf/a.xdf", xdf)
+	gen := func(name string, _ []byte) ([]record.Item, []record.Map, error) {
+		switch name {
+		case "a.bin":
+			return []record.Item{{Name: "nmot", Addr: 0xF878, Size: 1}},
+				[]record.Map{{Name: "KFZW", Addr: needleBase + 0x10, X: &record.Axis{Addr: needleBase + 0x11, Count: 8, Bits: 8}}}, nil
+		case "b.bin":
+			return []record.Item{{Name: "nmot", Addr: 0xF900, Size: 1}, {Name: "wkrdy", Addr: 1, Size: 1}},
+				[]record.Map{{Name: "KFZW", Addr: needleBase + 0x99}}, nil
+		default:
+			t.Fatalf("unexpected %s", name)
+			return nil, nil, nil
+		}
+	}
+	got, err := run(dir, gen)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got.ME7Info) != 1 || got.ME7Info[0].Name != "a.bin" || got.ME7Info[0].String() != "50.0% (1/2)" {
+		t.Fatalf("me7info %+v", got.ME7Info)
+	}
+	if got.ME7Info[0].Corpus.Hit != 1 || got.ME7Info[0].Corpus.Total <= 1 {
+		t.Fatalf("catalog %+v", got.ME7Info[0].Corpus)
+	}
+	if len(got.Extras) != 2 || got.Extras[0].Name != "a.bin" || got.Extras[0].Hit != 1 || got.Extras[1].Hit != 2 {
+		t.Fatalf("extras %+v", got.Extras)
+	}
+	if got.ExtrasAll.Hit != 2 || got.ExtrasAll.Total <= got.ExtrasAll.Hit {
+		t.Fatalf("extras all %+v", got.ExtrasAll)
+	}
+	if len(got.S4Wiki) != 2 || got.S4Wiki[0].Name != "a.bin" || got.S4Wiki[1].Name != "b.bin" {
+		t.Fatalf("s4wiki %+v", got.S4Wiki)
+	}
+	if got.S4Wiki[0].String() != "50.0% (1/2)" || got.S4Wiki[1].String() != "0.0% (0/2)" {
+		t.Fatalf("s4wiki %+v", got.S4Wiki)
+	}
+	if len(got.XDF) != 1 || got.XDF[0].Name != "a.bin" || got.XDF[0].String() != "0.0% (0/2)" {
+		t.Fatalf("xdf %+v", got.XDF)
+	}
+	if len(got.XDFAxis) != 0 {
+		t.Fatalf("xdf axis %+v", got.XDFAxis)
+	}
+}
+
+func TestReportText(t *testing.T) {
+	rep := &Report{
+		ME7Info: []Image{{
+			Name: "a.bin", Fraction: Fraction{1, 2}, Beyond: 3, Corpus: Fraction{2, 10},
+		}},
+		Extras:    []Image{{Name: "a.bin", Fraction: Fraction{1, 4}}},
+		ExtrasAll: Fraction{1, 4},
+		S4Wiki: []Image{
+			{Name: "a.bin", Fraction: Fraction{1, 2}},
+			{Name: "bb.bin", Fraction: Fraction{0, 2}},
+		},
+		XDF:     []Image{{Name: "a.bin", Fraction: Fraction{0, 3}}},
+		XDFAxis: []Image{{Name: "a.bin", Fraction: Fraction{1, 4}}},
+	}
+	got := rep.Text()
+	want := "" +
+		"ecu me7info   vs ecu-specific     vs corpus\n" +
+		"  a.bin       50.0%  1/2 (+3)   20.0%  2/10\n" +
+		"\n" +
+		"ecu extras\n" +
+		"  a.bin       25.0%  1/4\n" +
+		"  all         25.0%  1/4\n" +
+		"\n" +
+		"xdf s4wiki\n" +
+		"  a.bin       50.0%  1/2\n" +
+		"  bb.bin       0.0%  0/2\n" +
+		"\n" +
+		"xdf\n" +
+		"  a.bin        0.0%  0/3\n" +
+		"\n" +
+		"xdf axis\n" +
+		"  a.bin       25.0%  1/4\n"
+	if got != want {
+		t.Fatalf("got\n%s\nwant\n%s", got, want)
+	}
+}
+
+func TestBeyondME7(t *testing.T) {
+	cat := map[string]struct{}{"ti_avg": {}, "nmot": {}}
+	meas := map[string]struct{}{"wkrdy": {}}
+	items := []record.Item{
+		{Name: "nmot"},
+		{Name: "ti_avg"},
+		{Name: "ti_avg"},
+		{Name: "wkrdy"},
+		{Name: "other"},
+	}
+	want := []record.Item{{Name: "nmot"}}
+	if n := beyondME7(items, want, cat, meas); n != 1 {
+		t.Fatalf("%d", n)
+	}
+}
+
+func TestME7InfoParity(t *testing.T) {
+	rep, err := Run(filepath.Join("..", "testdata", "parity"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rep.ME7Info) == 0 {
+		t.Fatal("no ME7Info image")
+	}
+	for _, im := range rep.ME7Info {
+		if im.Hit != im.Total {
+			t.Errorf("%s %s", im.Name, im.Fraction)
+		}
+	}
+}
+
+func TestFraction(t *testing.T) {
+	if (Fraction{1, 4}).String() != "25.0% (1/4)" {
+		t.Fatal((Fraction{1, 4}).String())
+	}
+	if (Fraction{}).String() != "0.0% (0/0)" {
+		t.Fatal((Fraction{}).String())
+	}
+}

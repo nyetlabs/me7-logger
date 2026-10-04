@@ -1,0 +1,6 @@
+# EA 00 is not a leading jump, so the walk stops.
+size 0x40
+00: D4 40 12 00 66 F4 0F 00
+08: EA 00 00 00 46 F4 01 00 2D 07
+12: 46 F4 F7 03 2D 07
+20: F2 F4 00 81 DB 00
