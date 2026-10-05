@@ -4,10 +4,12 @@
 # label to the CALLS. caller is the Funktionsrahmen module and the entry.
 # interp is the map_interp needle.
 # Two rows with one name are two calls that pass the same map.
-# The axis point count and its width are read from the image. That is the column axis.
-# When the call loads it from a RAM word, that word holds the header a setup stored:
-# the low 14 bits in R12, and the page in R13 when the header is not on DPP0.
-# The row axis is not an argument of the call.
+# The axis point count and its width are read from the image. That is the column axis
+# when R13 is that header. A load of R14 or R15 from a RAM word is a header a setup
+# stored: the low 14 bits in R12, and the page in R13 when the header is not on DPP0.
+# A word whose header is the column is the column index. A different header is the row.
+# Two different row headers leave the row unset. A page call that does not load that
+# word leaves the row unset.
 
 maps:
 - name: KRFKLN

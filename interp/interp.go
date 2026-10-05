@@ -22,8 +22,8 @@ const (
 
 // Locate returns one map per address passed to a map_interp needle.
 // Addr is the CPU address of the map body. Cols and the column axis are read
-// from this image's header when R13 is that header. The row axis is Y and
-// stays unset until this image's second header is read. Body width stays
+// from this image's header when R13 is that header. The row axis is the other
+// header a setup stored into a RAM word this call loads. Body width stays
 // unset until this image says what it is. An M-box size is not filled in.
 // The Bosch name is not on the needle. It comes from which caller function
 // made the call. calls names that caller slot. An empty list leaves every
@@ -38,7 +38,7 @@ func Locate(data []byte, ns []needle.Needle, dpp [4]uint16, calls []record.Call)
 		}
 		for _, label := range n.Labels(data) {
 			for _, call := range callsTo(data, label) {
-				r12, r13, r14, r15, hasR13, hasAxis, r13ram, r14ram, hasR13Ram, hasR14Ram, ok := mapArgs(data, call)
+				r12, r13, r14, r15, hasR13, hasAxis, r13ram, r14ram, r15ram, hasR13Ram, hasR14Ram, hasR15Ram, ok := mapArgs(data, call)
 				if !ok {
 					continue
 				}
@@ -46,7 +46,7 @@ func Locate(data []byte, ns []needle.Needle, dpp [4]uint16, calls []record.Call)
 				if !ok {
 					continue
 				}
-				x, y, xOK, yOK := callAxes(data, dpp, r13, hasR13, r14, r15, hasAxis, r13ram, r14ram, hasR13Ram, hasR14Ram)
+				x, y, xOK, yOK := callAxes(data, dpp, r13, hasR13, r14, r15, hasAxis, r13ram, r14ram, r15ram, hasR13Ram, hasR14Ram, hasR15Ram)
 				name := slotName(data, ns, labels, calls, call, n.Name)
 				if i, dup := seen[addr]; dup {
 					if out[i].Name == "" && name != "" {
@@ -80,18 +80,18 @@ func Locate(data []byte, ns []needle.Needle, dpp [4]uint16, calls []record.Call)
 	return out
 }
 
-// callAxes reads the column header this call can see.
-// R13 is that header when it is not a page. When R13 is a page, R14 is the
-// low 14 bits of the column header and R15 is its page. A load of R14, or of
-// R13 when R13 is not an immediate, is the RAM word a setup stored that
-// header into. The row header is not an argument of the call. Y stays unset
-// until that header is read.
-func callAxes(data []byte, dpp [4]uint16, r13 uint16, hasR13 bool, r14, r15 uint16, hasAxis bool, r13ram, r14ram uint16, hasR13Ram, hasR14Ram bool) (x, y record.Axis, xOK, yOK bool) {
+// callAxes reads the column header this call can see, then the row header.
+// R13 is the column header when it is not a page. When R13 is a page, R14 is
+// the low 14 bits of the column header and R15 is its page. A load of R14, or
+// of R13 when R13 is not an immediate, is the RAM word a setup stored that
+// header into. Once the column is known, each RAM word this call loads is
+// read the same way. A header whose values are the column axis is the column
+// index. A different header is the row axis. Two different row headers leave
+// Y unset. A curve keeps the one header that matches the column.
+func callAxes(data []byte, dpp [4]uint16, r13 uint16, hasR13 bool, r14, r15 uint16, hasAxis bool, r13ram, r14ram, r15ram uint16, hasR13Ram, hasR14Ram, hasR15Ram bool) (x, y record.Axis, xOK, yOK bool) {
 	if hasR13 && !pageImm(r13) {
 		x, xOK = axisOf(data, dpp, r13)
-		return x, y, xOK, yOK
-	}
-	if hasR13 && pageImm(r13) && hasAxis {
+	} else if hasR13 && pageImm(r13) && hasAxis {
 		x, xOK = axisAt(data, (uint32(r15)<<14)|uint32(r14&0x3FFF))
 	}
 	if !xOK && hasR14Ram {
@@ -99,10 +99,47 @@ func callAxes(data []byte, dpp [4]uint16, r13 uint16, hasR13 bool, r14, r15 uint
 	} else if !xOK && !hasR13 && hasR13Ram {
 		x, xOK = RamAxis(data, dpp, r13ram, 0)
 	}
+	if !xOK {
+		return x, y, false, false
+	}
+	var words [3]uint16
+	n := 0
+	if hasR13Ram {
+		words[n] = r13ram
+		n++
+	}
+	if hasR14Ram {
+		words[n] = r14ram
+		n++
+	}
+	if hasR15Ram {
+		words[n] = r15ram
+		n++
+	}
+	y, yOK = rowAxis(data, dpp, x, words[:n])
 	return x, y, xOK, yOK
 }
 
-// RamAxis reads the column header stored into ram.
+// rowAxis is a header stored into one of words, when its values are not the
+// column axis. Two headers that name different values leave the row unset.
+func rowAxis(data []byte, dpp [4]uint16, x record.Axis, words []uint16) (record.Axis, bool) {
+	var y record.Axis
+	seen := false
+	for _, w := range words {
+		ax, ok := RamAxis(data, dpp, w, 0)
+		if !ok || ax.Addr == x.Addr {
+			continue
+		}
+		if seen && ax.Addr != y.Addr {
+			return record.Axis{}, false
+		}
+		y = ax
+		seen = true
+	}
+	return y, seen
+}
+
+// RamAxis reads the header stored into ram.
 // The store is MOV [ram], R4. In front of it the setup passes the header's
 // low 14 bits in R12 and, when the header is not on DPP0, its page in R13.
 // bits 8 or 16 is that header's width. bits 0 uses the zero-marker rule.
@@ -168,14 +205,16 @@ func axisBits(data []byte, addr uint32, bits int) (record.Axis, bool) {
 
 // axisSetup is the immediate in front of a store to ram.
 // page 0 means the header sits on DPP0. The call between the moves and the
-// store is DA. The long form reloads ram just before that call.
+// store is DA. The long form reloads ram just before that call. C2, or F2 of
+// R13, may sit between MOV R12,#imm and that reload. Page 0 and an E6 FD page
+// immediate are what e6Before reads.
 func axisSetup(data []byte, store int, ram uint16) (page, imm uint16, ok bool) {
 	if store < 12 || data[store-4] != 0xDA {
 		return 0, 0, false
 	}
 	f2 := store - 8
 	if f2 >= 4 && data[f2] == 0xF2 && (data[f2+1] == 0xFE || data[f2+1] == 0xFF) &&
-		binary.LittleEndian.Uint16(data[f2+2:f2+4]) == ram && data[f2-4] == 0xC2 {
+		binary.LittleEndian.Uint16(data[f2+2:f2+4]) == ram && moveBefore(data, f2-4) {
 		if page, imm, ok = e6Before(data, f2-4); ok {
 			return page, imm, true
 		}
@@ -184,6 +223,19 @@ func axisSetup(data []byte, store int, ram uint16) (page, imm uint16, ok bool) {
 		return 0, 0, false
 	}
 	return e6Before(data, f2)
+}
+
+// moveBefore is the instruction between the header immediate and the reload.
+// C2 is that move on the setups already read. F2 of R13 is the same move when
+// the input is a memory operand.
+func moveBefore(data []byte, at int) bool {
+	if at < 0 || at+2 > len(data) {
+		return false
+	}
+	if data[at] == 0xC2 {
+		return true
+	}
+	return data[at] == 0xF2 && data[at+1] == 0xFD
 }
 
 // e6Before reads MOV R12,#imm, and MOV R13,#imm when it is the next instruction.
@@ -261,10 +313,10 @@ func callsTo(data []byte, label int) []int {
 // R12-R15 (E6, F2, C2), a 4-byte F6 or F7, or a 2-byte F0 or C0. The nearest
 // such frame wins. hasR13 is set when MOV R13,#imm is in the frame. hasAxis
 // is set when MOV R14,#imm and MOV R15,#imm are both in the frame. A MOV of
-// R13 or R14 from memory records that RAM word.
-func mapArgs(data []byte, call int) (r12, r13, r14, r15 uint16, hasR13, hasAxis bool, r13ram, r14ram uint16, hasR13Ram, hasR14Ram, ok bool) {
+// R13, R14, or R15 from memory records that RAM word.
+func mapArgs(data []byte, call int) (r12, r13, r14, r15 uint16, hasR13, hasAxis bool, r13ram, r14ram, r15ram uint16, hasR13Ram, hasR14Ram, hasR15Ram, ok bool) {
 	if call < 4 {
-		return 0, 0, 0, 0, false, false, 0, 0, false, false, false
+		return 0, 0, 0, 0, false, false, 0, 0, 0, false, false, false, false
 	}
 	startMin := call - 20
 	if startMin < 0 {
@@ -299,12 +351,15 @@ func mapArgs(data []byte, call int) (r12, r13, r14, r15 uint16, hasR13, hasAxis 
 			case op == 0xF2 && data[start+pos+1] == 0xFE:
 				r14ram = word
 				hasR14Ram = true
+			case op == 0xF2 && data[start+pos+1] == 0xFF:
+				r15ram = word
+				hasR15Ram = true
 			}
 			pos += 4
 		}
-		return r12, r13, r14, r15, hasR13, hasR14 && hasR15, r13ram, r14ram, hasR13Ram, hasR14Ram, true
+		return r12, r13, r14, r15, hasR13, hasR14 && hasR15, r13ram, r14ram, r15ram, hasR13Ram, hasR14Ram, hasR15Ram, true
 	}
-	return 0, 0, 0, 0, false, false, 0, 0, false, false, false
+	return 0, 0, 0, 0, false, false, 0, 0, 0, false, false, false, false
 }
 
 // argFrame reports whether b is MOV R12,#imm followed only by the moves that

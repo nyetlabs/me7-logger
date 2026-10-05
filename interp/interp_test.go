@@ -54,14 +54,120 @@ functions:
 	if got[0].Name != "" || got[0].Addr != 0x810200 || got[0].Bits != 0 || got[0].Cols != 4 || got[0].Comment != Byte {
 		t.Fatalf("%+v", got[0])
 	}
-	if got[0].X == nil || got[0].X.Addr != 0x810111 || got[0].X.Count != 4 || got[0].X.Bits != 8 {
-		t.Fatalf("%+v", got[0].X)
+	if got[0].X == nil || got[0].X.Addr != 0x810111 || got[0].X.Count != 4 || got[0].X.Bits != 8 || got[0].Y != nil {
+		t.Fatalf("%+v", got[0])
 	}
 	if got[1].Addr != 0x810300 || got[1].Cols != 4 || got[1].Comment != ByteB {
 		t.Fatalf("%+v", got[1])
 	}
-	if got[1].X == nil || got[1].X.Addr != 0x810122 || got[1].X.Bits != 16 || got[1].X.Count != 4 {
-		t.Fatalf("%+v", got[1].X)
+	if got[1].X == nil || got[1].X.Addr != 0x810122 || got[1].X.Bits != 16 || got[1].X.Count != 4 || got[1].Y != nil {
+		t.Fatalf("%+v", got[1])
+	}
+}
+
+func TestRowAxis(t *testing.T) {
+	const entry = 0x40
+	img := make([]byte, 0x10400)
+	copy(img[entry:], []byte{
+		0x26, 0xF4, 0x00, 0x80, 0x8D, 0x04, 0x7D, 0x06,
+		0xE6, 0xF4, 0xFF, 0x7F, 0x0D, 0x03, 0x6D, 0x02,
+		0xE6, 0xF4, 0x00, 0x80,
+	})
+	// Column header: count 4, then the breakpoints. R13 is 0x0110.
+	copy(img[0x10110:], []byte{4, 1, 2, 3, 4})
+	// Row header: count 16, then the breakpoints. The setup's R12 is 0x00C0.
+	row := make([]byte, 17)
+	row[0] = 16
+	row[1] = 0x0B
+	copy(img[0x100C0:], row)
+	// R14's setup stores the row header. R15's setup stores the column header.
+	copy(img[0x300:], []byte{
+		0xE6, 0xFC, 0xC0, 0x00,
+		0xC2, 0xFD, 0x00, 0x00,
+		0xF2, 0xFE, 0x46, 0x8F,
+		0xDA, 0x00, 0x00, 0x00,
+		0xF6, 0xF4, 0x46, 0x8F,
+	})
+	copy(img[0x320:], []byte{
+		0xE6, 0xFC, 0x10, 0x01,
+		0xC2, 0xFD, 0x00, 0x00,
+		0xF2, 0xFF, 0x54, 0x8F,
+		0xDA, 0x00, 0x00, 0x00,
+		0xF6, 0xF4, 0x54, 0x8F,
+	})
+	copy(img[0x400:], []byte{
+		0xE6, 0xFC, 0x00, 0x02,
+		0xE6, 0xFD, 0x10, 0x01,
+		0xF2, 0xFE, 0x46, 0x8F,
+		0xF2, 0xFF, 0x54, 0x8F,
+		0xDA, 0x00, byte(entry), byte(entry >> 8),
+	})
+	ns, err := needle.Parse([]byte(`
+functions:
+  - name: map_interp_table8
+    needle_hex: "26 F4 00 80 8D 04 7D 06 E6 F4 FF 7F 0D 03 6D 02 E6 F4 00 80"
+    unique: false
+`), "t")
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := Locate(img, ns, opcode.StandardDPP, nil)
+	if len(got) != 1 {
+		t.Fatalf("%d maps", len(got))
+	}
+	if got[0].Addr != 0x810200 || got[0].Cols != 4 || got[0].Rows != 16 {
+		t.Fatalf("%+v", got[0])
+	}
+	if got[0].X == nil || got[0].X.Addr != 0x810111 || got[0].X.Count != 4 || got[0].X.Bits != 8 {
+		t.Fatalf("col %+v", got[0].X)
+	}
+	if got[0].Y == nil || got[0].Y.Addr != 0x8100C1 || got[0].Y.Count != 16 || got[0].Y.Bits != 8 || got[0].Y.Equation != "" {
+		t.Fatalf("row %+v", got[0].Y)
+	}
+}
+
+func TestRowAxisF2(t *testing.T) {
+	const entry = 0x40
+	img := make([]byte, 0x10400)
+	copy(img[entry:], []byte{
+		0x26, 0xF4, 0x00, 0x80, 0x8D, 0x04, 0x7D, 0x06,
+		0xE6, 0xF4, 0xFF, 0x7F, 0x0D, 0x03, 0x6D, 0x02,
+		0xE6, 0xF4, 0x00, 0x80,
+	})
+	copy(img[0x10110:], []byte{4, 1, 2, 3, 4})
+	row := make([]byte, 17)
+	row[0] = 16
+	row[1] = 0x0B
+	copy(img[0x100C0:], row)
+	// F2 of R13 sits between the header immediate and the reload.
+	copy(img[0x300:], []byte{
+		0xE6, 0xFC, 0xC0, 0x00,
+		0xF2, 0xFD, 0x78, 0xF8,
+		0xF2, 0xFE, 0x46, 0x8F,
+		0xDA, 0x00, 0x00, 0x00,
+		0xF6, 0xF4, 0x46, 0x8F,
+	})
+	copy(img[0x400:], []byte{
+		0xE6, 0xFC, 0x00, 0x02,
+		0xE6, 0xFD, 0x10, 0x01,
+		0xF2, 0xFE, 0x46, 0x8F,
+		0xDA, 0x00, byte(entry), byte(entry >> 8),
+	})
+	ns, err := needle.Parse([]byte(`
+functions:
+  - name: map_interp_table8
+    needle_hex: "26 F4 00 80 8D 04 7D 06 E6 F4 FF 7F 0D 03 6D 02 E6 F4 00 80"
+    unique: false
+`), "t")
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := Locate(img, ns, opcode.StandardDPP, nil)
+	if len(got) != 1 {
+		t.Fatalf("%d maps", len(got))
+	}
+	if got[0].Y == nil || got[0].Y.Addr != 0x8100C1 || got[0].Y.Count != 16 || got[0].Y.Bits != 8 {
+		t.Fatalf("row %+v", got[0].Y)
 	}
 }
 
@@ -105,7 +211,7 @@ functions:
 	if len(got) != 1 {
 		t.Fatalf("%d maps", len(got))
 	}
-	if got[0].Addr != 0x810200 || got[0].Cols != 4 || got[0].X == nil || got[0].X.Addr != 0x810111 || got[0].X.Bits != 8 {
+	if got[0].Addr != 0x810200 || got[0].Cols != 4 || got[0].X == nil || got[0].X.Addr != 0x810111 || got[0].X.Bits != 8 || got[0].Y != nil {
 		t.Fatalf("%+v axis %+v", got[0], got[0].X)
 	}
 }
@@ -159,10 +265,10 @@ functions:
 	if len(got) != 2 {
 		t.Fatalf("%d maps", len(got))
 	}
-	if got[0].Addr != 0x810200 || got[0].Cols != 8 || got[0].X == nil || got[0].X.Addr != 0x810085 || got[0].X.Bits != 8 {
+	if got[0].Addr != 0x810200 || got[0].Cols != 8 || got[0].X == nil || got[0].X.Addr != 0x810085 || got[0].X.Bits != 8 || got[0].Y != nil {
 		t.Fatalf("page %+v axis %+v", got[0], got[0].X)
 	}
-	if got[1].Addr != 0x810300 || got[1].Cols != 4 || got[1].X == nil || got[1].X.Addr != 0x810111 || got[1].X.Bits != 8 {
+	if got[1].Addr != 0x810300 || got[1].Cols != 4 || got[1].X == nil || got[1].X.Addr != 0x810111 || got[1].X.Bits != 8 || got[1].Y != nil {
 		t.Fatalf("direct %+v axis %+v", got[1], got[1].X)
 	}
 }
