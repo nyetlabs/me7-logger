@@ -22,7 +22,7 @@ Shipped behavior comes from the YAML in `config/`. Files you add under `config/u
 
 `make package` writes `dist/`. A tag `vX.Y.Z` publishes those archives. `vX.Y.Z-rcN` is a prerelease. macOS and Linux archives are `.tar.gz`. Windows is `.zip`.
 
-Each archive contains `me7info` and `me7logger` (`.exe` on Windows), this file, `QUICKSTART.md`, `DEVELOPER.md`, `LICENSE`, and `config/`. Run the programs from the unpacked directory so they read `config/`.
+Each archive contains `me7info` and `me7logger` (`.exe` on Windows), this file, `QUICKSTART.md`, `DEVELOPER.md`, `LICENSE`, and `config/`. Run the programs from the unpacked directory so they read `config/`. Rows added under that folder's `config/user/` stay in the folder. Replacing the folder drops them.
 
 ## WARNING
 
