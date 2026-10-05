@@ -104,7 +104,7 @@ func TestShippedNeedles(t *testing.T) {
 }
 
 func TestShippedMaps(t *testing.T) {
-	calls, err := LoadMaps("")
+	calls, err := LoadMaps("", "")
 	if err != nil {
 		t.Fatal(err)
 	}

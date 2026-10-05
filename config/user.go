@@ -253,7 +253,7 @@ func parseRoot(b []byte, name string) (map[string]*yaml.Node, error) {
 	}
 	for k := range fields {
 		switch k {
-		case "conversions", "measurements", "data", "functions":
+		case "conversions", "measurements", "data", "functions", "maps":
 		default:
 			return nil, fmt.Errorf("%s: unknown field %s", name, k)
 		}

@@ -31,7 +31,7 @@ build:
 version:
 	@echo $(VERSION)
 
-# Each archive is me7info, me7logger, README.md, LICENSE, and config/.
+# Each archive is me7info, me7logger, README.md, QUICKSTART.md, DEVELOPER.md, LICENSE, and config/.
 # macOS and Linux are tar.gz. Windows is zip. Run from the unpacked directory.
 package:
 	rm -rf dist
@@ -51,10 +51,14 @@ package:
 		mkdir -p "$$stage/config/catalog" "$$stage/config/examples" "$$stage/config/user"; \
 		CGO_ENABLED=0 GOOS=$$goos GOARCH=$$arch go build -ldflags "-X main.version=$(VERSION)" -o "$$stage/me7info$$ext" ./cmd/me7info; \
 		CGO_ENABLED=0 GOOS=$$goos GOARCH=$$arch go build -ldflags "-X main.version=$(VERSION)" -o "$$stage/me7logger$$ext" ./cmd/me7logger; \
-		cp README.md LICENSE "$$stage/"; \
+		cp README.md QUICKSTART.md DEVELOPER.md LICENSE "$$stage/"; \
 		cp config/*.yaml "$$stage/config/"; \
 		cp config/catalog/*.yaml "$$stage/config/catalog/"; \
 		cp config/examples/*.yaml "$$stage/config/examples/"; \
+		awk 'NF && substr($$1,1,1) != "#" { exit } { print }' config/measurements.yaml > "$$stage/config/user/measurements.yaml"; \
+		printf '%s\n' 'measurements: []' >> "$$stage/config/user/measurements.yaml"; \
+		awk 'NF && substr($$1,1,1) != "#" { exit } { print }' config/maps.yaml > "$$stage/config/user/maps.yaml"; \
+		printf '%s\n' 'maps: []' >> "$$stage/config/user/maps.yaml"; \
 		if [[ $$goos == windows ]]; then \
 			( cd dist && COPYFILE_DISABLE=1 zip -r -q -X "$$name.zip" "$$name" ); \
 		else \

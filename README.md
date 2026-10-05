@@ -14,7 +14,7 @@ me7info generate -o out.ecu -xdf out.xdf image.bin
 me7logger log -p /dev/tty.usbserial -1 -o log.csv image.bin session.cfg
 ```
 
-`generate` does not open a serial port. Without `-o` and `-xdf` it writes the `.ecu` and `.xdf` next to the image. `log` stays at 10400 baud.
+`generate` does not open a serial port. Without `-o` and `-xdf` it writes the `.ecu` and `.xdf` next to the image. `log` stays at 10400 baud. See [Quickstart](QUICKSTART.md). Overlay rules and `make parity` are in [DEVELOPER.md](DEVELOPER.md).
 
 Shipped behavior comes from the YAML in `config/`. Files you add under `config/user/` stay out of git.
 
@@ -22,7 +22,7 @@ Shipped behavior comes from the YAML in `config/`. Files you add under `config/u
 
 `make package` writes `dist/`. A tag `vX.Y.Z` publishes those archives. `vX.Y.Z-rcN` is a prerelease. macOS and Linux archives are `.tar.gz`. Windows is `.zip`.
 
-Each archive contains `me7info` and `me7logger` (`.exe` on Windows), this file, `LICENSE`, and `config/`. Run the programs from the unpacked directory so they read `config/`.
+Each archive contains `me7info` and `me7logger` (`.exe` on Windows), this file, `QUICKSTART.md`, `DEVELOPER.md`, `LICENSE`, and `config/`. Run the programs from the unpacked directory so they read `config/`.
 
 ## WARNING
 

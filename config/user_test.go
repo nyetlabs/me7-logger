@@ -363,3 +363,58 @@ func TestNamedConversionKeepsBlankUnit(t *testing.T) {
 		t.Fatal("dropped torque was still applied")
 	}
 }
+
+func TestUserMapAndMeasureLists(t *testing.T) {
+	dir := t.TempDir()
+	empty := "measurements: []\nmaps: []\n"
+	if err := os.WriteFile(filepath.Join(dir, "measurements.yaml"), []byte(empty), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "maps.yaml"), []byte("maps: []\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	baseM, err := LoadMeasures("", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	gotM, err := LoadMeasures("", "", dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(gotM) != len(baseM) {
+		t.Fatalf("measurements %d base %d", len(gotM), len(baseM))
+	}
+	if _, err := LoadNeedles("", dir); err != nil {
+		t.Fatal(err)
+	}
+	base, err := LoadMaps("", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := LoadMaps("", dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got) != len(base) {
+		t.Fatalf("maps %d base %d", len(got), len(base))
+	}
+	row := "maps:\n- name: USERMAP\n  caller: ZWGRU_ign_zw\n  at: '0x10'\n  interp: map_interp_table8\n"
+	if err := os.WriteFile(filepath.Join(dir, "maps.yaml"), []byte(row), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	got, err = LoadMaps("", dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	last := got[len(got)-1]
+	if len(got) != len(base)+1 || last.Name != "USERMAP" || last.Caller != "ZWGRU_ign_zw" || last.At != 0x10 || last.Interp != "map_interp_table8" {
+		t.Fatalf("%+v len %d", last, len(got))
+	}
+	clash := "maps:\n- name: OTHER\n  caller: ZWGRU_ign_zw\n  at: '0x5DE'\n  interp: map_interp_table8\n"
+	if err := os.WriteFile(filepath.Join(dir, "maps.yaml"), []byte(clash), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := LoadMaps("", dir); err == nil {
+		t.Fatal("repeated caller and distance was accepted")
+	}
+}

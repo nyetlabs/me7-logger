@@ -75,7 +75,7 @@ func Generate(opt Options) (*Result, error) {
 	if err != nil {
 		return nil, err
 	}
-	calls, err := config.LoadMaps("")
+	calls, err := config.LoadMaps("", opt.UserDir)
 	if err != nil {
 		return nil, err
 	}
