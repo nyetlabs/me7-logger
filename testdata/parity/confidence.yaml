@@ -1,0 +1,10 @@
+# Left out of confidence on every image.
+# The body differs across most of its cells between images in one dataset.
+skip:
+  - KFDMDADP
+  - KFDMDARO
+  - KFMIZUFIL
+  - KFMIZUOF
+  - KFMIZUNS
+  - KFMPED_UM
+  - KFNWWL

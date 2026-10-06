@@ -374,6 +374,16 @@ func run(dir string, gen imageGen) (*Report, error) {
 		if err != nil {
 			return nil, err
 		}
+		skip, err := loadConfidenceSkip(dir)
+		if err != nil {
+			return nil, err
+		}
+		for n := range skip {
+			if _, ok := axes[n]; !ok {
+				return nil, fmt.Errorf("confidence skip: %s is not an s4wiki name", n)
+			}
+		}
+		confWiki := omitNames(wiki, skip)
 		byStem := map[string]kept{}
 		for _, h := range held {
 			byStem[h.stem] = h
@@ -389,7 +399,7 @@ func run(dir string, gen imageGen) (*Report, error) {
 					img: o.img, maps: o.maps, scored: wikiMaps(wiki, axes, o.maps, o.oracle),
 				})
 			}
-			rep.S4Wiki[i].Confidence = scoreConfidence(wiki, axes, h.img, h.maps, h.oracle, peers)
+			rep.S4Wiki[i].Confidence = scoreConfidence(confWiki, axes, h.img, h.maps, h.oracle, peers)
 		}
 	}
 	return rep, nil

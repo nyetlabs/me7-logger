@@ -199,12 +199,12 @@ The number on the list is how many axes the table has, and those counts are the 
 
 Maps are located on that image from the caller that passes the map to the interpolator. How the column and the row are read is in the `config/maps.yaml` section above. `addMapAt` reads the row and column counts when they sit in front of the axes. A count the image does not hold stays unset, and that map is written as a constant. A mapsig row names a header with `yat` when a setup stored it in a RAM word.
 
-`confidence` scores the body bytes of the names that hit. The denominator is that matched set. A name the locator missed is not in it, and neither is the axis count.
+`confidence` scores the body bytes of the names that hit. The denominator is that matched set. A name the locator missed is not in it, and neither is the axis count. `testdata/parity/confidence.yaml` lists names left out of that score on every image. Those names stay on the S4wiki list.
 
 ```mermaid
 flowchart TD
   b[body]
-  b --> z{zero?}
+  b --> z{longer than one byte and zero?}
   z -->|yes| s{peers?}
   s -->|all zero| hi[high]
   s -->|else| low[low]
@@ -218,7 +218,7 @@ flowchart TD
 
 - **peers** — every sibling that has this name. None means low.
 - **peer** — another image of the same dataset.
-- **near** — at most two cells differ, and both neighbors match.
+- **near** — at most two cells differ, or 3% of the cells on a larger map, and both neighbors match.
 
 Peers are the images grouped in `testdata/parity/datasets.yaml`. A shared axis does not lower the body.
 

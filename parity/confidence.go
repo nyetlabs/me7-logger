@@ -2,9 +2,11 @@ package parity
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 
@@ -13,6 +15,13 @@ import (
 )
 
 const largeBody = 16
+
+// nearCells is the smallest difference a large body may have.
+// nearPercent is the extra room on a bigger map, as a percent of its cells.
+const (
+	nearCells   = 2
+	nearPercent = 3
+)
 
 // scoreConfidence judges the body of each name the locator already scored.
 // The denominator is that matched set. A name the locator missed is not in it.
@@ -43,7 +52,8 @@ func confident(img []byte, maps []record.Map, m record.Map, peers []binBody) boo
 	if !ok {
 		return false
 	}
-	if allZero(raw) {
+	// A one-byte body is one cell. The empty-body rule is for a longer run of zeros.
+	if len(raw) > 1 && allZero(raw) {
 		return zerosMatch(m, raw, peers)
 	}
 	if cells < largeBody {
@@ -69,10 +79,21 @@ func bodiesMatch(img []byte, maps []record.Map, m record.Map, pimg []byte, pmaps
 	if diff == 0 {
 		return true
 	}
-	if diff > 2 || cells < largeBody {
+	if !nearDiff(diff, cells) {
 		return false
 	}
 	return neighborsMatch(img, maps, m, pimg, pmaps)
+}
+
+// nearDiff is a large body whose cells are close: two cells, or 3% of the body.
+func nearDiff(diff, cells int) bool {
+	if cells < largeBody {
+		return false
+	}
+	if diff <= nearCells {
+		return true
+	}
+	return diff*100 <= cells*nearPercent
 }
 
 func neighborsMatch(img []byte, maps []record.Map, m record.Map, pimg []byte, pmaps []record.Map) bool {
@@ -98,7 +119,7 @@ func neighborOK(img []byte, n record.Map, pimg []byte, pmaps []record.Map) bool 
 	if !ok {
 		return false
 	}
-	return diff == 0 || (cells >= largeBody && diff <= 2)
+	return diff == 0 || nearDiff(diff, cells)
 }
 
 func diffCells(img []byte, a record.Map, pimg []byte, b record.Map) (diff, cells int, ok bool) {
@@ -287,4 +308,47 @@ func loadDatasets(dir string) (map[string][]string, error) {
 		}
 	}
 	return peers, nil
+}
+
+// loadConfidenceSkip reads testdata/parity/confidence.yaml.
+// A missing file leaves every scored name in the confidence denominator.
+func loadConfidenceSkip(dir string) (map[string]struct{}, error) {
+	b, err := os.ReadFile(filepath.Join(dir, "confidence.yaml"))
+	if os.IsNotExist(err) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	var doc struct {
+		Skip []string `yaml:"skip"`
+	}
+	if err := yaml.Unmarshal(b, &doc); err != nil {
+		return nil, fmt.Errorf("confidence skip: %w", err)
+	}
+	out := make(map[string]struct{}, len(doc.Skip))
+	for _, n := range doc.Skip {
+		n = strings.TrimSpace(n)
+		if n == "" {
+			continue
+		}
+		if _, ok := out[n]; ok {
+			return nil, fmt.Errorf("confidence skip: %s repeated", n)
+		}
+		out[n] = struct{}{}
+	}
+	return out, nil
+}
+
+func omitNames(names []string, skip map[string]struct{}) []string {
+	if len(skip) == 0 {
+		return names
+	}
+	out := make([]string, 0, len(names))
+	for _, n := range names {
+		if _, ok := skip[n]; !ok {
+			out = append(out, n)
+		}
+	}
+	return out
 }

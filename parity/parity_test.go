@@ -257,6 +257,30 @@ func TestReportText(t *testing.T) {
 	}
 }
 
+func TestConfidenceSkipFile(t *testing.T) {
+	dir := filepath.Join("..", "testdata", "parity")
+	skip, err := loadConfidenceSkip(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	wiki, _, err := loadWiki(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	have := map[string]struct{}{}
+	for _, n := range wiki {
+		have[n] = struct{}{}
+	}
+	if len(skip) == 0 {
+		t.Fatal("empty skip")
+	}
+	for n := range skip {
+		if _, ok := have[n]; !ok {
+			t.Errorf("%s is not an s4wiki name", n)
+		}
+	}
+}
+
 func TestBeyondME7(t *testing.T) {
 	cat := map[string]struct{}{"ti_avg": {}, "nmot": {}}
 	meas := map[string]struct{}{"wkrdy": {}}

@@ -1,6 +1,7 @@
 package parity
 
 import (
+	"bytes"
 	"testing"
 
 	"me7-logger/opcode"
@@ -48,6 +49,17 @@ func TestConfidence(t *testing.T) {
 		}
 	})
 
+	t.Run("one byte zero", func(t *testing.T) {
+		img := []byte{0}
+		peerImg := []byte{1}
+		m := record.Map{Name: "S", Addr: opcode.FlashBase}
+		peer := binBody{img: peerImg, scored: map[string]record.Map{"S": m}}
+		got := scoreConfidence(wiki, map[string]int{"S": 0}, img, []record.Map{m}, nil, []binBody{peer})
+		if got.Hit != 1 || got.Total != 1 {
+			t.Fatalf("%+v", got)
+		}
+	})
+
 	t.Run("zero peer filled", func(t *testing.T) {
 		img := make([]byte, 32)
 		filled := make([]byte, 32)
@@ -86,6 +98,44 @@ func TestConfidence(t *testing.T) {
 		peer[16], peer[17] = 0x99, 0x98
 		got := scoreConfidence(wiki, nil, img, trio(axis), nil, []binBody{peerBody(peer, axis)})
 		if got.Hit != 1 || got.Total != 1 {
+			t.Fatalf("%+v", got)
+		}
+	})
+
+	t.Run("four cells of a large map", func(t *testing.T) {
+		img := bytes.Repeat([]byte{0x22}, 16+192+16)
+		peer := bytes.Repeat([]byte{0x22}, len(img))
+		peer[16], peer[17], peer[18], peer[19] = 1, 2, 3, 4
+		axis := &record.Axis{Addr: opcode.FlashBase + 0x40, Count: 4, Bits: 8}
+		maps := []record.Map{
+			{Name: "B", Addr: opcode.FlashBase, Cols: 16, X: axis},
+			{Name: "S", Addr: opcode.FlashBase + 16, Cols: 192, X: axis},
+			{Name: "C", Addr: opcode.FlashBase + 16 + 192, Cols: 16, X: axis},
+		}
+		got := scoreConfidence(wiki, nil, img, maps, nil, []binBody{{
+			img: peer, maps: maps, scored: map[string]record.Map{"S": maps[1]},
+		}})
+		if got.Hit != 1 || got.Total != 1 {
+			t.Fatalf("%+v", got)
+		}
+	})
+
+	t.Run("six cells of a large map", func(t *testing.T) {
+		img := bytes.Repeat([]byte{0x22}, 16+192+16)
+		peer := bytes.Repeat([]byte{0x22}, len(img))
+		for i := 16; i < 22; i++ {
+			peer[i] = byte(i)
+		}
+		axis := &record.Axis{Addr: opcode.FlashBase + 0x40, Count: 4, Bits: 8}
+		maps := []record.Map{
+			{Name: "B", Addr: opcode.FlashBase, Cols: 16, X: axis},
+			{Name: "S", Addr: opcode.FlashBase + 16, Cols: 192, X: axis},
+			{Name: "C", Addr: opcode.FlashBase + 16 + 192, Cols: 16, X: axis},
+		}
+		got := scoreConfidence(wiki, nil, img, maps, nil, []binBody{{
+			img: peer, maps: maps, scored: map[string]record.Map{"S": maps[1]},
+		}})
+		if got.Hit != 0 || got.Total != 1 {
 			t.Fatalf("%+v", got)
 		}
 	})
