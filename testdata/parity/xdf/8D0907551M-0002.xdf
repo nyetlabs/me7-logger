@@ -1,4 +1,4 @@
-<!-- Written Thu Oct 01 17:05:25 PDT 2026 -->
+<!-- Written Tue Oct 06 13:10:50 PDT 2026 -->
 <XDFFORMAT version="1.50">
   <XDFHEADER>
     <fileversion>Version 1</fileversion>
@@ -866,7 +866,8 @@
     </XDFAXIS>
   </XDFTABLE>
   <XDFTABLE uniqueid="0x0" flags="0x0">
-    <title>CLA DTC table</title>
+    <title>CLA</title>
+    <description>CLA DTC table</description>
     <CATEGORYMEM index="0" category="42" />
     <XDFAXIS id="x" uniqueid="0x0">
       <EMBEDDEDDATA mmedelementsizebits="16" mmedmajorstridebits="-32" />
@@ -3587,7 +3588,8 @@ Unchanged.</description>
     </XDFAXIS>
   </XDFTABLE>
   <XDFTABLE uniqueid="0x0" flags="0x0">
-    <title>Manufacturer P code table</title>
+    <title>MFG</title>
+    <description>Manufacturer P code table</description>
     <CATEGORYMEM index="0" category="1" />
     <XDFAXIS id="x" uniqueid="0x0">
       <EMBEDDEDDATA mmedelementsizebits="16" mmedmajorstridebits="-32" />
@@ -4199,7 +4201,7 @@ Unchanged.</description>
     <description>Map: Offset tolerance depending on allowed torque</description>
     <CATEGORYMEM index="0" category="47" />
     <XDFAXIS id="x" uniqueid="0x0">
-      <EMBEDDEDDATA mmedaddress="0x1407E" mmedelementsizebits="8" mmedmajorstridebits="8" />
+      <EMBEDDEDDATA mmedaddress="0x14075" mmedelementsizebits="8" mmedmajorstridebits="8" />
       <units>Upm</units>
       <indexcount>8</indexcount>
       <decimalpl>1</decimalpl>
@@ -6331,7 +6333,7 @@ hPa axis data is odd because it is unused, since CWPLGU bit 0 disables this path
   <XDFTABLE uniqueid="0x0" flags="0x0">
     <title>DPVDKDWG</title>
     <description>Min. delta pressure before throttle plate for wastegate diagnosis
-1/2? (TODO)</description>
+1/2</description>
     <CATEGORYMEM index="0" category="7" />
     <XDFAXIS id="x" uniqueid="0x0">
       <EMBEDDEDDATA mmedaddress="0x156E9" mmedelementsizebits="8" mmedmajorstridebits="8" />
@@ -6947,20 +6949,6 @@ hPa axis data is odd because it is unused, since CWPLGU bit 0 disables this path
     </MATH>
   </XDFCONSTANT>
   <XDFCONSTANT uniqueid="0x0">
-    <title>DIFFMAX</title>
-    <description>Max. permissible pressure change during 100ms
-1/2? (TODO)</description>
-    <CATEGORYMEM index="0" category="8" />
-    <EMBEDDEDDATA mmedtypeflags="0x02" mmedaddress="0x168DC" mmedelementsizebits="16" />
-    <units>hPa</units>
-    <datatype>0</datatype>
-    <unittype>0</unittype>
-    <DALINK index="0" />
-    <MATH equation="0.078126 * X">
-      <VAR id="X" />
-    </MATH>
-  </XDFCONSTANT>
-  <XDFCONSTANT uniqueid="0x0">
     <title>PUSMAX</title>
     <description>maximal plausible ambient pressure threshhold</description>
     <CATEGORYMEM index="0" category="11" />
@@ -6974,20 +6962,6 @@ hPa axis data is odd because it is unused, since CWPLGU bit 0 disables this path
     </MATH>
   </XDFCONSTANT>
   <XDFCONSTANT uniqueid="0x0">
-    <title>PUSMAX</title>
-    <description>Maximal plausible ambent pressure threshhold
-1/2? TODO</description>
-    <CATEGORYMEM index="0" category="8" />
-    <EMBEDDEDDATA mmedtypeflags="0x02" mmedaddress="0x168DE" mmedelementsizebits="16" />
-    <units>hPa</units>
-    <datatype>0</datatype>
-    <unittype>0</unittype>
-    <DALINK index="0" />
-    <MATH equation="0.078126 * X">
-      <VAR id="X" />
-    </MATH>
-  </XDFCONSTANT>
-  <XDFCONSTANT uniqueid="0x0">
     <title>PUSMIN</title>
     <description>minimal plausible ambient pressure threshhold</description>
     <CATEGORYMEM index="0" category="11" />
@@ -6997,20 +6971,6 @@ hPa axis data is odd because it is unused, since CWPLGU bit 0 disables this path
     <unittype>0</unittype>
     <DALINK index="0" />
     <MATH equation="0.039063 * X">
-      <VAR id="X" />
-    </MATH>
-  </XDFCONSTANT>
-  <XDFCONSTANT uniqueid="0x0">
-    <title>PUSMIN</title>
-    <description>Minimal plausible ambent pressure threshhold
-1/2? TODO</description>
-    <CATEGORYMEM index="0" category="8" />
-    <EMBEDDEDDATA mmedtypeflags="0x02" mmedaddress="0x168E0" mmedelementsizebits="16" />
-    <units>hPa</units>
-    <datatype>0</datatype>
-    <unittype>0</unittype>
-    <DALINK index="0" />
-    <MATH equation="0.078126 * X">
       <VAR id="X" />
     </MATH>
   </XDFCONSTANT>
@@ -8680,7 +8640,7 @@ sqrt(2) * 2 or no change?</description>
     <description>Map: warm up enrichment factor</description>
     <CATEGORYMEM index="0" category="44" />
     <XDFAXIS id="x" uniqueid="0x0">
-      <EMBEDDEDDATA mmedaddress="0x10165" mmedelementsizebits="8" mmedmajorstridebits="8" />
+      <EMBEDDEDDATA mmedaddress="0x10158" mmedelementsizebits="8" mmedmajorstridebits="8" />
       <units>Grad C</units>
       <indexcount>12</indexcount>
       <embedinfo type="1" />
@@ -8720,7 +8680,7 @@ sqrt(2) * 2 or no change?</description>
     <description>Map: warm up enrichment factor</description>
     <CATEGORYMEM index="0" category="44" />
     <XDFAXIS id="x" uniqueid="0x0">
-      <EMBEDDEDDATA mmedaddress="0x10165" mmedelementsizebits="8" mmedmajorstridebits="8" />
+      <EMBEDDEDDATA mmedaddress="0x10158" mmedelementsizebits="8" mmedmajorstridebits="8" />
       <units>Grad C</units>
       <indexcount>12</indexcount>
       <embedinfo type="1" />
@@ -9544,20 +9504,6 @@ sqrt(2) * 2 or no change?</description>
     <description>Hysteresis for LDR I-Adaption curve</description>
     <CATEGORYMEM index="0" category="13" />
     <EMBEDDEDDATA mmedaddress="0x1978D" mmedelementsizebits="8" />
-    <units>Upm</units>
-    <decimalpl>1</decimalpl>
-    <datatype>0</datatype>
-    <unittype>0</unittype>
-    <DALINK index="0" />
-    <MATH equation="40 * X">
-      <VAR id="X" />
-    </MATH>
-  </XDFCONSTANT>
-  <XDFCONSTANT uniqueid="0x0">
-    <title>LDHIA</title>
-    <description>Hysteresis for I-Adaptation characteristic</description>
-    <CATEGORYMEM index="0" category="13" />
-    <EMBEDDEDDATA mmedtypeflags="0x01" mmedaddress="0x1978D" mmedelementsizebits="8" />
     <units>Upm</units>
     <decimalpl>1</decimalpl>
     <datatype>0</datatype>
@@ -10669,7 +10615,7 @@ Leave alone?</description>
     <description>Idle speed progression after start</description>
     <CATEGORYMEM index="0" category="22" />
     <XDFAXIS id="x" uniqueid="0x0">
-      <EMBEDDEDDATA mmedaddress="0x1830A" mmedelementsizebits="8" mmedmajorstridebits="8" />
+      <EMBEDDEDDATA mmedaddress="0x18303" mmedelementsizebits="8" mmedmajorstridebits="8" />
       <units>Grad C</units>
       <indexcount>6</indexcount>
       <embedinfo type="1" />
@@ -10709,7 +10655,7 @@ Leave alone?</description>
     <description>Desired idle speed when in gear</description>
     <CATEGORYMEM index="0" category="22" />
     <XDFAXIS id="x" uniqueid="0x0">
-      <EMBEDDEDDATA mmedaddress="0x1830A" mmedelementsizebits="8" mmedmajorstridebits="8" />
+      <EMBEDDEDDATA mmedaddress="0x18303" mmedelementsizebits="8" mmedmajorstridebits="8" />
       <units>Grad C</units>
       <indexcount>6</indexcount>
       <embedinfo type="1" />
@@ -10751,7 +10697,7 @@ Leave alone?</description>
     <description>Desired idle speed 2</description>
     <CATEGORYMEM index="0" category="22" />
     <XDFAXIS id="x" uniqueid="0x0">
-      <EMBEDDEDDATA mmedaddress="0x1830A" mmedelementsizebits="8" mmedmajorstridebits="8" />
+      <EMBEDDEDDATA mmedaddress="0x18303" mmedelementsizebits="8" mmedmajorstridebits="8" />
       <units>Grad C</units>
       <indexcount>6</indexcount>
       <embedinfo type="1" />
@@ -10793,7 +10739,7 @@ Leave alone?</description>
     <description>Desired idle speed 2</description>
     <CATEGORYMEM index="0" category="22" />
     <XDFAXIS id="x" uniqueid="0x0">
-      <EMBEDDEDDATA mmedaddress="0x1830A" mmedelementsizebits="8" mmedmajorstridebits="8" />
+      <EMBEDDEDDATA mmedaddress="0x18303" mmedelementsizebits="8" mmedmajorstridebits="8" />
       <units>Grad C</units>
       <indexcount>6</indexcount>
       <embedinfo type="1" />
@@ -10835,7 +10781,7 @@ Leave alone?</description>
     <description>Desired idle speed</description>
     <CATEGORYMEM index="0" category="22" />
     <XDFAXIS id="x" uniqueid="0x0">
-      <EMBEDDEDDATA mmedaddress="0x1830A" mmedelementsizebits="8" mmedmajorstridebits="8" />
+      <EMBEDDEDDATA mmedaddress="0x18303" mmedelementsizebits="8" mmedmajorstridebits="8" />
       <units>Grad C</units>
       <indexcount>6</indexcount>
       <embedinfo type="1" />
@@ -11612,7 +11558,7 @@ Unchanged?</description>
     <XDFAXIS id="y" uniqueid="0x0">
       <EMBEDDEDDATA mmedtypeflags="0x02" mmedaddress="0x1BD0E" mmedelementsizebits="16" mmedmajorstridebits="16" />
       <units>°KW</units>
-      <indexcount>3</indexcount>
+      <indexcount>6</indexcount>
       <decimalpl>3</decimalpl>
       <embedinfo type="1" />
       <datatype>0</datatype>
@@ -11623,7 +11569,7 @@ Unchanged?</description>
       </MATH>
     </XDFAXIS>
     <XDFAXIS id="z">
-      <EMBEDDEDDATA mmedtypeflags="0x02" mmedaddress="0x1BD2E" mmedelementsizebits="16" mmedrowcount="3" mmedcolcount="10" />
+      <EMBEDDEDDATA mmedtypeflags="0x02" mmedaddress="0x1BD2E" mmedelementsizebits="16" mmedrowcount="6" mmedcolcount="10" />
       <units>hPa</units>
       <decimalpl>2</decimalpl>
       <min>0.000000</min>
@@ -11655,7 +11601,7 @@ Unchanged?</description>
     <XDFAXIS id="y" uniqueid="0x0">
       <EMBEDDEDDATA mmedtypeflags="0x02" mmedaddress="0x1BD0E" mmedelementsizebits="16" mmedmajorstridebits="16" />
       <units>°KW</units>
-      <indexcount>3</indexcount>
+      <indexcount>6</indexcount>
       <decimalpl>3</decimalpl>
       <embedinfo type="1" />
       <datatype>0</datatype>
@@ -11666,7 +11612,7 @@ Unchanged?</description>
       </MATH>
     </XDFAXIS>
     <XDFAXIS id="z">
-      <EMBEDDEDDATA mmedtypeflags="0x02" mmedaddress="0x1BD2E" mmedelementsizebits="16" mmedrowcount="3" mmedcolcount="10" />
+      <EMBEDDEDDATA mmedtypeflags="0x02" mmedaddress="0x1BD2E" mmedelementsizebits="16" mmedrowcount="6" mmedcolcount="10" />
       <units>hPa</units>
       <decimalpl>2</decimalpl>
       <min>0.000000</min>
@@ -11988,6 +11934,18 @@ Unchanged?</description>
     <description>Repeated start time factor</description>
     <CATEGORYMEM index="0" category="44" />
     <XDFAXIS id="x" uniqueid="0x0">
+      <EMBEDDEDDATA mmedaddress="0x1C014" mmedelementsizebits="8" mmedmajorstridebits="8" />
+      <units>Grad C</units>
+      <indexcount>8</indexcount>
+      <embedinfo type="1" />
+      <datatype>0</datatype>
+      <unittype>0</unittype>
+      <DALINK index="0" />
+      <MATH equation="0.75 * X+ -48">
+        <VAR id="X" />
+      </MATH>
+    </XDFAXIS>
+    <XDFAXIS id="y" uniqueid="0x0">
       <EMBEDDEDDATA mmedtypeflags="0x02" mmedaddress="0x1C004" mmedelementsizebits="16" mmedmajorstridebits="16" />
       <units>s</units>
       <indexcount>8</indexcount>
@@ -11997,18 +11955,6 @@ Unchanged?</description>
       <unittype>0</unittype>
       <DALINK index="0" />
       <MATH equation="X">
-        <VAR id="X" />
-      </MATH>
-    </XDFAXIS>
-    <XDFAXIS id="y" uniqueid="0x0">
-      <EMBEDDEDDATA mmedaddress="0x1C014" mmedelementsizebits="8" mmedmajorstridebits="8" />
-      <units>Grad C</units>
-      <indexcount>8</indexcount>
-      <embedinfo type="1" />
-      <datatype>0</datatype>
-      <unittype>0</unittype>
-      <DALINK index="0" />
-      <MATH equation="0.75 * X+ -48">
         <VAR id="X" />
       </MATH>
     </XDFAXIS>
@@ -12202,20 +12148,6 @@ Unchanged?</description>
     <unittype>0</unittype>
     <DALINK index="0" />
     <MATH equation="0.039063 * X">
-      <VAR id="X" />
-    </MATH>
-  </XDFCONSTANT>
-  <XDFCONSTANT uniqueid="0x0">
-    <title>PSAPES</title>
-    <description>Intake manifold pressure for injection application
-1/2? (TODO)</description>
-    <CATEGORYMEM index="0" category="8" />
-    <EMBEDDEDDATA mmedtypeflags="0x02" mmedaddress="0x1C2BE" mmedelementsizebits="16" />
-    <units>hPa</units>
-    <datatype>0</datatype>
-    <unittype>0</unittype>
-    <DALINK index="0" />
-    <MATH equation="0.078126 * X">
       <VAR id="X" />
     </MATH>
   </XDFCONSTANT>
