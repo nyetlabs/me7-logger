@@ -3,7 +3,9 @@
 # call, and it is not stored here. at is the byte distance from the caller
 # label to the CALLS. caller is the Funktionsrahmen module and the entry.
 # interp is the map_interp needle.
-# Two rows with one name are two calls that pass the same map.
+# at is one distance or a list. A list is several calls on one caller and one
+# interp. One image matches one of them. A different caller or interp stays
+# its own row. One caller and distance may not be repeated.
 # The axis point count and its width are read from the image. That is the column axis
 # when R13 is that header. A load of R14 or R15 from a RAM word is a header a setup
 # stored: the low 14 bits in R12, and the page in R13 when the header is not on DPP0.
@@ -22,23 +24,19 @@ maps:
   interp: map_interp_curve8
 - name: KFZW2
   caller: ZWGRU_ign_zw
-  at: '0x5B8'
+  at: ['0x22', '0x66', '0x5B8', '0x5FC']
   interp: map_interp_table8
 - name: KFZW
   caller: ZWGRU_ign_zw
-  at: '0x5DE'
-  interp: map_interp_table8
-- name: KFZW2
-  caller: ZWGRU_ign_zw
-  at: '0x5FC'
-  interp: map_interp_table8
-- name: KFZW
-  caller: ZWGRU_ign_zw
-  at: '0x620'
+  at: ['0x48', '0x8A', '0x5DE', '0x620']
   interp: map_interp_table8
 - name: KFZWWLNM
   caller: ZWGRU_ign_zw
   at: '0x6BC'
+  interp: map_interp_table8
+- name: KFZWWLNM
+  caller: ZWGRU_ign_wl
+  at: '0x2A'
   interp: map_interp_table8
 - name: KFDMDARO
   caller: ARMD_kfdmd
@@ -74,31 +72,23 @@ maps:
   interp: map_interp_table8_twin
 - name: KFMDZOF_UM
   caller: MDUEB_kfmped
-  at: '0x168'
+  at: ['0x154', '0x168']
   interp: map_interp_table8_twin
 - name: KFMRESK
   caller: LLR_kfmres
-  at: '0x86'
+  at: ['0x86', '0xC8']
   interp: map_interp_table8_b
 - name: KFMRES
   caller: LLR_kfmres
-  at: '0x9E'
+  at: ['0x9E', '0xE0']
   interp: map_interp_table8_b
 - name: KFVPDKSD
   caller: FUEDK_kfvpdks
-  at: '0x24'
+  at: ['0x24', '0x88']
   interp: map_interp_table16
 - name: KFVPDKSE
   caller: FUEDK_kfvpdks
-  at: '0x46'
-  interp: map_interp_table16
-- name: KFVPDKSD
-  caller: FUEDK_kfvpdks
-  at: '0x88'
-  interp: map_interp_table16
-- name: KFVPDKSE
-  caller: FUEDK_kfvpdks
-  at: '0xAE'
+  at: ['0x46', '0xAE']
   interp: map_interp_table16
 - name: KFVPLGU
   caller: FUEDK_kfvplgu
@@ -118,19 +108,19 @@ maps:
   interp: map_interp_table8
 - name: KFLAMKRL
   caller: LAMFAW_lamkr
-  at: '0x26A'
+  at: ['0x26A', '0x2B0']
   interp: map_interp_table8_page
 - name: KFLAMKR
   caller: LAMFAW_lamkr
-  at: '0x2F0'
+  at: ['0x2F0', '0x33E']
   interp: map_interp_table8_page
 - name: KFLAFWL
   caller: LAMFAW_lamkr
-  at: '0x3A0'
+  at: ['0x3A0', '0x3DC', '0x444']
   interp: map_interp_table8_page
 - name: KFFLLDE
   caller: LDRLMX_ldhbn
-  at: '0x148'
+  at: ['0x148', '0x1D4']
   interp: map_interp_table16_page
 - name: KFTARXZK
   caller: LDRLMX_ldhbn
@@ -146,11 +136,11 @@ maps:
   interp: map_interp_table8_page
 - name: LDPBN
   caller: LDRLMX_ldhbn
-  at: '0x334'
+  at: ['0x334', '0x49C']
   interp: map_interp_curve8
 - name: LDORXN
   caller: LDRLMX_ldhbn
-  at: '0x42C'
+  at: ['0x42C', '0x5C0']
   interp: map_interp_curve8
 - name: KFWPLGTA
   caller: LDRPID_ldiopu
@@ -158,19 +148,19 @@ maps:
   interp: map_interp_table8_page
 - name: KFLDIOPU
   caller: LDRPID_ldiopu
-  at: '0x72'
+  at: ['0x4C', '0x72']
   interp: map_interp_table8_page
 - name: LDIATA
   caller: LDRPID_ldiopu
-  at: '0x88'
+  at: ['0x62', '0x88']
   interp: map_interp_curve8
 - name: KFLDIMX
   caller: LDRPID_ldiopu
-  at: '0xBC'
+  at: ['0x96', '0xBC']
   interp: map_interp_table16_page
 - name: TLDIAPN
   caller: LDRPID_ldiopu
-  at: '0x352'
+  at: ['0x352', '0x3B8']
   interp: map_interp_curve8
 - name: KFLDRQ2
   caller: LDRPID_ldrq
@@ -190,7 +180,7 @@ maps:
   interp: map_interp_curve16
 - name: KFLDRL
   caller: LDRPID_ldrq
-  at: '0x228'
+  at: ['0x228', '0x230']
   interp: map_interp_table16_page
 - name: NFSM
   caller: LLR_nfsm
@@ -202,57 +192,21 @@ maps:
   interp: map_interp_curve8
 - name: NLLM
   caller: LLR_nllm
-  at: '0x106'
-  interp: map_interp_curve8
-- name: NLLM
-  caller: LLR_nllm
-  at: '0x120'
-  interp: map_interp_curve8
-- name: NLLM
-  caller: LLR_nllm
-  at: '0x154'
-  interp: map_interp_curve8
-- name: NLLM
-  caller: LLR_nllm
-  at: '0x16E'
-  interp: map_interp_curve8
-- name: NLLM
-  caller: LLR_nllm
-  at: '0x336'
-  interp: map_interp_curve8
-- name: NLLM
-  caller: LLR_nllm
-  at: '0x350'
-  interp: map_interp_curve8
-- name: NLLM
-  caller: LLR_nllm
-  at: '0x384'
-  interp: map_interp_curve8
-- name: NLLM
-  caller: LLR_nllm
-  at: '0x39E'
+  at: ['0x106', '0x120', '0x154', '0x16E', '0x336', '0x350', '0x384', '0x39E']
   interp: map_interp_curve8
 - name: NLLM
   caller: LLR_nllm_b
-  at: '0x104'
+  at: ['0x104', '0x11E', '0x152', '0x16C']
   interp: map_interp_curve8
-- name: NLLM
-  caller: LLR_nllm_b
-  at: '0x11E'
-  interp: map_interp_curve8
-- name: NLLM
-  caller: LLR_nllm_b
-  at: '0x152'
-  interp: map_interp_curve8
-- name: NLLM
-  caller: LLR_nllm_b
-  at: '0x16C'
-  interp: map_interp_curve8
+- name: KFNLLNST
+  caller: nllnst_entry
+  at: '0x18A'
+  interp: map_interp_table8_page
 - name: RLSALUN
   caller: ASE_rlsalun
-  at: '0x8BA'
+  at: ['0x840', '0x8BA']
   interp: map_interp_curve8_direct
 - name: WDKUGDN
   caller: BGMSZS_wdkugdn
-  at: '0x4A'
+  at: ['0x2A', '0x4A']
   interp: map_interp_curve16_entry

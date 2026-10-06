@@ -54,7 +54,7 @@ func TestShippedNeedles(t *testing.T) {
 	if strings.Contains(string(b), "function:") {
 		t.Fatal("function is the list, not a field")
 	}
-	if len(ns) != 36 {
+	if len(ns) != 49 {
 		t.Fatalf("needles %d", len(ns))
 	}
 	if ns[0].Name != "slow_init_table" {
@@ -89,7 +89,7 @@ func TestShippedNeedles(t *testing.T) {
 		t.Fatalf("%+v", ign)
 	}
 	ldrq, ok := needle.ByName(ns, "LDRPID_ldrq")
-	if !ok || !ldrq.Unique || !ldrq.Function || len(ldrq.Pattern) != 12 {
+	if !ok || !ldrq.Unique || !ldrq.Function || len(ldrq.Pattern) != 14 {
 		t.Fatalf("%+v", ldrq)
 	}
 	if _, ok := needle.ByName(ns, "KFZW"); ok {
@@ -108,7 +108,7 @@ func TestShippedMaps(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(calls) != 61 {
+	if len(calls) != 84 {
 		t.Fatalf("maps %d", len(calls))
 	}
 	ns, err := LoadNeedles("", "")
@@ -131,7 +131,13 @@ func TestShippedMaps(t *testing.T) {
 		got[c.Name] = append(got[c.Name], c.At)
 		switch c.Name {
 		case "KFZW", "KFZW2", "KFZWWLNM":
-			if c.Caller != "ZWGRU_ign_zw" || c.Interp != "map_interp_table8" {
+			if c.Interp != "map_interp_table8" {
+				t.Fatalf("%+v", c)
+			}
+			if c.Name == "KFZWWLNM" && c.Caller != "ZWGRU_ign_zw" && c.Caller != "ZWGRU_ign_wl" {
+				t.Fatalf("%+v", c)
+			}
+			if c.Name != "KFZWWLNM" && c.Caller != "ZWGRU_ign_zw" {
 				t.Fatalf("%+v", c)
 			}
 		case "KFLDRQ2", "KFLDRL":
@@ -144,13 +150,21 @@ func TestShippedMaps(t *testing.T) {
 			}
 		}
 	}
-	if len(got["KFZW"]) != 2 || got["KFZW"][0] != 0x5DE || got["KFZW"][1] != 0x620 {
+	has := func(ats []int, want int) bool {
+		for _, a := range ats {
+			if a == want {
+				return true
+			}
+		}
+		return false
+	}
+	if got["KFZW"][0] != 0x48 || !has(got["KFZW"], 0x5DE) || !has(got["KFZW"], 0x620) {
 		t.Fatalf("%v", got["KFZW"])
 	}
-	if len(got["KFZW2"]) != 2 || got["KFZW2"][0] != 0x5B8 || got["KFZW2"][1] != 0x5FC {
+	if got["KFZW2"][0] != 0x22 || !has(got["KFZW2"], 0x5B8) || !has(got["KFZW2"], 0x5FC) {
 		t.Fatalf("%v", got["KFZW2"])
 	}
-	if len(got["KFZWWLNM"]) != 1 || got["KFZWWLNM"][0] != 0x6BC {
+	if !has(got["KFZWWLNM"], 0x6BC) || !has(got["KFZWWLNM"], 0x2A) {
 		t.Fatalf("%v", got["KFZWWLNM"])
 	}
 	if len(got["KFLDRQ2"]) != 1 || got["KFLDRQ2"][0] != 0x70 || got["LDRQ0DY"][0] != 0x86 || got["LDRQ1DY"][0] != 0xA2 || got["LDRQ1ST"][0] != 0xC8 || got["KFLDRL"][0] != 0x228 {
@@ -158,6 +172,10 @@ func TestShippedMaps(t *testing.T) {
 	}
 	if _, err := ParseMaps([]byte("maps:\n- name: KFZW\n  caller: ign_zw\n  at: '0x5'\n  interp: map_interp_table8\n"), "t"); err == nil {
 		t.Fatal("odd at accepted")
+	}
+	listed, err := ParseMaps([]byte("maps:\n- name: KFZW\n  caller: ign_zw\n  at: ['0x22', '0x48']\n  interp: map_interp_table8\n"), "t")
+	if err != nil || len(listed) != 2 || listed[0].At != 0x22 || listed[1].At != 0x48 {
+		t.Fatalf("%v %+v", err, listed)
 	}
 }
 

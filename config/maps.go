@@ -72,8 +72,34 @@ func ParseMaps(raw []byte, name string) ([]record.Call, error) {
 type mapRow struct {
 	Name   string `yaml:"name"`
 	Caller string `yaml:"caller"`
-	At     string `yaml:"at"`
+	At     atList `yaml:"at"`
 	Interp string `yaml:"interp"`
+}
+
+// atList is one distance or several on the same caller and interp.
+type atList []string
+
+func (a *atList) UnmarshalYAML(node *yaml.Node) error {
+	switch node.Kind {
+	case yaml.ScalarNode:
+		*a = atList{node.Value}
+		return nil
+	case yaml.SequenceNode:
+		if len(node.Content) == 0 {
+			return fmt.Errorf("at wants a distance")
+		}
+		vals := make(atList, 0, len(node.Content))
+		for _, c := range node.Content {
+			if c.Kind != yaml.ScalarNode {
+				return fmt.Errorf("at wants a distance")
+			}
+			vals = append(vals, c.Value)
+		}
+		*a = vals
+		return nil
+	default:
+		return fmt.Errorf("at wants a distance or a list")
+	}
 }
 
 func parseMapNode(n *yaml.Node, file string) ([]record.Call, error) {
@@ -94,24 +120,26 @@ func compileMapRows(rows []mapRow, name string) ([]record.Call, error) {
 	seen := map[[2]string]string{}
 	out := make([]record.Call, 0, len(rows))
 	for _, r := range rows {
-		if r.Name == "" || r.Caller == "" || r.Interp == "" || r.At == "" {
+		if r.Name == "" || r.Caller == "" || r.Interp == "" || len(r.At) == 0 {
 			return nil, fmt.Errorf("%s: a map needs name, caller, at, and interp", name)
 		}
-		at, err := mapfile.ParseUint(r.At)
-		if err != nil {
-			return nil, fmt.Errorf("%s: %s: at: %w", name, r.Name, err)
+		for _, raw := range r.At {
+			at, err := mapfile.ParseUint(raw)
+			if err != nil {
+				return nil, fmt.Errorf("%s: %s: at: %w", name, r.Name, err)
+			}
+			if at == 0 || at%2 != 0 {
+				return nil, fmt.Errorf("%s: %s: at must be a positive even distance", name, r.Name)
+			}
+			key := [2]string{r.Caller, strconv.Itoa(int(at))}
+			if prev, ok := seen[key]; ok {
+				return nil, fmt.Errorf("%s: %s and %s share %s+0x%X", name, prev, r.Name, r.Caller, at)
+			}
+			seen[key] = r.Name
+			out = append(out, record.Call{
+				Name: r.Name, Caller: r.Caller, At: int(at), Interp: r.Interp,
+			})
 		}
-		if at == 0 || at%2 != 0 {
-			return nil, fmt.Errorf("%s: %s: at must be a positive even distance", name, r.Name)
-		}
-		key := [2]string{r.Caller, r.At}
-		if prev, ok := seen[key]; ok {
-			return nil, fmt.Errorf("%s: %s and %s share %s+%s", name, prev, r.Name, r.Caller, r.At)
-		}
-		seen[key] = r.Name
-		out = append(out, record.Call{
-			Name: r.Name, Caller: r.Caller, At: int(at), Interp: r.Interp,
-		})
 	}
 	return out, nil
 }

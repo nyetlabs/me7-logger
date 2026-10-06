@@ -56,18 +56,30 @@ func Parse(raw []byte, name string) ([]Needle, error) {
 func compileList(list []rawNeedle, function bool) ([]Needle, error) {
 	out := make([]Needle, 0, len(list))
 	for _, f := range list {
-		n, err := f.compile()
+		ns, err := f.compileAll()
 		if err != nil {
 			return nil, err
 		}
-		n.Function = function
-		out = append(out, n)
+		for i := range ns {
+			ns[i].Function = function
+		}
+		out = append(out, ns...)
 	}
 	return out, nil
 }
 
 type rawNeedle struct {
-	Name       string     `yaml:"name"`
+	Name       string       `yaml:"name"`
+	NeedleHex  string       `yaml:"needle_hex"`
+	MaskHex    string       `yaml:"mask_hex"`
+	BackUp     numOrRange   `yaml:"back_up"`
+	Unique     *bool        `yaml:"unique"`
+	EntryAfter []string     `yaml:"entry_after"`
+	Needles    []needlePart `yaml:"needles"`
+}
+
+// needlePart is one prologue. unique, back_up, and entry_after stay on it.
+type needlePart struct {
 	NeedleHex  string     `yaml:"needle_hex"`
 	MaskHex    string     `yaml:"mask_hex"`
 	BackUp     numOrRange `yaml:"back_up"`
@@ -110,9 +122,40 @@ func (n *numOrRange) UnmarshalYAML(node *yaml.Node) error {
 	}
 }
 
+func (f rawNeedle) compileAll() ([]Needle, error) {
+	if f.Name == "" {
+		return nil, fmt.Errorf("needle missing name")
+	}
+	if len(f.Needles) == 0 {
+		n, err := f.compile()
+		if err != nil {
+			return nil, err
+		}
+		return []Needle{n}, nil
+	}
+	if f.NeedleHex != "" || f.MaskHex != "" || f.BackUp.set || f.Unique != nil || len(f.EntryAfter) > 0 {
+		return nil, fmt.Errorf("%s: needles replaces needle_hex", f.Name)
+	}
+	out := make([]Needle, 0, len(f.Needles))
+	for _, p := range f.Needles {
+		n, err := (rawNeedle{
+			Name: f.Name, NeedleHex: p.NeedleHex, MaskHex: p.MaskHex,
+			BackUp: p.BackUp, Unique: p.Unique, EntryAfter: p.EntryAfter,
+		}).compile()
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, n)
+	}
+	return out, nil
+}
+
 func (f rawNeedle) compile() (Needle, error) {
 	if f.Name == "" {
 		return Needle{}, fmt.Errorf("needle missing name")
+	}
+	if strings.TrimSpace(f.NeedleHex) == "" {
+		return Needle{}, fmt.Errorf("%s: needle_hex is required", f.Name)
 	}
 	pat, mask, err := parsePattern(f.NeedleHex)
 	if err != nil {
@@ -393,7 +436,7 @@ func applyNeedle(base []Needle, item *yaml.Node, file string, function bool) ([]
 	for k := range fields {
 		switch k {
 		case "name", "needle_hex", "mask_hex", "back_up", "unique",
-			"entry_after", "drop":
+			"entry_after", "drop", "needles":
 		default:
 			return nil, fmt.Errorf("%s: needle: unknown field %s", file, k)
 		}
@@ -415,6 +458,19 @@ func applyNeedle(base []Needle, item *yaml.Node, file string, function bool) ([]
 	var raw rawNeedle
 	if err := item.Decode(&raw); err != nil {
 		return nil, fmt.Errorf("%s: %s: %w", file, needleName, err)
+	}
+	if _, ok := fields["needles"]; ok {
+		if _, ok := fields["needle_hex"]; ok {
+			return nil, fmt.Errorf("%s: %s: needles replaces needle_hex", file, needleName)
+		}
+		ns, err := raw.compileAll()
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", file, err)
+		}
+		for i := range ns {
+			ns[i].Function = function
+		}
+		return replaceNeedles(base, ns), nil
 	}
 	if _, ok := fields["needle_hex"]; ok {
 		n, err := raw.compile()
@@ -480,6 +536,29 @@ func applyNeedle(base []Needle, item *yaml.Node, file string, function bool) ([]
 	n.Function = function
 	base[idx] = n
 	return base, nil
+}
+
+func replaceNeedles(base, ns []Needle) []Needle {
+	if len(ns) == 0 {
+		return base
+	}
+	name := ns[0].Name
+	out := make([]Needle, 0, len(base)+len(ns))
+	placed := false
+	for _, n := range base {
+		if n.Name != name {
+			out = append(out, n)
+			continue
+		}
+		if !placed {
+			out = append(out, ns...)
+			placed = true
+		}
+	}
+	if !placed {
+		out = append(out, ns...)
+	}
+	return out
 }
 
 func replaceNeedle(base []Needle, n Needle) []Needle {

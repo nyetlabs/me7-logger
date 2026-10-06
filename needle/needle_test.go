@@ -134,6 +134,35 @@ func TestApplyOverlay(t *testing.T) {
 	}
 }
 
+func TestNeedleList(t *testing.T) {
+	raw := []byte(`
+functions:
+  - name: f
+    needles:
+      - needle_hex: "AA BB"
+        unique: false
+      - needle_hex: "CC DD"
+`)
+	ns, err := Parse(raw, "t")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(ns) != 2 || ns[0].Name != "f" || ns[0].Unique || !ns[1].Unique || ns[1].Pattern[0] != 0xCC {
+		t.Fatalf("%+v %+v", ns[0], ns[1])
+	}
+	if _, err := Parse([]byte("functions:\n- name: f\n  needle_hex: AA\n  needles:\n  - needle_hex: BB\n"), "t"); err == nil {
+		t.Fatal("accepted needle_hex and needles")
+	}
+	base, err := Parse([]byte("functions:\n- name: f\n  needle_hex: \"AA BB\"\n- name: g\n  needle_hex: \"11 22\"\n"), "t")
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := ApplyOverlay(base, []byte("functions:\n- name: f\n  needles:\n  - needle_hex: \"CC\"\n  - needle_hex: \"DD\"\n    unique: false\n"), "u")
+	if err != nil || len(got) != 3 || got[0].Pattern[0] != 0xCC || got[1].Unique || got[2].Name != "g" {
+		t.Fatalf("%v %+v", err, got)
+	}
+}
+
 func sameInts(a, b []int) bool {
 	if len(a) != len(b) {
 		return false

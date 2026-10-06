@@ -274,12 +274,13 @@ func callerLabels(data []byte, ns []needle.Needle, labels map[string][]int, name
 	if v, ok := labels[name]; ok {
 		return v
 	}
-	n, ok := needle.ByName(ns, name)
-	if !ok {
-		labels[name] = nil
-		return nil
+	var v []int
+	for _, n := range ns {
+		if n.Name != name {
+			continue
+		}
+		v = append(v, n.Labels(data)...)
 	}
-	v := n.Labels(data)
 	labels[name] = v
 	return v
 }
