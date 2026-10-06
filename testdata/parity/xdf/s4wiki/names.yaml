@@ -2,6 +2,10 @@
 # One list for every ECU. An address is not stored here.
 # values have no axis in the image. One address is a hit.
 # Every other name needs that address and an axis.
+# When the image XDF contains the name, the body address must match one row.
+# The axis denominator is the axes on the maps that hit. A scalar adds none.
+# A hit matches the address file. No address file leaves those hits at 0.
+# Confidence counts the names that hit, not this whole list.
 names:
 - RLSALUN
 - ESKONF

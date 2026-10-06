@@ -113,13 +113,56 @@ func TestScoreWikiOneAddress(t *testing.T) {
 		{Name: "LAMFA", Addr: needleBase + 0x30, X: &record.Axis{Addr: needleBase + 0x31, Count: 4, Bits: 8}},
 		{Name: "KFKHFM", Addr: needleBase + 0x40},
 	}
-	got := scoreWiki([]string{"KFZW", "LAMFA", "KFKHFM"}, nil, maps)
+	got := scoreWiki([]string{"KFZW", "LAMFA", "KFKHFM"}, nil, maps, nil)
 	if got.String() != "33.3% (1/3)" {
 		t.Fatal(got)
 	}
-	got = scoreWiki([]string{"KFZW", "LAMFA", "KFKHFM"}, map[string]struct{}{"KFKHFM": {}}, maps)
+	got = scoreWiki([]string{"KFZW", "LAMFA", "KFKHFM"}, map[string]struct{}{"KFKHFM": {}}, maps, nil)
 	if got.String() != "66.7% (2/3)" {
 		t.Fatal(got)
+	}
+}
+
+func TestScoreWikiAxisMatchesReference(t *testing.T) {
+	maps := []record.Map{{
+		Name: "KFZW", Addr: 0x10,
+		X: &record.Axis{Addr: 0x20, Count: 8, Bits: 8},
+		Y: &record.Axis{Addr: 0x30, Count: 6, Bits: 16},
+	}}
+	row := refRow{
+		name: "KFZW", addr: 0x10,
+		axes: map[string]axisSig{
+			"x": {id: "x", addr: 0x20, count: 8, bits: 8},
+			"y": {id: "y", addr: 0x30, count: 6, bits: 16},
+		},
+	}
+	if got := scoreWiki([]string{"KFZW"}, nil, maps, []refRow{row}); got.String() != "100.0% (1/1)" {
+		t.Fatal(got)
+	}
+	row.axes["y"] = axisSig{id: "y", addr: 0x30, count: 3, bits: 16}
+	if got := scoreWiki([]string{"KFZW"}, nil, maps, []refRow{row}); got.Hit != 1 {
+		t.Fatal(got)
+	}
+	_, axes := wikiScore([]string{"KFZW"}, nil, maps, []refRow{row})
+	if axes.Hit != 1 || axes.Total != 2 {
+		t.Fatal(axes)
+	}
+	other := []refRow{{name: "OTHER", addr: 0x10}}
+	if got := scoreWiki([]string{"KFZW"}, nil, maps, other); got.Hit != 1 {
+		t.Fatal(got)
+	}
+	_, axes = wikiScore([]string{"KFZW", "KFKHFM"}, map[string]struct{}{"KFKHFM": {}}, []record.Map{
+		maps[0],
+		{Name: "KFKHFM", Addr: 0x40},
+	}, nil)
+	if axes.Hit != 0 || axes.Total != 2 {
+		t.Fatal(axes)
+	}
+	_, axes = wikiScore([]string{"KFKHFM"}, map[string]struct{}{"KFKHFM": {}}, []record.Map{
+		{Name: "KFKHFM", Addr: 0x40},
+	}, nil)
+	if axes.Total != 0 {
+		t.Fatal(axes)
 	}
 }
 
@@ -169,20 +212,14 @@ func TestRunLayout(t *testing.T) {
 	if len(got.Extras) != 2 || got.Extras[0].Name != "a.bin" || got.Extras[0].Hit != 1 || got.Extras[1].Hit != 2 {
 		t.Fatalf("extras %+v", got.Extras)
 	}
-	if got.ExtrasAll.Hit != 2 || got.ExtrasAll.Total <= got.ExtrasAll.Hit {
-		t.Fatalf("extras all %+v", got.ExtrasAll)
-	}
 	if len(got.S4Wiki) != 2 || got.S4Wiki[0].Name != "a.bin" || got.S4Wiki[1].Name != "b.bin" {
 		t.Fatalf("s4wiki %+v", got.S4Wiki)
 	}
 	if got.S4Wiki[0].String() != "50.0% (1/2)" || got.S4Wiki[1].String() != "0.0% (0/2)" {
 		t.Fatalf("s4wiki %+v", got.S4Wiki)
 	}
-	if len(got.XDF) != 1 || got.XDF[0].Name != "a.bin" || got.XDF[0].String() != "0.0% (0/2)" {
+	if len(got.XDF) != 1 || got.XDF[0].Name != "a.bin" || got.XDF[0].String() != "0.0% (0/2)" || got.XDF[0].Axis.Total != 0 {
 		t.Fatalf("xdf %+v", got.XDF)
-	}
-	if len(got.XDFAxis) != 0 {
-		t.Fatalf("xdf axis %+v", got.XDFAxis)
 	}
 }
 
@@ -191,33 +228,24 @@ func TestReportText(t *testing.T) {
 		ME7Info: []Image{{
 			Name: "a.bin", Fraction: Fraction{1, 2}, Beyond: 3, Corpus: Fraction{2, 10},
 		}},
-		Extras:    []Image{{Name: "a.bin", Fraction: Fraction{1, 4}}},
-		ExtrasAll: Fraction{1, 4},
+		Extras: []Image{{Name: "a.bin", Fraction: Fraction{1, 4}}},
 		S4Wiki: []Image{
-			{Name: "a.bin", Fraction: Fraction{1, 2}},
+			{Name: "a.bin", Fraction: Fraction{1, 2}, Axis: Fraction{1, 2}, Confidence: Fraction{1, 1}},
 			{Name: "bb.bin", Fraction: Fraction{0, 2}},
 		},
-		XDF:     []Image{{Name: "a.bin", Fraction: Fraction{0, 3}}},
-		XDFAxis: []Image{{Name: "a.bin", Fraction: Fraction{1, 4}}},
+		XDF: []Image{{Name: "a.bin", Fraction: Fraction{0, 3}, Axis: Fraction{1, 4}}},
 	}
 	got := rep.Text()
 	want := "" +
-		"ecu me7info   vs ecu-specific     vs corpus\n" +
-		"  a.bin       50.0%  1/2 (+3)   20.0%  2/10\n" +
+		"ecu me7info   vs ecu-specific     vs corpus       extras\n" +
+		"  a.bin       50.0%  1/2 (+3)   20.0%  2/10   25.0%  1/4\n" +
 		"\n" +
-		"ecu extras\n" +
-		"  a.bin       25.0%  1/4\n" +
-		"  all         25.0%  1/4\n" +
+		"xdf s4wiki                       axis   confidence\n" +
+		"  a.bin       50.0%  1/2   50.0%  1/2  100.0%  1/1\n" +
+		"  bb.bin       0.0%  0/2    0.0%  0/0             \n" +
 		"\n" +
-		"xdf s4wiki\n" +
-		"  a.bin       50.0%  1/2\n" +
-		"  bb.bin       0.0%  0/2\n" +
-		"\n" +
-		"xdf\n" +
-		"  a.bin        0.0%  0/3\n" +
-		"\n" +
-		"xdf axis\n" +
-		"  a.bin       25.0%  1/4\n"
+		"xdf                              axis\n" +
+		"  a.bin        0.0%  0/3   25.0%  1/4\n"
 	if got != want {
 		t.Fatalf("got\n%s\nwant\n%s", got, want)
 	}

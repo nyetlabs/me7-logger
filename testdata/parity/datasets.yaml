@@ -1,0 +1,18 @@
+# Images of one dataset. A large map is compared with the others in its group.
+# A stem absent from this file is compared only with itself.
+22m:
+  - 8D0907551M-0002
+  - 8D0907551L
+23g:
+  - 8D0907551F
+  - 8D0907551K
+  - 8D0907551Q
+22N:
+  - 8D0907551AA
+  - 8D0907551T
+X22ka:
+  - 8D0907551A-0003
+  - 8D0907551B
+24B:
+  - 06A906032HF
+  - 06A906032HS

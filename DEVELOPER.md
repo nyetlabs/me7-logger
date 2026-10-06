@@ -107,7 +107,7 @@ Do not point `generate` at the oracle files without `-o` and `-xdf` aimed somewh
 
 That run reads the shipped YAML. It does not read `config/user`. Adding files there leaves the score unchanged. A drop means a shipped file in `config/` changed.
 
-`testdata/parity/bin/*.bin` are the images. `ecu/me7info/<stem>.ecu` is the legacy ME7Info file for that image. `xdf/s4wiki/names.yaml` is one name list scored on every image. A hit is one address and an axis. A name under `values` has no axis in the image, so one address is the hit. Any other body with no axis is a miss. It is not a per-CPU list, and not a second 100%. The tuner set is <https://s4wiki.com/wiki/Tuning>. `xdf/<stem>.xdf`, when present, checks body addresses for that image. A missing file is omitted. It is not the S4wiki list, and it does not locate maps. `testdata/parity/incoming/` is not scored.
+`testdata/parity/bin/*.bin` are the images. `ecu/me7info/<stem>.ecu` is the legacy ME7Info file for that image. `xdf/s4wiki/names.yaml` is one name list scored on every image. A hit is one address and an axis. A name under `values` has no axis in the image, so one address is the hit. Any other body with no axis is a miss. When `xdf/<stem>.xdf` contains that name, the body address must match one row. The axes of those names are the `axis` column. It is not a per-CPU list, and not a second 100%. The tuner set is <https://s4wiki.com/wiki/Tuning>. `xdf/<stem>.xdf`, when present, checks body addresses for that image. A missing file is omitted. It is not the S4wiki list, and it does not locate maps. `testdata/parity/incoming/` is not scored.
 
 An x or y axis in that file that has an address is a separate score. A hit is the same address, point count, and width. An axis with no address is not in the score. The column axis is the one the caller passes, including a RAM word a setup filled with the header. The row axis is another RAM word the call loads, when that setup stored a different header. A page call that does not load that word leaves the row unset. A mapsig row names that header with `yat` when a setup stored it in a RAM word. A 16-bit axis or body is the even address. The odd byte in front of it is a pad, not a value.
 
@@ -115,11 +115,9 @@ Maps are located from the caller that passes the map to the interpolator, on tha
 
 The report sections are:
 
-- `ecu me7info` is the legacy file, a count of catalog names that file does not name, and that image against the full catalog
-- `ecu extras` is the measurement list, per image and once across the images. The torque scale is the `torque` conversion in `config/names.yaml`
-- `xdf s4wiki` is the shared name list
-- `xdf` is the per-image address oracle
-- `xdf axis` is the axes in that oracle
+- `ecu me7info` is the legacy file, a count of catalog names that file does not name, and that image against the full catalog. The `extras` column is the measurement list on that image. The torque scale is the `torque` conversion in `config/names.yaml`
+- `xdf s4wiki` is the shared name list. The `axis` denominator is the axes on the maps that hit. A scalar adds nothing. That denominator is 0 only when every map that hit has no axis. A hit is an axis that matches the address file. With no address file those axes are unverified, so the hits are 0. The `confidence` column is the body bytes of the names that hit. Its denominator is that matched set, not the tuner list and not the axis count. A name the locator missed is not a confidence miss. A body of zeros is low. A body under 16 cells is high when those bytes occur once. A larger body is compared with another image of the same dataset in `testdata/parity/datasets.yaml`. Identical bytes are high. At most two cells may differ when the maps at the next-lower and next-higher addresses match too. A shared axis does not lower the body
+- `xdf` is every body in the per-image address file. The `axis` column is every axis in that file
 
 ## Version
 

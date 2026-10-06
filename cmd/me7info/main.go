@@ -56,8 +56,8 @@ func usage() {
 generate writes an .ecu file and, when calibration maps were located, a TunerPro XDF.
 It does not open a serial port. probe reports the DPP block and needle hits.
 parity scores each image. Legacy ME7Info parity is the only hard mark, one image at a time.
-The catalog and the measurement list are coverage, each name once across the images.
-The S4wiki name list is the same on every image. A hit is one address and an axis. A name under values has no axis in the image, so one address is the hit. An XDF file is an address oracle for that image when one is present. Its x and y axes that have an address are a separate score.
+The catalog is coverage. The measurement list is the extras column on each ECU row.
+The S4wiki name list is the same on every image. A hit is one address and an axis. A name under values has no axis in the image, so one address is the hit. When that image's XDF contains the name, the body address must match one row. The axis denominator is the axes on the maps that hit. A scalar adds nothing. That denominator is 0 only when every map that hit has no axis. A hit is an axis that matches the address file. With no address file those axes are unverified, so the hits are 0. The confidence column is the body bytes of the names that hit. Its denominator is that matched set, not the tuner list. An XDF file is an address oracle for that image when one is present. Its x and y axes that have an address are the axis column of that section.
 Needle names, connect bytes, and per-part addresses are the YAML files in config/.
 `, version)
 }

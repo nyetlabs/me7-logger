@@ -23,28 +23,32 @@ import (
 )
 
 // Report is one pass over a parity root.
-// ME7Info is the only hard mark. Extras, S4Wiki, XDF, and XDFAxis are coverage.
+// ME7Info is the only hard mark. Extras, S4Wiki, and XDF are coverage.
 // An empty slice means that kind had no oracle.
 // Corpus, on a ME7Info row, is catalog names located on that image over the
-// full catalog. ExtrasAll counts each measurement name once across the bins.
+// full catalog. Extras is the measurement list on that image.
+// Axis and Confidence are set on an S4Wiki row. Axis is the axes on the
+// maps that scored, and a hit matches that image's XDF. Confidence is the
+// body-byte result for the names that row scored.
+// Axis on an XDF row is every axis in that file.
 type Report struct {
-	ME7Info   []Image
-	Extras    []Image
-	ExtrasAll Fraction
-	S4Wiki    []Image
-	XDF       []Image
-	XDFAxis   []Image
+	ME7Info []Image
+	Extras  []Image
+	S4Wiki  []Image
+	XDF     []Image
 }
 
 // Image is one binary scored against one oracle.
 // Beyond is the count of catalog names located on this image that its
 // ME7Info file does not name. Corpus is that image against the full catalog.
-// Both are set only on ME7Info rows.
+// Both are set only on ME7Info rows. Axis and Confidence are set on S4Wiki rows.
 type Image struct {
 	Name string
 	Fraction
-	Beyond int
-	Corpus Fraction
+	Beyond     int
+	Corpus     Fraction
+	Axis       Fraction
+	Confidence Fraction
 }
 
 // Fraction is hits over the oracle row count.
@@ -77,50 +81,58 @@ func (r *Report) Text() string {
 		label   string
 		frac    Fraction
 		corpus  Fraction
+		axis    Fraction
+		conf    Fraction
+		extras  Fraction
 		head    bool
 		beyond  int
 		me7info bool
+		wiki    bool
+		xdf     bool
 	}
 	var lines []line
-	addImages := func(title string, images []Image) {
-		if len(images) == 0 {
-			return
-		}
-		if len(lines) > 0 {
-			lines = append(lines, line{})
-		}
-		lines = append(lines, line{label: title, head: true})
-		for _, im := range images {
-			lines = append(lines, line{label: "  " + im.Name, frac: im.Fraction})
-		}
+	extraBy := map[string]Fraction{}
+	for _, im := range r.Extras {
+		extraBy[im.Name] = im.Fraction
 	}
 	if len(r.ME7Info) > 0 {
 		lines = append(lines, line{label: "ecu me7info", head: true, me7info: true})
 		for _, im := range r.ME7Info {
 			lines = append(lines, line{
 				label: "  " + im.Name, frac: im.Fraction, corpus: im.Corpus,
-				beyond: im.Beyond, me7info: true,
+				beyond: im.Beyond, extras: extraBy[im.Name], me7info: true,
 			})
 		}
 	}
-	if len(r.Extras) > 0 {
+	if len(r.S4Wiki) > 0 {
 		if len(lines) > 0 {
 			lines = append(lines, line{})
 		}
-		lines = append(lines, line{label: "ecu extras", head: true})
-		for _, im := range r.Extras {
-			lines = append(lines, line{label: "  " + im.Name, frac: im.Fraction})
+		lines = append(lines, line{label: "xdf s4wiki", head: true, wiki: true})
+		for _, im := range r.S4Wiki {
+			lines = append(lines, line{
+				label: "  " + im.Name, frac: im.Fraction, axis: im.Axis, conf: im.Confidence, wiki: true,
+			})
 		}
-		lines = append(lines, line{label: "  all", frac: r.ExtrasAll})
 	}
-	addImages("xdf s4wiki", r.S4Wiki)
-	addImages("xdf", r.XDF)
-	addImages("xdf axis", r.XDFAxis)
+	if len(r.XDF) > 0 {
+		if len(lines) > 0 {
+			lines = append(lines, line{})
+		}
+		lines = append(lines, line{label: "xdf", head: true, xdf: true})
+		for _, im := range r.XDF {
+			lines = append(lines, line{label: "  " + im.Name, frac: im.Fraction, axis: im.Axis, xdf: true})
+		}
+	}
 
 	nameW, countW, beyondW, corpusW := 0, 0, 0, 0
+	axisW, confW, extrasW := 0, 0, 0
 	counts := make([]string, len(lines))
 	beyonds := make([]string, len(lines))
 	corpus := make([]string, len(lines))
+	axes := make([]string, len(lines))
+	confs := make([]string, len(lines))
+	extras := make([]string, len(lines))
 	for i, ln := range lines {
 		if ln.label == "" || ln.head {
 			continue
@@ -141,7 +153,35 @@ func (r *Report) Text() string {
 			if len(corpus[i]) > corpusW {
 				corpusW = len(corpus[i])
 			}
+			if ln.extras.Total > 0 {
+				extras[i] = fmt.Sprintf("%d/%d", ln.extras.Hit, ln.extras.Total)
+				if len(extras[i]) > extrasW {
+					extrasW = len(extras[i])
+				}
+			}
 		}
+		if ln.wiki || ln.xdf {
+			axes[i] = fmt.Sprintf("%d/%d", ln.axis.Hit, ln.axis.Total)
+			if len(axes[i]) > axisW {
+				axisW = len(axes[i])
+			}
+		}
+		if ln.wiki && ln.conf.Total > 0 {
+			confs[i] = fmt.Sprintf("%d/%d", ln.conf.Hit, ln.conf.Total)
+			if len(confs[i]) > confW {
+				confW = len(confs[i])
+			}
+		}
+	}
+	if axisW < 3 {
+		axisW = 3
+	}
+	if confW < 3 {
+		confW = 3
+	}
+	showExtras := extrasW > 0
+	if extrasW < 3 {
+		extrasW = 3
 	}
 	if len(r.ME7Info) > 0 && nameW < len("ecu me7info") {
 		nameW = len("ecu me7info")
@@ -151,24 +191,69 @@ func (r *Report) Text() string {
 		switch {
 		case ln.label == "":
 			b.WriteByte('\n')
+		case ln.head && ln.wiki:
+			// percent, gap, count, gap, then the same pair for axis and confidence.
+			mainSpan := 6 + 2 + countW
+			axisStart := nameW + 2 + mainSpan + 2
+			axisSpan := 6 + 2 + axisW
+			confStart := axisStart + axisSpan + 2
+			confSpan := 6 + 2 + confW
+			hdr := []byte(strings.Repeat(" ", confStart+confSpan))
+			copy(hdr, ln.label)
+			copy(hdr[axisStart+axisSpan-len("axis"):], "axis")
+			copy(hdr[confStart+confSpan-len("confidence"):], "confidence")
+			b.Write(hdr)
+			b.WriteByte('\n')
 		case ln.head && ln.me7info:
 			me7Start := nameW + 2
 			me7Span := countW + beyondW + 11
 			corpusStart := me7Start + me7Span + 2
 			corpusSpan := 8 + corpusW
-			hdr := []byte(strings.Repeat(" ", corpusStart+corpusSpan))
+			end := corpusStart + corpusSpan
+			if showExtras {
+				end += 2 + 6 + 2 + extrasW
+			}
+			hdr := []byte(strings.Repeat(" ", end))
 			copy(hdr, ln.label)
 			copy(hdr[me7Start+me7Span-len("vs ecu-specific"):], "vs ecu-specific")
 			copy(hdr[corpusStart+corpusSpan-len("vs corpus"):], "vs corpus")
+			if showExtras {
+				copy(hdr[end-len("extras"):], "extras")
+			}
+			b.Write(hdr)
+			b.WriteByte('\n')
+		case ln.head && ln.xdf:
+			mainSpan := 6 + 2 + countW
+			axisStart := nameW + 2 + mainSpan + 2
+			axisSpan := 6 + 2 + axisW
+			hdr := []byte(strings.Repeat(" ", axisStart+axisSpan))
+			copy(hdr, ln.label)
+			copy(hdr[axisStart+axisSpan-len("axis"):], "axis")
 			b.Write(hdr)
 			b.WriteByte('\n')
 		case ln.head:
 			b.WriteString(ln.label)
 			b.WriteByte('\n')
 		case ln.me7info:
-			fmt.Fprintf(&b, "%-*s  %6s  %*s (%*s)  %6s  %*s\n",
+			extraPct := ""
+			if ln.extras.Total > 0 {
+				extraPct = ln.extras.percent()
+			}
+			fmt.Fprintf(&b, "%-*s  %6s  %*s (%*s)  %6s  %*s  %6s  %*s\n",
 				nameW, ln.label, ln.frac.percent(), countW, counts[i], beyondW, beyonds[i],
-				ln.corpus.percent(), corpusW, corpus[i])
+				ln.corpus.percent(), corpusW, corpus[i], extraPct, extrasW, extras[i])
+		case ln.wiki:
+			confPct := ""
+			if ln.conf.Total > 0 {
+				confPct = ln.conf.percent()
+			}
+			fmt.Fprintf(&b, "%-*s  %6s  %*s  %6s  %*s  %6s  %*s\n",
+				nameW, ln.label, ln.frac.percent(), countW, counts[i],
+				ln.axis.percent(), axisW, axes[i], confPct, confW, confs[i])
+		case ln.xdf:
+			fmt.Fprintf(&b, "%-*s  %6s  %*s  %6s  %*s\n",
+				nameW, ln.label, ln.frac.percent(), countW, counts[i],
+				ln.axis.percent(), axisW, axes[i])
 		default:
 			fmt.Fprintf(&b, "%-*s  %6s  %*s\n", nameW, ln.label, ln.frac.percent(), countW, counts[i])
 		}
@@ -232,7 +317,13 @@ func run(dir string, gen imageGen) (*Report, error) {
 		return nil, err
 	}
 	rep := &Report{}
-	var located [][]string
+	type kept struct {
+		base, stem string
+		img        []byte
+		maps       []record.Map
+		oracle     []refRow
+	}
+	var held []kept
 	for _, bin := range bins {
 		img, err := os.ReadFile(bin)
 		if err != nil {
@@ -245,7 +336,6 @@ func run(dir string, gen imageGen) (*Report, error) {
 			return nil, fmt.Errorf("%s: %w", base, err)
 		}
 		names := itemNames(items)
-		located = append(located, names)
 		if len(meas) > 0 {
 			rep.Extras = append(rep.Extras, Image{Name: base, Fraction: cover(meas, [][]string{names})})
 		}
@@ -257,19 +347,46 @@ func run(dir string, gen imageGen) (*Report, error) {
 				Corpus: cover(cat, [][]string{names}),
 			})
 		}
-		if len(wiki) > 0 {
-			rep.S4Wiki = append(rep.S4Wiki, Image{Name: base, Fraction: scoreWiki(wiki, values, maps)})
-		}
-		if body, axes, ok, err := scoreXDF(dir, stem, maps); err != nil {
+		xmaps, xaxes, oracle, hasOracle, err := loadOracle(dir, stem)
+		if err != nil {
 			return nil, err
-		} else if ok {
-			rep.XDF = append(rep.XDF, Image{Name: base, Fraction: body})
-			if axes.Total > 0 {
-				rep.XDFAxis = append(rep.XDFAxis, Image{Name: base, Fraction: axes})
-			}
+		}
+		if len(wiki) > 0 {
+			names, axes := wikiScore(wiki, values, maps, oracle)
+			rep.S4Wiki = append(rep.S4Wiki, Image{Name: base, Fraction: names, Axis: axes})
+			held = append(held, kept{base: base, stem: stem, img: img, maps: maps, oracle: oracle})
+		}
+		if hasOracle {
+			h, n := matchMaps(locatedMaps(maps), xmaps)
+			ah, an := matchAxes(locatedAxes(maps), xaxes)
+			rep.XDF = append(rep.XDF, Image{
+				Name: base, Fraction: Fraction{h, n}, Axis: Fraction{ah, an},
+			})
 		}
 	}
-	rep.ExtrasAll = cover(meas, located)
+	if len(wiki) > 0 && len(held) > 0 {
+		groups, err := loadDatasets(dir)
+		if err != nil {
+			return nil, err
+		}
+		byStem := map[string]kept{}
+		for _, h := range held {
+			byStem[h.stem] = h
+		}
+		for i, h := range held {
+			var peers []binBody
+			for _, stem := range groups[h.stem] {
+				o, ok := byStem[stem]
+				if !ok {
+					continue
+				}
+				peers = append(peers, binBody{
+					img: o.img, maps: o.maps, scored: wikiMaps(wiki, values, o.maps, o.oracle),
+				})
+			}
+			rep.S4Wiki[i].Confidence = scoreConfidence(wiki, values, h.img, h.maps, h.oracle, peers)
+		}
+	}
 	return rep, nil
 }
 
@@ -335,21 +452,19 @@ func nameSet(names []string) map[string]struct{} {
 	return out
 }
 
-func scoreXDF(dir, stem string, maps []record.Map) (body, axes Fraction, ok bool, err error) {
+func loadOracle(dir, stem string) (maps []Map, axes []Axis, rows []refRow, ok bool, err error) {
 	raw, err := os.ReadFile(filepath.Join(dir, "xdf", stem+".xdf"))
 	if os.IsNotExist(err) {
-		return Fraction{}, Fraction{}, false, nil
+		return nil, nil, nil, false, nil
 	}
 	if err != nil {
-		return Fraction{}, Fraction{}, false, err
+		return nil, nil, nil, false, err
 	}
-	want, wantAxes, err := parseXDF(raw)
+	maps, axes, rows, err = parseXDF(raw)
 	if err != nil {
-		return Fraction{}, Fraction{}, false, fmt.Errorf("%s.xdf: %w", stem, err)
+		return nil, nil, nil, false, fmt.Errorf("%s.xdf: %w", stem, err)
 	}
-	h, n := matchMaps(locatedMaps(maps), want)
-	ah, an := matchAxes(locatedAxes(maps), wantAxes)
-	return Fraction{h, n}, Fraction{ah, an}, true, nil
+	return maps, axes, rows, true, nil
 }
 
 func catalogNames() ([]string, error) {
@@ -466,46 +581,119 @@ func itemNames(items []record.Item) []string {
 	return out
 }
 
-// scoreWiki counts a name when the image locates it at one address and that
-// map has an axis. A name in values has no axis in the image, so the address
-// is enough. A second address is a miss. Any other body with no axis is a miss.
-func scoreWiki(want []string, values map[string]struct{}, maps []record.Map) Fraction {
-	addrs := map[string]map[uint32]struct{}{}
-	axis := map[string]map[uint32]struct{}{}
-	for _, m := range maps {
-		if m.Name == "" {
-			continue
-		}
-		off := opcode.FileOffset(m.Addr)
-		if addrs[m.Name] == nil {
-			addrs[m.Name] = map[uint32]struct{}{}
-			axis[m.Name] = map[uint32]struct{}{}
-		}
-		addrs[m.Name][off] = struct{}{}
-		if mapAxis(m) {
-			axis[m.Name][off] = struct{}{}
-		}
-	}
+// wikiScore is the tuner names and, beside them, the axes of the maps that
+// scored. A name counts at one address with an axis. A name in values has no
+// axis, so the address is enough. A second address is a miss. When the XDF
+// names that row, the body address has to match. Each axis on a scored map
+// is in the axis denominator. A scalar adds none. A hit is that axis matching
+// the address file.
+func wikiScore(want []string, values map[string]struct{}, maps []record.Map, rows []refRow) (names, axes Fraction) {
+	scored := wikiMaps(want, values, maps, rows)
 	hit := 0
 	for _, n := range want {
-		if len(addrs[n]) != 1 {
-			continue
+		if _, ok := scored[n]; ok {
+			hit++
 		}
-		for off := range addrs[n] {
-			if _, ok := axis[n][off]; ok {
-				hit++
+	}
+	return Fraction{hit, len(want)}, scoreAxes(scored, rows)
+}
+
+// scoreWiki is the name half of wikiScore.
+func scoreWiki(want []string, values map[string]struct{}, maps []record.Map, rows []refRow) Fraction {
+	names, _ := wikiScore(want, values, maps, rows)
+	return names
+}
+
+func scoreAxes(scored map[string]record.Map, rows []refRow) Fraction {
+	hit, total := 0, 0
+	for _, m := range scored {
+		for _, id := range []string{"x", "y"} {
+			if !axisPresent(m, id) {
 				continue
 			}
-			if _, ok := values[n]; ok {
+			total++
+			if axisMatches(m, id, rows) {
 				hit++
 			}
 		}
 	}
-	return Fraction{hit, len(want)}
+	return Fraction{hit, total}
+}
+
+func axisPresent(m record.Map, id string) bool {
+	a := axisByID(m, id)
+	return a != nil && a.Addr != 0
+}
+
+func axisMatches(m record.Map, id string, rows []refRow) bool {
+	body := opcode.FileOffset(m.Addr)
+	for _, row := range rows {
+		if row.name != m.Name || row.addr != body {
+			continue
+		}
+		w, ok := row.axes[id]
+		if ok && axisOne(m, id, w) {
+			return true
+		}
+	}
+	return false
+}
+
+func axisByID(m record.Map, id string) *record.Axis {
+	switch id {
+	case "x":
+		return m.X
+	case "y":
+		return m.Y
+	}
+	return nil
+}
+
+func axisOne(m record.Map, id string, w axisSig) bool {
+	a := axisByID(m, id)
+	if !axisPresent(m, id) {
+		return false
+	}
+	g := axisSig{id: id, addr: opcode.FileOffset(a.Addr), count: a.Count, bits: a.Bits}
+	return g == w
 }
 
 func mapAxis(m record.Map) bool {
-	return m.X != nil && m.X.Addr != 0 || m.Y != nil && m.Y.Addr != 0
+	return axisPresent(m, "x") || axisPresent(m, "y")
+}
+
+type axisSig struct {
+	id    string
+	addr  uint32
+	count int
+	bits  int
+}
+
+// refRow is one constant or table in the image's XDF. addr is the body file offset.
+type refRow struct {
+	name string
+	addr uint32
+	axes map[string]axisSig
+}
+
+// referenceHit is true when this image has no XDF row of that name, or one row
+// has this body address. The axes are scored on their own.
+func referenceHit(m record.Map, rows []refRow) bool {
+	if len(rows) == 0 {
+		return true
+	}
+	off := opcode.FileOffset(m.Addr)
+	seen := false
+	for _, row := range rows {
+		if row.name != m.Name {
+			continue
+		}
+		seen = true
+		if row.addr == off {
+			return true
+		}
+	}
+	return !seen
 }
 
 func matchECU(got []record.Item, want []record.Item) (int, int) {
@@ -645,61 +833,66 @@ type xdfData struct {
 
 // ParseXDF returns one row per constant and one per table body.
 func ParseXDF(b []byte) ([]Map, error) {
-	maps, _, err := parseXDF(b)
+	maps, _, _, err := parseXDF(b)
 	return maps, err
 }
 
 // ParseXDFAxes returns each x or y axis that carries an address.
 // A label list with no address is left out. The table body is not an axis.
 func ParseXDFAxes(b []byte) ([]Axis, error) {
-	_, axes, err := parseXDF(b)
+	_, axes, _, err := parseXDF(b)
 	return axes, err
 }
 
-func parseXDF(b []byte) ([]Map, []Axis, error) {
+func parseXDF(b []byte) ([]Map, []Axis, []refRow, error) {
 	var doc xdfFile
 	if err := xml.Unmarshal(b, &doc); err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 	var maps []Map
 	var axes []Axis
+	var rows []refRow
 	for _, c := range doc.Constants {
 		addr, err := parseAddr(c.Data.Addr)
 		if err != nil {
-			return nil, nil, fmt.Errorf("%s: %w", c.Title, err)
+			return nil, nil, nil, fmt.Errorf("%s: %w", c.Title, err)
 		}
 		maps = append(maps, Map{Name: c.Title, Addr: addr})
+		rows = append(rows, refRow{name: c.Title, addr: addr})
 	}
 	for _, t := range doc.Tables {
 		var addr uint32
 		var found bool
-		for _, ax := range t.Axes {
-			if ax.ID == "z" {
-				if ax.Data.Addr == "" {
+		ax := map[string]axisSig{}
+		for _, a := range t.Axes {
+			if a.ID == "z" {
+				if a.Data.Addr == "" {
 					continue
 				}
-				a, err := parseAddr(ax.Data.Addr)
+				z, err := parseAddr(a.Data.Addr)
 				if err != nil {
-					return nil, nil, fmt.Errorf("%s: %w", t.Title, err)
+					return nil, nil, nil, fmt.Errorf("%s: %w", t.Title, err)
 				}
-				addr, found = a, true
+				addr, found = z, true
 				continue
 			}
-			if ax.ID != "x" && ax.ID != "y" || ax.Data.Addr == "" {
+			if a.ID != "x" && a.ID != "y" || a.Data.Addr == "" {
 				continue
 			}
-			a, err := parseAddr(ax.Data.Addr)
+			at, err := parseAddr(a.Data.Addr)
 			if err != nil {
-				return nil, nil, fmt.Errorf("%s %s: %w", t.Title, ax.ID, err)
+				return nil, nil, nil, fmt.Errorf("%s %s: %w", t.Title, a.ID, err)
 			}
-			axes = append(axes, Axis{Name: t.Title, ID: ax.ID, Addr: a, Count: ax.Count, Bits: ax.Data.Bits})
+			axes = append(axes, Axis{Name: t.Title, ID: a.ID, Addr: at, Count: a.Count, Bits: a.Data.Bits})
+			ax[a.ID] = axisSig{id: a.ID, addr: at, count: a.Count, bits: a.Data.Bits}
 		}
 		if !found {
-			return nil, nil, fmt.Errorf("%s: no table address", t.Title)
+			return nil, nil, nil, fmt.Errorf("%s: no table address", t.Title)
 		}
 		maps = append(maps, Map{Name: t.Title, Addr: addr})
+		rows = append(rows, refRow{name: t.Title, addr: addr, axes: ax})
 	}
-	return maps, axes, nil
+	return maps, axes, rows, nil
 }
 
 func parseAddr(s string) (uint32, error) {
