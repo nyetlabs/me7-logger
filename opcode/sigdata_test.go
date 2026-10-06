@@ -278,6 +278,58 @@ mapsigs:
 	}
 }
 
+func TestMapSigBreakpointTable(t *testing.T) {
+	body := []byte(`
+mapsigs:
+- name: TAB
+  pattern: "020A14"
+  table: true
+- name: CURVE
+  pattern: "D7400002C2F42000"
+  at: 6
+  cols: 2
+  xtable: TAB
+`)
+	doc, err := ParseSigs(body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	img := make([]byte, 0x30)
+	copy(img, []byte{0x02, 0x0A, 0x14})
+	copy(img[8:], []byte{0xD7, 0x40, 0x00, 0x02, 0xC2, 0xF4, 0x20, 0x00})
+	got := MapAddrs(img, StandardDPP, doc.Maps)
+	if len(got) != 1 || got[0].Name != "CURVE" || got[0].Addr != 0x800020 || got[0].XTab != 0x800000 || got[0].Cols != 2 {
+		t.Fatalf("%+v", got)
+	}
+	earlier := []byte(`
+mapsigs:
+- name: TAB
+  pattern: "020A14"
+  table: true
+- name: CURVE
+  pattern: "D7400002C2F42000"
+  at: 6
+- name: CURVE
+  pattern: "FFFFFFFF"
+  cols: 2
+  xtable: TAB
+`)
+	doc, err = ParseSigs(earlier)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got = MapAddrs(img, StandardDPP, doc.Maps)
+	if len(got) != 1 || got[0].XTab != 0 {
+		t.Fatalf("later row %+v", got)
+	}
+	if _, err := ParseSigs([]byte("mapsigs:\n- name: A\n  pattern: AA\n  xtable: TAB\n  cols: 2\n")); err == nil {
+		t.Fatal("accepted an xtable that is not a breakpoint table")
+	}
+	if _, err := ParseSigs([]byte("mapsigs:\n- name: A\n  anchor: B\n  add: 1\n  table: true\n")); err == nil {
+		t.Fatal("accepted a breakpoint table that is an anchor")
+	}
+}
+
 func TestMapSigRejects(t *testing.T) {
 	if _, err := ParseSigs([]byte("mapsigs:\n- name: A\n  anchor: B\n")); err == nil {
 		t.Fatal("accepted an anchor with no add")

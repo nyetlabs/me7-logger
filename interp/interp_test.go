@@ -521,3 +521,23 @@ func putCall(img []byte, at, entry int, r12, r13 uint16) {
 	img[at+18] = byte(entry)
 	img[at+19] = byte(entry >> 8)
 }
+
+func TestBreakpoints(t *testing.T) {
+	img := make([]byte, 16)
+	img[2] = 3
+	copy(img[3:], []byte{1, 2, 3})
+	ax, ok := Breakpoints(img, opcode.FlashBase+2, 8)
+	if !ok || ax.Addr != opcode.FlashBase+3 || ax.Count != 3 || ax.Bits != 8 {
+		t.Fatalf("%v %+v", ok, ax)
+	}
+	img[6] = 2
+	copy(img[8:], []byte{0x10, 0x00, 0x20, 0x00})
+	ax, ok = Breakpoints(img, opcode.FlashBase+6, 16)
+	if !ok || ax.Addr != opcode.FlashBase+8 || ax.Count != 2 || ax.Bits != 16 {
+		t.Fatalf("word %v %+v", ok, ax)
+	}
+	img[2] = 0
+	if _, ok := Breakpoints(img, opcode.FlashBase+2, 8); ok {
+		t.Fatal("accepted a zero count")
+	}
+}

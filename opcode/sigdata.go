@@ -49,6 +49,9 @@ type CallWords struct {
 // that axis data. XAt and YAt are byte distances from the pattern hit to an
 // F2 operand: the RAM word whose setup stored that header. Nil means this
 // row does not name that word. Cols 0 means this row does not give the dimensions.
+// Table means the pattern is the breakpoint table: the address is the hit,
+// and the row is not a map. XTable and YTable name such a row. The count
+// there has to match Cols or Rows.
 type MapSig struct {
 	Name    string
 	Pattern string
@@ -61,6 +64,9 @@ type MapSig struct {
 	YBits   int
 	XAt     *int
 	YAt     *int
+	Table   bool
+	XTable  string
+	YTable  string
 }
 
 // SigDoc is the signature list and the call-slot words it references.
@@ -97,6 +103,9 @@ type mapSigDraft struct {
 	YBits   int    `yaml:"ybits"`
 	XAt     *int   `yaml:"xat"`
 	YAt     *int   `yaml:"yat"`
+	Table   bool   `yaml:"table"`
+	XTable  string `yaml:"xtable"`
+	YTable  string `yaml:"ytable"`
 }
 
 type sigDraft struct {
@@ -199,11 +208,14 @@ func ParseSigs(b []byte) (SigDoc, error) {
 		if d.Anchor != "" && d.Add == nil {
 			return SigDoc{}, fmt.Errorf("mapsig %s: an anchor needs add", d.Name)
 		}
+		if d.Table && (d.Pattern == "" || d.Anchor != "" || d.XTable != "" || d.YTable != "") {
+			return SigDoc{}, fmt.Errorf("mapsig %s: a breakpoint table is a pattern, not a map", d.Name)
+		}
 		at := 0
-		if d.Pattern != "" {
+		if d.Pattern != "" && !d.Table {
 			at = 2
 		}
-		if d.At != nil {
+		if d.At != nil && !d.Table {
 			at = *d.At
 		}
 		xbits, ybits := d.XBits, d.YBits
@@ -213,13 +225,22 @@ func ParseSigs(b []byte) (SigDoc, error) {
 		if d.Rows > 0 && ybits == 0 {
 			ybits = 8
 		}
-		if d.Pattern != "" && (len(d.Pattern)%2 != 0 || at < 0 || at+2 > len(d.Pattern)/2) {
+		if d.Table && (len(d.Pattern)%2 != 0 || len(d.Pattern) < 2) {
+			return SigDoc{}, fmt.Errorf("mapsig %s: a breakpoint table pattern is an even byte string", d.Name)
+		}
+		if !d.Table && d.Pattern != "" && (len(d.Pattern)%2 != 0 || at < 0 || at+2 > len(d.Pattern)/2) {
 			return SigDoc{}, fmt.Errorf("mapsig %s: at must sit on a word inside the pattern", d.Name)
+		}
+		if d.XTable != "" && d.Cols == 0 {
+			return SigDoc{}, fmt.Errorf("mapsig %s: xtable needs the column count", d.Name)
+		}
+		if d.YTable != "" && d.Rows == 0 {
+			return SigDoc{}, fmt.Errorf("mapsig %s: ytable needs the row count", d.Name)
 		}
 		row := MapSig{
 			Name: d.Name, Pattern: d.Pattern, At: at, Anchor: d.Anchor,
 			Rows: d.Rows, Cols: d.Cols, XBits: xbits, YBits: ybits,
-			XAt: d.XAt, YAt: d.YAt,
+			XAt: d.XAt, YAt: d.YAt, Table: d.Table, XTable: d.XTable, YTable: d.YTable,
 		}
 		if d.Add != nil {
 			row.Add = *d.Add
@@ -229,11 +250,23 @@ func ParseSigs(b []byte) (SigDoc, error) {
 		}
 		doc.Maps = append(doc.Maps, row)
 	}
+	tables := map[string]bool{}
+	for _, row := range doc.Maps {
+		if row.Table {
+			tables[row.Name] = true
+		}
+	}
 	for _, row := range doc.Maps {
 		if row.Anchor != "" {
 			if _, ok := seen[row.Anchor]; !ok {
 				return SigDoc{}, fmt.Errorf("mapsig %s: anchor %s is not a mapsig", row.Name, row.Anchor)
 			}
+		}
+		if row.XTable != "" && !tables[row.XTable] {
+			return SigDoc{}, fmt.Errorf("mapsig %s: xtable %s is not a breakpoint table", row.Name, row.XTable)
+		}
+		if row.YTable != "" && !tables[row.YTable] {
+			return SigDoc{}, fmt.Errorf("mapsig %s: ytable %s is not a breakpoint table", row.Name, row.YTable)
 		}
 	}
 	return doc, nil

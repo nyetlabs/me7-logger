@@ -170,15 +170,16 @@ func RamAxis(data []byte, dpp [4]uint16, ram uint16, bits int) (record.Axis, boo
 		return record.Axis{}, false
 	}
 	if bits == 8 || bits == 16 {
-		return axisBits(data, hdr, bits)
+		return Breakpoints(data, hdr, bits)
 	}
 	return axisAt(data, hdr)
 }
 
-// axisBits reads a header whose width is already known.
-// An 8-bit axis keeps a zero first breakpoint. A 16-bit axis is a count word
-// whose high byte is zero, and the breakpoints start two bytes later.
-func axisBits(data []byte, addr uint32, bits int) (record.Axis, bool) {
+// Breakpoints reads a breakpoint table that is not in front of the map.
+// addr is the count. bits 8 keeps a one-byte count and the values start on
+// the next byte. bits 16 keeps a count word whose high byte is zero, and the
+// values start two bytes later. The axis address is the first breakpoint.
+func Breakpoints(data []byte, addr uint32, bits int) (record.Axis, bool) {
 	addr, ok := inImage(data, addr)
 	if !ok {
 		return record.Axis{}, false
@@ -447,7 +448,7 @@ func axisAt(data []byte, addr uint32) (record.Axis, bool) {
 	if data[off+1] == 0 {
 		bits = 16
 	}
-	return axisBits(data, addr, bits)
+	return Breakpoints(data, addr, bits)
 }
 
 // Packed reads a row count and a column count when they sit in front of the

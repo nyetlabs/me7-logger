@@ -450,17 +450,26 @@ func loadAlias(path string) (map[string]string, error) {
 	return nil, err
 }
 
-// fillPacked copies a packed axis onto the caller map of this name when that
-// map is the same body and does not already have an axis.
+// fillPacked copies axes onto the caller map of this name when that map is the
+// same body. An axis the caller already stored stays.
 func fillPacked(img []byte, dpp [4]uint16, maps []record.Map, h opcode.MapHit) {
 	for i := range maps {
 		if maps[i].Name != h.Name || maps[i].Addr != h.Addr {
 			continue
 		}
-		if maps[i].X != nil || maps[i].Y != nil {
+		if maps[i].X != nil && maps[i].Y != nil {
 			return
 		}
+		keptX, keptY := maps[i].X, maps[i].Y
 		applyAxes(img, dpp, h, &maps[i])
+		if keptX != nil {
+			maps[i].X = keptX
+			maps[i].Cols = keptX.Count
+		}
+		if keptY != nil {
+			maps[i].Y = keptY
+			maps[i].Rows = keptY.Count
+		}
 		return
 	}
 }
@@ -480,6 +489,23 @@ func applyAxes(img []byte, dpp [4]uint16, h opcode.MapHit, m *record.Map) {
 			}
 		}
 		return
+	}
+	if h.XTab != 0 || h.YTab != 0 {
+		if h.XTab != 0 {
+			if x, ok := interp.Breakpoints(img, h.XTab, h.XBits); ok && (h.Cols == 0 || x.Count == h.Cols) {
+				m.Cols = x.Count
+				m.X = &x
+			}
+		}
+		if h.YTab != 0 {
+			if y, ok := interp.Breakpoints(img, h.YTab, h.YBits); ok && (h.Rows == 0 || y.Count == h.Rows) {
+				m.Rows = y.Count
+				m.Y = &y
+			}
+		}
+		if m.X != nil || m.Y != nil {
+			return
+		}
 	}
 	if h.Cols > 0 {
 		rows, cols, x, y, ok := interp.Shaped(img, h.Addr, h.Rows, h.Cols, h.YBits, h.XBits)

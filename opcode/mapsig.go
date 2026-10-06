@@ -22,18 +22,25 @@ type MapHit struct {
 	YBits int
 	XRam  uint16
 	YRam  uint16
+	// XTab and YTab are breakpoint tables named by the row. Each is the CPU
+	// address of that table's count byte. Zero means this hit does not name one.
+	XTab uint32
+	YTab uint32
 }
 
 // MapAddrs runs the mapsig rows. A pattern is kept only when it occurs once
-// and the address word decodes inside this image. An anchor is a byte
-// distance from a map this pass already located. A later row with the same
-// name fills it only when an earlier window missed. These addresses are
+// and the address word decodes inside this image. A table row is the
+// breakpoint table: its address is the hit, and it is not a map. An anchor is
+// a byte distance from a map this pass already located. A later row with the
+// same name fills it only when an earlier window missed. These addresses are
 // flash maps, so the RAM filter used by the logging signatures does not apply.
 func MapAddrs(img []byte, dpp [4]uint16, rows []MapSig) []MapHit {
 	if len(img) == 0 || len(rows) == 0 {
 		return nil
 	}
 	have := map[string]int{}
+	tabs := map[string]uint32{}
+	won := map[string]MapSig{}
 	var out []MapHit
 	add := func(name string, addr, header uint32, row MapSig, xram, yram uint16) {
 		if _, ok := have[name]; ok {
@@ -43,6 +50,7 @@ func MapAddrs(img []byte, dpp [4]uint16, rows []MapSig) []MapHit {
 			return
 		}
 		have[name] = len(out)
+		won[name] = row
 		out = append(out, MapHit{
 			Name: name, Addr: addr, Header: header,
 			Rows: row.Rows, Cols: row.Cols, XBits: row.XBits, YBits: row.YBits,
@@ -59,6 +67,14 @@ func MapAddrs(img []byte, dpp [4]uint16, rows []MapSig) []MapHit {
 		}
 		at, ok := findOne(img, pat, mask)
 		if !ok {
+			continue
+		}
+		if row.Table {
+			sum := at + row.Add
+			if sum < 0 || sum >= len(img) {
+				continue
+			}
+			tabs[row.Name] = FlashBase + uint32(sum)
 			continue
 		}
 		ptr := PtrAt(img, FlashBase+uint32(at+row.At), dpp)
@@ -87,6 +103,15 @@ func MapAddrs(img []byte, dpp [4]uint16, rows []MapSig) []MapHit {
 			}
 			add(row.Name, addr, 0, row, out[base].XRam, out[base].YRam)
 			again = true
+		}
+	}
+	for name, idx := range have {
+		row := won[name]
+		if row.XTable != "" {
+			out[idx].XTab = tabs[row.XTable]
+		}
+		if row.YTable != "" {
+			out[idx].YTab = tabs[row.YTable]
 		}
 	}
 	return out
