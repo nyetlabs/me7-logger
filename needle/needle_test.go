@@ -53,6 +53,34 @@ func TestMatchWildcardAndMask(t *testing.T) {
 	}
 }
 
+func TestNeedleHexList(t *testing.T) {
+	one, err := Parse([]byte("data:\n  - name: s\n    needle_hex: \"AA 11 BB\"\n"), "scalar")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(one) != 1 || len(one[0].Pats) != 0 || one[0].Pattern[0] != 0xAA {
+		t.Fatalf("scalar %+v", one)
+	}
+	raw := []byte("data:\n  - name: f\n    needle_hex:\n      - \"AA 11 BB\"\n      - \"CC 22 DD\"\n")
+	ns, err := Parse(raw, "list")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(ns) != 1 || len(ns[0].Pats) != 2 {
+		t.Fatalf("patterns %d", len(ns[0].Pats))
+	}
+	data := []byte{0xaa, 0x11, 0xbb, 0x00, 0xcc, 0x22, 0xdd}
+	if got := ns[0].Find(data); !sameInts(got, []int{0, 4}) {
+		t.Fatalf("list hits %v", got)
+	}
+	again := []byte{0xaa, 0x11, 0xbb, 0x00, 0xaa, 0x11, 0xbb}
+	ns[0].Pats[1] = ns[0].Pats[0]
+	ns[0].Masks[1] = ns[0].Masks[0]
+	if got := ns[0].Find(again); !sameInts(got, []int{0, 4}) {
+		t.Fatalf("duplicate list hits %v", got)
+	}
+}
+
 func TestBackUpRange(t *testing.T) {
 	dir := t.TempDir()
 	yml := filepath.Join(dir, "p.yaml")

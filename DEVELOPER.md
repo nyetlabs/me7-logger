@@ -112,7 +112,7 @@ A measurement row carries the scale and, when the bytes are known, the needle th
 
 `bit: true` means the label is an `8A` or `9A` and the word is `0xFD00` plus twice the next byte. When that needle's address is the load in a selector case, the case supplies the result type. The catalog is not asked for that case.
 
-An omitted measurement field is size 2, bitmask 0, unit "", signed false, inverse false, factor 1, offset 0. A row replaces only the fields it lists. `needle_hex` on the row attaches or replaces the needle. An omitted `back_up` is -4.
+An omitted measurement field is size 2, bitmask 0, unit "", signed false, inverse false, factor 1, offset 0. A row replaces only the fields it lists. `needle_hex` on the row attaches or replaces the needle. It may be a list of patterns, one per code layout. The list shares `back_up`, and `unique` counts every hit. The list is not a selector case. An omitted `back_up` is -4.
 
 A failed measurement pattern is fixed on that row. A failed function pattern stays in `config/needles.yaml`.
 

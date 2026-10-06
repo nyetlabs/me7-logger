@@ -6,6 +6,7 @@ package needle
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -26,6 +27,10 @@ type Needle struct {
 	Unique     bool
 	Function   bool
 	EntryAfter [][]byte
+	// Pats is every pattern when needle_hex is a list. Pattern and Mask
+	// are Pats[0]. Empty means the single Pattern and Mask.
+	Pats  [][]byte
+	Masks [][]byte
 }
 
 // Parse reads data and functions lists from YAML bytes. name is used in errors.
@@ -70,7 +75,7 @@ func compileList(list []rawNeedle, function bool) ([]Needle, error) {
 
 type rawNeedle struct {
 	Name       string       `yaml:"name"`
-	NeedleHex  string       `yaml:"needle_hex"`
+	NeedleHex  hexList      `yaml:"needle_hex"`
 	MaskHex    string       `yaml:"mask_hex"`
 	BackUp     numOrRange   `yaml:"back_up"`
 	Unique     *bool        `yaml:"unique"`
@@ -133,13 +138,13 @@ func (f rawNeedle) compileAll() ([]Needle, error) {
 		}
 		return []Needle{n}, nil
 	}
-	if f.NeedleHex != "" || f.MaskHex != "" || f.BackUp.set || f.Unique != nil || len(f.EntryAfter) > 0 {
+	if !f.NeedleHex.empty() || f.MaskHex != "" || f.BackUp.set || f.Unique != nil || len(f.EntryAfter) > 0 {
 		return nil, fmt.Errorf("%s: needles replaces needle_hex", f.Name)
 	}
 	out := make([]Needle, 0, len(f.Needles))
 	for _, p := range f.Needles {
 		n, err := (rawNeedle{
-			Name: f.Name, NeedleHex: p.NeedleHex, MaskHex: p.MaskHex,
+			Name: f.Name, NeedleHex: hexList{items: []string{p.NeedleHex}}, MaskHex: p.MaskHex,
 			BackUp: p.BackUp, Unique: p.Unique, EntryAfter: p.EntryAfter,
 		}).compile()
 		if err != nil {
@@ -154,23 +159,31 @@ func (f rawNeedle) compile() (Needle, error) {
 	if f.Name == "" {
 		return Needle{}, fmt.Errorf("needle missing name")
 	}
-	if strings.TrimSpace(f.NeedleHex) == "" {
+	if f.NeedleHex.empty() {
 		return Needle{}, fmt.Errorf("%s: needle_hex is required", f.Name)
 	}
-	pat, mask, err := parsePattern(f.NeedleHex)
-	if err != nil {
-		return Needle{}, fmt.Errorf("%s: %w", f.Name, err)
+	if len(f.NeedleHex.items) > 1 && strings.TrimSpace(f.MaskHex) != "" {
+		return Needle{}, fmt.Errorf("%s: mask_hex applies to one needle_hex", f.Name)
+	}
+	pats := make([][]byte, len(f.NeedleHex.items))
+	masks := make([][]byte, len(f.NeedleHex.items))
+	for i, hex := range f.NeedleHex.items {
+		pat, mask, err := parsePattern(hex)
+		if err != nil {
+			return Needle{}, fmt.Errorf("%s: %w", f.Name, err)
+		}
+		pats[i], masks[i] = pat, mask
 	}
 	if strings.TrimSpace(f.MaskHex) != "" {
 		m, err := ParseHex(f.MaskHex)
 		if err != nil {
 			return Needle{}, fmt.Errorf("%s: mask_hex: %w", f.Name, err)
 		}
-		if len(m) != len(pat) {
-			return Needle{}, fmt.Errorf("%s: mask_hex length %d != needle length %d", f.Name, len(m), len(pat))
+		if len(m) != len(pats[0]) {
+			return Needle{}, fmt.Errorf("%s: mask_hex length %d != needle length %d", f.Name, len(m), len(pats[0]))
 		}
-		for i := range mask {
-			mask[i] &= m[i]
+		for i := range masks[0] {
+			masks[0][i] &= m[i]
 		}
 	}
 	unique := true
@@ -178,8 +191,11 @@ func (f rawNeedle) compile() (Needle, error) {
 		unique = *f.Unique
 	}
 	n := Needle{
-		Name: f.Name, Pattern: pat, Mask: mask,
+		Name: f.Name, Pattern: pats[0], Mask: masks[0],
 		BackUp: DefaultBackUp, Unique: unique,
+	}
+	if len(pats) > 1 {
+		n.Pats, n.Masks = pats, masks
 	}
 	if f.BackUp.set {
 		lo, hi := f.BackUp.lo, f.BackUp.hi
@@ -199,6 +215,42 @@ func (f rawNeedle) compile() (Needle, error) {
 		n.EntryAfter = append(n.EntryAfter, b)
 	}
 	return n, nil
+}
+
+// hexList is one needle_hex string or a list of them.
+type hexList struct {
+	items []string
+}
+
+func (h *hexList) UnmarshalYAML(n *yaml.Node) error {
+	switch n.Kind {
+	case yaml.ScalarNode:
+		h.items = []string{n.Value}
+		return nil
+	case yaml.SequenceNode:
+		if len(n.Content) == 0 {
+			return fmt.Errorf("needle_hex list is empty")
+		}
+		h.items = make([]string, len(n.Content))
+		for i, c := range n.Content {
+			if c.Kind != yaml.ScalarNode {
+				return fmt.Errorf("needle_hex list wants strings")
+			}
+			h.items[i] = c.Value
+		}
+		return nil
+	default:
+		return fmt.Errorf("needle_hex wants a string or a list")
+	}
+}
+
+func (h hexList) empty() bool {
+	for _, s := range h.items {
+		if strings.TrimSpace(s) != "" {
+			return false
+		}
+	}
+	return true
 }
 
 func parseNum(s string) (int, error) {
@@ -265,11 +317,34 @@ func ParseHex(s string) ([]byte, error) {
 }
 
 // Find returns word-aligned hit offsets. C166 instructions are word aligned.
+// Every pattern in a needle_hex list is searched. The same offset is one hit.
 func (n Needle) Find(data []byte) []int {
+	if len(n.Pats) == 0 {
+		return scan(data, n.Pattern, n.Mask)
+	}
 	var hits []int
-	last := len(data) - len(n.Pattern)
+	for i := range n.Pats {
+		hits = append(hits, scan(data, n.Pats[i], n.Masks[i])...)
+	}
+	if len(hits) < 2 {
+		return hits
+	}
+	sort.Ints(hits)
+	w := 1
+	for i := 1; i < len(hits); i++ {
+		if hits[i] != hits[w-1] {
+			hits[w] = hits[i]
+			w++
+		}
+	}
+	return hits[:w]
+}
+
+func scan(data, pat, mask []byte) []int {
+	var hits []int
+	last := len(data) - len(pat)
 	for i := 0; i <= last; i += 2 {
-		if matchAt(data, n.Pattern, n.Mask, i) {
+		if matchAt(data, pat, mask, i) {
 			hits = append(hits, i)
 		}
 	}
@@ -516,6 +591,9 @@ func applyNeedle(base []Needle, item *yaml.Node, file string, function bool) ([]
 		}
 	}
 	if _, ok := fields["mask_hex"]; ok {
+		if len(n.Pats) > 1 {
+			return nil, fmt.Errorf("%s: %s: mask_hex applies to one needle_hex", file, needleName)
+		}
 		m, err := ParseHex(raw.MaskHex)
 		if err != nil {
 			return nil, fmt.Errorf("%s: %s: mask_hex: %w", file, needleName, err)
@@ -590,6 +668,15 @@ func dropNeedle(base []Needle, file, name string) ([]Needle, error) {
 func cloneNeedle(n Needle) Needle {
 	n.Pattern = append([]byte(nil), n.Pattern...)
 	n.Mask = append([]byte(nil), n.Mask...)
+	if len(n.Pats) > 0 {
+		pats := make([][]byte, len(n.Pats))
+		masks := make([][]byte, len(n.Masks))
+		for i := range n.Pats {
+			pats[i] = append([]byte(nil), n.Pats[i]...)
+			masks[i] = append([]byte(nil), n.Masks[i]...)
+		}
+		n.Pats, n.Masks = pats, masks
+	}
 	if n.BackUpMax != nil {
 		v := *n.BackUpMax
 		n.BackUpMax = &v
