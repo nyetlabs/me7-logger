@@ -1,7 +1,7 @@
-# By name.
-# Alias for each Bosch name. A row with no alias is kept here and omitted from output.
-# $1 in an alias is a regex reference used by ecuxplot loggers.yaml. It is not a literal.
-# was is the previous alias when this name was renamed. The Bosch name is unchanged.
+# One display name per Bosch name. Keep the list sorted by name.
+# A row with no alias stays in this file and is left out of the output.
+# $1 is a backreference for ecuxplot's loggers.yaml.
+# was is the alias this name used before it was renamed. The Bosch name stays.
 aliases:
 - name: abo
   alias: CountStartsWithOilInFuel

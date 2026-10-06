@@ -1,20 +1,22 @@
-# By caller, then at, then interp, then name.
-# Which caller function passes each map. The address is the immediate at that
-# call, and it is not stored here. at is the byte distance from the caller
-# label to the CALLS. caller is the Funktionsrahmen module and the entry.
-# interp is the map_interp needle.
-# at is one distance or a list. A list is several calls on one caller and one
-# interp. One image matches one of them. A different caller or interp stays
-# its own row. One caller and distance may not be repeated.
-# The axis point count and its width are read from the image. That is the column axis
-# when R13 is that header. A load of R14 or R15 from a RAM word is a header a setup
-# stored in R12. An R13 page immediate overrides the DPP. With no page, the top bits
-# of that immediate select the DPP. A setup store immediately before the R12 frame
-# is that same kind of word.
-# A word whose header is the column is the column index. A different header is the row.
-# Two different row headers leave the row unset. A page call that does not load that
-# word leaves the row unset. ytable names a breakpoint table. rows is the count
-# that table must have. It fills the row when the call leaves that axis unset.
+# Maps found by the function that passes them to an interpolator.
+# The address is the immediate at the CALLS, read from the binary.
+#
+# name    Bosch name. One name can be passed by more than one caller.
+# caller  That function, as module_entry (DWKR_dwkr).
+# at      Bytes from the function label to the CALLS. Positive and even.
+#         A list is several calls in that function that share one interpolator.
+#         Each binary matches one offset in the list.
+# interp  Interpolator needle, such as map_interp_curve8 or map_interp_table8.
+# ytable  Breakpoint table for the row axis, when the call leaves that axis blank.
+# rows    How many points that table has. Set this together with ytable.
+# ybits   Width of those points, 8 or 16. With a table and no width, this is 8.
+#
+# Keep the list sorted by caller, then offset, then interpolator, then name.
+# The same caller and offset belong to one row.
+#
+# The column is the axis header on the call. A second header loaded beside it
+# is the row. When those headers disagree, the row stays blank and ytable
+# fills it. How the headers are recognized is in DEVELOPER.md.
 
 maps:
 - name: KRFKLN

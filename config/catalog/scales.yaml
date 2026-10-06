@@ -1,6 +1,6 @@
-# By unit, then name.
-# Named catalog scales. A row selects one with scale.
-# A field written on the row wins. One unit can have more than one scale.
+# Named scales for catalog rows. A row picks one with scale.
+# Several scales can share a unit. A field on the catalog row overrides the scale.
+# Keep these sorted by unit, then by name.
 scales:
   count:
     unit: '#'

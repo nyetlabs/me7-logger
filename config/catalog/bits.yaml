@@ -1,7 +1,6 @@
-# Result type numeric, then bitmask high to low.
-# One bitmask per row. The result type is the selector compare;
-# the mask is the bit that compare loads. A row with a mask does not
-# share a key with a value row.
+# Single-bit catalog rows. Sort by result type, then by bitmask from high to low.
+# rt is the value the selector compares. bitmask is the bit that compare loads.
+# A bit row and a value row keep different result-type and mask pairs.
 variables:
 - rt: '0x000D'
   bitmask: '0x80'

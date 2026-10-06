@@ -1,32 +1,47 @@
-# Rows run in file order. A new row goes after the names it embeds.
-# calls keys stay numeric.
-# Ordered signature rows. A later row may embed a name an earlier row stored.
-# {name:MID} is that address in EXTP form, with MID between the page
-# and the word. {slot:N} is callsSlot(N): the word comes from calls, chosen by
-# the same call counts clock() uses. from is the CPU search floor. open is a
-# copy whose DB00 window limits pattern. first uses the first copy when
-# several exist; otherwise open requires one copy. A later row may search
-# that window with in. after searches from that row's hit, through the next
-# DB00. absent skips the row when that pattern is in the range. steps is a
-# chain; skip is the byte distance from the previous hit. pattern is one
-# string or a list tried in order. single applies to each string, and after
-# measures from the string that hit. at is the byte distance from the last
-# hit to the address word. also add is a byte offset from that address.
-# mapsigs locates a calibration map in flash. pattern is one window; XX is
-# the address word. at is the distance from the hit to that word, 2 when
-# omitted. add is the byte distance from the decoded pointer to the map body.
-# anchor names a map this list already locates; add is then the byte distance
-# from that map. A later row with the same name fills it only when an earlier
-# window missed. rows and cols are the axis point counts when those axes are
-# prepended to the body. xbits and ybits are the breakpoint widths, 8 when
-# that count is set and the width is omitted. The distance from the counts to
-# the body is the length of that axis data. A curve sets cols. xat and yat are
-# byte distances from the hit to an F2 operand, the RAM word whose setup stored
-# that header. An anchor uses the base row's words when it does not name its own.
-# The point count on the row has to match the count byte at that header.
-# table is the breakpoint table itself. The address is the hit, and the row is
-# not a map. xtable and ytable name that row. The count there has to match cols
-# or rows.
+# Byte patterns that locate Bosch names, then calibration maps.
+# Rows run from top to bottom. A row can splice in a name an earlier row
+# already found, so add it below that name.
+#
+# calls
+#   Bootrom call-table words. The outer key is the call count that picks the
+#   bootrom. The inner keys are the tables 0, 402, and 602. Keep them quoted.
+#   {slot:N} inserts the word for slot N, using the same call count as the clock.
+#
+# name      Bosch name to store.
+# size      Width in bytes.
+# from      Lowest address to search. Omitted means 0x804000.
+# pattern   Bytes to find. One string, or a list tried in order.
+#           X, x, and ? are nibble wildcards. {name:MID} splices a known
+#           address in EXTP form: page, the name, then the word.
+# open      Find this copy first. The DB00 window around it limits pattern.
+#           The copy has to occur once unless first is set.
+# first     With open, keep the first copy when several exist.
+# in        Search the window an earlier open row saved.
+# after     Start just after that row's hit and stop at the next DB00.
+# absent    Skip this row when this pattern is already in the range.
+# single    Keep the row only when the pattern occurs once.
+# steps     Several searches in a chain. skip is bytes past the previous hit.
+# at        Bytes from the hit to the address word. Negative counts backward.
+# also      More names from the same hit. at selects another word.
+#           add is a byte offset from the address already taken.
+#
+# mapsigs locate a calibration map from a byte window in flash.
+# pattern   A window that occurs once. XX is the address word inside it.
+# at        Bytes from the hit to that word. Omitted means 2.
+# add       Bytes from the decoded pointer to the map body.
+#           With anchor, bytes from a map this list already found.
+# anchor    That earlier map. Its axis words are used unless this row sets its own.
+# rows      Row-axis point count, when the axes sit in front of the body.
+# cols      Column-axis point count. A curve sets cols and leaves rows out.
+# xbits     Column breakpoint width, 8 or 16. Omitted means 8 when cols is set.
+# ybits     Row breakpoint width, 8 or 16. Omitted means 8 when rows is set.
+# xat, yat  Bytes from the hit to the F2 that loads that axis header from RAM.
+#           The count byte at the header has to match cols or rows.
+# table     The hit is the count byte of a breakpoint table.
+# xtable    Column table, by name. Its count has to match cols.
+# ytable    Row table, by name. Its count has to match rows.
+#
+# A later row with the same map name fills it only when the earlier window missed.
 
 calls:
   "13":
@@ -171,7 +186,7 @@ signatures:
   open: "E6FXxxxx{nmot:C2FX}{rl:C2FX}DAXXxxxxF7F8xxxxC0845C74F6F4xxxx"
   pattern: "E6FCxxxx{nmot:C2FD}{rl:C2FE}{slot:13}"
   at: 18 # ptrAt(hit + 0x12)
-# scanKhfm's second window. The F7 F8 word is fkhfm.
+# Second fkhfm site. The address is the F7 F8 word.
 - name: fkhfm
   size: 1
   from: "0x820000"
@@ -313,7 +328,7 @@ signatures:
 - name: uzue
   size: 1
   from: "0x820000"
-  # E7 F8 FF 00 is the copy ME7Info takes. A D7 40 copy of the same tail is a different word.
+  # ME7Info uses the E7 F8 FF 00 copy. A D7 40 copy of this tail is a different word.
   pattern: "E7F8FF00F7F8xxxxE6FCxxxxE6FDxxxxC08EC2FFxxxxDAXXxxxx"
   single: true
   at: 6
@@ -321,7 +336,7 @@ signatures:
   - name: tsrldyn
     size: 1
     at: 20
-# scanStart's first KFSZDUB pattern. C0 8D C2 FE, with the same E7 F8 FF 00 copy.
+# uzue at the first KFSZDUB site: E7 F8 FF 00, then C0 8D C2 FE.
 - name: uzue
   size: 1
   from: "0x820000"
@@ -337,7 +352,7 @@ signatures:
   after: uzue
   pattern: "C2FCxxxxE6FDxxxxE6FExxxxD740XX02C2FFxxxxDAXXxxxx"
   at: -32
-# scanStart uses this ngfil site when the C0 8D uzue search hit.
+# ngfil_w after the C0 8D uzue match.
 - name: ngfil_w
   size: 2
   after: uzue
@@ -645,7 +660,7 @@ signatures:
   - name: zwoutar_3
     size: 1
     add: 3
-# F22ig loads these through DPP2. The earlier windows miss that image.
+# fkhfm on F22ig, loaded through DPP2.
 - name: fkhfm
   size: 1
   pattern: "1273F7F8xxxxC2F4058B"
@@ -666,7 +681,7 @@ signatures:
   pattern: "66F2FF03F6F2xxxxF2F404F8"
   single: true
   at: 6
-# scanKrkte findSingle. The word after F2 FX is uhfm_w.
+# uhfm_w is the word after F2 FX in the KRKTE scan.
 - name: uhfm_w
   size: 2
   from: "0x804000"
@@ -1779,11 +1794,12 @@ mapsigs:
   rows: 12
   cols: 12
   xat: -118
-# Breakpoint tables shared by several curves. The address is the count. The row is not a map.
-# SGA06MDUB is the gear row of KFDMDADP and KFDMDARO. The caller loads it from
-# RAM 0x8EBE. The stores of that word write 0x0500 and then copy RAM 0x8AF8.
-# No store of the header address has been found. The same named table can be
-# attached on other bins once that store, or their own pattern, is known.
+# Breakpoint tables shared by several curves. The hit is the count byte.
+# SGA06MDUB is the gear axis of KFDMDADP and KFDMDARO. The caller reads it
+# from RAM 0x8EBE. That word is stored as 0x0500, then copied from RAM 0x8AF8.
+# The store of the header address itself has not turned up, so the table is
+# matched by these bytes. Another binary can reuse the name once its store,
+# or its own pattern, is known.
 - name: SGA06MDUB
   pattern: "06010203040506"
   table: true
@@ -1817,7 +1833,7 @@ mapsigs:
   add: 17
   cols: 16
   xtable: bp_nmot
-# 22N front bytes. The tail matches the earlier row of the same name.
+# 22N copy of RLSALULL. The tail matches the row above; these front bytes differ.
 - name: RLSALULL
   pattern: "ED842D03F3F8XXXX0D0AE6FC"
   at: 6

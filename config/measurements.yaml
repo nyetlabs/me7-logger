@@ -1,33 +1,42 @@
-# By name.
-# A measurement is one row: the scale, the comment, and the bytes that locate
-# the mem operand. needle_hex is that pattern, or a list of patterns.
-# A list is one pattern per code layout. The patterns share back_up, and
-# unique counts every hit. The list is not a selector case. "??" is one wildcard.
-# An omitted back_up is -4, which lands the label on that word. Write back_up
-# when it is not -4. generate maps the word through the image DPP. When that
-# address is inside a selector case, the case supplies
-# the result type and the catalog is not used for that case.
-# A row with no needle is a stub and is not written. There is no address in
-# this file. config/user adds needle_hex on the row, or sets stub: true to drop
-# the needle and keep the scale. bit: true means the label is an 8A or 9A.
-# The word is 0xFD00 plus twice the next byte.
+# One row per measurement: its scale, its description, and the bytes that
+# find the RAM operand. The address is read from the image.
+# Keep the list sorted by name.
 #
-# A measurement may omit size, bitmask, unit, signed, inverse, factor, and
-# offset. Omitted, those are 2, 0, "", false, false, 1, and 0. The conversions
-# in config/names.yaml map a size and a unit onto omitted signed, inverse,
-# factor, and offset. An omitted conversion size is 2. A field written on the
-# row wins. conversion selects a named scale, which is not a size+unit
-# default. torque is unit "" and 100/0x10000. twice is 200/0x10000 and keeps
-# the row's unit. half is the 1/2 byte percent. retard is °KW -3/4; the °KW
-# default stays signed +3/4. amp is a blank byte, 800/0x10000, not the 1/100
-# timer. config/user/*.yaml can add, replace, or drop
-# pairs and rows.
-# A word with no unit uses 1/4. Signed speed differences set signed.
-# A "%" word uses 100/0x10000, one percent of a 16-bit word. 1/0x10000 is the
-# fraction of the word. A byte scale is n/256, as in 1/256 or 10/256.
-# Other percent words set factor.
-# A byte with no unit uses 1/100. A single-bit bitmask is a flag and
-# does not take that pair.
+# name        Bosch name.
+# comment     Description written with the measurement.
+# needle_hex  Bytes around the operand. "??" is one wildcard byte.
+#             A list is one pattern per code layout. The patterns share
+#             back_up, and a hit on any of them counts.
+# back_up     Bytes from the hit back to the operand. Omitted means -4,
+#             which lands on that word. Write it when the landing differs.
+# bit         The match is an 8A or 9A. The address is 0xFD00 plus twice
+#             the following byte.
+# size        Width in bytes. Omitted means 2.
+# bitmask     Omitted means 0. One bit is a flag, and it keeps factor 1.
+# unit        Omitted means blank.
+# signed      Omitted means false. Set it on a signed speed difference.
+# inverse     Omitted means false.
+# factor      Omitted means 1, unless a conversion fills it in.
+# offset      Omitted means 0.
+# conversion  A named scale in config/names.yaml: amp, half, retard, torque, twice.
+# stub        In config/user: drop the needle and keep the scale.
+#
+# A blank scale field is filled from config/names.yaml when size and unit
+# match a conversion there. A field written on the row is kept. conversion
+# picks a named scale on its own, so that scale can have a blank unit.
+# A row with no needle is a stub and is left out. config/user can add a
+# needle, replace the row, or set stub.
+#
+# When the row leaves factor blank, the usual scales are:
+#   16-bit, no unit     1/4
+#   16-bit percent      100/65536, one percent of the word
+#   8-bit, no unit      1/100
+#   8-bit percent       3/4
+# A byte scale written as n/256 (1/256, 10/256) is a fraction of the byte.
+# 1/65536 is a fraction of the word.
+#
+# If the operand is the load inside a selector case, that case supplies the
+# result type.
 measurements:
 - name: abs_ndfil_w
   comment: absolute value ndfil_w
@@ -410,7 +419,7 @@ measurements:
     - "9D 0B 8A 52 04 F0"
     - "02 30 9A 52"
   back_up: -2
-# unit t is the T4 register, not a mass
+# Unit t is the T4 timer register.
 - name: currentT4_w
   unit: t
   comment: current T4 register for nmod integrator
@@ -440,14 +449,14 @@ measurements:
   needle_hex:
     - "02 A8 F6 F4 ?? ?? 0D 14"
     - "F2 A7 F2 FF F0 A7"
-# factor 1, not the 3/4 byte percent
+# Raw byte. The usual 8-bit percent is 3/4.
 - name: dmrkh
   size: 1
   unit: "%"
   factor: 1.0
   comment: torque reserve for catalyzer heating
   needle_hex: "0D 04 F3 F8 ?? ?? 49 80"
-# factor 1, not the torque-word factor
+# Raw word. The usual percent word is 100/65536.
 - name: dmrkh_w
   unit: "%"
   factor: 1
@@ -512,7 +521,7 @@ measurements:
   needle_hex:
     - "03 00 F7 8E ?? ?? 0D 2B"
     - "0D 1A F3 F8 A1 8C"
-# 1/16, not the 1/100 timer scale
+# Gain, scale 1/16. A timer byte is usually 1/100.
 - name: flrar
   size: 1
   factor: 1/16
@@ -520,28 +529,28 @@ measurements:
   needle_hex:
     - "AA A8 C2 F5 ?? ?? F0 25"
     - "97 8C F7 8E A2 8C"
-# 19/256, not the speed-word 1/4
+# Gain, scale 19/256. A speed word is usually 1/4.
 - name: kifz_MDH_w
   factor: 19/256
   comment: kifz MDH register for nmod integrator
   needle_hex:
     - "1B 42 F6 06 ?? ?? F2 F3 0C FE F2 F2 9A A8"
     - "6A 88 F2 F4 E2 A8"
-# 19/256, not the speed-word 1/4
+# Gain, scale 19/256. A speed word is usually 1/4.
 - name: kifz_w
   factor: 19/256
   comment: amplification of vehicle model
   needle_hex:
     - "03 00 F6 8E ?? ?? 0D 30"
     - "57 88 F6 8E 9A A8"
-# unit t is the T4 register, not a mass
+# Unit t is the T4 timer register.
 - name: lastT4_w
   unit: t
   comment: previous T4 register for nmod integrator
   needle_hex:
     - "DE A8 F6 F4 ?? ?? F6 F6"
     - "D2 A8 F6 8E E0 A8"
-# signed 1/200, not the torque-word factor
+# Signed percent, scale 1/200. A percent word is usually 100/65536.
 - name: ldimxr_w
   unit: "%"
   signed: true
@@ -692,14 +701,14 @@ measurements:
   needle_hex:
     - "C6 3C 22 F5 ?? ?? 5D 03"
     - "72 A8 F3 F8 A0 A8"
-# factor 40 on a percent unit
+# Speed threshold stored as a percent: 40 per count, same as an rpm byte.
 - name: nasnottm
   size: 1
   unit: "%"
   factor: 40.0
   comment: Speed threshold due to stalling protection as a function of tmot
   needle_hex: "78 F8 43 F8 ?? ?? 9D 11"
-# factor 1, not the 1/100 timer scale
+# Raw byte. A timer byte is usually 1/100.
 - name: ndar_init_switch
   size: 1
   factor: 1
@@ -833,7 +842,7 @@ measurements:
   needle_hex:
     - "AA A8 42 F4 ?? ?? BD 0A"
     - "64 88 F6 8E A8 A8"
-# factor 1, not the speed-word 1/4
+# Raw word. A speed word is usually 1/4.
 - name: nmod_int_reset_w
   factor: 1
   comment: integrator reset from B_iniar
@@ -850,7 +859,7 @@ measurements:
   needle_hex:
     - "07 A0 F2 F4 ?? ?? F6 F4 DC A8"
     - "FD 00 65 F8 AC A8"
-# Selector case, not the size-2 rpm word (1/4). Factor 40 matches the catalog row.
+# Taken from the result-type selector. Factor 40 matches the catalog rpm row.
 - name: nmot
   unit: rpm
   factor: 40
@@ -875,7 +884,7 @@ measurements:
   needle_hex:
     - "CC 00 42 F4 ?? ?? 8D 02 BF 4E"
     - "50 04 F6 F4 8E 9F"
-# 100/256, not a torque or speed word
+# Scale 100/256.
 - name: out_DMARMX_w
   factor: 100/256
   comment: upper threshold steady torque intervention of anti-jerk
@@ -903,19 +912,19 @@ measurements:
   needle_hex:
     - "FF FF F6 F2 ?? ?? F2 F4 E8 A2"
     - "DB 00 F7 8E 88 A1"
-# factor 1, not the 1/100 timer scale
+# Raw byte. A timer byte is usually 1/100.
 - name: resetB_argf
   size: 1
   factor: 1
   comment: B_argf reset from flip-flop
   needle_hex: "F7 F8 0A 8A ?? ?? 41 AD"
-# load word 6/256, not the torque-word factor
+# Load, scale 6/256. A percent word is usually 100/65536.
 - name: rlmin_w
   unit: "%"
   factor: 6/256
   comment: minimum permissible rl
   needle_hex: "0D 0C 42 F8 ?? ?? ED 06"
-# factor 1, not the speed-word 1/4
+# Raw word. A speed word is usually 1/4.
 - name: SGA06MDUB_w
   factor: 1
   comment: condition end of start
@@ -983,7 +992,7 @@ measurements:
   needle_hex:
     - "B4 13 F7 F8 ?? ?? 8A 52"
     - "12 A9 F6 8E 56 A9"
-# retard and unsigned; °KW default is signed +3/4
+# Ignition retard: unsigned, scale -3/4. A crank-angle byte is usually signed +3/4.
 - name: wkrdy
   size: 1
   conversion: retard
@@ -991,13 +1000,13 @@ measurements:
   needle_hex:
     - "38 A6 F7 F8 ?? ?? F3 F8"
     - "58 87 F3 FA B4 F9"
-# unsigned; °KW default is signed
+# Unsigned crank angle. A °KW byte is usually signed.
 - name: zaldy
   size: 1
   unit: "°KW"
   signed: false
   needle_hex: "C7 10 F7 F8 ?? ?? F2 F4"
-# unsigned; °KW default is signed
+# Unsigned crank angle. A °KW byte is usually signed.
 - name: zwbas
   size: 1
   unit: "°KW"

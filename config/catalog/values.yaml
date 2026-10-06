@@ -1,10 +1,17 @@
-# Result type numeric, with 0 last and in its current order.
-# A repeated result type and bitmask stays in its current order.
-# Rows with no bitmask. Omitted size is 0. Omitted bitmask, unit,
-# signed, inverse, factor, and offset are 0, "", false, false, 1, and 0.
-# A field on the row wins. scale names a row in scales.yaml.
-# Size 1 and 2 also use config/names.yaml.
-# Result type 0 is last, so a repeated key here wins.
+# Catalog names for whole values. Single-bit rows are in bits.yaml.
+# Files load in name order, so this file replaces an earlier row that has
+# the same result type and bitmask. Inside the file, a later row does the
+# same, which is why result type 0 sits at the bottom. Leave a repeated
+# pair where it is. The first row of a name is the one looked up by name.
+#
+# rt        Result type the selector compares.
+# name      Bosch name.
+# scale     A scale from scales.yaml.
+# size      Width in bytes. Omitted means 0, and the image chooses the width.
+#           Size 1 and 2 also use a matching conversion in config/names.yaml.
+# unit, signed, inverse, factor, offset
+#           Omitted means blank, false, false, 1, and 0.
+#           A value written on the row is kept.
 variables:
 - rt: '0x0001'
   name: nmot

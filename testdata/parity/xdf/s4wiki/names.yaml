@@ -1,13 +1,10 @@
-# Bosch names from https://s4wiki.com/wiki/Tuning.
-# One list for every ECU. An address is not stored here.
-# The number is how many axes that table has.
-# 0 is a scalar: one address is a hit, and it adds nothing to the axis column.
-# 1 is the column. 2 is the column and the row.
-# A one-row table is 1. A map is 2. Those counts come from the M-box table shapes.
-# When the image XDF contains the name, the body address must match one row.
-# The axis denominator is that count on the maps that hit.
-# A hit is that axis present on the map. The address file is a separate score.
-# Confidence counts the names that hit, not this whole list.
+# Bosch names from https://s4wiki.com/wiki/Tuning, scored on every image.
+# The number is how many axes the table has, taken from the M-box shapes:
+#   0  scalar, so the address alone counts and the axis score ignores it
+#   1  curve (the column). A one-row table counts as 1
+#   2  map (column and row)
+# When the image XDF contains the name, the body address has to match one of its rows.
+# The axis score counts maps that have their axis. Confidence counts names that hit.
 names:
   RLSALUN: 1
   ESKONF: 0

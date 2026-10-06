@@ -1,31 +1,31 @@
-# data is 5-baud, then fast-init, then the selector.
-# map_interp_* stays in file order. Other functions are by name.
-# Byte-pattern needles. Edit this file. This project does not read a needle list from another checkout.
-# Field rules match the me7-core language: needle_hex, optional mask_hex, word-aligned hits,
-# back_up or an even [min, max] range with entry_after, unique.
-#
-# needle_hex:  hex bytes, spaces allowed, "??" is a wildcard byte. Only word-aligned hits count.
-#              A list is one pattern per code layout. The patterns share back_up,
-#              and unique counts every hit. needles is the form that gives each
-#              prologue its own back_up, unique, or entry_after.
-# mask_hex:    optional per-byte mask ANDed with the "??" mask; a byte matches when
-#              (b & m) == (n & m) (ME7Sum FindData style).
-# back_up:     label = hit - back_up (negative moves the label forward). Omitted, this
-#              is 0. A range [min, max] (even span, needs entry_after) takes the
-#              closest label to the hit, from hit - min down to hit - max, that
-#              passes entry_after; for code whose length before the needle differs
-#              between builds.
-# unique:      skip and report if the needle hits more than once. Omitted, this is true.
-# entry_after: byte strings, one of which must precede the label (RETS or erased padding).
-#
-# data:        the label is a table or other bytes. It is not a function entry.
-# functions:   the label is a function entry. map_interp_* is the shared
-#              interpolation routine. A caller is prefixed with its
-#              Funktionsrahmen module. It passes the map address.
-#              A measurement needle lives on the measurement row.
-#
+# Byte patterns that label functions and data tables. Edit this file.
 # Checksum and flash-kernel patterns are in config/examples/needles.yaml.
-# This program does not load that file.
+# Copy a row from there into config/user to use it.
+#
+# In data, keep 5-baud, then fast-init, then the selector.
+# Keep map_interp_* in the order written. Sort the other functions by name.
+#
+# needle_hex    Hex bytes. Spaces are optional. "??" is one wildcard byte.
+#               Only word-aligned hits count. A list is one pattern per code
+#               layout. Those patterns share back_up, and unique counts every hit.
+#               Use needles when each prologue needs its own back_up, unique,
+#               or entry_after.
+# mask_hex      Optional per-byte mask, combined with the wildcard mask.
+#               A byte matches when (image & mask) == (pattern & mask).
+# back_up       The label is the hit minus this many bytes. Negative moves the
+#               label forward. Omitted means 0, so the label is the hit.
+#               [min, max] is an even span and needs entry_after. The label is
+#               the closest match from hit-min down to hit-max. Use it when the
+#               bytes before the needle change length between builds.
+# unique        Report and skip the needle when it hits more than once.
+#               Omitted means true.
+# entry_after   Byte strings. One of them has to sit just before the label,
+#               such as a RETS or erased flash.
+#
+# data          The label is a table or other bytes.
+# functions     The label is a function entry. map_interp_* is a shared
+#               interpolator. A caller is named module_entry and passes a map
+#               address. A measurement pattern belongs on the measurement row.
 
 data:
   # First row of the 5-baud address table. Byte 0 is 0x01 or 0x11 (bit 4 masked).

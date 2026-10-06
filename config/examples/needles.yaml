@@ -1,8 +1,8 @@
-# By name inside data and inside functions.
-# Not loaded by default. Field rules are the same as config/needles.yaml.
-# Copy an entry into config/user, or point another program at this file.
-# These locate checksum code and the flash-kernel KWP handlers. The logger
-# does not write flash.
+# Checksum code and the flash-kernel KWP handlers.
+# The field rules match config/needles.yaml.
+# Copy a row into config/user to use it, or point another program at this file.
+# The logger does not write flash.
+# Sort by name inside data and inside functions.
 
 data:
   # Application: bit 7 of page 30 byte 8 -> P0602 / P1681 fault path. Not present in CH.
@@ -17,7 +17,7 @@ data:
     unique: false
 
   # ME7Sum FindCRCTab / FindMainCRCPreBlk needles with ME7Sum's masks. The labels mark the
-  # code that loads the address, not the table itself.
+  # code that loads the table address.
   # MOV R4,#lo / MOV R5,#hi (0x80-0x83) / CRC table walk (needle0)
   - name: CrcTableRef
     needle_hex: "e6f40000e6f58000a960c0625c22"

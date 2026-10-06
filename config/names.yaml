@@ -1,9 +1,17 @@
-# Document keys stay. injection and ambient by name, factors by MHz.
-# Unnamed conversions by size then unit, named conversions by name.
-# ME7 names the generator uses. Edit this file. Nothing in this list is compiled into the program.
-# Clock factors are milliseconds per timer tick.
-# 20 and 40 MHz are 1/312.5, 24 MHz is 1/375, 32 MHz is 1/250.
-# KRKTE uses the injection factor divided by 24.
+# Names and clock scales the generator reads. Edit this file.
+# Nothing here is compiled into the program.
+#
+# map_name    File name written for the catalog.
+# connect     Slow-init and fast-init needles, KWP keys, and the addresses to try.
+# clock       Milliseconds per timer tick, keyed by CPU megahertz.
+#             20 and 40 MHz are 1/312.5, 24 MHz is 1/375, 32 MHz is 1/250.
+#             injection is the names that use the injection timer.
+#             KRKTE uses that factor divided by 24.
+# scale_5120  Pressure names checked against the 400–1200 mbar band.
+# selector_*  Start bytes and end address of the result-type selector.
+#
+# Leave the top-level keys in this order. Sort injection and ambient by name,
+# and the megahertz factors by frequency.
 
 map_name: catalog.yaml
 
@@ -50,12 +58,13 @@ selector_prefixes:
   - "D440140066F40F00"
 selector_end: "0x3F7"
 
-# Shared scales. An omitted size is 2. A measurement, and a catalog row whose
-# size is 1 or 2, uses the matching pair for omitted signed, inverse, factor,
-# and offset. A catalog row with size 0 does not. A field written on the row
-# wins. A single-bit measurement bitmask does not use the table.
-# A name is selected by a measurement with conversion. It is not a size+unit
-# default, so its unit may be "". The row keeps a field it sets.
+# Shared scales. A row with no name matches a measurement or catalog value
+# by size and unit, and fills signed, inverse, factor, and offset when that
+# value leaves them blank. Omitted size here is 2. A catalog value whose size
+# is 0 stays as written. A field set on the measurement or catalog row is kept.
+# A one-bit measurement bitmask skips this list.
+# A row with a name is used only when a measurement sets conversion. Its unit
+# can be blank. Sort unnamed rows by size, then unit, and named rows by name.
 conversions:
 - size: 1
   unit: ""

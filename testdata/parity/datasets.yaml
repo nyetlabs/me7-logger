@@ -1,5 +1,14 @@
-# Images of one dataset. A large map is compared with the others in its group.
-# A stem absent from this file is compared only with itself.
+# The key is the Bosch dataset token in the image identification string,
+# the field after the double slash:
+#
+#   40/1/ME7.1/5/6005.01//22m/DstD1o/110700//
+#                          ^^^
+#   22m is the dataset. DstD1o is the data stand. 110700 is the date.
+#
+# Part numbers that share that token and the same software number (6005.01
+# above) go in one list. A large map is compared with the others in its list.
+# A part number whose token appears on no other image is left out, and it is
+# compared with itself. The key is a label. The comparison uses the lists.
 22m:
   - 8D0907551M-0002
   - 8D0907551L
@@ -16,3 +25,6 @@ X22ka:
 24B:
   - 06A906032HF
   - 06A906032HS
+25A:
+  - 4Z7907551AA
+  - 4Z7907551S
