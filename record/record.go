@@ -42,11 +42,16 @@ func FormatEq(a, b float64, inverse bool) string {
 // Caller and Interp are function needle names.
 // At is the byte distance from the caller label to the CALLS.
 // The immediate at that call is the address, and it is not stored here.
+// YTable is a breakpoint table. Rows is the count that table must have.
+// YBits is its width. When the call leaves the row unset, that table fills it.
 type Call struct {
 	Name   string
 	Caller string
 	At     int
 	Interp string
+	Rows   int
+	YBits  int
+	YTable string
 }
 
 // Map is one calibration map. Addr is a CPU address. The XDF writer stores the file offset.

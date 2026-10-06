@@ -98,12 +98,16 @@ func wikiNames(t *testing.T) []string {
 		t.Fatal(err)
 	}
 	var doc struct {
-		Names []string `yaml:"names"`
+		Names map[string]int `yaml:"names"`
 	}
 	if err := yaml.Unmarshal(b, &doc); err != nil {
 		t.Fatal(err)
 	}
-	return doc.Names
+	out := make([]string, 0, len(doc.Names))
+	for n := range doc.Names {
+		out = append(out, n)
+	}
+	return out
 }
 
 func readBin(t *testing.T, path string) []byte {

@@ -1749,6 +1749,13 @@ mapsigs:
   cols: 12
   xat: -118
 # Breakpoint tables shared by several curves. The address is the count. The row is not a map.
+# SGA06MDUB is the gear row of KFDMDADP and KFDMDARO. The caller loads it from
+# RAM 0x8EBE. The stores of that word write 0x0500 and then copy RAM 0x8AF8.
+# No store of the header address has been found. The same named table can be
+# attached on other bins once that store, or their own pattern, is known.
+- name: SGA06MDUB
+  pattern: "06010203040506"
+  table: true
 - name: bp_tmot
   pattern: "0618405B7590B806"
   table: true

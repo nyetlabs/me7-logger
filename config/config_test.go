@@ -148,6 +148,10 @@ func TestShippedMaps(t *testing.T) {
 			if c.Caller != "LDRPID_ldrq" || c.Interp != "map_interp_curve16" {
 				t.Fatalf("%+v", c)
 			}
+		case "KFDMDADP", "KFDMDARO":
+			if c.Caller != "ARMD_kfdmd" || c.YTable != "SGA06MDUB" || c.Rows != 6 || c.YBits != 8 {
+				t.Fatalf("%+v", c)
+			}
 		}
 	}
 	has := func(ats []int, want int) bool {

@@ -117,7 +117,7 @@ func TestScoreWikiOneAddress(t *testing.T) {
 	if got.String() != "33.3% (1/3)" {
 		t.Fatal(got)
 	}
-	got = scoreWiki([]string{"KFZW", "LAMFA", "KFKHFM"}, map[string]struct{}{"KFKHFM": {}}, maps, nil)
+	got = scoreWiki([]string{"KFZW", "LAMFA", "KFKHFM"}, map[string]int{"KFKHFM": 0}, maps, nil)
 	if got.String() != "66.7% (2/3)" {
 		t.Fatal(got)
 	}
@@ -143,7 +143,13 @@ func TestScoreWikiAxisMatchesReference(t *testing.T) {
 	if got := scoreWiki([]string{"KFZW"}, nil, maps, []refRow{row}); got.Hit != 1 {
 		t.Fatal(got)
 	}
-	_, axes := wikiScore([]string{"KFZW"}, nil, maps, []refRow{row})
+	dims := map[string]int{"KFZW": 2}
+	_, axes := wikiScore([]string{"KFZW"}, dims, maps, []refRow{row})
+	if axes.Hit != 2 || axes.Total != 2 {
+		t.Fatal(axes)
+	}
+	maps[0].Y = nil
+	_, axes = wikiScore([]string{"KFZW"}, dims, maps, nil)
 	if axes.Hit != 1 || axes.Total != 2 {
 		t.Fatal(axes)
 	}
@@ -151,14 +157,14 @@ func TestScoreWikiAxisMatchesReference(t *testing.T) {
 	if got := scoreWiki([]string{"KFZW"}, nil, maps, other); got.Hit != 1 {
 		t.Fatal(got)
 	}
-	_, axes = wikiScore([]string{"KFZW", "KFKHFM"}, map[string]struct{}{"KFKHFM": {}}, []record.Map{
-		maps[0],
+	_, axes = wikiScore([]string{"KFZW", "KFKHFM"}, map[string]int{"KFZW": 2, "KFKHFM": 0}, []record.Map{
+		{Name: "KFZW", Addr: 0x10, X: &record.Axis{Addr: 0x20, Count: 8, Bits: 8}, Y: &record.Axis{Addr: 0x30, Count: 6, Bits: 16}},
 		{Name: "KFKHFM", Addr: 0x40},
 	}, nil)
-	if axes.Hit != 0 || axes.Total != 2 {
+	if axes.Hit != 2 || axes.Total != 2 {
 		t.Fatal(axes)
 	}
-	_, axes = wikiScore([]string{"KFKHFM"}, map[string]struct{}{"KFKHFM": {}}, []record.Map{
+	_, axes = wikiScore([]string{"KFKHFM"}, map[string]int{"KFKHFM": 0}, []record.Map{
 		{Name: "KFKHFM", Addr: 0x40},
 	}, nil)
 	if axes.Total != 0 {
@@ -184,7 +190,7 @@ func TestRunLayout(t *testing.T) {
 	write("bin/b.bin", "")
 	write("ecu/me7info/a.ecu", ecu)
 	write("ecu/me7info/b.ecu", "")
-	write("xdf/s4wiki/names.yaml", "names:\n- KFZW\n- LAMFA\n")
+	write("xdf/s4wiki/names.yaml", "names:\n  KFZW: 2\n  LAMFA: 2\n")
 	write("xdf/a.xdf", xdf)
 	gen := func(name string, _ []byte) ([]record.Item, []record.Map, error) {
 		switch name {
@@ -238,14 +244,14 @@ func TestReportText(t *testing.T) {
 	got := rep.Text()
 	want := "" +
 		"ecu me7info   vs ecu-specific     vs corpus       extras\n" +
-		"  a.bin       50.0%  1/2 (+3)   20.0%  2/10   25.0%  1/4\n" +
+		"  a          1/2 (+3)   50.0%  2/10   20.0%  1/4   25.0%\n" +
 		"\n" +
 		"xdf s4wiki                       axis   confidence\n" +
-		"  a.bin       50.0%  1/2   50.0%  1/2  100.0%  1/1\n" +
-		"  bb.bin       0.0%  0/2    0.0%  0/0             \n" +
+		"  a          1/2   50.0%  1/2   50.0%  1/1  100.0%\n" +
+		"  bb         0/2    0.0%  0/0    0.0%             \n" +
 		"\n" +
 		"xdf                              axis\n" +
-		"  a.bin        0.0%  0/3   25.0%  1/4\n"
+		"  a          0/3    0.0%  1/4   25.0%\n"
 	if got != want {
 		t.Fatalf("got\n%s\nwant\n%s", got, want)
 	}

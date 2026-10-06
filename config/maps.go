@@ -74,6 +74,9 @@ type mapRow struct {
 	Caller string `yaml:"caller"`
 	At     atList `yaml:"at"`
 	Interp string `yaml:"interp"`
+	Rows   int    `yaml:"rows"`
+	YBits  int    `yaml:"ybits"`
+	YTable string `yaml:"ytable"`
 }
 
 // atList is one distance or several on the same caller and interp.
@@ -123,6 +126,16 @@ func compileMapRows(rows []mapRow, name string) ([]record.Call, error) {
 		if r.Name == "" || r.Caller == "" || r.Interp == "" || len(r.At) == 0 {
 			return nil, fmt.Errorf("%s: a map needs name, caller, at, and interp", name)
 		}
+		if (r.YTable == "") != (r.Rows == 0) {
+			return nil, fmt.Errorf("%s: %s: ytable and rows are set together", name, r.Name)
+		}
+		ybits := r.YBits
+		if r.YTable != "" && ybits == 0 {
+			ybits = 8
+		}
+		if ybits != 0 && ybits != 8 && ybits != 16 {
+			return nil, fmt.Errorf("%s: %s: ybits is 8 or 16", name, r.Name)
+		}
 		for _, raw := range r.At {
 			at, err := mapfile.ParseUint(raw)
 			if err != nil {
@@ -138,6 +151,7 @@ func compileMapRows(rows []mapRow, name string) ([]record.Call, error) {
 			seen[key] = r.Name
 			out = append(out, record.Call{
 				Name: r.Name, Caller: r.Caller, At: int(at), Interp: r.Interp,
+				Rows: r.Rows, YBits: ybits, YTable: r.YTable,
 			})
 		}
 	}

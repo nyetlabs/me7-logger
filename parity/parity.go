@@ -72,7 +72,8 @@ func (f Fraction) percent() string {
 }
 
 // Text is the parity report. A kind with no rows is omitted.
-// Names share a column and the percents share a column.
+// Names share a column. Each score is its fraction, then its percent.
+// The image name is the stem, without .bin.
 func (r *Report) Text() string {
 	if r == nil {
 		return ""
@@ -99,7 +100,7 @@ func (r *Report) Text() string {
 		lines = append(lines, line{label: "ecu me7info", head: true, me7info: true})
 		for _, im := range r.ME7Info {
 			lines = append(lines, line{
-				label: "  " + im.Name, frac: im.Fraction, corpus: im.Corpus,
+				label: "  " + stemName(im.Name), frac: im.Fraction, corpus: im.Corpus,
 				beyond: im.Beyond, extras: extraBy[im.Name], me7info: true,
 			})
 		}
@@ -111,7 +112,7 @@ func (r *Report) Text() string {
 		lines = append(lines, line{label: "xdf s4wiki", head: true, wiki: true})
 		for _, im := range r.S4Wiki {
 			lines = append(lines, line{
-				label: "  " + im.Name, frac: im.Fraction, axis: im.Axis, conf: im.Confidence, wiki: true,
+				label: "  " + stemName(im.Name), frac: im.Fraction, axis: im.Axis, conf: im.Confidence, wiki: true,
 			})
 		}
 	}
@@ -121,7 +122,7 @@ func (r *Report) Text() string {
 		}
 		lines = append(lines, line{label: "xdf", head: true, xdf: true})
 		for _, im := range r.XDF {
-			lines = append(lines, line{label: "  " + im.Name, frac: im.Fraction, axis: im.Axis, xdf: true})
+			lines = append(lines, line{label: "  " + stemName(im.Name), frac: im.Fraction, axis: im.Axis, xdf: true})
 		}
 	}
 
@@ -192,7 +193,7 @@ func (r *Report) Text() string {
 		case ln.label == "":
 			b.WriteByte('\n')
 		case ln.head && ln.wiki:
-			// percent, gap, count, gap, then the same pair for axis and confidence.
+			// count, gap, percent, gap, then the same pair for axis and confidence.
 			mainSpan := 6 + 2 + countW
 			axisStart := nameW + 2 + mainSpan + 2
 			axisSpan := 6 + 2 + axisW
@@ -239,26 +240,30 @@ func (r *Report) Text() string {
 			if ln.extras.Total > 0 {
 				extraPct = ln.extras.percent()
 			}
-			fmt.Fprintf(&b, "%-*s  %6s  %*s (%*s)  %6s  %*s  %6s  %*s\n",
-				nameW, ln.label, ln.frac.percent(), countW, counts[i], beyondW, beyonds[i],
-				ln.corpus.percent(), corpusW, corpus[i], extraPct, extrasW, extras[i])
+			fmt.Fprintf(&b, "%-*s  %*s (%*s)  %6s  %*s  %6s  %*s  %6s\n",
+				nameW, ln.label, countW, counts[i], beyondW, beyonds[i], ln.frac.percent(),
+				corpusW, corpus[i], ln.corpus.percent(), extrasW, extras[i], extraPct)
 		case ln.wiki:
 			confPct := ""
 			if ln.conf.Total > 0 {
 				confPct = ln.conf.percent()
 			}
-			fmt.Fprintf(&b, "%-*s  %6s  %*s  %6s  %*s  %6s  %*s\n",
-				nameW, ln.label, ln.frac.percent(), countW, counts[i],
-				ln.axis.percent(), axisW, axes[i], confPct, confW, confs[i])
+			fmt.Fprintf(&b, "%-*s  %*s  %6s  %*s  %6s  %*s  %6s\n",
+				nameW, ln.label, countW, counts[i], ln.frac.percent(),
+				axisW, axes[i], ln.axis.percent(), confW, confs[i], confPct)
 		case ln.xdf:
-			fmt.Fprintf(&b, "%-*s  %6s  %*s  %6s  %*s\n",
-				nameW, ln.label, ln.frac.percent(), countW, counts[i],
-				ln.axis.percent(), axisW, axes[i])
+			fmt.Fprintf(&b, "%-*s  %*s  %6s  %*s  %6s\n",
+				nameW, ln.label, countW, counts[i], ln.frac.percent(),
+				axisW, axes[i], ln.axis.percent())
 		default:
-			fmt.Fprintf(&b, "%-*s  %6s  %*s\n", nameW, ln.label, ln.frac.percent(), countW, counts[i])
+			fmt.Fprintf(&b, "%-*s  %*s  %6s\n", nameW, ln.label, countW, counts[i], ln.frac.percent())
 		}
 	}
 	return b.String()
+}
+
+func stemName(name string) string {
+	return strings.TrimSuffix(name, ".bin")
 }
 
 type ecuKey struct {
@@ -312,7 +317,7 @@ func run(dir string, gen imageGen) (*Report, error) {
 	}
 	catSet := nameSet(cat)
 	measSet := nameSet(meas)
-	wiki, values, err := loadWiki(dir)
+	wiki, axes, err := loadWiki(dir)
 	if err != nil {
 		return nil, err
 	}
@@ -352,8 +357,8 @@ func run(dir string, gen imageGen) (*Report, error) {
 			return nil, err
 		}
 		if len(wiki) > 0 {
-			names, axes := wikiScore(wiki, values, maps, oracle)
-			rep.S4Wiki = append(rep.S4Wiki, Image{Name: base, Fraction: names, Axis: axes})
+			names, axisFrac := wikiScore(wiki, axes, maps, oracle)
+			rep.S4Wiki = append(rep.S4Wiki, Image{Name: base, Fraction: names, Axis: axisFrac})
 			held = append(held, kept{base: base, stem: stem, img: img, maps: maps, oracle: oracle})
 		}
 		if hasOracle {
@@ -381,10 +386,10 @@ func run(dir string, gen imageGen) (*Report, error) {
 					continue
 				}
 				peers = append(peers, binBody{
-					img: o.img, maps: o.maps, scored: wikiMaps(wiki, values, o.maps, o.oracle),
+					img: o.img, maps: o.maps, scored: wikiMaps(wiki, axes, o.maps, o.oracle),
 				})
 			}
-			rep.S4Wiki[i].Confidence = scoreConfidence(wiki, values, h.img, h.maps, h.oracle, peers)
+			rep.S4Wiki[i].Confidence = scoreConfidence(wiki, axes, h.img, h.maps, h.oracle, peers)
 		}
 	}
 	return rep, nil
@@ -506,7 +511,7 @@ func measurementNames() ([]string, error) {
 	return out, nil
 }
 
-func loadWiki(dir string) ([]string, map[string]struct{}, error) {
+func loadWiki(dir string) ([]string, map[string]int, error) {
 	b, err := os.ReadFile(filepath.Join(dir, "xdf", "s4wiki", "names.yaml"))
 	if os.IsNotExist(err) {
 		return nil, nil, nil
@@ -515,33 +520,29 @@ func loadWiki(dir string) ([]string, map[string]struct{}, error) {
 		return nil, nil, err
 	}
 	var doc struct {
-		Names  []string `yaml:"names"`
-		Values []string `yaml:"values"`
+		Names yaml.Node `yaml:"names"`
 	}
 	if err := yaml.Unmarshal(b, &doc); err != nil {
 		return nil, nil, fmt.Errorf("s4wiki names: %w", err)
 	}
-	seen := map[string]struct{}{}
-	var out []string
-	for _, n := range doc.Names {
-		n = strings.TrimSpace(n)
-		if n == "" {
-			continue
+	if doc.Names.Kind != yaml.MappingNode {
+		return nil, nil, fmt.Errorf("s4wiki names: want a map of axis counts")
+	}
+	out := make([]string, 0, len(doc.Names.Content)/2)
+	axes := map[string]int{}
+	for i := 0; i+1 < len(doc.Names.Content); i += 2 {
+		n := strings.TrimSpace(doc.Names.Content[i].Value)
+		var c int
+		if err := doc.Names.Content[i+1].Decode(&c); err != nil || c < 0 || c > 2 {
+			return nil, nil, fmt.Errorf("s4wiki names: %s axis count", n)
 		}
-		if _, ok := seen[n]; ok {
-			continue
+		if _, ok := axes[n]; ok || n == "" {
+			return nil, nil, fmt.Errorf("s4wiki names: %s repeated", n)
 		}
-		seen[n] = struct{}{}
+		axes[n] = c
 		out = append(out, n)
 	}
-	values := map[string]struct{}{}
-	for _, n := range doc.Values {
-		n = strings.TrimSpace(n)
-		if _, ok := seen[n]; ok {
-			values[n] = struct{}{}
-		}
-	}
-	return out, values, nil
+	return out, axes, nil
 }
 
 // cover counts each wanted name once. A hit is a name located on any bin.
@@ -582,39 +583,47 @@ func itemNames(items []record.Item) []string {
 }
 
 // wikiScore is the tuner names and, beside them, the axes of the maps that
-// scored. A name counts at one address with an axis. A name in values has no
-// axis, so the address is enough. A second address is a miss. When the XDF
-// names that row, the body address has to match. Each axis on a scored map
-// is in the axis denominator. A scalar adds none. A hit is that axis matching
-// the address file.
-func wikiScore(want []string, values map[string]struct{}, maps []record.Map, rows []refRow) (names, axes Fraction) {
-	scored := wikiMaps(want, values, maps, rows)
+// scored. A name counts at one address with an axis. An axis count of 0 is a
+// scalar, so the address is enough. A second address is a miss. When the XDF
+// names that row, the body address has to match. dims is how many axes that
+// table has: 1 is the column, 2 is the column and the row. A hit is that axis
+// present on the map. The address file is a separate score.
+func wikiScore(want []string, dims map[string]int, maps []record.Map, rows []refRow) (names, axes Fraction) {
+	scored := wikiMaps(want, dims, maps, rows)
 	hit := 0
 	for _, n := range want {
 		if _, ok := scored[n]; ok {
 			hit++
 		}
 	}
-	return Fraction{hit, len(want)}, scoreAxes(scored, rows)
+	return Fraction{hit, len(want)}, scoreAxes(scored, dims)
 }
 
 // scoreWiki is the name half of wikiScore.
-func scoreWiki(want []string, values map[string]struct{}, maps []record.Map, rows []refRow) Fraction {
-	names, _ := wikiScore(want, values, maps, rows)
+func scoreWiki(want []string, dims map[string]int, maps []record.Map, rows []refRow) Fraction {
+	names, _ := wikiScore(want, dims, maps, rows)
 	return names
 }
 
-func scoreAxes(scored map[string]record.Map, rows []refRow) Fraction {
+func scoreAxes(scored map[string]record.Map, dims map[string]int) Fraction {
 	hit, total := 0, 0
-	for _, m := range scored {
-		for _, id := range []string{"x", "y"} {
-			if !axisPresent(m, id) {
-				continue
+	for name, m := range scored {
+		n, ok := dims[name]
+		if ok && n == 0 {
+			continue
+		}
+		if !ok {
+			n = 1
+			if axisPresent(m, "y") {
+				n = 2
 			}
-			total++
-			if axisMatches(m, id, rows) {
-				hit++
-			}
+		}
+		total += n
+		if n >= 1 && axisPresent(m, "x") {
+			hit++
+		}
+		if n >= 2 && axisPresent(m, "y") {
+			hit++
 		}
 	}
 	return Fraction{hit, total}
@@ -625,20 +634,6 @@ func axisPresent(m record.Map, id string) bool {
 	return a != nil && a.Addr != 0
 }
 
-func axisMatches(m record.Map, id string, rows []refRow) bool {
-	body := opcode.FileOffset(m.Addr)
-	for _, row := range rows {
-		if row.name != m.Name || row.addr != body {
-			continue
-		}
-		w, ok := row.axes[id]
-		if ok && axisOne(m, id, w) {
-			return true
-		}
-	}
-	return false
-}
-
 func axisByID(m record.Map, id string) *record.Axis {
 	switch id {
 	case "x":
@@ -647,15 +642,6 @@ func axisByID(m record.Map, id string) *record.Axis {
 		return m.Y
 	}
 	return nil
-}
-
-func axisOne(m record.Map, id string, w axisSig) bool {
-	a := axisByID(m, id)
-	if !axisPresent(m, id) {
-		return false
-	}
-	g := axisSig{id: id, addr: opcode.FileOffset(a.Addr), count: a.Count, bits: a.Bits}
-	return g == w
 }
 
 func mapAxis(m record.Map) bool {

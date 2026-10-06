@@ -39,7 +39,7 @@ func MapAddrs(img []byte, dpp [4]uint16, rows []MapSig) []MapHit {
 		return nil
 	}
 	have := map[string]int{}
-	tabs := map[string]uint32{}
+	tabs := TableAddrs(img, rows)
 	won := map[string]MapSig{}
 	var out []MapHit
 	add := func(name string, addr, header uint32, row MapSig, xram, yram uint16) {
@@ -58,7 +58,7 @@ func MapAddrs(img []byte, dpp [4]uint16, rows []MapSig) []MapHit {
 		})
 	}
 	for _, row := range rows {
-		if row.Pattern == "" {
+		if row.Table || row.Pattern == "" {
 			continue
 		}
 		pat, mask, ok := compilePat(row.Pattern)
@@ -67,14 +67,6 @@ func MapAddrs(img []byte, dpp [4]uint16, rows []MapSig) []MapHit {
 		}
 		at, ok := findOne(img, pat, mask)
 		if !ok {
-			continue
-		}
-		if row.Table {
-			sum := at + row.Add
-			if sum < 0 || sum >= len(img) {
-				continue
-			}
-			tabs[row.Name] = FlashBase + uint32(sum)
 			continue
 		}
 		ptr := PtrAt(img, FlashBase+uint32(at+row.At), dpp)
@@ -115,6 +107,34 @@ func MapAddrs(img []byte, dpp [4]uint16, rows []MapSig) []MapHit {
 		}
 	}
 	return out
+}
+
+// TableAddrs is the CPU address of each breakpoint table whose pattern occurs
+// once. The address is the hit. A table is not a map.
+func TableAddrs(img []byte, rows []MapSig) map[string]uint32 {
+	tabs := map[string]uint32{}
+	if len(img) == 0 {
+		return tabs
+	}
+	for _, row := range rows {
+		if !row.Table || row.Pattern == "" {
+			continue
+		}
+		pat, mask, ok := compilePat(row.Pattern)
+		if !ok {
+			continue
+		}
+		at, ok := findOne(img, pat, mask)
+		if !ok {
+			continue
+		}
+		sum := at + row.Add
+		if sum < 0 || sum >= len(img) {
+			continue
+		}
+		tabs[row.Name] = FlashBase + uint32(sum)
+	}
+	return tabs
 }
 
 // f2Word is the RAM operand of an F2 at hit+rel. rel nil, or a byte that is

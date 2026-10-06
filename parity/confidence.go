@@ -17,8 +17,8 @@ const largeBody = 16
 // scoreConfidence judges the body of each name the locator already scored.
 // The denominator is that matched set. A name the locator missed is not in it.
 // High means the body bytes hold up. A shared axis does not change that.
-func scoreConfidence(wiki []string, values map[string]struct{}, img []byte, maps []record.Map, rows []refRow, peers []binBody) Fraction {
-	scored := wikiMaps(wiki, values, maps, rows)
+func scoreConfidence(wiki []string, dims map[string]int, img []byte, maps []record.Map, rows []refRow, peers []binBody) Fraction {
+	scored := wikiMaps(wiki, dims, maps, rows)
 	high := 0
 	for _, n := range wiki {
 		m, ok := scored[n]
@@ -40,11 +40,14 @@ type binBody struct {
 
 func confident(img []byte, maps []record.Map, m record.Map, peers []binBody) bool {
 	cells, _, raw, ok := bodyOf(img, m)
-	if !ok || allZero(raw) {
+	if !ok {
 		return false
 	}
+	if allZero(raw) {
+		return zerosMatch(m, raw, peers)
+	}
 	if cells < largeBody {
-		return occursOnce(img, raw)
+		return true
 	}
 	for _, p := range peers {
 		other, ok := p.scored[m.Name]
@@ -203,23 +206,28 @@ func allZero(b []byte) bool {
 	return true
 }
 
-func occursOnce(img, pat []byte) bool {
-	if len(pat) == 0 || len(pat) > len(img) {
+// zerosMatch is high when every sibling that has this name is zero too.
+// A body with no sibling stays low.
+func zerosMatch(m record.Map, raw []byte, peers []binBody) bool {
+	if len(peers) == 0 {
 		return false
 	}
-	n := 0
-	for i := 0; i+len(pat) <= len(img); i += 2 {
-		if bytes.Equal(img[i:i+len(pat)], pat) {
-			n++
-			if n > 1 {
-				return false
-			}
+	seen := false
+	for _, p := range peers {
+		other, ok := p.scored[m.Name]
+		if !ok {
+			continue
 		}
+		_, _, praw, pok := bodyOf(p.img, other)
+		if !pok || len(praw) != len(raw) || !allZero(praw) {
+			return false
+		}
+		seen = true
 	}
-	return n == 1
+	return seen
 }
 
-func wikiMaps(want []string, values map[string]struct{}, maps []record.Map, rows []refRow) map[string]record.Map {
+func wikiMaps(want []string, dims map[string]int, maps []record.Map, rows []refRow) map[string]record.Map {
 	addrs := map[string]map[uint32]record.Map{}
 	axis := map[string]map[uint32]struct{}{}
 	for _, m := range maps {
@@ -242,10 +250,9 @@ func wikiMaps(want []string, values map[string]struct{}, maps []record.Map, rows
 			continue
 		}
 		for off, m := range addrs[n] {
-			if _, ok := axis[n][off]; !ok {
-				if _, ok := values[n]; !ok {
-					continue
-				}
+			c, known := dims[n]
+			if _, ok := axis[n][off]; !ok && !(known && c == 0) {
+				continue
 			}
 			if referenceHit(m, rows) {
 				out[n] = m

@@ -7,6 +7,8 @@ import (
 	"testing"
 
 	"me7-logger/internal/heximg"
+	"me7-logger/opcode"
+	"me7-logger/record"
 )
 
 func TestGenerateSelector(t *testing.T) {
@@ -303,6 +305,23 @@ func TestInterpCall(t *testing.T) {
 	}
 	if !strings.Contains(res.MapNote, "1 calibration map located") {
 		t.Fatal(res.MapNote)
+	}
+}
+
+func TestCallTableFillsUnsetRow(t *testing.T) {
+	img := make([]byte, 32)
+	copy(img[4:], []byte{6, 1, 2, 3, 4, 5, 6})
+	maps := []record.Map{{Name: "KFDMDADP", Addr: 0x800010, Cols: 8}}
+	calls := []record.Call{{Name: "KFDMDADP", Rows: 6, YBits: 8, YTable: "SGA06MDUB"}}
+	tabs := map[string]uint32{"SGA06MDUB": opcode.FlashBase + 4}
+	applyCallTables(img, maps, calls, tabs)
+	if maps[0].Y == nil || maps[0].Y.Addr != opcode.FlashBase+5 || maps[0].Y.Count != 6 || maps[0].Y.Bits != 8 || maps[0].Rows != 6 {
+		t.Fatalf("%+v", maps[0].Y)
+	}
+	maps[0].Y = &record.Axis{Addr: 0x800001, Count: 6, Bits: 8}
+	applyCallTables(img, maps, calls, tabs)
+	if maps[0].Y.Addr != 0x800001 {
+		t.Fatalf("%+v", maps[0].Y)
 	}
 }
 

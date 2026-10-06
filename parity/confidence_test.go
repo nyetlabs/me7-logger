@@ -20,11 +20,11 @@ func TestConfidence(t *testing.T) {
 		}
 	})
 
-	t.Run("short twice", func(t *testing.T) {
+	t.Run("short repeated", func(t *testing.T) {
 		img := []byte{0x11, 0x22, 0, 0, 0x11, 0x22}
 		m := record.Map{Name: "S", Addr: opcode.FlashBase, Cols: 2, X: axis}
 		got := scoreConfidence(wiki, nil, img, []record.Map{m}, nil, nil)
-		if got.Hit != 0 || got.Total != 1 {
+		if got.Hit != 1 || got.Total != 1 {
 			t.Fatalf("%+v", got)
 		}
 	})
@@ -34,6 +34,28 @@ func TestConfidence(t *testing.T) {
 		m := record.Map{Name: "S", Addr: opcode.FlashBase, Cols: 2, X: axis}
 		got := scoreConfidence([]string{"S", "Gone"}, nil, img, []record.Map{m}, nil, nil)
 		if got.Hit != 1 || got.Total != 1 {
+			t.Fatalf("%+v", got)
+		}
+	})
+
+	t.Run("shared zero", func(t *testing.T) {
+		img := make([]byte, 32)
+		m := record.Map{Name: "S", Addr: opcode.FlashBase, Rows: 4, Cols: 4, X: axis}
+		peer := binBody{img: img, scored: map[string]record.Map{"S": m}}
+		got := scoreConfidence(wiki, nil, img, []record.Map{m}, nil, []binBody{peer})
+		if got.Hit != 1 || got.Total != 1 {
+			t.Fatalf("%+v", got)
+		}
+	})
+
+	t.Run("zero peer filled", func(t *testing.T) {
+		img := make([]byte, 32)
+		filled := make([]byte, 32)
+		filled[0] = 1
+		m := record.Map{Name: "S", Addr: opcode.FlashBase, Rows: 4, Cols: 4, X: axis}
+		peer := binBody{img: filled, scored: map[string]record.Map{"S": m}}
+		got := scoreConfidence(wiki, nil, img, []record.Map{m}, nil, []binBody{peer})
+		if got.Hit != 0 || got.Total != 1 {
 			t.Fatalf("%+v", got)
 		}
 	})

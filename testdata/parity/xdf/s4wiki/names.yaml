@@ -1,251 +1,169 @@
 # Bosch names from https://s4wiki.com/wiki/Tuning.
 # One list for every ECU. An address is not stored here.
-# values have no axis in the image. One address is a hit.
-# Every other name needs that address and an axis.
+# The number is how many axes that table has.
+# 0 is a scalar: one address is a hit, and it adds nothing to the axis column.
+# 1 is the column. 2 is the column and the row.
+# A one-row table is 1. A map is 2. Those counts come from the M-box table shapes.
 # When the image XDF contains the name, the body address must match one row.
-# The axis denominator is the axes on the maps that hit. A scalar adds none.
-# A hit matches the address file. No address file leaves those hits at 0.
+# The axis denominator is that count on the maps that hit.
+# A hit is that axis present on the map. The address file is a separate score.
 # Confidence counts the names that hit, not this whole list.
 names:
-- RLSALUN
-- ESKONF
-- KFKHFM
-- KFVPLGU
-- KFMRES
-- KFMRESK
-- KFZWOP
-- KFZWOP2
-- KLDMASRL
-- KFMIZUFIL
-- KFMIZUNS
-- KFMIZUOF
-- KFZW
-- KFZW2
-- KFZWWLNM
-- SNM16OPUW
-- KFMDZOF_UM
-- KFMPED_UM
-- MLHFM
-- KFMSNWDK
-- WDKUGDN
-- KFMIRL
-- TVUB
-- FBSTABGM
-- KFVPDKSD
-- KFVPDKSE
-- KIFZGHG
-- KFMIOP
-- FWFTBRTA
-- KFFWTBR
-- KFNW
-- KFNWWL
-- KFLF
-- KFFWL_0_A
-- KFFWL_1_A
-- KFLAFWL
-- KFLAMKR
-- KFLAMKRL
-- KFLBTS_0_A
-- DWKRMSN
-- KRFKLN
-- KFLDIOPU
-- KFWPLGTA
-- LDIATA
-- NLDIAPU
-- TLDIAPN
-- KFLDRXO
-- KFLDHBN
-- LDORXN
-- LDPBN
-- KFLDRAPP
-- KFDLULS
-- KFVPDKLD
-- NDLDRAPU
-- KFNLLNST
-- NFSM
-- NLLM
-- NASNOTKL
-- KFTSRL
-- KFMLDMX
-- KFPBRK
-- KFPBRKNW
-- KFPRG
-- KFURL
-- KFWDKMSN
-- FKKVS
-- DLAMTANS
-- LAMFA
-- DLBTS
-- KFLDIMX
-- KFLDRL
-- KFLDRQ2
-- LDRQ0DY
-- LDRQ1DY
-- LDRQ1ST
-- KFFLLDE
-- KFTARX
-- KFTARXZK
-- KFDMDADP
-- KFDMDARO
-- RLSALULL
-- CLAATR
-- CLAATR2
-- CLAATS
-- CLAATS2
-- CLAHSH
-- CLAHSH2
-- CLAHSHE
-- CLAHSHE2
-- CLALSH
-- CLALSH2
-- CWDNMAX
-- NWPMBBR
-- VWPMBBR
-- KUMSRL
-- DPUPS
-- KRDWA
-- MDIMX
-- VNMX
-- CWMSRCAN
-- TMNSMN
-- CLRKA
-- CLRHK
-- AIMVM
-- NMAXF
-- KISRM
-- DSLOFS
-- MLOFS
-- TEMIN
-- TEMINVA
-- DNMAXH
-- ITNMXH
-- NMAX
-- NMAXOG
-- TMOTNMX
-- TNMXH
-- CDATR
-- CDATS
-- CDHSH
-- CDHSHE
-- CDKAT
-- CDLASH
-- CDLATV
-- CDLDP
-- CDLSH
-- CDLSHV
-- CDSLS
-- CDTES
-- CWKONABG
-- CWKONLS
-- CWMDAPP
-- CWDLSAHK
-- CWLAMFAW
-- DLAMFAW
-- CATR
-- FKHABMN
-- KRALH
-- KRANH
-- LDEIAP
-- LDHIA
-- UMDYLDR
-- EDLDRP
-- SDLDRL
-- TDLDRA
-- TDLDRA2
-- TULV1
-- CLRHKA
-- FKVA
-- KVB
-- MLMAX
-- KRKTE
-- ZKWLAFWL
-- TABGBTS
-- TABGSS
-- TABGSS2
-- FHOKH
-- LDRQ0S
-- VMAXNB
-values:
-- ESKONF
-- SNM16OPUW
-- MLHFM
-- KIFZGHG
-- NLDIAPU
-- RLSALULL
-- CLAATR
-- CLAATR2
-- CLAATS
-- CLAATS2
-- CLAHSH
-- CLAHSH2
-- CLAHSHE
-- CLAHSHE2
-- CLALSH
-- CLALSH2
-- CWDNMAX
-- NWPMBBR
-- VWPMBBR
-- KUMSRL
-- DPUPS
-- KRDWA
-- MDIMX
-- VNMX
-- CWMSRCAN
-- TMNSMN
-- CLRKA
-- CLRHK
-- AIMVM
-- NMAXF
-- KISRM
-- DSLOFS
-- MLOFS
-- TEMIN
-- TEMINVA
-- DNMAXH
-- ITNMXH
-- NMAX
-- NMAXOG
-- TMOTNMX
-- TNMXH
-- CDATR
-- CDATS
-- CDHSH
-- CDHSHE
-- CDKAT
-- CDLASH
-- CDLATV
-- CDLDP
-- CDLSH
-- CDLSHV
-- CDSLS
-- CDTES
-- CWKONABG
-- CWKONLS
-- CWMDAPP
-- CWDLSAHK
-- CWLAMFAW
-- DLAMFAW
-- CATR
-- FKHABMN
-- KRALH
-- KRANH
-- LDEIAP
-- LDHIA
-- UMDYLDR
-- EDLDRP
-- SDLDRL
-- TDLDRA
-- TDLDRA2
-- TULV1
-- CLRHKA
-- FKVA
-- KVB
-- MLMAX
-- KRKTE
-- ZKWLAFWL
-- TABGBTS
-- TABGSS
-- TABGSS2
-- FHOKH
-- LDRQ0S
-- VMAXNB
+  RLSALUN: 1
+  ESKONF: 0
+  KFKHFM: 2
+  KFVPLGU: 2
+  KFMRES: 2
+  KFMRESK: 2
+  KFZWOP: 2
+  KFZWOP2: 2
+  KLDMASRL: 1
+  KFMIZUFIL: 2
+  KFMIZUNS: 2
+  KFMIZUOF: 2
+  KFZW: 2
+  KFZW2: 2
+  KFZWWLNM: 2
+  SNM16OPUW: 0
+  KFMDZOF_UM: 2
+  KFMPED_UM: 2
+  MLHFM: 0
+  KFMSNWDK: 2
+  WDKUGDN: 1
+  KFMIRL: 2
+  TVUB: 1
+  FBSTABGM: 1
+  KFVPDKSD: 2
+  KFVPDKSE: 2
+  KIFZGHG: 0
+  KFMIOP: 2
+  FWFTBRTA: 1
+  KFFWTBR: 2
+  KFNW: 2
+  KFNWWL: 2
+  KFLF: 2
+  KFFWL_0_A: 2
+  KFFWL_1_A: 2
+  KFLAFWL: 2
+  KFLAMKR: 2
+  KFLAMKRL: 2
+  KFLBTS_0_A: 2
+  DWKRMSN: 1
+  KRFKLN: 1
+  KFLDIOPU: 2
+  KFWPLGTA: 2
+  LDIATA: 1
+  NLDIAPU: 0
+  TLDIAPN: 1
+  KFLDRXO: 2
+  KFLDHBN: 2
+  LDORXN: 1
+  LDPBN: 1
+  KFLDRAPP: 2
+  KFDLULS: 2
+  KFVPDKLD: 2
+  NDLDRAPU: 1
+  KFNLLNST: 2
+  NFSM: 1
+  NLLM: 1
+  NASNOTKL: 1
+  KFTSRL: 2
+  KFMLDMX: 2
+  KFPBRK: 2
+  KFPBRKNW: 2
+  KFPRG: 2
+  KFURL: 2
+  KFWDKMSN: 2
+  FKKVS: 2
+  DLAMTANS: 1
+  LAMFA: 2
+  DLBTS: 1
+  KFLDIMX: 2
+  KFLDRL: 2
+  KFLDRQ2: 2
+  LDRQ0DY: 1
+  LDRQ1DY: 1
+  LDRQ1ST: 1
+  KFFLLDE: 2
+  KFTARX: 2
+  KFTARXZK: 2
+  KFDMDADP: 2
+  KFDMDARO: 2
+  RLSALULL: 0
+  CLAATR: 0
+  CLAATR2: 0
+  CLAATS: 0
+  CLAATS2: 0
+  CLAHSH: 0
+  CLAHSH2: 0
+  CLAHSHE: 0
+  CLAHSHE2: 0
+  CLALSH: 0
+  CLALSH2: 0
+  CWDNMAX: 0
+  NWPMBBR: 0
+  VWPMBBR: 0
+  KUMSRL: 0
+  DPUPS: 0
+  KRDWA: 0
+  MDIMX: 0
+  VNMX: 0
+  CWMSRCAN: 0
+  TMNSMN: 0
+  CLRKA: 0
+  CLRHK: 0
+  AIMVM: 0
+  NMAXF: 0
+  KISRM: 0
+  DSLOFS: 0
+  MLOFS: 0
+  TEMIN: 0
+  TEMINVA: 0
+  DNMAXH: 0
+  ITNMXH: 0
+  NMAX: 0
+  NMAXOG: 0
+  TMOTNMX: 0
+  TNMXH: 0
+  CDATR: 0
+  CDATS: 0
+  CDHSH: 0
+  CDHSHE: 0
+  CDKAT: 0
+  CDLASH: 0
+  CDLATV: 0
+  CDLDP: 0
+  CDLSH: 0
+  CDLSHV: 0
+  CDSLS: 0
+  CDTES: 0
+  CWKONABG: 0
+  CWKONLS: 0
+  CWMDAPP: 0
+  CWDLSAHK: 0
+  CWLAMFAW: 0
+  DLAMFAW: 0
+  CATR: 0
+  FKHABMN: 0
+  KRALH: 0
+  KRANH: 0
+  LDEIAP: 0
+  LDHIA: 0
+  UMDYLDR: 0
+  EDLDRP: 0
+  SDLDRL: 0
+  TDLDRA: 0
+  TDLDRA2: 0
+  TULV1: 0
+  CLRHKA: 0
+  FKVA: 0
+  KVB: 0
+  MLMAX: 0
+  KRKTE: 0
+  ZKWLAFWL: 0
+  TABGBTS: 0
+  TABGSS: 0
+  TABGSS2: 0
+  FHOKH: 0
+  LDRQ0S: 0
+  VMAXNB: 0

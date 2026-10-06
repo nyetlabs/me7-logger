@@ -8,10 +8,13 @@
 # its own row. One caller and distance may not be repeated.
 # The axis point count and its width are read from the image. That is the column axis
 # when R13 is that header. A load of R14 or R15 from a RAM word is a header a setup
-# stored: the low 14 bits in R12, and the page in R13 when the header is not on DPP0.
+# stored in R12. An R13 page immediate overrides the DPP. With no page, the top bits
+# of that immediate select the DPP. A setup store immediately before the R12 frame
+# is that same kind of word.
 # A word whose header is the column is the column index. A different header is the row.
 # Two different row headers leave the row unset. A page call that does not load that
-# word leaves the row unset.
+# word leaves the row unset. ytable names a breakpoint table. rows is the count
+# that table must have. It fills the row when the call leaves that axis unset.
 
 maps:
 - name: KRFKLN
@@ -42,10 +45,14 @@ maps:
   caller: ARMD_kfdmd
   at: '0x1D4'
   interp: map_interp_table16_page
+  rows: 6
+  ytable: SGA06MDUB
 - name: KFDMDADP
   caller: ARMD_kfdmd
   at: '0x224'
   interp: map_interp_table16_page
+  rows: 6
+  ytable: SGA06MDUB
 - name: KFLBTS_0_A
   caller: LAMBTS_kflbts
   at: '0x12E'

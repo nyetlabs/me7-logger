@@ -242,6 +242,7 @@ func Generate(opt Options) (*Result, error) {
 	}
 	locatedMaps := interp.Locate(opt.Image, ns, dpp, calls)
 	res.Maps = mergeMaps(opt.Image, dpp, locatedMaps, opcode.MapAddrs(opt.Image, dpp, sigs.Maps))
+	applyCallTables(opt.Image, res.Maps, calls, opcode.TableAddrs(opt.Image, sigs.Maps))
 	if n := len(locatedMaps); n > 0 {
 		note := fmt.Sprintf("%d calibration maps located from interpolation calls", n)
 		if n == 1 {
@@ -448,6 +449,34 @@ func loadAlias(path string) (map[string]string, error) {
 		return map[string]string{}, nil
 	}
 	return nil, err
+}
+
+// applyCallTables fills a row the call left unset from the breakpoint table
+// that caller row names. A row the call already stored stays. The table count
+// has to match the row count on that caller.
+func applyCallTables(img []byte, maps []record.Map, calls []record.Call, tabs map[string]uint32) {
+	want := map[string]record.Call{}
+	for _, c := range calls {
+		if c.YTable != "" {
+			want[c.Name] = c
+		}
+	}
+	for i := range maps {
+		c, ok := want[maps[i].Name]
+		if !ok || maps[i].Y != nil {
+			continue
+		}
+		addr, ok := tabs[c.YTable]
+		if !ok {
+			continue
+		}
+		y, ok := interp.Breakpoints(img, addr, c.YBits)
+		if !ok || y.Count != c.Rows {
+			continue
+		}
+		maps[i].Rows = y.Count
+		maps[i].Y = &y
+	}
 }
 
 // fillPacked copies axes onto the caller map of this name when that map is the
