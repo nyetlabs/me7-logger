@@ -5,8 +5,9 @@
 # back_up or an even [min, max] range with entry_after, unique.
 #
 # needle_hex:  hex bytes, spaces allowed, "??" is a wildcard byte. Only word-aligned hits count.
-# needles:     a second prologue of the same function. Each entry has its own
-#              needle_hex, and its own unique, back_up, and entry_after.
+#              A list is one pattern per code layout. The patterns share back_up,
+#              and unique counts every hit. needles is the form that gives each
+#              prologue its own back_up, unique, or entry_after.
 # mask_hex:    optional per-byte mask ANDed with the "??" mask; a byte matches when
 #              (b & m) == (n & m) (ME7Sum FindData style).
 # back_up:     label = hit - back_up (negative moves the label forward). Omitted, this
@@ -67,6 +68,9 @@ functions:
         unique: false
       # 23g calls this entry. The 20-byte body above is present and nothing calls it.
       - needle_hex: "EA 30 ?? ?? F3 FA 8C 8E 47 FA"
+      # 4Z7 calls this body through segment 0. Two copies. The twin on 22m ends F2 F1.
+      - needle_hex: "A9 4D C0 4D F0 1E C0 31 1B 1D 02 FC"
+        unique: false
 
   # Second 8-bit table entry, same call. One hit on the images that have it.
   - name: map_interp_table8_b
@@ -74,6 +78,11 @@ functions:
       - needle_hex: "E4 8F F6 8E DE 8F F6 8E 06 90 F6 8E"
       # 23g entry. Callers still land here.
       - needle_hex: "0D 00 FD F4 F0 C0 E0 ED E0 9E E6 FF DE BB"
+      # 22N calls this body with segment 0. The 22m prologue is not in that image.
+      - needle_hex: "5E BC 9A F5 63 70 E7 F8 BF 00 65 F8"
+      # Same 4Z7 body as map_interp_table8. KFMRES on that image calls the other copy.
+      - needle_hex: "A9 4D C0 4D F0 1E C0 31 1B 1D 02 FC"
+        unique: false
 
   # 16-bit table, same R12/R13 call. Two copies of the body. Rows and columns
   # come from this image.
@@ -133,13 +142,19 @@ functions:
     needles:
       - needle_hex: "0D 03 6D 02 E6 F4 00 80 F6 F4 C8 8F"
       - needle_hex: "2C 01 FD 04 E6 F5 2C 01 F6 F5 70 8E"
+      # 4Z7 and the 1.8T images. Two copies. The curve16 prologue on 22m is F0 3E.
+      - needle_hex: "F0 3D C0 72 5C 12 00 C2 98 4C"
+        unique: false
 
   # Caller functions. The name is the Funktionsrahmen module, then the entry.
   # config/maps.yaml gives the byte distance from that entry to the CALLS.
-  # A second prologue is another entry under needles. Both labels are used.
+  # A second pattern in needle_hex is the same entry on another layout.
+  # The patterns share back_up. needles is a prologue with its own back_up.
   # "??" is an R12 or R13 immediate, or an address that changes per image.
   - name: DWKR_dwkr
-    needle_hex: "9A 04 0B 60 E6 FC ?? ??"
+    needle_hex:
+      - "9A 04 0B 60 E6 FC ?? ??"
+      - "9A 04 0B 70 E6 FC ?? ??"
 
   # Ignition-timing caller. config/maps.yaml names the maps at fixed distances
   # from this label. One hit on the images that have it.
@@ -148,21 +163,33 @@ functions:
       - needle_hex: "88 90 88 80 88 70 88 60 9A 58 03 00"
       # 23g ignition entry. The warm-up map sits in ZWGRU_ign_wl.
       - needle_hex: "88 90 88 70 88 60 28 02 F3 F8 50 8C 47 F8 FF 00"
+      # 4Z7 ignition entry. One less push, and the F3 address differs per image.
+      - needle_hex: "88 90 88 80 28 02 F3 F8 ?? ?? 47 F8 FF 00"
 
   - name: ZWGRU_ign_wl
-    needle_hex: "88 90 88 80 E6 FC ?? ?? E6 FD CE 00 F2 FE"
+    needle_hex:
+      - "88 90 88 80 E6 FC ?? ?? E6 FD CE 00 F2 FE"
+      # 4Z7. The byte after E6 FD is E7.
+      - "88 90 88 80 E6 FC ?? ?? E6 FD E7 00 F2 FE"
 
   - name: ARMD_kfdmd
-    needle_hex: "28 04 9A 00 05 90 8A 0D"
+    needle_hex:
+      - "28 04 9A 00 05 90 8A 0D"
+      # 22N pushes two registers first. The byte after 8A is 0C.
+      - "88 90 88 80 28 04 9A 00 05 90 8A 0C"
 
   - name: LAMBTS_kflbts
-    needle_hex: "88 90 88 80 88 70 88 60 28 04 E6 FC ?? ?? F2 FD E8 9C"
+    needle_hex:
+      - "88 90 88 80 88 70 88 60 28 04 E6 FC ?? ?? F2 FD E8 9C"
+      - "88 90 88 80 88 70 88 60 28 04 E6 FC ?? ?? F2 FD EE 97"
 
   - name: MDBAS_kfmiop
     needle_hex: "88 90 88 80 88 70 F2 F7"
 
   - name: MDZW_kfmizu
-    needle_hex: "88 90 88 80 88 60 28 04 9A 55 0C ??"
+    needle_hex:
+      - "88 90 88 80 88 60 28 04 9A 55 0C ??"
+      - "88 90 88 80 88 60 28 04 9A 56 0C 50"
 
   # Callers for the other wiki maps. config/maps.yaml names each map at a
   # fixed distance from the label. "??" is an R12 or R13 immediate: that
@@ -173,6 +200,8 @@ functions:
       - needle_hex: "88 60 F2 F4 0C 8E 68 43 EA 30 B0 57"
       # Same entry on the 23g images. The memory operand and the jump target differ.
       - needle_hex: "88 60 F2 F4 ?? ?? 68 43 EA 30 B2 20"
+      # 22N memory operand. The jump target matches the first pattern.
+      - needle_hex: "88 60 F2 F4 2A 89 68 43 EA 30 B0 57"
 
   - name: LLR_kfmres
     needles:
@@ -180,7 +209,10 @@ functions:
       - needle_hex: "88 90 88 80 88 70 88 60 28 04 C2 F6"
 
   - name: FUEDK_kfvpdks
-    needle_hex: "8A ?? 04 ?? 8A ?? 02 ?? 9A ?? 12 ?? E6 F4 FF 7F"
+    needle_hex:
+      - "8A ?? 04 ?? 8A ?? 02 ?? 9A ?? 12 ?? E6 F4 FF 7F"
+      # 4Z7 entry. The calls sit past the distances used on 22m.
+      - "88 90 88 80 88 70 88 60 D7 40 06 02 F3 FC DF 1E"
 
   - name: FUEDK_kfvplgu
     needle_hex: "E6 FC ?? ?? F2 FD 8A A2 F2 FE 3C A7"
@@ -189,6 +221,10 @@ functions:
     needles:
       - needle_hex: "88 90 88 80 88 70 88 60 28 04 E6 FC ?? ?? F2 FD 90 F9"
       - needle_hex: "88 90 88 80 88 70 88 60 28 04 E6 FC ?? ?? F2 FD 0E F9"
+
+  # 4Z7 entry. 0x28 is KFMIOP. 0x40 passes the KFZWOP body, which the 22m row names KFZWOP2.
+  - name: MDBAS_kfzwop_b
+    needle_hex: "88 90 88 80 88 70 88 60 28 06 E6 FC ?? ?? F2 FD"
 
   - name: LAMFAW_lamkr
     needle_hex: "88 90 88 80 88 70 88 60 28 02 F2 F4 ?? ?? 88 40 C2 F5 ?? F8"
@@ -215,7 +251,9 @@ functions:
     needle_hex: "88 90 88 80 88 70 88 60 28 02 9A ?? 0F ??"
 
   - name: LLR_nfsm
-    needle_hex: "88 70 88 60 9A 02 02 80 EA 00 8A 13"
+    needle_hex:
+      - "88 70 88 60 9A 02 02 80 EA 00 8A 13"
+      - "88 70 88 60 9A 02 02 80 EA 00 FE B5"
 
   - name: LLR_nllm
     needle_hex: "88 90 88 70 88 60 28 02 C2 F4"

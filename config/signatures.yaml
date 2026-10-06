@@ -8,9 +8,10 @@
 # several exist; otherwise open requires one copy. A later row may search
 # that window with in. after searches from that row's hit, through the next
 # DB00. absent skips the row when that pattern is in the range. steps is a
-# chain; skip is the byte distance from the previous hit. at is the byte
-# distance from the last hit to the address word. also add is a byte offset
-# from that address.
+# chain; skip is the byte distance from the previous hit. pattern is one
+# string or a list tried in order. single applies to each string, and after
+# measures from the string that hit. at is the byte distance from the last
+# hit to the address word. also add is a byte offset from that address.
 # mapsigs locates a calibration map in flash. pattern is one window; XX is
 # the address word. at is the distance from the hit to that word, 2 when
 # omitted. add is the byte distance from the decoded pointer to the map body.
@@ -45,7 +46,10 @@ signatures:
 - name: frkte_w
   size: 1
   from: "0x820000"
-  pattern: "F2FXxxxx{rk_w:F2FX}1BXX"
+  # scanKrkte tries F2 FX, then C2 FX.
+  pattern:
+  - "F2FXxxxx{rk_w:F2FX}1BXX"
+  - "C2FXxxxx{rk_w:F2FX}1BXX"
   at: 2
 - name: ftek_w
   size: 1
@@ -167,6 +171,13 @@ signatures:
   open: "E6FXxxxx{nmot:C2FX}{rl:C2FX}DAXXxxxxF7F8xxxxC0845C74F6F4xxxx"
   pattern: "E6FCxxxx{nmot:C2FD}{rl:C2FE}{slot:13}"
   at: 18 # ptrAt(hit + 0x12)
+# scanKhfm's second window. The F7 F8 word is fkhfm.
+- name: fkhfm
+  size: 1
+  from: "0x820000"
+  open: "E6FXxxxx{nmot:C2FX}{rl:C2FX}DAXXxxxxF7F8xxxxC2F4xxxxC2F5xxxx0B45"
+  pattern: "F7F8xxxxC2F4xxxxC2F5xxxx0B45"
+  at: 2
 - name: ldptv
   size: 2
   from: "0x820000"
@@ -302,18 +313,36 @@ signatures:
 - name: uzue
   size: 1
   from: "0x820000"
-  pattern: "E6FCxxxxE6FDxxxxC08EC2FFxxxxDAXXxxxx"
+  # E7 F8 FF 00 is the copy ME7Info takes. A D7 40 copy of the same tail is a different word.
+  pattern: "E7F8FF00F7F8xxxxE6FCxxxxE6FDxxxxC08EC2FFxxxxDAXXxxxx"
   single: true
-  at: -2
+  at: 6
   also:
   - name: tsrldyn
     size: 1
-    at: 12
+    at: 20
+# scanStart's first KFSZDUB pattern. C0 8D C2 FE, with the same E7 F8 FF 00 copy.
+- name: uzue
+  size: 1
+  from: "0x820000"
+  pattern: "E7F8FF00F7F8xxxxE6FCxxxxC08DC2FExxxxDA00xxxx"
+  single: true
+  at: 6
+  also:
+  - name: tsrldyn
+    size: 1
+    at: 16
 - name: ngfil_w
   size: 2
   after: uzue
   pattern: "C2FCxxxxE6FDxxxxE6FExxxxD740XX02C2FFxxxxDAXXxxxx"
   at: -32
+# scanStart uses this ngfil site when the C0 8D uzue search hit.
+- name: ngfil_w
+  size: 2
+  after: uzue
+  pattern: "C2FCxxxxE6FDxxxxC2FExxxxE6FFxxxxDA00xxxx"
+  at: -10
 - name: ngfil
   size: 1
   from: "0x820000"
@@ -340,7 +369,8 @@ signatures:
 - name: tmotrvmx_b2w
   size: 2
   from: "0x820000"
-  pattern: "D740E100F7FXxxxxE6FCxxxxE6FDxxxxC08EDAXX1C5CF074"
+  # The call word after DA is not 1C 5C on every 4Z7 image. F0 74 is the instruction after it.
+  pattern: "D740E100F7FXxxxxE6FCxxxxE6FDxxxxC08EDAXXXXXXF074"
   single: true
   at: 6
 - name: tolc_b2w
@@ -378,13 +408,9 @@ signatures:
 - name: dns_ptr
   size: 1
   from: "0x820000"
-  pattern: "E6FCxxxxE6FDxxxxF2FExxxxF2FFxxxxDA005678F0C4xxxx"
-  single: true
-  at: 14
-- name: dns_ptr
-  size: 1
-  from: "0x820000"
-  pattern: "E6FCxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}F1C803FCxxxx5D03"
+  pattern:
+  - "E6FCxxxxE6FDxxxxF2FExxxxF2FFxxxxDA005678F0C4xxxx"
+  - "E6FCxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}F1C803FCxxxx5D03"
   single: true
   at: 14
 - name: dns
@@ -556,12 +582,10 @@ signatures:
 - name: frkte_w
   size: 1
   from: "0x804000"
-  pattern: "EA009621C2F4xxxxF2F5"
-  single: true
-  at: 6
-- name: frkte_w
-  size: 1
-  pattern: "EA00xxxxC2F4xxxxF2F5"
+  pattern:
+  - "EA009621C2F4xxxxF2F5"
+  - "EA00xxxxC2F4xxxxF2F5"
+  - "E6F5FFFFF7FAxxxxC2FCEC1D"
   single: true
   at: 6
 - name: ftek_w
@@ -591,13 +615,18 @@ signatures:
 - name: wkrmdy_w
   size: 2
   from: "0x804000"
-  pattern: "E6FC0401F2FDxxxxF2FE"
+  # The mov r12 immediate is 04 01, or 26 01 on the 512K 06A file.
+  pattern:
+  - "E6FC0401F2FDxxxxF2FE"
+  - "E6FC2601F2FDxxxxF2FE"
   single: true
   at: 6
 - name: wkrmstat_w
   size: 2
   from: "0x804000"
-  pattern: "E6FCF200F2FDxxxxF2FE"
+  pattern:
+  - "E6FCF200F2FDxxxxF2FE"
+  - "E6FC1401F2FDxxxxF2FE"
   single: true
   at: 6
 - name: zwoutar_0
@@ -622,11 +651,6 @@ signatures:
   pattern: "1273F7F8xxxxC2F4058B"
   single: true
   at: 4
-- name: frkte_w
-  size: 1
-  pattern: "E6F5FFFFF7FAxxxxC2FCEC1D"
-  single: true
-  at: 6
 - name: ftek_w
   size: 1
   pattern: "E6F40080F6F4xxxxDB009A4A55B0"
@@ -642,6 +666,13 @@ signatures:
   pattern: "66F2FF03F6F2xxxxF2F404F8"
   single: true
   at: 6
+# scanKrkte findSingle. The word after F2 FX is uhfm_w.
+- name: uhfm_w
+  size: 2
+  from: "0x804000"
+  pattern: "F2FXxxxx7C1X5C1XD4XXxxxx"
+  single: true
+  at: 2
 
 mapsigs:
 - name: ESKONF
@@ -1786,3 +1817,27 @@ mapsigs:
   add: 17
   cols: 16
   xtable: bp_nmot
+# 22N front bytes. The tail matches the earlier row of the same name.
+- name: RLSALULL
+  pattern: "ED842D03F3F8XXXX0D0AE6FC"
+  at: 6
+- name: NWPMBBR
+  pattern: "F3F87AF843F8XXXX8D0AF3FA"
+  at: 6
+- name: CLRKA
+  pattern: "06A9DB00C2F4XXXX6841EA20"
+  at: 6
+- name: FKHABMN
+  pattern: "EC86D740060243F8XXXXED05E6F45000"
+  at: 8
+- name: NASNOTKL
+  pattern: "DEA4D7400602C2F5XXXX1B45F2F9"
+  at: 8
+  add: 52
+  cols: 4
+- name: KFTSRL
+  pattern: "XAF8D740060243F8XXXX9D30"
+  at: 8
+  add: 296
+  rows: 9
+  cols: 10

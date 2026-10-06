@@ -121,6 +121,51 @@ func TestApplySigSingle(t *testing.T) {
 	}
 }
 
+func TestApplySigPatternList(t *testing.T) {
+	if _, err := ParseSigs([]byte("signatures:\n- name: got\n  size: 1\n  pattern: []\n")); err == nil {
+		t.Fatal("accepted an empty pattern list")
+	}
+	body := []byte(`
+signatures:
+- name: got
+  size: 1
+  single: true
+  at: 2
+  pattern:
+  - "AABB"
+  - "CCDD"
+- name: next
+  size: 1
+  after: got
+  pattern: "EEFF"
+  at: 2
+`)
+	doc, err := ParseSigs(body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	img := make([]byte, 0x4200)
+	// AABB is two copies, so that string is skipped. CCDD is the hit.
+	// The EEFF before DB00 is in an earlier window.
+	copy(img[0x4000:], []byte{
+		0xAA, 0xBB, 0x02, 0x81,
+		0xAA, 0xBB, 0x04, 0x81,
+		0xEE, 0xFF, 0x0A, 0x81,
+		0xDB, 0x00,
+		0xCC, 0xDD, 0x06, 0x81,
+		0xEE, 0xFF, 0x08, 0x81,
+		0xDB, 0x00,
+	})
+	got := ApplySigs(img, StandardDPP, nil, doc)
+	have := map[string]uint32{}
+	for _, h := range got {
+		have[h.Name] = h.Addr
+	}
+	if have["got"] != 0x380106 || have["next"] != 0x380108 {
+		t.Fatalf("%v", got)
+	}
+}
+
 func TestApplySigNegativeAt(t *testing.T) {
 	doc, err := ParseSigs([]byte("signatures:\n- name: got\n  size: 2\n  pattern: CCDD\n  at: -4\n"))
 	if err != nil {

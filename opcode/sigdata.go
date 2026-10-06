@@ -9,11 +9,13 @@ import (
 )
 
 // Sig is one signature row. The name and the pattern come from config YAML.
+// Pattern is tried in order. single applies to each string, and the hit keeps
+// that string's length.
 type Sig struct {
 	Name    string
 	Size    int
 	From    uint32
-	Pattern string
+	Pattern []string
 	Open    string
 	First   bool
 	After   string
@@ -112,7 +114,7 @@ type sigDraft struct {
 	Name    string         `yaml:"name"`
 	Size    int            `yaml:"size"`
 	From    string         `yaml:"from"`
-	Pattern string         `yaml:"pattern"`
+	Pattern sigPats        `yaml:"pattern"`
 	Open    string         `yaml:"open"`
 	First   bool           `yaml:"first"`
 	After   string         `yaml:"after"`
@@ -122,6 +124,36 @@ type sigDraft struct {
 	At      int            `yaml:"at"`
 	Also    []sigAtDraft   `yaml:"also"`
 	Steps   []sigStepDraft `yaml:"steps"`
+}
+
+// sigPats is one pattern string or a list of them.
+type sigPats struct {
+	items []string
+}
+
+func (p *sigPats) UnmarshalYAML(n *yaml.Node) error {
+	switch n.Kind {
+	case yaml.ScalarNode:
+		if strings.TrimSpace(n.Value) == "" {
+			return fmt.Errorf("pattern is empty")
+		}
+		p.items = []string{n.Value}
+		return nil
+	case yaml.SequenceNode:
+		if len(n.Content) == 0 {
+			return fmt.Errorf("pattern list is empty")
+		}
+		p.items = make([]string, len(n.Content))
+		for i, c := range n.Content {
+			if c.Kind != yaml.ScalarNode || strings.TrimSpace(c.Value) == "" {
+				return fmt.Errorf("pattern list wants strings")
+			}
+			p.items[i] = c.Value
+		}
+		return nil
+	default:
+		return fmt.Errorf("pattern wants a string or a list")
+	}
 }
 
 type sigStepDraft struct {
@@ -171,11 +203,11 @@ func ParseSigs(b []byte) (SigDoc, error) {
 	}
 	doc.Rows = make([]Sig, 0, len(raw.Sigs))
 	for i, d := range raw.Sigs {
-		if d.Name == "" || d.Size <= 0 || (d.Pattern == "" && len(d.Steps) == 0) {
+		if d.Name == "" || d.Size <= 0 || (len(d.Pattern.items) == 0 && len(d.Steps) == 0) {
 			return SigDoc{}, fmt.Errorf("signature %d: name, size, and a pattern are required", i+1)
 		}
 		row := Sig{
-			Name: d.Name, Size: d.Size, Pattern: d.Pattern,
+			Name: d.Name, Size: d.Size, Pattern: d.Pattern.items,
 			Open: d.Open, First: d.First, After: d.After, In: d.In, Absent: d.Absent, Single: d.Single, At: d.At,
 		}
 		if d.From != "" {
@@ -391,35 +423,50 @@ func ApplySigs(img []byte, dpp [4]uint16, known map[string]uint32, doc SigDoc) [
 				continue
 			}
 		}
-		var h uint32
-		var n int
-		if len(row.Steps) > 0 {
-			h, n = walkSteps(img, lo, hi, row.Steps, have, slot)
-		} else {
-			pat, ok := expandSig(row.Pattern, have, slot)
-			if !ok {
-				continue
-			}
-			h = findPat(img, lo, hi, pat, row.Single)
-			n = len(pat) / 2
-		}
-		if h == 0 {
+		if len(row.Steps) == 0 {
+			applyPats(img, dpp, lo, hi, row, have, slot, add, hits)
 			continue
 		}
-		hits[row.Name] = sigHit{at: h, n: n}
-		base := PtrAt(img, ptrOff(h, row.At), dpp)
-		add(row.Name, base, row.Size)
-		for _, a := range row.Also {
-			addr := base
-			if a.Add != nil {
-				addr += uint32(*a.Add)
-			} else {
-				addr = PtrAt(img, ptrOff(h, a.At), dpp)
-			}
-			add(a.Name, addr, a.Size)
+		if h, n := walkSteps(img, lo, hi, row.Steps, have, slot); h != 0 {
+			storeSig(img, dpp, h, n, row, add, hits)
 		}
 	}
 	return out
+}
+
+func storeSig(img []byte, dpp [4]uint16, h uint32, n int, row Sig, add func(string, uint32, int), hits map[string]sigHit) {
+	hits[row.Name] = sigHit{at: h, n: n}
+	base := PtrAt(img, ptrOff(h, row.At), dpp)
+	add(row.Name, base, row.Size)
+	for _, a := range row.Also {
+		addr := base
+		if a.Add != nil {
+			addr += uint32(*a.Add)
+		} else {
+			addr = PtrAt(img, ptrOff(h, a.At), dpp)
+		}
+		add(a.Name, addr, a.Size)
+	}
+}
+
+// applyPats stores the first string that hits. single applies to that string.
+// A hit that does not store the row name tries the next string. Names added
+// beside it stay.
+func applyPats(img []byte, dpp [4]uint16, lo, hi uint32, row Sig, have map[string]uint32, slot func(string) (string, bool), add func(string, uint32, int), hits map[string]sigHit) {
+	for _, raw := range row.Pattern {
+		pat, ok := expandSig(raw, have, slot)
+		if !ok {
+			continue
+		}
+		h := findPat(img, lo, hi, pat, row.Single)
+		if h == 0 {
+			continue
+		}
+		storeSig(img, dpp, h, len(pat)/2, row, add, hits)
+		if _, ok := have[row.Name]; ok {
+			return
+		}
+	}
 }
 
 func ptrOff(h uint32, at int) uint32 {
