@@ -383,3 +383,79 @@ func TestMapSigRejects(t *testing.T) {
 		t.Fatal("accepted a pattern and an anchor")
 	}
 }
+
+func TestMapFramePtr(t *testing.T) {
+	body := []byte(`
+mapsigs:
+- name: CURVE
+  pattern: "AAAA100000000002"
+  at: 2
+  frame: true
+`)
+	doc, err := ParseSigs(body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	img := make([]byte, 32)
+	// offset 0x10, page word 0x0200: 0x10 | (0x200 << 14) = 0x800010
+	copy(img, []byte{0xAA, 0xAA, 0x10, 0x00, 0x00, 0x00, 0x00, 0x02})
+	got := MapAddrs(img, StandardDPP, doc.Maps)
+	if len(got) != 1 || got[0].Addr != 0x800010 {
+		t.Fatalf("%+v", got)
+	}
+}
+
+func TestMapOpenAxes(t *testing.T) {
+	body := []byte(`
+mapsigs:
+- name: BASE
+  from: "0x800000"
+  pattern: "D74000020000XXXX"
+  at: 6
+  xat: 10
+  yat: 14
+`)
+	doc, err := ParseSigs(body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	img := make([]byte, 32)
+	copy(img, []byte{
+		0xD7, 0x40, 0x00, 0x02, 0x00, 0x00, 0x10, 0x00,
+		0xF2, 0xF4, 0x68, 0x8F,
+		0xF2, 0xF5, 0x66, 0x8F,
+	})
+	got := MapAddrs(img, StandardDPP, doc.Maps)
+	if len(got) != 1 || got[0].Addr != 0x800010 || got[0].XRam != 0x8F68 || got[0].YRam != 0x8F66 {
+		t.Fatalf("%+v", got)
+	}
+}
+
+func TestMapOpenWindow(t *testing.T) {
+	body := []byte(`
+mapsigs:
+- name: CURVE
+  from: "0x800000"
+  open: "AABB"
+  pattern: "CCCC10000002"
+  at: 2
+  far: true
+`)
+	doc, err := ParseSigs(body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	img := make([]byte, 32)
+	// DB00, opener, then a 4-byte far pointer: offset 0x10, page 0x0200.
+	copy(img, []byte{0xDB, 0x00, 0xAA, 0xBB, 0xCC, 0xCC, 0x10, 0x00, 0x00, 0x02, 0xDB, 0x00})
+	got := MapAddrs(img, StandardDPP, doc.Maps)
+	if len(got) != 1 || got[0].Addr != 0x800010 {
+		t.Fatalf("%+v", got)
+	}
+	// A second copy outside the window does not drop the row.
+	copy(img[18:], []byte{0xCC, 0xCC, 0x10, 0x00, 0x00, 0x02})
+	got = MapAddrs(img, StandardDPP, doc.Maps)
+	if len(got) != 1 || got[0].Addr != 0x800010 {
+		t.Fatalf("window %+v", got)
+	}
+}

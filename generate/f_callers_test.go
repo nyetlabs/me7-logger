@@ -110,6 +110,78 @@ func wikiNames(t *testing.T) []string {
 	return out
 }
 
+func TestFamilyFinderMaps(t *testing.T) {
+	caller := map[string]bool{}
+	b, err := os.ReadFile("../config/maps.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var doc struct {
+		Maps []struct {
+			Name string `yaml:"name"`
+		} `yaml:"maps"`
+	}
+	if err := yaml.Unmarshal(b, &doc); err != nil {
+		t.Fatal(err)
+	}
+	for _, m := range doc.Maps {
+		caller[m.Name] = true
+	}
+	bins, err := filepath.Glob("../testdata/parity/bin/*.bin")
+	if err != nil || len(bins) == 0 {
+		t.Fatal(err)
+	}
+	found := map[string]int{}
+	curve := map[string]int{}
+	for _, path := range bins {
+		img := readBin(t, path)
+		res, err := Generate(Options{Image: img, ImageName: filepath.Base(path), Scale: "off"})
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, m := range res.Maps {
+			if m.Name == "" || caller[m.Name] {
+				continue
+			}
+			found[m.Name]++
+			switch m.Name {
+			case "FZWWLRLN":
+				if m.Rows != 6 || m.Cols != 12 || m.X == nil || m.Y == nil {
+					t.Errorf("%s FZWWLRLN rows %d cols %d", filepath.Base(path), m.Rows, m.Cols)
+				}
+			case "KFMI_UM":
+				if m.Rows != 8 || m.Cols != 8 || m.X == nil || m.Y == nil {
+					t.Errorf("%s KFMI_UM rows %d cols %d", filepath.Base(path), m.Rows, m.Cols)
+				}
+			case "MLHFM":
+				if m.Cols == 0 && m.Rows == 0 {
+					break
+				}
+				curve[m.Name]++
+				if m.Rows != 0 || m.Cols != 512 || m.X != nil || m.Y != nil {
+					t.Errorf("%s MLHFM rows %d cols %d", filepath.Base(path), m.Rows, m.Cols)
+				}
+			case "WFRL":
+				curve[m.Name]++
+				if m.Rows != 0 || m.Cols != 31 || m.X != nil || m.Y != nil {
+					t.Errorf("%s WFRL rows %d cols %d", filepath.Base(path), m.Rows, m.Cols)
+				}
+			}
+		}
+	}
+	// These names are not in the caller list. The family-finder rows located them.
+	for _, n := range []string{"KFZW2_0_A", "WFRL", "FZWWLRLN", "KFMI_UM", "MLHFM"} {
+		if found[n] == 0 {
+			t.Errorf("sample did not locate %s", n)
+		}
+	}
+	for _, n := range []string{"MLHFM", "WFRL"} {
+		if curve[n] == 0 {
+			t.Errorf("sample did not shape %s", n)
+		}
+	}
+}
+
 func readBin(t *testing.T, path string) []byte {
 	t.Helper()
 	b, err := os.ReadFile(path)

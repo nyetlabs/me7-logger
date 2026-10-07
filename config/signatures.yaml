@@ -3,9 +3,11 @@
 # already found, so add it below that name.
 #
 # calls
-#   Bootrom call-table words. The outer key is the call count that picks the
-#   bootrom. The inner keys are the tables 0, 402, and 602. Keep them quoted.
+#   Bootrom call-table words. The outer key is the slot. The inner keys are
+#   the tables 0, 402, and 602. Keep them quoted.
 #   {slot:N} inserts the word for slot N, using the same call count as the clock.
+#   N is the callsSlot argument: 13 is 0xd, 14 is 0xe, 17 is 0x17, and the
+#   other keys are the hex digits of the argument.
 #
 # name      Bosch name to store.
 # size      Width in bytes.
@@ -27,12 +29,25 @@
 #
 # mapsigs locate a calibration map from a byte window in flash.
 # pattern   A window that occurs once. XX is the address word inside it.
+#           {name:MID} and {slot:N} splice the same way as a signature.
 # at        Bytes from the hit to that word. Omitted means 2.
+#           Negative reads the pointer in front of the hit.
+# open      Find this copy first. The DB00 window around it limits pattern.
+#           The copy has to occur once unless first is set.
+# first     With open, keep the first copy when several exist.
+# from      Lowest address to search. An omitted open starts at 0x820000.
+# single    With open, keep the row only when pattern occurs once in the window.
+# frame     The pointer at `at` is the 6-byte segmented form.
+# far       The pointer at `at` is the 4-byte segmented form.
+# deref     Read this many further words at the decoded address.
+# derefat   Bytes added before the first of those reads.
+# dereffar  That read is the 4-byte segmented pointer.
 # add       Bytes from the decoded pointer to the map body.
 #           With anchor, bytes from a map this list already found.
 # anchor    That earlier map. Its axis words are used unless this row sets its own.
 # rows      Row-axis point count, when the axes sit in front of the body.
 # cols      Column-axis point count. A curve sets cols and leaves rows out.
+# plain     Keep that count when no axis is stored in front of the body.
 # xbits     Column breakpoint width, 8 or 16. Omitted means 8 when cols is set.
 # ybits     Row breakpoint width, 8 or 16. Omitted means 8 when rows is set.
 # xat, yat  Bytes from the hit to the F2 that loads that axis header from RAM.
@@ -56,6 +71,30 @@ calls:
     "0": "0x78B8"
     "402": "0x0000"
     "602": "0x2B24"
+  "12":
+    "0": "0x716A"
+    "402": "0x0000"
+    "602": "0x246E"
+  "11":
+    "0": "0x754E"
+    "402": "0x0000"
+    "602": "0x27E0"
+  "16":
+    "0": "0x7856"
+    "402": "0x0000"
+    "602": "0x2ACC"
+  "18":
+    "0": "0x7B42"
+    "402": "0x0000"
+    "602": "0x2D98"
+  "19":
+    "0": "0x7B7A"
+    "402": "0x0000"
+    "602": "0x2DCC"
+  "1a":
+    "0": "0x67D8"
+    "402": "0x0000"
+    "602": "0x1B2A"
 
 signatures:
 - name: frkte_w
@@ -1989,3 +2028,303 @@ mapsigs:
   add: 296
   rows: 9
   cols: 10
+
+# Family-finder maps. addMap and addMapRef store this pointer.
+# addMapAt is absent: its address is the body after the counts.
+- name: MLHFM
+  from: "0x820000"
+  pattern: "F2FXxxxx7C1X5C1XD4XXxxxx"
+  at: 10
+  cols: 512
+  plain: true
+- name: MLHFM
+  from: "0x820000"
+  pattern: "F2FXxxxx7C1X46FX00029DXXF0XX5C1XD4XXxxxx"
+  at: 18
+  cols: 512
+  plain: true
+- name: WFRL
+  pattern: "E6FCxxxxF2FDxxxxE6FE1F00DAXXxxxxF05X7C14"
+  at: 2
+  cols: 31
+  plain: true
+- name: KFFWL_0_A
+  pattern: "E6FCxxxxF2FDxxxxE6FE1X00DAXXxxxxXXXXXXXXXXXX"
+  at: 20
+  deref: 1
+  dereffar: true
+- name: KFFWL_1_A
+  pattern: "E6FCxxxxF2FDxxxxE6FE1X00DAXXxxxxXXXXXXXXXXXX"
+  at: 20
+  deref: 1
+  derefat: 4
+  dereffar: true
+- name: KFFWLW
+  pattern: "E6FCxxxxF2FDxxxxE6FE1X00DAXXxxxxXXXXXXXXXXXXXXXX"
+  at: 18
+  frame: true
+- name: KFFWLW
+  pattern: "E6FCxxxxF2FDxxxxE6FE1X00DAXXxxxxXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+  at: 34
+  frame: true
+- name: FZWWLRLN
+  open: "E6FCxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}X0XX0B98"
+  pattern: "E6FCxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:16}"
+  at: 2
+  xat: 10
+  yat: 14
+- name: KFZWWLNM
+  open: "E6FCxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}X0XX0B98"
+  pattern: "E6FCxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}"
+  at: 2
+- name: KFMI_UM
+  open: "F3FXxxxxF3FXxxxxB1X041XX"
+  pattern: "E6FCxxxxE6FDxxxxF2FExxxxF2FFxxxxDA8Xxxxx"
+  at: 2
+  xat: 10
+  yat: 14
+- name: KFZW
+  open: "88X0E6FCxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}F7F8xxxxD089"
+  pattern: "E6FCxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}"
+  at: 2
+- name: KFZW2_0_A
+  open: "{zwgru:F7F8}08XX"
+  pattern: "47FXFF003DXXC2FXxxxx5C1XD4CXxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}"
+  at: 14
+  deref: 1
+- name: KFZW2_0_A
+  open: "{zwgru:F7F8}98X0"
+  pattern: "47FXFF003DXXC2FXxxxx5C1XD4CXxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}"
+  at: 14
+  deref: 1
+- name: KFZW2_0_A
+  open: "{zwgru:F7F8}9AXXxxxx"
+  pattern: "47FXFF003DXXC2FXxxxx5C1XD4CXxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}"
+  at: 14
+  deref: 1
+- name: KFZW2_0_A
+  open: "{zwgru:F7F8}C2F4xxxx"
+  pattern: "47FXFF003DXXC2FXxxxx5C1XD4CXxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}"
+  at: 14
+  deref: 1
+- name: KFZW2_1_A
+  open: "{zwgru:F7F8}08XX"
+  pattern: "47FXFF003DXXC2FXxxxx5C1XD4CXxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}"
+  at: 14
+  deref: 1
+  derefat: 2
+- name: KFZW2_1_A
+  open: "{zwgru:F7F8}98X0"
+  pattern: "47FXFF003DXXC2FXxxxx5C1XD4CXxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}"
+  at: 14
+  deref: 1
+  derefat: 2
+- name: KFZW2_1_A
+  open: "{zwgru:F7F8}9AXXxxxx"
+  pattern: "47FXFF003DXXC2FXxxxx5C1XD4CXxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}"
+  at: 14
+  deref: 1
+  derefat: 2
+- name: KFZW2_1_A
+  open: "{zwgru:F7F8}C2F4xxxx"
+  pattern: "47FXFF003DXXC2FXxxxx5C1XD4CXxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}"
+  at: 14
+  deref: 1
+  derefat: 2
+- name: KFZW2
+  open: "{zwgru:F7F8}08XX"
+  pattern: "47FXFF003DXXE6FCxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}"
+  at: 18
+- name: KFZW2
+  open: "{zwgru:F7F8}98X0"
+  pattern: "47FXFF003DXXE6FCxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}"
+  at: 18
+- name: KFZW2
+  open: "{zwgru:F7F8}9AXXxxxx"
+  pattern: "47FXFF003DXXE6FCxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}"
+  at: 18
+- name: KFZW2
+  open: "{zwgru:F7F8}C2F4xxxx"
+  pattern: "47FXFF003DXXE6FCxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}"
+  at: 18
+- name: KFLDRQ1
+  open: "9AXXxxxx{plsol:C2FX}{pvdkds:C2FX}20XX"
+  pattern: "E6FCxxxxE6FDxxxxE6FExxxxE6FFxxxxDA8Xxxxx"
+  at: 2
+  frame: true
+- name: KFLDRQ1
+  open: "{plsol:F3FX}{pvdkds:23FX}8DXX"
+  pattern: "E6FCxxxxE6FDxxxxE6FExxxxE6FFxxxxDA8Xxxxx"
+  at: 2
+  frame: true
+- name: KFMRESK
+  open: "{vfzg:F3FX}43FXxxxx9DXX"
+  first: true
+  pattern: "E6FCxxxxE6FDxxxxF2FExxxxF2FFxxxxDAXXxxxx"
+  at: 2
+- name: NFSM
+  open: "{dns:F7FX}0D02{dns:F78E}E6FCxxxx"
+  first: true
+  pattern: "E6FCxxxxE6FDxxxxF2FExxxxDAXXxxxx8840"
+  at: 2
+  frame: true
+- name: NFSM
+  open: "DAXXxxxx"
+  pattern: "E6FCxxxxE6FDxxxxD740E100F2FExxxxDAXXxxxx"
+  at: 2
+  frame: true
+- name: NFSM
+  open: "DAXXxxxx"
+  pattern: "E6FCxxxxE6FDxxxxF2FExxxxDAXXxxxx"
+  at: 2
+  frame: true
+- name: NLLMGFS
+  open: "DAXXxxxx"
+  pattern: "E6FCxxxxE6FDxxxxE6FExxxxE6FFxxxxDAXXxxxx0804"
+  at: 2
+  frame: true
+- name: NFS2M
+  open: "DAXXxxxx"
+  pattern: "E6FCxxxxE6FDxxxxD740E100F2FExxxxDAXXxxxx"
+  at: 2
+  frame: true
+- name: NFS2M
+  open: "DAXXxxxx"
+  pattern: "E6FCxxxxE6FDxxxxF2FExxxxDAXXxxxx"
+  at: 2
+  frame: true
+- name: NFS2M_0_A
+  open: "DAXXxxxx"
+  pattern: "D4C4xxxxD4D4xxxxD740E100F2FExxxxDAXXxxxx"
+  at: 2
+  deref: 1
+  dereffar: true
+- name: NFS2M_1_A
+  open: "DAXXxxxx"
+  pattern: "D4C4xxxxD4D4xxxxD740E100F2FExxxxDAXXxxxx"
+  at: 2
+  deref: 1
+  derefat: 4
+  dereffar: true
+- name: NFS2M_0_A
+  open: "DAXXxxxx"
+  pattern: "D4C4xxxxD4D4xxxxF2FExxxxDAXXxxxx"
+  at: 2
+  deref: 1
+  dereffar: true
+- name: NFS2M_1_A
+  open: "DAXXxxxx"
+  pattern: "D4C4xxxxD4D4xxxxF2FExxxxDAXXxxxx"
+  at: 2
+  deref: 1
+  derefat: 4
+  dereffar: true
+- name: NLLM
+  open: "DAXXxxxx"
+  pattern: "E6FCxxxxE6FDxxxxD740E100F2FExxxxDAXXxxxx"
+  at: 2
+  frame: true
+- name: NLLM
+  open: "DAXXxxxx"
+  pattern: "E6FCxxxxE6FDxxxxF2FExxxxDAXXxxxx"
+  at: 2
+  frame: true
+- name: NLLM_0_A
+  open: "DAXXxxxx"
+  pattern: "D4C5xxxxD4D5xxxxD740E100F2FExxxxDAXXxxxx"
+  at: 2
+  deref: 1
+  dereffar: true
+- name: NLLM_1_A
+  open: "DAXXxxxx"
+  pattern: "D4C5xxxxD4D5xxxxD740E100F2FExxxxDAXXxxxx"
+  at: 2
+  deref: 1
+  derefat: 4
+  dereffar: true
+- name: NLLM_2_A
+  open: "DAXXxxxx"
+  pattern: "D4C5xxxxD4D5xxxxD740E100F2FExxxxDAXXxxxx"
+  at: 2
+  deref: 1
+  derefat: 8
+  dereffar: true
+- name: NLLM_3_A
+  open: "DAXXxxxx"
+  pattern: "D4C5xxxxD4D5xxxxD740E100F2FExxxxDAXXxxxx"
+  at: 2
+  deref: 1
+  derefat: 12
+  dereffar: true
+- name: NLLMG
+  open: "DAXXxxxx"
+  pattern: "E6FCxxxxE6FDxxxxE6FExxxxE6FFxxxxDAXXxxxx0804"
+  at: 2
+  frame: true
+- name: NLL2M
+  open: "DAXXxxxx"
+  pattern: "E6FCxxxxE6FDxxxxD740E100F2FExxxxDAXXxxxx"
+  at: 2
+  frame: true
+- name: NLL2M
+  open: "DAXXxxxx"
+  pattern: "E6FCxxxxE6FDxxxxF2FExxxxDAXXxxxx"
+  at: 2
+  frame: true
+- name: NLL2M_0_A
+  open: "DAXXxxxx"
+  pattern: "D4C4xxxxD4D4xxxxD740E100F2FExxxxDAXXxxxx"
+  at: 2
+  deref: 1
+  dereffar: true
+- name: NLL2M_1_A
+  open: "DAXXxxxx"
+  pattern: "D4C4xxxxD4D4xxxxD740E100F2FExxxxDAXXxxxx"
+  at: 2
+  deref: 1
+  derefat: 4
+  dereffar: true
+- name: NLL2M_0_A
+  open: "DAXXxxxx"
+  pattern: "D4C4xxxxD4D4xxxxF2FExxxxDAXXxxxx"
+  at: 2
+  deref: 1
+  dereffar: true
+- name: NLL2M_1_A
+  open: "DAXXxxxx"
+  pattern: "D4C4xxxxD4D4xxxxF2FExxxxDAXXxxxx"
+  at: 2
+  deref: 1
+  derefat: 4
+  dereffar: true
+- name: NLL2M_0_A
+  open: "DAXXxxxx"
+  pattern: "D4C5xxxxD4D5xxxxD740E100F2FExxxxDAXXxxxx"
+  at: 2
+  deref: 1
+  dereffar: true
+- name: NLL2M_1_A
+  open: "DAXXxxxx"
+  pattern: "D4C5xxxxD4D5xxxxD740E100F2FExxxxDAXXxxxx"
+  at: 2
+  deref: 1
+  derefat: 4
+  dereffar: true
+- name: NLL2M_2_A
+  open: "DAXXxxxx"
+  pattern: "D4C5xxxxD4D5xxxxD740E100F2FExxxxDAXXxxxx"
+  at: 2
+  deref: 1
+  derefat: 8
+  dereffar: true
+- name: NLL2M_3_A
+  open: "DAXXxxxx"
+  pattern: "D4C5xxxxD4D5xxxxD740E100F2FExxxxDAXXxxxx"
+  at: 2
+  deref: 1
+  derefat: 12
+  dereffar: true
+- name: KFPEDR
+  open: "E6FCxxxx{wped_w:F2FD}{slot:11}E6FCxxxx{nmot_w:F2FD}{slot:11}F6F4xxxx"
+  pattern: "E6FCxxxxE6FDxxxxF2FExxxxF2FFxxxxDA8Xxxxx"
+  at: 2

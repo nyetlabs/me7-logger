@@ -40,15 +40,15 @@ How the address is taken from the hit:
 
 A name already stored stays as it is. A name that is not in the catalog is kept so a later row can embed it, and that name is not written.
 
-`mapsigs` in the same file locates a map the caller list does not name. `pattern` is one window and `XX` is the address word inside it. `at` is the distance from the hit to that word, 2 when omitted. `add` is the byte distance from the decoded pointer to the body. `anchor` names a map this list already locates, and then `add` is the distance from that map. An anchor uses the base row's axis words when it does not name its own.
+`mapsigs` in the same file locates a map the caller list does not name. `pattern` is one window and `XX` is the address word inside it. `at` is the distance from the hit to that word, 2 when omitted. A negative `at` reads the pointer in front of the hit. `add` is the byte distance from the decoded pointer to the body. `anchor` names a map this list already locates, and then `add` is the distance from that map. An anchor uses the base row's axis words when it does not name its own. `open` finds a copy first and limits `pattern` to the DB00 window around it. `first` keeps the first copy of `open` when several exist. `from` is the search floor. An `open` with no `from` starts at 0x820000. `single` keeps that pattern only when it occurs once in the window. `frame` reads the 6-byte segmented pointer at `at`. `far` reads the 4-byte form. `deref` reads that many further words, and `derefat` is added before the first of those reads. `dereffar` makes that read the 4-byte segmented pointer.
 
 The axes come from one of these:
 
-- `rows` and `cols` are the point counts when the axes are prepended to the body, or when `xat` and `yat` name them. `xbits` and `ybits` are the breakpoint widths, 8 when that count is set and the width is omitted. The bytes between the counts and the body are that axis data. A curve sets `cols`.
+- `rows` and `cols` are the point counts when the axes are prepended to the body, or when `xat` and `yat` name them. `plain` keeps that count when no axis is stored in front of the body. `xbits` and `ybits` are the breakpoint widths, 8 when that count is set and the width is omitted. The bytes between the counts and the body are that axis data. A curve sets `cols`.
 - `xat` and `yat` are byte distances from the hit to an `F2` operand, the RAM word whose setup stored that header. The count byte at the header has to match `cols` or `rows`.
 - `table: true` is the breakpoint table itself. The address is the hit, and the row is not a map. `xtable` and `ytable` name that row. The count there has to match `cols` or `rows`.
 
-Axes that are neither prepended nor named that way have no dimensions on the row. A pattern is kept only when it occurs once and the address is inside the image. A later row with the same name fills the map only when an earlier window missed.
+Axes that are neither prepended nor named that way have no dimensions on the row. A pattern with no `open` is kept only when it occurs once and the address is inside the image. A pattern with `open` keeps the first hit in that DB00 window, unless `single` is set. A later row with the same name fills the map only when an earlier window missed.
 
 When the pointer sits in front of the axes and the counts there account for every byte up to the body, those counts are the rows and the columns. A count the image does not hold stays unset. Do not invent a row count of 1.
 
@@ -197,7 +197,7 @@ The number on the list is how many axes the table has, and those counts are the 
 
 `xdf/<stem>.xdf`, when present, checks that image's own address file. A missing file is omitted from the report. The file is not the S4wiki list, and it does not locate maps. A body hit is the same address. An axis hit is the same address, point count, and width. An axis with no address is left out of the score. A 16-bit axis or body is the even address. The odd byte in front of it is a pad, not a value.
 
-Maps are located on that image from the caller that passes the map to the interpolator. How the column and the row are read is in the `config/maps.yaml` section above. `addMapAt` reads the row and column counts when they sit in front of the axes. A count the image does not hold stays unset, and that map is written as a constant. A mapsig row names a header with `yat` when a setup stored it in a RAM word.
+Maps are located on that image from the caller that passes the map to the interpolator. How the column and the row are read is in the `config/maps.yaml` section above. `addMapAt` reads the row and column counts when they sit in front of the axes. A count the image does not hold stays unset, and that map is written as a constant, unless the row is `plain`. A mapsig row names a header with `xat` or `yat` when a setup stored it in a RAM word.
 
 `confidence` scores the body bytes of the names that hit. The denominator is that matched set. A name the locator missed is not in it, and neither is the axis count. `testdata/parity/confidence.yaml` lists names left out of that score on every image. Those names stay on the S4wiki list.
 

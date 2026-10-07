@@ -69,6 +69,24 @@ type MapSig struct {
 	Table   bool
 	XTable  string
 	YTable  string
+	// Plain keeps Rows and Cols when no axis is stored in front of the body.
+	Plain bool
+	// Open limits the search to the DB00 window around that pattern.
+	// First keeps the first copy of Open when several exist.
+	// From is the lowest address for that search. Zero starts an open
+	// search at 0x820000 and any other search at the start of flash.
+	Open   string
+	First  bool
+	From   uint32
+	Single bool
+	// Frame is the 6-byte framePtr at At. Far is the 4-byte readFar there.
+	// Deref reads that many further words. DerefAt is added to the address
+	// before the first of those reads. DerefFar makes that read a readFar.
+	Frame    bool
+	Far      bool
+	Deref    int
+	DerefAt  int
+	DerefFar bool
 }
 
 // SigDoc is the signature list and the call-slot words it references.
@@ -94,20 +112,30 @@ type sigFile struct {
 }
 
 type mapSigDraft struct {
-	Name    string `yaml:"name"`
-	Pattern string `yaml:"pattern"`
-	At      *int   `yaml:"at"`
-	Add     *int   `yaml:"add"`
-	Anchor  string `yaml:"anchor"`
-	Rows    int    `yaml:"rows"`
-	Cols    int    `yaml:"cols"`
-	XBits   int    `yaml:"xbits"`
-	YBits   int    `yaml:"ybits"`
-	XAt     *int   `yaml:"xat"`
-	YAt     *int   `yaml:"yat"`
-	Table   bool   `yaml:"table"`
-	XTable  string `yaml:"xtable"`
-	YTable  string `yaml:"ytable"`
+	Name     string `yaml:"name"`
+	Pattern  string `yaml:"pattern"`
+	At       *int   `yaml:"at"`
+	Add      *int   `yaml:"add"`
+	Anchor   string `yaml:"anchor"`
+	Rows     int    `yaml:"rows"`
+	Cols     int    `yaml:"cols"`
+	XBits    int    `yaml:"xbits"`
+	YBits    int    `yaml:"ybits"`
+	XAt      *int   `yaml:"xat"`
+	YAt      *int   `yaml:"yat"`
+	Table    bool   `yaml:"table"`
+	XTable   string `yaml:"xtable"`
+	YTable   string `yaml:"ytable"`
+	Plain    bool   `yaml:"plain"`
+	Open     string `yaml:"open"`
+	First    bool   `yaml:"first"`
+	From     string `yaml:"from"`
+	Single   bool   `yaml:"single"`
+	Frame    bool   `yaml:"frame"`
+	Far      bool   `yaml:"far"`
+	Deref    int    `yaml:"deref"`
+	DerefAt  int    `yaml:"derefat"`
+	DerefFar bool   `yaml:"dereffar"`
 }
 
 type sigDraft struct {
@@ -260,8 +288,24 @@ func ParseSigs(b []byte) (SigDoc, error) {
 		if d.Table && (len(d.Pattern)%2 != 0 || len(d.Pattern) < 2) {
 			return SigDoc{}, fmt.Errorf("mapsig %s: a breakpoint table pattern is an even byte string", d.Name)
 		}
-		if !d.Table && d.Pattern != "" && (len(d.Pattern)%2 != 0 || at < 0 || at+2 > len(d.Pattern)/2) {
-			return SigDoc{}, fmt.Errorf("mapsig %s: at must sit on a word inside the pattern", d.Name)
+		if d.Frame && d.Far {
+			return SigDoc{}, fmt.Errorf("mapsig %s: frame and far are different pointers", d.Name)
+		}
+		if d.Deref < 0 || d.DerefAt < 0 {
+			return SigDoc{}, fmt.Errorf("mapsig %s: deref is not negative", d.Name)
+		}
+		if !d.Table && d.Pattern != "" && !strings.Contains(d.Pattern, "{") {
+			if len(d.Pattern)%2 != 0 {
+				return SigDoc{}, fmt.Errorf("mapsig %s: pattern is an even byte string", d.Name)
+			}
+			n := len(d.Pattern) / 2
+			// A negative at reads the pointer in front of the hit.
+			if at >= 0 && !d.Frame && !d.Far && at+2 > n {
+				return SigDoc{}, fmt.Errorf("mapsig %s: at must sit on a word inside the pattern", d.Name)
+			}
+			if at >= 0 && (d.Frame || d.Far) && at >= n {
+				return SigDoc{}, fmt.Errorf("mapsig %s: at must sit inside the pattern", d.Name)
+			}
 		}
 		if d.XTable != "" && d.Cols == 0 {
 			return SigDoc{}, fmt.Errorf("mapsig %s: xtable needs the column count", d.Name)
@@ -273,6 +317,15 @@ func ParseSigs(b []byte) (SigDoc, error) {
 			Name: d.Name, Pattern: d.Pattern, At: at, Anchor: d.Anchor,
 			Rows: d.Rows, Cols: d.Cols, XBits: xbits, YBits: ybits,
 			XAt: d.XAt, YAt: d.YAt, Table: d.Table, XTable: d.XTable, YTable: d.YTable,
+			Open: d.Open, First: d.First, Single: d.Single, Plain: d.Plain,
+			Frame: d.Frame, Far: d.Far, Deref: d.Deref, DerefAt: d.DerefAt, DerefFar: d.DerefFar,
+		}
+		if d.From != "" {
+			v, err := parseHex(d.From)
+			if err != nil {
+				return SigDoc{}, fmt.Errorf("mapsig %s: from: %w", d.Name, err)
+			}
+			row.From = v
 		}
 		if d.Add != nil {
 			row.Add = *d.Add

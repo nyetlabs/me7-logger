@@ -215,16 +215,19 @@ func Generate(opt Options) (*Result, error) {
 			known[it.Name] = it.Addr
 		}
 	}
-	for _, h := range opcode.Signatures(opt.Image, dpp, known) {
-		if _, ok := known[h.Name]; !ok {
-			known[h.Name] = h.Addr
+	keep := func(hits []opcode.Named) {
+		for _, h := range hits {
+			if _, ok := known[h.Name]; !ok {
+				known[h.Name] = h.Addr
+			}
+			v, ok := varByName(tab, h.Name)
+			if !ok {
+				continue
+			}
+			addItem(&res.File.Items, emitted, ramItem(v.Name, aliases[v.Name], h.Addr, h.Size, 0, v.Unit, v.Comment, v.Signed, v.Inverse, v.A, v.B, false, v.ResultType))
 		}
-		v, ok := varByName(tab, h.Name)
-		if !ok {
-			continue
-		}
-		addItem(&res.File.Items, emitted, ramItem(v.Name, aliases[v.Name], h.Addr, h.Size, 0, v.Unit, v.Comment, v.Signed, v.Inverse, v.A, v.B, false, v.ResultType))
 	}
+	keep(opcode.Signatures(opt.Image, dpp, known))
 	sigBody, err := config.Read("", config.SigFile)
 	if err != nil {
 		return nil, err
@@ -233,15 +236,9 @@ func Generate(opt Options) (*Result, error) {
 	if err != nil {
 		return nil, err
 	}
-	for _, h := range opcode.ApplySigs(opt.Image, dpp, known, sigs) {
-		v, ok := varByName(tab, h.Name)
-		if !ok {
-			continue
-		}
-		addItem(&res.File.Items, emitted, ramItem(v.Name, aliases[v.Name], h.Addr, h.Size, 0, v.Unit, v.Comment, v.Signed, v.Inverse, v.A, v.B, false, v.ResultType))
-	}
+	keep(opcode.ApplySigs(opt.Image, dpp, known, sigs))
 	locatedMaps := interp.Locate(opt.Image, ns, dpp, calls)
-	res.Maps = mergeMaps(opt.Image, dpp, locatedMaps, opcode.MapAddrs(opt.Image, dpp, sigs.Maps))
+	res.Maps = mergeMaps(opt.Image, dpp, locatedMaps, opcode.MapHits(opt.Image, dpp, sigs, known))
 	applyCallTables(opt.Image, res.Maps, calls, opcode.TableAddrs(opt.Image, sigs.Maps))
 	if n := len(locatedMaps); n > 0 {
 		note := fmt.Sprintf("%d calibration maps located from interpolation calls", n)
@@ -538,14 +535,18 @@ func applyAxes(img []byte, dpp [4]uint16, h opcode.MapHit, m *record.Map) {
 	}
 	if h.Cols > 0 {
 		rows, cols, x, y, ok := interp.Shaped(img, h.Addr, h.Rows, h.Cols, h.YBits, h.XBits)
-		if !ok {
+		if ok {
+			m.Rows = rows
+			m.Cols = cols
+			m.X = &x
+			if y.Addr != 0 {
+				m.Y = &y
+			}
 			return
 		}
-		m.Rows = rows
-		m.Cols = cols
-		m.X = &x
-		if y.Addr != 0 {
-			m.Y = &y
+		if h.Plain {
+			m.Rows = h.Rows
+			m.Cols = h.Cols
 		}
 		return
 	}
