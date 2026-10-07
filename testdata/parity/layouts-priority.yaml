@@ -1,0 +1,15 @@
+# Finder priority for the blocks in layouts.yaml. Opinion, not measurement.
+# Tiers run S, A, B, C, D, highest first. Every block is in exactly one tier.
+tiers:
+  S:
+    - 22m
+  A:
+    - 22N
+    - 4Z7
+    - 1.8T
+  B:
+    - 4Z7-like
+  C:
+    - 23g
+  D:
+    - selector-sub

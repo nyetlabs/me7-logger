@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -321,6 +322,9 @@ func run(dir string, gen imageGen) (*Report, error) {
 	if err != nil {
 		return nil, err
 	}
+	if _, err := loadNamesPriority(dir, axes); err != nil {
+		return nil, err
+	}
 	rep := &Report{}
 	type kept struct {
 		base, stem string
@@ -553,6 +557,54 @@ func loadWiki(dir string) ([]string, map[string]int, error) {
 		out = append(out, n)
 	}
 	return out, axes, nil
+}
+
+// tierOrder is the priority order of a *-priority.yaml file, highest first.
+var tierOrder = []string{"S", "A", "B", "C", "D"}
+
+// loadNamesPriority reads xdf/s4wiki/names-priority.yaml, the finder tier of each S4wiki name.
+func loadNamesPriority(dir string, axes map[string]int) (map[string]string, error) {
+	return loadTiers(filepath.Join(dir, "xdf", "s4wiki", "names-priority.yaml"), axes)
+}
+
+// loadTiers reads a priority file: a tiers map from a tierOrder label to members.
+// Every key of want is in exactly one tier. A missing file returns nil.
+func loadTiers[V any](path string, want map[string]V) (map[string]string, error) {
+	b, err := os.ReadFile(path)
+	if os.IsNotExist(err) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	name := filepath.Base(path)
+	var doc struct {
+		Tiers map[string][]string `yaml:"tiers"`
+	}
+	if err := yaml.Unmarshal(b, &doc); err != nil {
+		return nil, fmt.Errorf("%s: %w", name, err)
+	}
+	out := map[string]string{}
+	for tier, members := range doc.Tiers {
+		if !slices.Contains(tierOrder, tier) {
+			return nil, fmt.Errorf("%s: tier %q is not one of %v", name, tier, tierOrder)
+		}
+		for _, m := range members {
+			if _, ok := want[m]; !ok {
+				return nil, fmt.Errorf("%s: %s is not listed in the file it ranks", name, m)
+			}
+			if _, ok := out[m]; ok {
+				return nil, fmt.Errorf("%s: %s repeated", name, m)
+			}
+			out[m] = tier
+		}
+	}
+	for m := range want {
+		if _, ok := out[m]; !ok {
+			return nil, fmt.Errorf("%s: %s has no tier", name, m)
+		}
+	}
+	return out, nil
 }
 
 // cover counts each wanted name once. A hit is a name located on any bin.

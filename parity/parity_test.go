@@ -3,8 +3,13 @@ package parity
 import (
 	"os"
 	"path/filepath"
+	"regexp"
 	"testing"
 
+	"gopkg.in/yaml.v3"
+
+	"me7-logger/ident"
+	"me7-logger/needle"
 	"me7-logger/record"
 )
 
@@ -277,6 +282,133 @@ func TestConfidenceSkipFile(t *testing.T) {
 	for n := range skip {
 		if _, ok := have[n]; !ok {
 			t.Errorf("%s is not an s4wiki name", n)
+		}
+	}
+}
+
+func TestNamesPriorityFile(t *testing.T) {
+	dir := filepath.Join("..", "testdata", "parity")
+	_, axes, err := loadWiki(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := loadNamesPriority(dir, axes); err != nil {
+		t.Fatal(err)
+	}
+	delete(axes, "KFZW")
+	if _, err := loadNamesPriority(dir, axes); err == nil {
+		t.Fatal("want an error for a name outside names.yaml")
+	}
+}
+
+var epkRE = regexp.MustCompile(`[0-9]+/[0-9]+/ME7[!-~]*`)
+
+func layoutID(img []byte) string {
+	if sw := ident.Find(img).SWNumber; sw != "" {
+		return sw
+	}
+	return string(epkRE.Find(img))
+}
+
+func TestLayoutBlocks(t *testing.T) {
+	dir := filepath.Join("..", "testdata", "parity")
+	b, err := os.ReadFile(filepath.Join(dir, "layouts.yaml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var blocks map[string][]string
+	if err := yaml.Unmarshal(b, &blocks); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := loadTiers(filepath.Join(dir, "layouts-priority.yaml"), blocks); err != nil {
+		t.Fatal(err)
+	}
+
+	raw, err := os.ReadFile(filepath.Join("..", "config", "needles.yaml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	ns, err := needle.Parse(raw, "needles.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var variants []needle.Needle
+	for _, n := range ns {
+		if len(n.Pats) == 0 {
+			variants = append(variants, needle.Needle{Pattern: n.Pattern, Mask: n.Mask})
+		}
+		for i := range n.Pats {
+			variants = append(variants, needle.Needle{Pattern: n.Pats[i], Mask: n.Masks[i]})
+		}
+	}
+
+	bins, err := filepath.Glob(filepath.Join(dir, "bin", "*.bin"))
+	if err != nil || len(bins) == 0 {
+		t.Fatalf("no bins: %v", err)
+	}
+	hits := map[string][]bool{}
+	count := make([]int, len(variants))
+	for _, b := range bins {
+		img, err := os.ReadFile(b)
+		if err != nil {
+			t.Fatal(err)
+		}
+		id := layoutID(img)
+		if id == "" {
+			t.Fatalf("%s: no software number or EPK", filepath.Base(b))
+		}
+		if _, ok := hits[id]; ok {
+			t.Fatalf("%s: id %s repeated", filepath.Base(b), id)
+		}
+		h := make([]bool, len(variants))
+		for i, v := range variants {
+			if len(v.Find(img)) > 0 {
+				h[i] = true
+				count[i]++
+			}
+		}
+		hits[id] = h
+	}
+	varying := func(id string) map[int]bool {
+		out := map[int]bool{}
+		for i, ok := range hits[id] {
+			if ok && count[i] < len(bins) {
+				out[i] = true
+			}
+		}
+		return out
+	}
+
+	seen := map[string]string{}
+	for label, ids := range blocks {
+		var core map[int]bool
+		for _, id := range ids {
+			if prev, ok := seen[id]; ok {
+				t.Errorf("%s in %s and %s", id, prev, label)
+			}
+			seen[id] = label
+			if _, ok := hits[id]; !ok {
+				t.Errorf("%s: %s is not a scored image", label, id)
+				continue
+			}
+			v := varying(id)
+			if core == nil {
+				core = v
+				continue
+			}
+			for i := range core {
+				if !v[i] {
+					delete(core, i)
+				}
+			}
+		}
+		if len(ids) > 1 && len(core) == 0 {
+			t.Errorf("%s: members share no varying needle", label)
+		}
+	}
+	for id := range hits {
+		if _, ok := seen[id]; !ok {
+			t.Errorf("%s is in no block", id)
 		}
 	}
 }

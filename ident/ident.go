@@ -1,7 +1,7 @@
 // Package ident reads the ASCII identification record ME7 images carry:
 // a 12-byte part number, a 20-byte engine id (the .ecu keeps 16), and a
 // 4-digit software version, plus the 10-digit hardware and software numbers
-// stored near file offset 0x18000.
+// stored between file offsets 0x14000 and 0x1A000.
 package ident
 
 import (
@@ -53,7 +53,7 @@ func Find(data []byte) ID {
 		id.SWVersion = string(ver)
 		break
 	}
-	lo, hi := 0x17000, 0x1A000
+	lo, hi := 0x14000, 0x1A000
 	if hi > len(data) {
 		lo, hi = 0, len(data)
 	}

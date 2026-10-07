@@ -1,0 +1,39 @@
+# Code layout blocks. Images in one block are likely to share needle variants,
+# code flow, and map locations. The key is a label from the comments in
+# config/needles.yaml, or the needle that sets the block apart. The list is the
+# durable id of each image: the Bosch software number (1037...), or the EPK
+# string when the image carries no software number.
+#
+# The blocks come from which variant of each needle hits. A near match stays in
+# the block: F with K and Q, the 4Z7 T with S, AA, and R, LP, CB, and CM with
+# HF and HS, and 06A906032S and 4B0906018Q with A and B.
+# datasets.yaml is a different grouping: calibration contents, not code.
+22m:
+  - "1037354145"
+  - "1037360857"
+22N:
+  - "1037362558"
+  - "1037370992"
+23g:
+  - "1037354531"
+  - "1037360387"
+  - "1037360388"
+4Z7:
+  - "1037368391"
+  - "1037369096"
+  - "1037369097"
+  - "243/1/ME7.1.1/5/6011.02//A25an/Dst5A/150502/"
+4Z7-like:
+  - "1037369307"
+  - "1037371702"
+1.8T:
+  - "1037363354"
+  - "1037363355"
+  - "1037366194"
+  - "1037366473"
+  - "1037378160"
+selector-sub:
+  - "1037352738"
+  - "1037352741"
+  - "1037352760"
+  - "1037352805"

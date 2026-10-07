@@ -189,7 +189,13 @@ That run reads the shipped YAML. It does not read `config/user`. Adding files th
 
 `testdata/parity/bin/*.bin` are the images. `ecu/me7info/<stem>.ecu` is the legacy ME7Info file for that image. `testdata/parity/incoming/` is not scored.
 
+`layouts.yaml` groups the images into code layout blocks: images likely to share needle variants and map locations. An image is listed by its Bosch software number, or by its EPK string when it carries no software number. `layouts-priority.yaml` puts each block in one finder tier. It is opinion. `TestLayoutBlocks` fails when an image is in no block or in two, when a listed id is not an image, when the members of a block share no needle variant that some image lacks, or when a block is missing from the priority file or repeated in it.
+
+A `*-priority.yaml` file is a `tiers` map. The tiers are `S`, `A`, `B`, `C`, and `D`, highest first. Any other key fails the load.
+
 `xdf/s4wiki/names.yaml` is one name list, scored on every image. The tuner set is <https://s4wiki.com/wiki/Tuning>. It is not a per-CPU list, and not a second 100%.
+
+`xdf/s4wiki/names-priority.yaml` puts every name on that list in one finder tier. It is opinion and does not change a score. Parity fails when a name is missing, repeated, or not on the list.
 
 A name hits when the locator stores one address and an axis. A count of 0 on that list is a scalar, so the address alone is the hit. Any other body with no axis is a miss. When `xdf/<stem>.xdf` contains the name, the body address has to match one row of that file.
 

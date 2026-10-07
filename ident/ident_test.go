@@ -22,3 +22,12 @@ func TestFind(t *testing.T) {
 		t.Fatalf("engine %q", id.EngineID)
 	}
 }
+
+func TestFindEarlyNumbers(t *testing.T) {
+	img := make([]byte, 0x1A000)
+	copy(img[0x143D1:], []byte("02612061091037352738"))
+	id := Find(img)
+	if id.HWNumber != "0261206109" || id.SWNumber != "1037352738" {
+		t.Fatalf("%+v", id)
+	}
+}
