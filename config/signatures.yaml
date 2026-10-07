@@ -248,6 +248,13 @@ signatures:
   pattern: "20479D01E004D740E100F6F4xxxxE6FCxxxxE6FDxxxxF0E4"
   single: true
   at: 12
+# scanLdr tries this uniqueWindow before the F3FX fallback.
+- name: lde_ptr
+  size: 1
+  from: "0x820000"
+  open: "9AXXxxxx{plsol:C2FX}{pvdkds:C2FX}20XX"
+  pattern: "E6FCxxxxE6FDxxxxE6FExxxxE6FFxxxxDA8Xxxxx"
+  at: -10
 - name: lde_ptr
   size: 1
   from: "0x820000"
@@ -325,6 +332,14 @@ signatures:
   open: "{etazwbm:C2FX}C2F4xxxx0BX4F2FXxxxx"
   pattern: "E6FCxxxxF2FDxxxxF2FExxxx{slot:14}"
   at: 10
+# scanMirl uses this window only when the slot pattern above missed.
+- name: misopl1_w
+  size: 2
+  from: "0x820000"
+  open: "{etazwbm:C2FX}C2F4xxxx0BX4F2FXxxxx"
+  absent: "E6FCxxxxF2FDxxxxF2FExxxx{slot:14}"
+  pattern: "E6FCxxxxE6FDxxxxF2FExxxxF2FFxxxxDA8Xxxxx"
+  at: 14
 - name: uzue
   size: 1
   from: "0x820000"
@@ -447,12 +462,41 @@ signatures:
   first: true
   pattern: "E6FCxxxxE6FDxxxxF2FExxxxF2FFxxxxDAXXxxxx"
   at: 14
+# axisAt tries this window before the F6F4 tail below.
+- name: mifa_w
+  size: 2
+  from: "0x800200"
+  pattern: "E6FCxxxxE6FDxxxxF6FExxxx{mifa_ptr:F2FF}DAXXxxxx{mifa_ptr:F6F4}"
+  at: 10
 - name: mifa_w
   size: 2
   from: "0x800200"
   pattern: "E6FCxxxxF2FDxxxxDAXXxxxx{mifa_ptr:F6F4}"
   single: true
   at: 6
+# scanUm's KFMI_UM window. axisAt binds rl_um and nmot_um from these pointers.
+- name: rl_um_ptr
+  size: 1
+  from: "0x820000"
+  open: "F6FXxxxxF6FXxxxxB1X041XX"
+  pattern: "E6FCxxxxE6FDxxxxF2FExxxxF2FFxxxxDA8Xxxxx"
+  at: 10
+- name: nmot_um_ptr
+  size: 1
+  from: "0x820000"
+  open: "F6FXxxxxF6FXxxxxB1X041XX"
+  pattern: "E6FCxxxxE6FDxxxxF2FExxxxF2FFxxxxDA8Xxxxx"
+  at: 14
+- name: rl_um
+  size: 1
+  from: "0x800200"
+  pattern: "E6FCxxxxE6FDxxxxF6FExxxx{rl_um_ptr:F2FF}DAXXxxxx{rl_um_ptr:F6F4}"
+  at: 10
+- name: nmot_um
+  size: 1
+  from: "0x800200"
+  pattern: "E6FCxxxxE6FDxxxxF6FExxxx{nmot_um_ptr:F2FF}DAXXxxxx{nmot_um_ptr:F6F4}"
+  at: 10
 - name: nmot_um
   size: 1
   from: "0x800200"
@@ -488,6 +532,13 @@ signatures:
   pattern: "DA004276F6F4xxxxF2F5xxxx02F5xxxx9D02E6F5FFFFF6F5xxxx"
   single: true
   at: 24
+# scanLdrxn binds tsel from ptrAt(hit+2) inside the rlmx_w window.
+- name: tsel
+  size: 1
+  from: "0x820000"
+  open: "{rlmx_w:F6XX}"
+  pattern: "F7FXxxxxE6FCxxxxE6FDxxxxC2FExxxxC0XFDA8Xxxxx"
+  at: 2
 - name: tsel
   size: 1
   from: "0x820000"
@@ -500,6 +551,47 @@ signatures:
   pattern: "C2FCxxxxE6FDxxxxE6FExxxxD740XX02C2FFxxxxDA8Xxxxx06F00C00D0845C7498507C15"
   single: true
   at: -42
+  also:
+  - name: tmst
+    size: 1
+    at: -32
+# scanLdr KFLDIAPL window.
+- name: ldimxak_w
+  size: 2
+  from: "0x820000"
+  pattern: "F2FCxxxxE6FDxxxxE6FExxxxD740XX02F2FFxxxxDA8Xxxxx"
+  single: true
+  at: -32
+# scanStart KFSZT window.
+- name: ub
+  size: 1
+  from: "0x820000"
+  open: "{nmot_w:F2F4}46F47017EDXXE6FCxxxxE6FDxxxxC2FExxxxDAXXxxxx"
+  pattern: "E6FCxxxxE6FDxxxxC2FExxxxC2FFxxxxDAXXxxxx"
+  at: 10
+  also:
+  - name: nmot
+    size: 1
+    at: 14
+# scanVmax binds toelk_w from this window when the earlier tolc site missed.
+- name: toelk_w
+  size: 2
+  from: "0x820000"
+  pattern: "E6FCxxxxE6FDxxxxD740E100F2FExxxxDAXXxxxx"
+  single: true
+  at: 10
+# scanLdrapp KFLDRAPP window.
+- name: wped
+  size: 1
+  from: "0x820000"
+  open: "{ldtvm:F7F8}"
+  first: true
+  pattern: "E6FCxxxxE6FDxxxxC2FExxxxC2FFxxxxDAXXxxxx"
+  at: 14
+  also:
+  - name: nmot
+    size: 1
+    at: 10
 - name: imlatm
   size: 1
   from: "0x820000"
@@ -511,6 +603,40 @@ signatures:
   pattern: "E6F3FFFFB83046F3FF00FD03F78Fxxxx"
   single: true
   at: 14
+# scanDlul binds dplsplsdn 14 bytes before this window when the E6FC
+# continuation did not hit twice. The name is not in the catalog, so it is not written.
+- name: dplsplsdn
+  size: 2
+  from: "0x820000"
+  open: "E6FCxxxxE6FDxxxx{nmot:C2FE}{wdkba:C2FF}DA8Xxxxx"
+  absent: "E6FCxxxxE6FDxxxxC2FExxxxC2FFxxxxDA8Xxxxx"
+  pattern: "88508840D740XXXXC2FCxxxxE6FDxxxxE6FExxxxDA8Xxxxx0806"
+  at: -14
+# scanFwl's first segment pattern. rlp_w is not in the catalog.
+- name: rlp_w
+  size: 2
+  from: "0x820000"
+  pattern: "E6FCxxxxF2FDxxxxE6FE1X00DAXXxxxx7C14F05X00545D0X"
+  single: true
+  at: 6
+- name: rlp_w
+  size: 2
+  from: "0x820000"
+  absent: "E6FCxxxxF2FDxxxxE6FE1X00DAXXxxxx7C14F05X00545D0X"
+  pattern: "E6FCxxxxF2FDxxxxE6FE1F00DAXXxxxxF05X7C14"
+  single: true
+  at: 6
+# scanKlf rebinds nmot and rl from this window when both are already stored.
+- name: nmot
+  size: 1
+  from: "0x820000"
+  open: "06F480018840E6FCxxxxE6FDxxxx{nmot:C2FE}{rl:C2FF}DA8Xxxxx"
+  pattern: "E6FCxxxxE6FDxxxxC2FExxxxC2FFxxxxDAXXxxxx"
+  at: 10
+  also:
+  - name: rl
+    size: 1
+    at: 14
 - name: detazwbs
   size: 1
   from: "0x804000"
@@ -594,6 +720,12 @@ signatures:
   from: "0x804000"
   pattern: "9D01E005D740E100F6F5xxxxF6F5DC93"
   at: 10
+# signVars stores pvdkds from this window when the pvdks_w chain missed.
+- name: pvdkds
+  size: 1
+  from: "0x804000"
+  pattern: "{pvdkds_w:F2FX}7C8XF7FXxxxx"
+  at: 8
 - name: frkte_w
   size: 1
   from: "0x804000"

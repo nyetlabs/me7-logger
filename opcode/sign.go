@@ -60,6 +60,7 @@ func Signatures(img []byte, dpp [4]uint16, known map[string]uint32) []Named {
 	relPrefix(img, dpp, start, end, have, add, "pu_w", 2, "7C7X", "F7FX", "pu", -1, false)
 	relPrefix(img, dpp, start, end, have, add, "fho_w", 2, "7C8X", "F7FX", "fho", -1, false)
 	relPrefix(img, dpp, start, end, have, add, "rl_w", 2, "F2FXXXXX7C5X", "F7FX", "rl", 0, true)
+	// altLayout uses the suffix 7C8XF0XXF7FXxxxx. This port is the altLayout == 0 path.
 	relSuffix(img, dpp, start, end, have, add, "wped", 1, "F6FX", "wped_w", "7C8X", 2, true)
 	if have["wped"] == 0 {
 		relSuffix(img, dpp, start, end, have, add, "wped", 1, "F2FX", "wped_w", "7C8XF7FXxxxx", 2, true)
@@ -132,6 +133,9 @@ func redistEvz(img []byte, dpp [4]uint16, start, end uint32, have map[string]uin
 	if addr := have["zwist"]; addr != 0 {
 		if h := findPat(img, lo, hi, embedAddr(addr, "F3FA")+"F3FXxxxx21XX", false); h != 0 {
 			add("zwopt", PtrAt(img, h+6, dpp), 1)
+		}
+		if have["zwopt"] == 0 {
+			relSuffix(img, dpp, start, end, have, add, "zwopt", 1, "F3FX", "zwist", "F3FXXXXX21XX", 1, true)
 		}
 	}
 	addr := have["redist"]
@@ -409,6 +413,12 @@ func pvdkPair(img []byte, dpp [4]uint16, start, end uint32, have map[string]uint
 	addr := have["pvdkds_w"]
 	if addr == 0 {
 		return
+	}
+	if h := findPat(img, start, end, "F6FXxxxx"+embedAddr(addr, "F6FX")+"7C8XF7FXxxxx", false); h != 0 {
+		got := prefixPick(walkInsns(img, h-4, h+4), "D740XXXX", dpp)
+		if got != 0 && got != have["pvdkdsl_w"] {
+			add("pvdkdsu_w", got, 2)
+		}
 	}
 	h := findPat(img, start, end, "F6FXxxxx7C8XF7FXxxxx"+embedAddr(addr, "F2FX"), false)
 	if h == 0 {
