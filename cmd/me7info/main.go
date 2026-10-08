@@ -9,6 +9,7 @@ import (
 
 	"go.nyet.org/me7-logger/config"
 	"go.nyet.org/me7-logger/generate"
+	"go.nyet.org/me7-logger/internal/ecucorpus"
 	"go.nyet.org/me7-logger/opcode"
 	"go.nyet.org/me7-logger/parity"
 	"go.nyet.org/me7-logger/record"
@@ -50,7 +51,7 @@ func usage() {
 
   me7info generate [flags] image.bin
   me7info probe [flags] image.bin
-  me7info parity [-data testdata/parity]
+  me7info parity [-data testdata/parity] [-corpus corpus]
   me7info version
 
 generate writes an .ecu file and, when calibration maps were located, a TunerPro XDF.
@@ -157,15 +158,20 @@ func writeXDF(path, imgPath string, size int, maps []record.Map) error {
 
 func cmdParity(args []string) error {
 	fs := flag.NewFlagSet("parity", flag.ContinueOnError)
-	dir := fs.String("data", "testdata/parity", "parity root: bin, ecu/me7info, and xdf")
+	dir := fs.String("data", "testdata/parity", "parity root: images.yaml, ecu/me7info, and xdf")
+	corpus := fs.String("corpus", ecucorpus.Dir("."), "ecu-corpus checkout; XDFKIT_CORPUS sets the default")
 	fs.SetOutput(os.Stderr)
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
 	if fs.NArg() != 0 {
-		return fmt.Errorf("parity takes no image; the parity root holds it")
+		return fmt.Errorf("parity takes no image; images.yaml names corpus images")
 	}
-	rep, err := parity.Run(*dir)
+	c, err := ecucorpus.Load(*corpus)
+	if err != nil {
+		return err
+	}
+	rep, err := parity.Run(*dir, c)
 	if err != nil {
 		return err
 	}

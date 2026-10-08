@@ -5,10 +5,12 @@
 package parity
 
 import (
+	"cmp"
 	"encoding/xml"
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"slices"
 	"sort"
 	"strconv"
@@ -19,6 +21,8 @@ import (
 	"go.nyet.org/me7-logger/config"
 	"go.nyet.org/me7-logger/ecu"
 	"go.nyet.org/me7-logger/generate"
+	"go.nyet.org/me7-logger/ident"
+	"go.nyet.org/me7-logger/internal/ecucorpus"
 	"go.nyet.org/me7-logger/opcode"
 	"go.nyet.org/me7-logger/record"
 )
@@ -42,12 +46,14 @@ type Report struct {
 // Image is one binary scored against one oracle.
 // Beyond is the count of catalog names located on this image that its
 // ME7Info file does not name. Corpus is that image against the full catalog.
-// Both are set only on ME7Info rows. Axis and Confidence are set on S4Wiki rows.
+// Both are set only on ME7Info rows. Tier, Axis, and Confidence are set on S4Wiki rows.
+// Tier is the layout block tier of the image in layouts-priority.yaml.
 type Image struct {
 	Name string
 	Fraction
 	Beyond     int
 	Corpus     Fraction
+	Tier       string
 	Axis       Fraction
 	Confidence Fraction
 }
@@ -83,6 +89,7 @@ func (r *Report) Text() string {
 		label   string
 		frac    Fraction
 		corpus  Fraction
+		tier    string
 		axis    Fraction
 		conf    Fraction
 		extras  Fraction
@@ -113,7 +120,8 @@ func (r *Report) Text() string {
 		lines = append(lines, line{label: "xdf s4wiki", head: true, wiki: true})
 		for _, im := range r.S4Wiki {
 			lines = append(lines, line{
-				label: "  " + stemName(im.Name), frac: im.Fraction, axis: im.Axis, conf: im.Confidence, wiki: true,
+				label: "  " + stemName(im.Name), frac: im.Fraction, tier: im.Tier,
+				axis: im.Axis, conf: im.Confidence, wiki: true,
 			})
 		}
 	}
@@ -194,14 +202,17 @@ func (r *Report) Text() string {
 		case ln.label == "":
 			b.WriteByte('\n')
 		case ln.head && ln.wiki:
-			// count, gap, percent, gap, then the same pair for axis and confidence.
+			// count, gap, percent, gap, tier, gap, then the same pair for axis and confidence.
 			mainSpan := 6 + 2 + countW
-			axisStart := nameW + 2 + mainSpan + 2
+			tierStart := nameW + 2 + mainSpan + 2
+			tierSpan := len("tier")
+			axisStart := tierStart + tierSpan + 2
 			axisSpan := 6 + 2 + axisW
 			confStart := axisStart + axisSpan + 2
 			confSpan := 6 + 2 + confW
 			hdr := []byte(strings.Repeat(" ", confStart+confSpan))
 			copy(hdr, ln.label)
+			copy(hdr[tierStart:], "tier")
 			copy(hdr[axisStart+axisSpan-len("axis"):], "axis")
 			copy(hdr[confStart+confSpan-len("confidence"):], "confidence")
 			b.Write(hdr)
@@ -249,8 +260,8 @@ func (r *Report) Text() string {
 			if ln.conf.Total > 0 {
 				confPct = ln.conf.percent()
 			}
-			fmt.Fprintf(&b, "%-*s  %*s  %6s  %*s  %6s  %*s  %6s\n",
-				nameW, ln.label, countW, counts[i], ln.frac.percent(),
+			fmt.Fprintf(&b, "%-*s  %*s  %6s  %-4s  %*s  %6s  %*s  %6s\n",
+				nameW, ln.label, countW, counts[i], ln.frac.percent(), ln.tier,
 				axisW, axes[i], ln.axis.percent(), confW, confs[i], confPct)
 		case ln.xdf:
 			fmt.Fprintf(&b, "%-*s  %*s  %6s  %*s  %6s\n",
@@ -281,12 +292,16 @@ type mapKey struct {
 
 type imageGen func(name string, img []byte) ([]record.Item, []record.Map, error)
 
-// Run generates each bin and scores it.
-// Bins are bin/*.bin. Legacy rows are ecu/me7info/<stem>.ecu.
-// S4wiki names are xdf/s4wiki/names.yaml, one list for every bin.
-// An address oracle is xdf/<stem>.xdf when that file exists.
-func Run(dir string) (*Report, error) {
-	return run(dir, generateImage)
+// Run generates each image and scores it.
+// The images are the corpus names in images.yaml. Legacy rows are ecu/me7info/<image>.ecu.
+// S4wiki names are xdf/s4wiki/names.yaml, one list for every image.
+// An address oracle is xdf/<image>.xdf when that file exists.
+func Run(dir string, c *ecucorpus.Corpus) (*Report, error) {
+	images, err := c.List(filepath.Join(dir, "images.yaml"))
+	if err != nil {
+		return nil, err
+	}
+	return run(dir, images, generateImage)
 }
 
 func generateImage(name string, img []byte) ([]record.Item, []record.Map, error) {
@@ -299,15 +314,7 @@ func generateImage(name string, img []byte) ([]record.Item, []record.Map, error)
 	return res.File.Items, res.Maps, nil
 }
 
-func run(dir string, gen imageGen) (*Report, error) {
-	bins, err := filepath.Glob(filepath.Join(dir, "bin", "*.bin"))
-	if err != nil {
-		return nil, err
-	}
-	sort.Strings(bins)
-	if len(bins) == 0 {
-		return nil, fmt.Errorf("%s: no image", dir)
-	}
+func run(dir string, images []string, gen imageGen) (*Report, error) {
 	cat, err := catalogNames()
 	if err != nil {
 		return nil, err
@@ -325,6 +332,11 @@ func run(dir string, gen imageGen) (*Report, error) {
 	if _, err := loadNamesPriority(dir, axes); err != nil {
 		return nil, err
 	}
+	layout, err := loadLayoutTiers(dir)
+	if err != nil {
+		return nil, err
+	}
+	tierOf := map[string]string{}
 	rep := &Report{}
 	type kept struct {
 		base, stem string
@@ -333,13 +345,14 @@ func run(dir string, gen imageGen) (*Report, error) {
 		oracle     []refRow
 	}
 	var held []kept
-	for _, bin := range bins {
-		img, err := os.ReadFile(bin)
+	for _, path := range images {
+		img, err := os.ReadFile(path)
 		if err != nil {
 			return nil, err
 		}
-		base := filepath.Base(bin)
+		base := filepath.Base(path)
 		stem := strings.TrimSuffix(base, ".bin")
+		tierOf[base] = layout[layoutID(img)]
 		items, maps, err := gen(base, img)
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", base, err)
@@ -361,8 +374,11 @@ func run(dir string, gen imageGen) (*Report, error) {
 			return nil, err
 		}
 		if len(wiki) > 0 {
-			names, axisFrac := wikiScore(wiki, axes, maps, oracle)
-			rep.S4Wiki = append(rep.S4Wiki, Image{Name: base, Fraction: names, Axis: axisFrac})
+			scored := wikiMaps(wiki, axes, maps, oracle)
+			rep.S4Wiki = append(rep.S4Wiki, Image{
+				Name: base, Fraction: countScored(wiki, scored),
+				Tier: tierOf[base], Axis: scoreAxes(scored, axes),
+			})
 			held = append(held, kept{base: base, stem: stem, img: img, maps: maps, oracle: oracle})
 		}
 		if hasOracle {
@@ -405,6 +421,9 @@ func run(dir string, gen imageGen) (*Report, error) {
 			}
 			rep.S4Wiki[i].Confidence = scoreConfidence(confWiki, axes, h.img, h.maps, h.oracle, peers)
 		}
+	}
+	for _, ims := range [][]Image{rep.ME7Info, rep.Extras, rep.S4Wiki, rep.XDF} {
+		sortImages(ims, tierOf)
 	}
 	return rep, nil
 }
@@ -607,6 +626,71 @@ func loadTiers[V any](path string, want map[string]V) (map[string]string, error)
 	return out, nil
 }
 
+var epkRE = regexp.MustCompile(`[0-9]+/[0-9]+/ME7[!-~]*`)
+
+// layoutID is the id layouts.yaml lists an image by: the Bosch software
+// number, or the EPK string when the image carries none.
+func layoutID(img []byte) string {
+	if sw := ident.Find(img).SWNumber; sw != "" {
+		return sw
+	}
+	return string(epkRE.Find(img))
+}
+
+// loadBlocks reads layouts.yaml, the layout ids of each code layout block.
+// A missing file returns nil.
+func loadBlocks(dir string) (map[string][]string, error) {
+	b, err := os.ReadFile(filepath.Join(dir, "layouts.yaml"))
+	if os.IsNotExist(err) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	var blocks map[string][]string
+	if err := yaml.Unmarshal(b, &blocks); err != nil {
+		return nil, fmt.Errorf("layouts.yaml: %w", err)
+	}
+	return blocks, nil
+}
+
+// loadLayoutTiers maps each layout id to the tier of its block in layouts-priority.yaml.
+func loadLayoutTiers(dir string) (map[string]string, error) {
+	blocks, err := loadBlocks(dir)
+	if err != nil || blocks == nil {
+		return nil, err
+	}
+	tiers, err := loadTiers(filepath.Join(dir, "layouts-priority.yaml"), blocks)
+	if err != nil {
+		return nil, err
+	}
+	out := map[string]string{}
+	for block, ids := range blocks {
+		for _, id := range ids {
+			out[id] = tiers[block]
+		}
+	}
+	return out, nil
+}
+
+// tierRank is the index of label in tierOrder. No tier sorts last.
+func tierRank(label string) int {
+	if i := slices.Index(tierOrder, label); i >= 0 {
+		return i
+	}
+	return len(tierOrder)
+}
+
+// sortImages orders rows by the layout tier of their image, then by name.
+func sortImages(ims []Image, tierOf map[string]string) {
+	slices.SortStableFunc(ims, func(a, b Image) int {
+		if c := cmp.Compare(tierRank(tierOf[a.Name]), tierRank(tierOf[b.Name])); c != 0 {
+			return c
+		}
+		return strings.Compare(a.Name, b.Name)
+	})
+}
+
 // cover counts each wanted name once. A hit is a name located on any bin.
 func cover(want []string, located [][]string) Fraction {
 	have := map[string]struct{}{}
@@ -652,13 +736,17 @@ func itemNames(items []record.Item) []string {
 // present on the map. The address file is a separate score.
 func wikiScore(want []string, dims map[string]int, maps []record.Map, rows []refRow) (names, axes Fraction) {
 	scored := wikiMaps(want, dims, maps, rows)
+	return countScored(want, scored), scoreAxes(scored, dims)
+}
+
+func countScored(want []string, scored map[string]record.Map) Fraction {
 	hit := 0
 	for _, n := range want {
 		if _, ok := scored[n]; ok {
 			hit++
 		}
 	}
-	return Fraction{hit, len(want)}, scoreAxes(scored, dims)
+	return Fraction{hit, len(want)}
 }
 
 // scoreWiki is the name half of wikiScore.

@@ -5,26 +5,27 @@
 #                          ^^^
 #   22m is the dataset. DstD1o is the data stand. 110700 is the date.
 #
-# Part numbers that share that token and the same software number (6005.01
-# above) go in one list. A large map is compared with the others in its list.
-# A part number whose token appears on no other image is left out, and it is
-# compared with itself. The key is a label. The comparison uses the lists.
+# Images that share that token and the same software number (6005.01 above)
+# go in one list, by corpus name. A large map is compared with the others in
+# its list. An image whose token appears on no other image is left out, and it
+# is compared with itself. The key is a label. The comparison uses the lists.
 22m:
   - 8D0907551M-0002
-  - 8D0907551L
+  - 8D0907551L-0001
 23g:
-  - 8D0907551F
-  - 8D0907551K
-  - 8D0907551Q
+  - 8D0907551F-0001
+  - 8D0907551K-0001
+  - 8D0907551Q-0001
 22N:
-  - 8D0907551AA
-  - 8D0907551T
+  - 8D0907551AA-4000
+  - 8D0907551T-0003
 X22ka:
   - 8D0907551A-0003
-  - 8D0907551B
+  - 8D0907551B-0003
 24B:
-  - 06A906032HF
-  - 06A906032HS
+  - 06A906032HF-0006
+  - 06A906032HS-0008
 25A:
-  - 4Z7907551AA
-  - 4Z7907551S
+  - 4Z7907551AA-0010
+  - 4Z7907551R-0003
+  - 4Z7907551S-0020

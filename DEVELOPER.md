@@ -173,11 +173,13 @@ A log cfg may set `SamplesPerSecond` from 1 through 50. Omitted, it is 10. A lin
 
 ## Parity
 
-The sample images and their oracles are in the git repo, under `testdata/parity`. A release archive does not include them. Clone the repo, then run the check from that checkout.
+The sample images come from the private [ecu-corpus](https://github.com/nyetlabs/ecu-corpus), a git submodule at `corpus/`. Their oracles are in this repo, under `testdata/parity`. A release archive includes neither. Clone the repo, fetch the corpus, then run the check from that checkout.
 
-`make parity` builds `build/me7info` and runs `me7info parity -data testdata/parity`. It prints a report and exits 0.
+With read access to `ecu-corpus`, `make corpus` fetches the submodule at its pinned commit. `make corpus-bump` moves it to the corpus head; commit the change yourself. The submodule URL is HTTPS. To use SSH, run `git config --global url.git@github.com:.insteadOf https://github.com/`. Without access, `corpus/` stays empty and `make test` skips the tests that read images. `XDFKIT_CORPUS` points the tests and `me7info parity` at another corpus checkout. `XDFKIT_REQUIRE_CORPUS=1`, set in CI, makes a missing corpus a failure. xdfkit's `docs/corpus.md` is the corpus specification.
 
-`make test` fails when any image is short of 100% on `vs ecu-specific`. That column is the image against `ecu/me7info/<stem>.ecu`, matched on name, address, size, and bitmask. It is the only hard 100%.
+`make parity` builds `build/me7info` and runs `me7info parity -data testdata/parity`, which reads the images from `corpus/` (`-corpus`). It prints a report and exits 0.
+
+`make test` fails when any image is short of 100% on `vs ecu-specific`. That column is the image against `ecu/me7info/<image>.ecu`, matched on name, address, size, and bitmask. It is the only hard 100%.
 
 A row that file does not name stays. Catalog names located on that image which the file does not name are a separate count. Extras are not in that count. The other scores are coverage, and a shortfall there does not fail the image.
 
@@ -187,7 +189,7 @@ Do not point `generate` at the oracle files without `-o` and `-xdf` aimed somewh
 
 That run reads the shipped YAML. It does not read `config/user`. Adding files there leaves the score unchanged. A drop means a shipped file in `config/` changed.
 
-`testdata/parity/bin/*.bin` are the images. `ecu/me7info/<stem>.ecu` is the legacy ME7Info file for that image. `testdata/parity/incoming/` is not scored.
+`testdata/parity/images.yaml` lists the images by their name in the corpus manifest, `corpus/corpus.tsv`. Each is read from `corpus/images/<image>.bin`, and every oracle uses the same name. `ecu/me7info/<image>.ecu` is the legacy ME7Info file for that image. `datasets.yaml` lists images by that name too. `testdata/parity/incoming/` is not scored.
 
 `layouts.yaml` groups the images into code layout blocks: images likely to share needle variants and map locations. An image is listed by its Bosch software number, or by its EPK string when it carries no software number. `layouts-priority.yaml` puts each block in one finder tier. It is opinion. `TestLayoutBlocks` fails when an image is in no block or in two, when a listed id is not an image, when the members of a block share no needle variant that some image lacks, or when a block is missing from the priority file or repeated in it.
 
@@ -197,11 +199,11 @@ A `*-priority.yaml` file is a `tiers` map. The tiers are `S`, `A`, `B`, `C`, and
 
 `xdf/s4wiki/names-priority.yaml` puts every name on that list in one finder tier. It is opinion and does not change a score. Parity fails when a name is missing, repeated, or not on the list.
 
-A name hits when the locator stores one address and an axis. A count of 0 on that list is a scalar, so the address alone is the hit. Any other body with no axis is a miss. When `xdf/<stem>.xdf` contains the name, the body address has to match one row of that file.
+A name hits when the locator stores one address and an axis. A count of 0 on that list is a scalar, so the address alone is the hit. Any other body with no axis is a miss. When `xdf/<image>.xdf` contains the name, the body address has to match one row of that file.
 
 The number on the list is how many axes the table has, and those counts are the `axis` column. A count of 0 adds nothing. The denominator is 0 only when every map that hit has a count of 0. A count of 1 is a curve and 2 is a map. A hit on that column is the axis present on the map.
 
-`xdf/<stem>.xdf`, when present, checks that image's own address file. A missing file is omitted from the report. The file is not the S4wiki list, and it does not locate maps. A body hit is the same address. An axis hit is the same address, point count, and width. An axis with no address is left out of the score. A 16-bit axis or body is the even address. The odd byte in front of it is a pad, not a value.
+`xdf/<image>.xdf`, when present, checks that image's own address file. A missing file is omitted from the report. The file is not the S4wiki list, and it does not locate maps. A body hit is the same address. An axis hit is the same address, point count, and width. An axis with no address is left out of the score. A 16-bit axis or body is the even address. The odd byte in front of it is a pad, not a value.
 
 Maps are located on that image from the caller that passes the map to the interpolator. How the column and the row are read is in the `config/maps.yaml` section above. `addMapAt` reads the row and column counts when they sit in front of the axes. A count the image does not hold stays unset, and that map is written as a constant, unless the row is `plain`. A mapsig row names a header with `xat` or `yat` when a setup stored it in a RAM word.
 
@@ -231,8 +233,10 @@ Peers are the images grouped in `testdata/parity/datasets.yaml`. A shared axis d
 The report sections are:
 
 - `ecu me7info` is the legacy file, then a count of catalog names that file does not name, then that image against the full catalog. The `extras` column is the measurement list on that image. The torque scale is the `torque` conversion in `config/names.yaml`.
-- `xdf s4wiki` is the shared name list, then its `axis` column, then `confidence`.
+- `xdf s4wiki` is the shared name list, then `tier`, then its `axis` column, then `confidence`. `tier` is the tier of the image's block in `layouts-priority.yaml`.
 - `xdf` is every body in the per-image address file. Its `axis` column is every axis in that file.
+
+Every section lists images by that block tier, then by name. An image in no block sorts last.
 
 ## Version
 
