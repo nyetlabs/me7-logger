@@ -10,8 +10,8 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"me7-logger/opcode"
-	"me7-logger/record"
+	"go.nyet.org/me7-logger/opcode"
+	"go.nyet.org/me7-logger/record"
 )
 
 const largeBody = 16

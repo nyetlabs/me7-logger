@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"me7-logger/internal/heximg"
+	"go.nyet.org/me7-logger/internal/heximg"
 )
 
 func TestFindDPPPrefersRuntime(t *testing.T) {

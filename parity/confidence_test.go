@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"testing"
 
-	"me7-logger/opcode"
-	"me7-logger/record"
+	"go.nyet.org/me7-logger/opcode"
+	"go.nyet.org/me7-logger/record"
 )
 
 func TestConfidence(t *testing.T) {

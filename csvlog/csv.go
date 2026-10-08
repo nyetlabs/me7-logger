@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"time"
 
-	"me7-logger/record"
+	"go.nyet.org/me7-logger/record"
 )
 
 // Col is one CSV column after TimeStamp.

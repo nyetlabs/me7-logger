@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
-	"me7-logger/csvlog"
-	"me7-logger/kwp"
-	"me7-logger/logcfg"
-	"me7-logger/record"
+	"go.nyet.org/me7-logger/csvlog"
+	"go.nyet.org/me7-logger/kwp"
+	"go.nyet.org/me7-logger/logcfg"
+	"go.nyet.org/me7-logger/record"
 )
 
 func TestPlanMergesNeighbors(t *testing.T) {

@@ -8,9 +8,9 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"me7-logger/ident"
-	"me7-logger/needle"
-	"me7-logger/record"
+	"go.nyet.org/me7-logger/ident"
+	"go.nyet.org/me7-logger/needle"
+	"go.nyet.org/me7-logger/record"
 )
 
 func TestMatchECU(t *testing.T) {

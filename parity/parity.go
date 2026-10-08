@@ -16,11 +16,11 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"me7-logger/config"
-	"me7-logger/ecu"
-	"me7-logger/generate"
-	"me7-logger/opcode"
-	"me7-logger/record"
+	"go.nyet.org/me7-logger/config"
+	"go.nyet.org/me7-logger/ecu"
+	"go.nyet.org/me7-logger/generate"
+	"go.nyet.org/me7-logger/opcode"
+	"go.nyet.org/me7-logger/record"
 )
 
 // Report is one pass over a parity root.

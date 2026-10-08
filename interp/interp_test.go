@@ -3,9 +3,9 @@ package interp
 import (
 	"testing"
 
-	"me7-logger/needle"
-	"me7-logger/opcode"
-	"me7-logger/record"
+	"go.nyet.org/me7-logger/needle"
+	"go.nyet.org/me7-logger/opcode"
+	"go.nyet.org/me7-logger/record"
 )
 
 func TestLocateMapFromCall(t *testing.T) {

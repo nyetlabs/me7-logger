@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"me7-logger/parity"
-	"me7-logger/record"
+	"go.nyet.org/me7-logger/parity"
+	"go.nyet.org/me7-logger/record"
 )
 
 func TestWriteConstantAndTable(t *testing.T) {

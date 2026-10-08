@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"me7-logger/internal/heximg"
-	"me7-logger/opcode"
-	"me7-logger/record"
+	"go.nyet.org/me7-logger/internal/heximg"
+	"go.nyet.org/me7-logger/opcode"
+	"go.nyet.org/me7-logger/record"
 )
 
 func TestGenerateSelector(t *testing.T) {
@@ -331,7 +331,7 @@ func TestNoSerialImport(t *testing.T) {
 		t.Fatal(err)
 	}
 	s := string(b)
-	if strings.Contains(s, "\"me7-logger/kwp\"") || strings.Contains(s, "go.bug.st/serial") {
+	if strings.Contains(s, "\"go.nyet.org/me7-logger/kwp\"") || strings.Contains(s, "go.bug.st/serial") {
 		t.Fatal("generate must not open a serial port")
 	}
 }

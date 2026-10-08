@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"me7-logger/record"
+	"go.nyet.org/me7-logger/record"
 )
 
 // ApplyClock replaces injection-time factors. mhz 0 leaves the catalog defaults.

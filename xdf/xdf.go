@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	"me7-logger/opcode"
-	"me7-logger/record"
+	"go.nyet.org/me7-logger/opcode"
+	"go.nyet.org/me7-logger/record"
 )
 
 // Write emits one XDFFORMAT document. An empty map list writes nothing.

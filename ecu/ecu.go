@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	"me7-logger/ident"
-	"me7-logger/record"
+	"go.nyet.org/me7-logger/ident"
+	"go.nyet.org/me7-logger/record"
 )
 
 // File is one .ecu characteristics file.

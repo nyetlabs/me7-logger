@@ -1,4 +1,4 @@
-module me7-logger
+module go.nyet.org/me7-logger
 
 go 1.26.0
 

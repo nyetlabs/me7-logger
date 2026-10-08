@@ -17,8 +17,8 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"me7-logger/mapfile"
-	"me7-logger/needle"
+	"go.nyet.org/me7-logger/mapfile"
+	"go.nyet.org/me7-logger/needle"
 )
 
 //go:embed names.yaml needles.yaml measurements.yaml catalog aliases.yaml maps.yaml signatures.yaml

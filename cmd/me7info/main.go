@@ -7,12 +7,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	"me7-logger/config"
-	"me7-logger/generate"
-	"me7-logger/opcode"
-	"me7-logger/parity"
-	"me7-logger/record"
-	"me7-logger/xdf"
+	"go.nyet.org/me7-logger/config"
+	"go.nyet.org/me7-logger/generate"
+	"go.nyet.org/me7-logger/opcode"
+	"go.nyet.org/me7-logger/parity"
+	"go.nyet.org/me7-logger/record"
+	"go.nyet.org/me7-logger/xdf"
 )
 
 // version is set from git describe by the Makefile. Do not edit it here.

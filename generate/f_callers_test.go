@@ -8,7 +8,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"me7-logger/opcode"
+	"go.nyet.org/me7-logger/opcode"
 )
 
 // The 23g prologues name the same caller slots as 22m. A map keeps one address.

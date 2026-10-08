@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"me7-logger/ident"
-	"me7-logger/record"
+	"go.nyet.org/me7-logger/ident"
+	"go.nyet.org/me7-logger/record"
 )
 
 func TestRoundTrip(t *testing.T) {

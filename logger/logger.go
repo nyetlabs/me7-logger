@@ -11,12 +11,12 @@ import (
 	"strings"
 	"time"
 
-	"me7-logger/csvlog"
-	"me7-logger/ecu"
-	"me7-logger/generate"
-	"me7-logger/kwp"
-	"me7-logger/logcfg"
-	"me7-logger/record"
+	"go.nyet.org/me7-logger/csvlog"
+	"go.nyet.org/me7-logger/ecu"
+	"go.nyet.org/me7-logger/generate"
+	"go.nyet.org/me7-logger/kwp"
+	"go.nyet.org/me7-logger/logcfg"
+	"go.nyet.org/me7-logger/record"
 )
 
 // Options is one logging run.

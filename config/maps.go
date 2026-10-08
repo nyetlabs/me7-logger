@@ -7,8 +7,8 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"me7-logger/mapfile"
-	"me7-logger/record"
+	"go.nyet.org/me7-logger/mapfile"
+	"go.nyet.org/me7-logger/record"
 )
 
 // LoadMaps reads config/maps.yaml, then maps lists from user YAML in dir.

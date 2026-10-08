@@ -9,8 +9,8 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"me7-logger/mapfile"
-	"me7-logger/needle"
+	"go.nyet.org/me7-logger/mapfile"
+	"go.nyet.org/me7-logger/needle"
 )
 
 // ResolveUserDir returns dir when it exists. An empty dir means no overlay.
