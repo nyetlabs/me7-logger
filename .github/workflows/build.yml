@@ -14,10 +14,31 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # Fork PRs get no secrets, so they can't fetch the private corpus; their corpus tests skip.
+      HAS_CORPUS: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
+      # Private corpus (xdfkit docs/corpus.md): short-lived token from the corpus GitHub App,
+      # used for the ecu-corpus URL only; corpus tests become mandatory.
+      - if: env.HAS_CORPUS == 'true'
+        id: corpus-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.CORPUS_APP_CLIENT_ID }}
+          private-key: ${{ secrets.CORPUS_APP_KEY }}
+          owner: nyetlabs
+          repositories: ecu-corpus
+      - if: env.HAS_CORPUS == 'true'
+        name: Fetch corpus
+        env:
+          TOKEN: ${{ steps.corpus-token.outputs.token }}
+        run: |
+          git config --global url."https://x-access-token:${TOKEN}@github.com/nyetlabs/ecu-corpus".insteadOf https://github.com/nyetlabs/ecu-corpus
+          git submodule update --init --checkout --depth 1 corpus
+          echo XDFKIT_REQUIRE_CORPUS=1 >>"$GITHUB_ENV"
       - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
@@ -25,6 +46,7 @@ jobs:
       - name: make test
         run: make test
       - name: make parity
+        if: env.HAS_CORPUS == 'true'
         run: make parity
       - uses: actions/upload-artifact@v7
         with:

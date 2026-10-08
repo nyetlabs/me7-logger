@@ -19,6 +19,7 @@ import (
 	"go.nyet.org/me7-logger/config"
 	"go.nyet.org/me7-logger/ecu"
 	"go.nyet.org/me7-logger/generate"
+	"go.nyet.org/me7-logger/internal/ecucorpus"
 	"go.nyet.org/me7-logger/opcode"
 	"go.nyet.org/me7-logger/record"
 )
@@ -281,12 +282,16 @@ type mapKey struct {
 
 type imageGen func(name string, img []byte) ([]record.Item, []record.Map, error)
 
-// Run generates each bin and scores it.
-// Bins are bin/*.bin. Legacy rows are ecu/me7info/<stem>.ecu.
-// S4wiki names are xdf/s4wiki/names.yaml, one list for every bin.
-// An address oracle is xdf/<stem>.xdf when that file exists.
-func Run(dir string) (*Report, error) {
-	return run(dir, generateImage)
+// Run generates each image and scores it.
+// The images are the corpus names in images.yaml. Legacy rows are ecu/me7info/<image>.ecu.
+// S4wiki names are xdf/s4wiki/names.yaml, one list for every image.
+// An address oracle is xdf/<image>.xdf when that file exists.
+func Run(dir string, c *ecucorpus.Corpus) (*Report, error) {
+	images, err := c.List(filepath.Join(dir, "images.yaml"))
+	if err != nil {
+		return nil, err
+	}
+	return run(dir, images, generateImage)
 }
 
 func generateImage(name string, img []byte) ([]record.Item, []record.Map, error) {
@@ -299,15 +304,7 @@ func generateImage(name string, img []byte) ([]record.Item, []record.Map, error)
 	return res.File.Items, res.Maps, nil
 }
 
-func run(dir string, gen imageGen) (*Report, error) {
-	bins, err := filepath.Glob(filepath.Join(dir, "bin", "*.bin"))
-	if err != nil {
-		return nil, err
-	}
-	sort.Strings(bins)
-	if len(bins) == 0 {
-		return nil, fmt.Errorf("%s: no image", dir)
-	}
+func run(dir string, images []string, gen imageGen) (*Report, error) {
 	cat, err := catalogNames()
 	if err != nil {
 		return nil, err
@@ -333,12 +330,12 @@ func run(dir string, gen imageGen) (*Report, error) {
 		oracle     []refRow
 	}
 	var held []kept
-	for _, bin := range bins {
-		img, err := os.ReadFile(bin)
+	for _, path := range images {
+		img, err := os.ReadFile(path)
 		if err != nil {
 			return nil, err
 		}
-		base := filepath.Base(bin)
+		base := filepath.Base(path)
 		stem := strings.TrimSuffix(base, ".bin")
 		items, maps, err := gen(base, img)
 		if err != nil {

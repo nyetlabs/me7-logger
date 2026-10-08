@@ -8,20 +8,17 @@ import (
 
 	"gopkg.in/yaml.v3"
 
+	"go.nyet.org/me7-logger/internal/ecucorpus"
 	"go.nyet.org/me7-logger/opcode"
 )
 
 // The 23g prologues name the same caller slots as 22m. A map keeps one address.
 func TestFCallersKeepOneAddress(t *testing.T) {
 	wiki := wikiNames(t)
-	bins, err := filepath.Glob("../testdata/parity/bin/*.bin")
-	if err != nil {
-		t.Fatal(err)
-	}
-	for _, path := range bins {
+	for _, path := range parityImages(t) {
 		stem := strings.TrimSuffix(filepath.Base(path), ".bin")
 		img := readBin(t, path)
-		res, err := Generate(Options{Image: img, ImageName: stem + ".bin", Scale: "off"})
+		res, err := Generate(Options{Image: img, ImageName: filepath.Base(path), Scale: "off"})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -44,8 +41,12 @@ func TestFCallersKeepOneAddress(t *testing.T) {
 }
 
 func TestFNamesTheMovedCalls(t *testing.T) {
-	img := readBin(t, "../testdata/parity/bin/8D0907551F.bin")
-	res, err := Generate(Options{Image: img, ImageName: "8D0907551F.bin", Scale: "off"})
+	path, err := ecucorpus.Open(t).Path("8D0907551F-0001")
+	if err != nil {
+		t.Fatal(err)
+	}
+	img := readBin(t, path)
+	res, err := Generate(Options{Image: img, ImageName: filepath.Base(path), Scale: "off"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -127,13 +128,9 @@ func TestFamilyFinderMaps(t *testing.T) {
 	for _, m := range doc.Maps {
 		caller[m.Name] = true
 	}
-	bins, err := filepath.Glob("../testdata/parity/bin/*.bin")
-	if err != nil || len(bins) == 0 {
-		t.Fatal(err)
-	}
 	found := map[string]int{}
 	curve := map[string]int{}
-	for _, path := range bins {
+	for _, path := range parityImages(t) {
 		img := readBin(t, path)
 		res, err := Generate(Options{Image: img, ImageName: filepath.Base(path), Scale: "off"})
 		if err != nil {
@@ -180,6 +177,15 @@ func TestFamilyFinderMaps(t *testing.T) {
 			t.Errorf("sample did not shape %s", n)
 		}
 	}
+}
+
+func parityImages(t *testing.T) []string {
+	t.Helper()
+	paths, err := ecucorpus.Open(t).List("../testdata/parity/images.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	return paths
 }
 
 func readBin(t *testing.T, path string) []byte {

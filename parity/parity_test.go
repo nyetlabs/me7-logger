@@ -9,6 +9,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"go.nyet.org/me7-logger/ident"
+	"go.nyet.org/me7-logger/internal/ecucorpus"
 	"go.nyet.org/me7-logger/needle"
 	"go.nyet.org/me7-logger/record"
 )
@@ -191,8 +192,8 @@ func TestRunLayout(t *testing.T) {
 	}
 	ecu := "[Measurements]\nnmot,{},0xF878,1,0,rpm,0,0,40,0,speed\nrl,{},0x380100,2,0,%,0,0,0.01,0,load\n"
 	xdf := "<?xml version=\"1.0\"?><XDFFORMAT><XDFCONSTANT><title>KRKTE</title><EMBEDDEDDATA mmedaddress=\"0x10\" /></XDFCONSTANT><XDFCONSTANT><title>EXTRA</title><EMBEDDEDDATA mmedaddress=\"0x20\" /></XDFCONSTANT></XDFFORMAT>"
-	write("bin/a.bin", "")
-	write("bin/b.bin", "")
+	write("a.bin", "")
+	write("b.bin", "")
 	write("ecu/me7info/a.ecu", ecu)
 	write("ecu/me7info/b.ecu", "")
 	write("xdf/s4wiki/names.yaml", "names:\n  KFZW: 2\n  LAMFA: 2\n")
@@ -210,7 +211,7 @@ func TestRunLayout(t *testing.T) {
 			return nil, nil, nil
 		}
 	}
-	got, err := run(dir, gen)
+	got, err := run(dir, []string{filepath.Join(dir, "a.bin"), filepath.Join(dir, "b.bin")}, gen)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -342,9 +343,9 @@ func TestLayoutBlocks(t *testing.T) {
 		}
 	}
 
-	bins, err := filepath.Glob(filepath.Join(dir, "bin", "*.bin"))
-	if err != nil || len(bins) == 0 {
-		t.Fatalf("no bins: %v", err)
+	bins, err := ecucorpus.Open(t).List(filepath.Join(dir, "images.yaml"))
+	if err != nil {
+		t.Fatal(err)
 	}
 	hits := map[string][]bool{}
 	count := make([]int, len(variants))
@@ -430,7 +431,7 @@ func TestBeyondME7(t *testing.T) {
 }
 
 func TestME7InfoParity(t *testing.T) {
-	rep, err := Run(filepath.Join("..", "testdata", "parity"))
+	rep, err := Run(filepath.Join("..", "testdata", "parity"), ecucorpus.Open(t))
 	if err != nil {
 		t.Fatal(err)
 	}

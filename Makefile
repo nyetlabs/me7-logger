@@ -1,11 +1,13 @@
 # Build and test me7info and me7logger.
 #
 #   make                  test, then build both binaries
-#   make test             go test ./...; ME7Info parity must be 100%
+#   make test             go test ./...; ME7Info parity must be 100% (image tests skip without corpus/)
 #   make build            build/me7info and build/me7logger
 #   make version          git describe (tags vX.Y.Z and vX.Y.Z-rcN)
 #   make parity           legacy ME7Info parity, plus coverage of the YAML lists, the S4wiki names, and supplied XDF address oracles
 #   make package          dist archives for macos, linux, and windows
+#   make corpus           fetch the corpus submodule at its pinned commit (needs access)
+#   make corpus-bump      move the corpus submodule to the ecu-corpus head (commit it yourself)
 #
 # Version comes from git tags only. Do not edit a version by hand.
 
@@ -13,7 +15,7 @@ SHELL := /bin/bash
 
 VERSION ?= $(patsubst v%,%,$(shell git describe --tags --match 'v[0-9]*' --dirty --always 2>/dev/null))
 
-.PHONY: all test build version parity package clean help
+.PHONY: all test build version parity package corpus corpus-bump clean help
 
 # Archive name uses macos; the Go port is darwin.
 PLATFORMS := darwin/amd64 darwin/arm64 linux/amd64 linux/arm64 windows/amd64
@@ -70,8 +72,17 @@ package:
 parity: build
 	./build/me7info parity -data testdata/parity
 
+# --checkout overrides update = none in .gitmodules.
+corpus:
+	git submodule update --init --checkout --depth 1 corpus
+
+corpus-bump:
+	git submodule update --init --checkout --remote --depth 1 corpus
+	@git -C corpus log -1 --format='corpus now at %h %s'
+	@git status --short corpus
+
 clean:
 	rm -rf build dist
 
 help:
-	@sed -n '2,10p' Makefile
+	@sed -n '2,12p' Makefile
