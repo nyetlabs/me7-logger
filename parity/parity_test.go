@@ -3,12 +3,9 @@ package parity
 import (
 	"os"
 	"path/filepath"
-	"regexp"
+	"slices"
 	"testing"
 
-	"gopkg.in/yaml.v3"
-
-	"go.nyet.org/me7-logger/ident"
 	"go.nyet.org/me7-logger/internal/ecucorpus"
 	"go.nyet.org/me7-logger/needle"
 	"go.nyet.org/me7-logger/record"
@@ -235,6 +232,18 @@ func TestRunLayout(t *testing.T) {
 	}
 }
 
+func TestSortImages(t *testing.T) {
+	ims := []Image{{Name: "c"}, {Name: "b"}, {Name: "a"}, {Name: "d"}}
+	sortImages(ims, map[string]string{"a": "C", "b": "S", "c": "S"})
+	var got []string
+	for _, im := range ims {
+		got = append(got, im.Name)
+	}
+	if want := []string{"b", "c", "a", "d"}; !slices.Equal(got, want) {
+		t.Fatalf("got %v, want %v", got, want)
+	}
+}
+
 func TestReportText(t *testing.T) {
 	rep := &Report{
 		ME7Info: []Image{{
@@ -242,7 +251,10 @@ func TestReportText(t *testing.T) {
 		}},
 		Extras: []Image{{Name: "a.bin", Fraction: Fraction{1, 4}}},
 		S4Wiki: []Image{
-			{Name: "a.bin", Fraction: Fraction{1, 2}, Axis: Fraction{1, 2}, Confidence: Fraction{1, 1}},
+			{
+				Name: "a.bin", Fraction: Fraction{1, 2}, Tier: "S",
+				Axis: Fraction{1, 2}, Confidence: Fraction{1, 1},
+			},
 			{Name: "bb.bin", Fraction: Fraction{0, 2}},
 		},
 		XDF: []Image{{Name: "a.bin", Fraction: Fraction{0, 3}, Axis: Fraction{1, 4}}},
@@ -252,9 +264,9 @@ func TestReportText(t *testing.T) {
 		"ecu me7info   vs ecu-specific     vs corpus       extras\n" +
 		"  a          1/2 (+3)   50.0%  2/10   20.0%  1/4   25.0%\n" +
 		"\n" +
-		"xdf s4wiki                       axis   confidence\n" +
-		"  a          1/2   50.0%  1/2   50.0%  1/1  100.0%\n" +
-		"  bb         0/2    0.0%  0/0    0.0%             \n" +
+		"xdf s4wiki                tier         axis   confidence\n" +
+		"  a          1/2   50.0%  S     1/2   50.0%  1/1  100.0%\n" +
+		"  bb         0/2    0.0%        0/0    0.0%             \n" +
 		"\n" +
 		"xdf                              axis\n" +
 		"  a          0/3    0.0%  1/4   25.0%\n"
@@ -302,26 +314,13 @@ func TestNamesPriorityFile(t *testing.T) {
 	}
 }
 
-var epkRE = regexp.MustCompile(`[0-9]+/[0-9]+/ME7[!-~]*`)
-
-func layoutID(img []byte) string {
-	if sw := ident.Find(img).SWNumber; sw != "" {
-		return sw
-	}
-	return string(epkRE.Find(img))
-}
-
 func TestLayoutBlocks(t *testing.T) {
 	dir := filepath.Join("..", "testdata", "parity")
-	b, err := os.ReadFile(filepath.Join(dir, "layouts.yaml"))
+	blocks, err := loadBlocks(dir)
 	if err != nil {
 		t.Fatal(err)
 	}
-	var blocks map[string][]string
-	if err := yaml.Unmarshal(b, &blocks); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := loadTiers(filepath.Join(dir, "layouts-priority.yaml"), blocks); err != nil {
+	if _, err := loadLayoutTiers(dir); err != nil {
 		t.Fatal(err)
 	}
 

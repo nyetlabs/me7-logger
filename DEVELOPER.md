@@ -233,8 +233,10 @@ Peers are the images grouped in `testdata/parity/datasets.yaml`. A shared axis d
 The report sections are:
 
 - `ecu me7info` is the legacy file, then a count of catalog names that file does not name, then that image against the full catalog. The `extras` column is the measurement list on that image. The torque scale is the `torque` conversion in `config/names.yaml`.
-- `xdf s4wiki` is the shared name list, then its `axis` column, then `confidence`.
+- `xdf s4wiki` is the shared name list, then `tier`, then its `axis` column, then `confidence`. `tier` is the tier of the image's block in `layouts-priority.yaml`.
 - `xdf` is every body in the per-image address file. Its `axis` column is every axis in that file.
+
+Every section lists images by that block tier, then by name. An image in no block sorts last.
 
 ## Version
 
