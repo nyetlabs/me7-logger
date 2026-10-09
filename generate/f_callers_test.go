@@ -14,7 +14,7 @@ import (
 
 // The 23g prologues name the same caller slots as 22m. A map keeps one address.
 func TestFCallersKeepOneAddress(t *testing.T) {
-	wiki := wikiNames(t)
+	tuner := tunerNames(t)
 	for _, path := range parityImages(t) {
 		stem := strings.TrimSuffix(filepath.Base(path), ".bin")
 		img := readBin(t, path)
@@ -32,7 +32,7 @@ func TestFCallersKeepOneAddress(t *testing.T) {
 			}
 			addrs[m.Name][opcode.FileOffset(m.Addr)] = struct{}{}
 		}
-		for _, n := range wiki {
+		for _, n := range tuner {
 			if len(addrs[n]) > 1 {
 				t.Errorf("%s %s addresses %d", stem, n, len(addrs[n]))
 			}
@@ -92,9 +92,9 @@ func TestFNamesTheMovedCalls(t *testing.T) {
 	}
 }
 
-func wikiNames(t *testing.T) []string {
+func tunerNames(t *testing.T) []string {
 	t.Helper()
-	b, err := os.ReadFile("../testdata/parity/names/s4wiki.yaml")
+	b, err := os.ReadFile("../testdata/parity/names/tuner.yaml")
 	if err != nil {
 		t.Fatal(err)
 	}

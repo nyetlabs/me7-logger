@@ -199,7 +199,7 @@ functions:
       - "88 90 88 80 88 60 28 04 9A 55 0C XX"
       - "88 90 88 80 88 60 28 04 9A 56 0C 50"
 
-  # Callers for the other wiki maps. config/maps.yaml names each map at a
+  # Callers for the other tuner maps. config/maps.yaml names each map at a
   # fixed distance from the label. "XX" is an R12 or R13 immediate: that
   # address changes per ECU, so it is not part of the pattern. One hit on
   # the images that have the caller.

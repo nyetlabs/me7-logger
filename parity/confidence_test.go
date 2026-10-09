@@ -10,12 +10,12 @@ import (
 
 func TestConfidence(t *testing.T) {
 	axis := &record.Axis{Addr: opcode.FlashBase + 0x40, Count: 4, Bits: 8}
-	wiki := []string{"S"}
+	tuner := []string{"S"}
 
 	t.Run("zeros", func(t *testing.T) {
 		img := make([]byte, 32)
 		m := record.Map{Name: "S", Addr: opcode.FlashBase, Rows: 4, Cols: 4, X: axis}
-		got := scoreConfidence(wiki, nil, img, []record.Map{m}, nil, nil)
+		got := scoreConfidence(tuner, nil, img, []record.Map{m}, nil, nil)
 		if got.Hit != 0 || got.Total != 1 {
 			t.Fatalf("%+v", got)
 		}
@@ -24,7 +24,7 @@ func TestConfidence(t *testing.T) {
 	t.Run("short repeated", func(t *testing.T) {
 		img := []byte{0x11, 0x22, 0, 0, 0x11, 0x22}
 		m := record.Map{Name: "S", Addr: opcode.FlashBase, Cols: 2, X: axis}
-		got := scoreConfidence(wiki, nil, img, []record.Map{m}, nil, nil)
+		got := scoreConfidence(tuner, nil, img, []record.Map{m}, nil, nil)
 		if got.Hit != 1 || got.Total != 1 {
 			t.Fatalf("%+v", got)
 		}
@@ -43,7 +43,7 @@ func TestConfidence(t *testing.T) {
 		img := make([]byte, 32)
 		m := record.Map{Name: "S", Addr: opcode.FlashBase, Rows: 4, Cols: 4, X: axis}
 		peer := binBody{img: img, scored: map[string]record.Map{"S": m}}
-		got := scoreConfidence(wiki, nil, img, []record.Map{m}, nil, []binBody{peer})
+		got := scoreConfidence(tuner, nil, img, []record.Map{m}, nil, []binBody{peer})
 		if got.Hit != 1 || got.Total != 1 {
 			t.Fatalf("%+v", got)
 		}
@@ -54,7 +54,7 @@ func TestConfidence(t *testing.T) {
 		peerImg := []byte{1}
 		m := record.Map{Name: "S", Addr: opcode.FlashBase}
 		peer := binBody{img: peerImg, scored: map[string]record.Map{"S": m}}
-		got := scoreConfidence(wiki, map[string]int{"S": 0}, img, []record.Map{m}, nil, []binBody{peer})
+		got := scoreConfidence(tuner, map[string]int{"S": 0}, img, []record.Map{m}, nil, []binBody{peer})
 		if got.Hit != 1 || got.Total != 1 {
 			t.Fatalf("%+v", got)
 		}
@@ -66,7 +66,7 @@ func TestConfidence(t *testing.T) {
 		filled[0] = 1
 		m := record.Map{Name: "S", Addr: opcode.FlashBase, Rows: 4, Cols: 4, X: axis}
 		peer := binBody{img: filled, scored: map[string]record.Map{"S": m}}
-		got := scoreConfidence(wiki, nil, img, []record.Map{m}, nil, []binBody{peer})
+		got := scoreConfidence(tuner, nil, img, []record.Map{m}, nil, []binBody{peer})
 		if got.Hit != 0 || got.Total != 1 {
 			t.Fatalf("%+v", got)
 		}
@@ -76,7 +76,7 @@ func TestConfidence(t *testing.T) {
 		img := []byte{0x11, 0x22, 0, 0}
 		m := record.Map{Name: "S", Addr: opcode.FlashBase, Cols: 2, X: axis}
 		other := record.Map{Name: "T", Addr: opcode.FlashBase, Cols: 2, X: axis}
-		got := scoreConfidence(wiki, nil, img, []record.Map{m, other}, nil, nil)
+		got := scoreConfidence(tuner, nil, img, []record.Map{m, other}, nil, nil)
 		if got.Hit != 1 || got.Total != 1 {
 			t.Fatalf("%+v", got)
 		}
@@ -86,7 +86,7 @@ func TestConfidence(t *testing.T) {
 		img := bodyImage(0x22)
 		peer := bodyImage(0x22)
 		m := subject(opcode.FlashBase+16, axis)
-		got := scoreConfidence(wiki, nil, img, trio(axis), nil, []binBody{peerBody(peer, axis)})
+		got := scoreConfidence(tuner, nil, img, trio(axis), nil, []binBody{peerBody(peer, axis)})
 		if got.Hit != 1 || got.Total != 1 {
 			t.Fatalf("exact %+v body %x", got, m.Addr)
 		}
@@ -96,7 +96,7 @@ func TestConfidence(t *testing.T) {
 		img := bodyImage(0x22)
 		peer := bodyImage(0x22)
 		peer[16], peer[17] = 0x99, 0x98
-		got := scoreConfidence(wiki, nil, img, trio(axis), nil, []binBody{peerBody(peer, axis)})
+		got := scoreConfidence(tuner, nil, img, trio(axis), nil, []binBody{peerBody(peer, axis)})
 		if got.Hit != 1 || got.Total != 1 {
 			t.Fatalf("%+v", got)
 		}
@@ -112,7 +112,7 @@ func TestConfidence(t *testing.T) {
 			{Name: "S", Addr: opcode.FlashBase + 16, Cols: 192, X: axis},
 			{Name: "C", Addr: opcode.FlashBase + 16 + 192, Cols: 16, X: axis},
 		}
-		got := scoreConfidence(wiki, nil, img, maps, nil, []binBody{{
+		got := scoreConfidence(tuner, nil, img, maps, nil, []binBody{{
 			img: peer, maps: maps, scored: map[string]record.Map{"S": maps[1]},
 		}})
 		if got.Hit != 1 || got.Total != 1 {
@@ -132,7 +132,7 @@ func TestConfidence(t *testing.T) {
 			{Name: "S", Addr: opcode.FlashBase + 16, Cols: 192, X: axis},
 			{Name: "C", Addr: opcode.FlashBase + 16 + 192, Cols: 16, X: axis},
 		}
-		got := scoreConfidence(wiki, nil, img, maps, nil, []binBody{{
+		got := scoreConfidence(tuner, nil, img, maps, nil, []binBody{{
 			img: peer, maps: maps, scored: map[string]record.Map{"S": maps[1]},
 		}})
 		if got.Hit != 0 || got.Total != 1 {
@@ -145,7 +145,7 @@ func TestConfidence(t *testing.T) {
 		peer := bodyImage(0x22)
 		peer[16], peer[17] = 0x99, 0x98
 		peer[32], peer[33], peer[34] = 0x44, 0x45, 0x46
-		got := scoreConfidence(wiki, nil, img, trio(axis), nil, []binBody{peerBody(peer, axis)})
+		got := scoreConfidence(tuner, nil, img, trio(axis), nil, []binBody{peerBody(peer, axis)})
 		if got.Hit != 0 || got.Total != 1 {
 			t.Fatalf("%+v", got)
 		}

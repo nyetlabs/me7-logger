@@ -1,11 +1,13 @@
 package config
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
+	"go.nyet.org/me7-logger/internal/ecucorpus"
 	"go.nyet.org/me7-logger/mapfile"
 	"go.nyet.org/me7-logger/needle"
 )
@@ -17,6 +19,37 @@ func TestShippedSignatures(t *testing.T) {
 	}
 	if !strings.Contains(string(b), "frkte_w") || !strings.Contains(string(b), "zwgru") {
 		t.Fatalf("signature list missing rows: %s", b)
+	}
+}
+
+// TestShippedCategories: the shipped table loads and is the corpus copy
+// (make corpus-bump copies it).
+func TestShippedCategories(t *testing.T) {
+	cats, err := LoadCategories("")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cats["KFZW"] == "" {
+		t.Fatal("KFZW has no category")
+	}
+	bad := filepath.Join(t.TempDir(), CategoriesFile)
+	if err := os.WriteFile(bad, []byte(`{"schema": 1, "categories": {"KFZW": "Timing"}, "extra": 1}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := LoadCategories(bad); err == nil {
+		t.Error("unknown key: no error")
+	}
+	c := ecucorpus.Open(t)
+	want, err := os.ReadFile(filepath.Join(c.Dir, CategoriesFile))
+	if err != nil {
+		t.Skip(err)
+	}
+	got, err := os.ReadFile(CategoriesFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(got, want) {
+		t.Fatalf("config/%s differs from the corpus copy: run make corpus-bump", CategoriesFile)
 	}
 }
 

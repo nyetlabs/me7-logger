@@ -6,6 +6,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -13,13 +14,21 @@ import (
 	"go.nyet.org/me7-logger/record"
 )
 
+// Other is the category of a map that is not in the category table.
+const Other = "Other"
+
 // Write emits one XDFFORMAT document. An empty map list writes nothing.
 // A map with no name is not written. size is the image length and becomes
 // the header region; 0 omits the region. Each map's unique id is its file
 // offset. An axis whose address is another map in this file is a link to
 // that id. The equation is the one stored on the map.
-func Write(w io.Writer, title string, size int, maps []record.Map) error {
-	maps = named(maps)
+//
+// cats is the category table (map name to category). A listed map gets its
+// category; an unlisted map that a listed map's axis links to gets that
+// map's category, and any other map gets Other. tuner keeps only the listed
+// maps and the maps their axes link to.
+func Write(w io.Writer, title string, size int, maps []record.Map, cats map[string]string, tuner bool) error {
+	maps, cat := categorize(named(maps), cats, tuner)
 	if len(maps) == 0 {
 		return nil
 	}
@@ -33,9 +42,68 @@ func Write(w io.Writer, title string, size int, maps []record.Map) error {
 	if _, err := io.WriteString(w, xml.Header); err != nil {
 		return err
 	}
+	names := categoryNames(cat)
 	enc := xml.NewEncoder(w)
 	enc.Indent("", "  ")
-	return enc.Encode(xdfDoc{header: newHeader(title, size), items: newItems(maps, ids)})
+	return enc.Encode(xdfDoc{header: newHeader(title, size, names), items: newItems(maps, ids, cat, names)})
+}
+
+// Count is the number of maps Write would write.
+func Count(maps []record.Map, cats map[string]string, tuner bool) int {
+	maps, _ = categorize(named(maps), cats, tuner)
+	return len(maps)
+}
+
+// categorize returns the maps to write and each one's category, by file
+// offset.
+func categorize(maps []record.Map, cats map[string]string, tuner bool) ([]record.Map, map[uint32]string) {
+	cat := map[uint32]string{}
+	for _, m := range maps {
+		if c, ok := cats[m.Name]; ok {
+			cat[opcode.FileOffset(m.Addr)] = c
+		}
+	}
+	listed := make(map[uint32]string, len(cat))
+	for k, v := range cat {
+		listed[k] = v
+	}
+	for _, m := range maps {
+		c, ok := listed[opcode.FileOffset(m.Addr)]
+		if !ok {
+			continue
+		}
+		for _, ax := range []*record.Axis{m.X, m.Y} {
+			if ax == nil || ax.Addr == 0 {
+				continue
+			}
+			if off := opcode.FileOffset(ax.Addr); cat[off] == "" {
+				cat[off] = c
+			}
+		}
+	}
+	out := maps[:0:0]
+	for _, m := range maps {
+		off := opcode.FileOffset(m.Addr)
+		if cat[off] == "" {
+			if tuner {
+				continue
+			}
+			cat[off] = Other
+		}
+		out = append(out, m)
+	}
+	return out, cat
+}
+
+func categoryNames(cat map[uint32]string) []string {
+	var names []string
+	for _, c := range cat {
+		if !slices.Contains(names, c) {
+			names = append(names, c)
+		}
+	}
+	slices.Sort(names)
+	return names
 }
 
 // tableShape is a map whose row count and column count were both read.
@@ -83,10 +151,10 @@ func (d xdfDoc) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 }
 
 type xdfHeader struct {
-	XMLName  xml.Name    `xml:"XDFHEADER"`
-	Title    string      `xml:"deftitle"`
-	Region   *xdfRegion  `xml:"REGION,omitempty"`
-	Category xdfCategory `xml:"CATEGORY"`
+	XMLName    xml.Name      `xml:"XDFHEADER"`
+	Title      string        `xml:"deftitle"`
+	Region     *xdfRegion    `xml:"REGION,omitempty"`
+	Categories []xdfCategory `xml:"CATEGORY"`
 }
 
 type xdfRegion struct {
@@ -98,22 +166,30 @@ type xdfCategory struct {
 	Name  string `xml:"name,attr"`
 }
 
+// xdfCategoryMem is TunerPro's category reference: the header index plus 1.
+type xdfCategoryMem struct {
+	Index    int `xml:"index,attr"`
+	Category int `xml:"category,attr"`
+}
+
 type xdfConstant struct {
-	XMLName     xml.Name `xml:"XDFCONSTANT"`
-	ID          string   `xml:"uniqueid,attr"`
-	Title       string   `xml:"title"`
-	Description string   `xml:"description"`
-	Data        xdfData  `xml:"EMBEDDEDDATA"`
-	Units       string   `xml:"units"`
-	Math        xdfMath  `xml:"MATH"`
+	XMLName     xml.Name       `xml:"XDFCONSTANT"`
+	ID          string         `xml:"uniqueid,attr"`
+	Title       string         `xml:"title"`
+	Description string         `xml:"description"`
+	CategoryMem xdfCategoryMem `xml:"CATEGORYMEM"`
+	Data        xdfData        `xml:"EMBEDDEDDATA"`
+	Units       string         `xml:"units"`
+	Math        xdfMath        `xml:"MATH"`
 }
 
 type xdfTable struct {
-	XMLName     xml.Name  `xml:"XDFTABLE"`
-	ID          string    `xml:"uniqueid,attr"`
-	Title       string    `xml:"title"`
-	Description string    `xml:"description"`
-	Axes        []xdfAxis `xml:"XDFAXIS"`
+	XMLName     xml.Name       `xml:"XDFTABLE"`
+	ID          string         `xml:"uniqueid,attr"`
+	Title       string         `xml:"title"`
+	Description string         `xml:"description"`
+	CategoryMem xdfCategoryMem `xml:"CATEGORYMEM"`
+	Axes        []xdfAxis      `xml:"XDFAXIS"`
 }
 
 type xdfAxis struct {
@@ -154,25 +230,31 @@ type xdfVar struct {
 	ID string `xml:"id,attr"`
 }
 
-func newHeader(title string, size int) xdfHeader {
-	h := xdfHeader{
-		Title:    title,
-		Category: xdfCategory{Index: "0xFF", Name: "Axes"},
+func newHeader(title string, size int, names []string) xdfHeader {
+	h := xdfHeader{Title: title}
+	for i, n := range names {
+		h.Categories = append(h.Categories, xdfCategory{Index: hex(uint32(i)), Name: n})
 	}
+	h.Categories = append(h.Categories, xdfCategory{Index: "0xFF", Name: "Axes"})
 	if size > 0 {
 		h.Region = &xdfRegion{Size: hex(uint32(size))}
 	}
 	return h
 }
 
-func newItems(maps []record.Map, ids map[uint32]struct{}) []any {
+func newItems(maps []record.Map, ids map[uint32]struct{}, cat map[uint32]string, names []string) []any {
 	items := make([]any, 0, len(maps))
 	for _, m := range maps {
+		mem := xdfCategoryMem{Category: slices.Index(names, cat[opcode.FileOffset(m.Addr)]) + 1}
 		if tableShape(m) {
-			items = append(items, newTable(m, ids))
+			t := newTable(m, ids)
+			t.CategoryMem = mem
+			items = append(items, t)
 			continue
 		}
-		items = append(items, newConst(m))
+		c := newConst(m)
+		c.CategoryMem = mem
+		items = append(items, c)
 	}
 	return items
 }

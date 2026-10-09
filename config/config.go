@@ -5,7 +5,9 @@
 package config
 
 import (
+	"bytes"
 	"embed"
+	"encoding/json"
 	"fmt"
 	"io/fs"
 	"os"
@@ -21,7 +23,7 @@ import (
 	"go.nyet.org/me7-logger/needle"
 )
 
-//go:embed names.yaml needles.yaml measurements.yaml catalog aliases.yaml maps.yaml signatures.yaml
+//go:embed names.yaml needles.yaml measurements.yaml catalog aliases.yaml maps.yaml signatures.yaml categories.json
 var embedded embed.FS
 
 const (
@@ -39,7 +41,32 @@ const (
 	MapsFile = "maps.yaml"
 	// SigFile is the signature list, signatures.yaml.
 	SigFile = "signatures.yaml"
+	// CategoriesFile is the corpus category table, copied by make corpus-bump.
+	CategoriesFile = "categories.json"
 )
+
+// LoadCategories reads the category table: the tuner map names, each with its
+// XDF category (xdfkit docs/corpus.md). Unknown keys are an error, as in
+// xdfkit's categories.schema.json.
+func LoadCategories(path string) (map[string]string, error) {
+	b, err := Read(path, CategoriesFile)
+	if err != nil {
+		return nil, err
+	}
+	var t struct {
+		Schema     int               `json:"schema"`
+		Categories map[string]string `json:"categories"`
+	}
+	dec := json.NewDecoder(bytes.NewReader(b))
+	dec.DisallowUnknownFields()
+	if err := dec.Decode(&t); err != nil {
+		return nil, fmt.Errorf("%s: %w", CategoriesFile, err)
+	}
+	if t.Schema != 1 || len(t.Categories) == 0 {
+		return nil, fmt.Errorf("%s: schema %d with %d names, want schema 1 with names", CategoriesFile, t.Schema, len(t.Categories))
+	}
+	return t.Categories, nil
+}
 
 // Path is config/<name>, or the environment variable when it is set.
 func Path(envKey, name string) string {

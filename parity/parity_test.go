@@ -142,7 +142,7 @@ func TestCoverMissUntilLocated(t *testing.T) {
 	}
 }
 
-func TestScoreWikiOneAddress(t *testing.T) {
+func TestScoreTunerOneAddress(t *testing.T) {
 	maps := []record.Map{
 		{Name: "KFZW", Addr: needleBase + 0x10, X: &record.Axis{Addr: needleBase + 0x11, Count: 8, Bits: 8}},
 		{Name: "KFZW", Addr: needleBase + 0x10},
@@ -150,17 +150,17 @@ func TestScoreWikiOneAddress(t *testing.T) {
 		{Name: "LAMFA", Addr: needleBase + 0x30, X: &record.Axis{Addr: needleBase + 0x31, Count: 4, Bits: 8}},
 		{Name: "KFKHFM", Addr: needleBase + 0x40},
 	}
-	got := scoreWiki([]string{"KFZW", "LAMFA", "KFKHFM"}, nil, maps, nil)
+	got := scoreTuner([]string{"KFZW", "LAMFA", "KFKHFM"}, nil, maps, nil)
 	if got.String() != "33.3% (1/3)" {
 		t.Fatal(got)
 	}
-	got = scoreWiki([]string{"KFZW", "LAMFA", "KFKHFM"}, map[string]int{"KFKHFM": 0}, maps, nil)
+	got = scoreTuner([]string{"KFZW", "LAMFA", "KFKHFM"}, map[string]int{"KFKHFM": 0}, maps, nil)
 	if got.String() != "66.7% (2/3)" {
 		t.Fatal(got)
 	}
 }
 
-func TestScoreWikiAxisMatchesReference(t *testing.T) {
+func TestScoreTunerAxisMatchesReference(t *testing.T) {
 	maps := []record.Map{{
 		Name: "KFZW", Addr: 0x10,
 		X: &record.Axis{Addr: 0x20, Count: 8, Bits: 8},
@@ -173,35 +173,35 @@ func TestScoreWikiAxisMatchesReference(t *testing.T) {
 			"y": {id: "y", addr: 0x30, count: 6, bits: 16},
 		},
 	}
-	if got := scoreWiki([]string{"KFZW"}, nil, maps, []refRow{row}); got.String() != "100.0% (1/1)" {
+	if got := scoreTuner([]string{"KFZW"}, nil, maps, []refRow{row}); got.String() != "100.0% (1/1)" {
 		t.Fatal(got)
 	}
 	row.axes["y"] = axisSig{id: "y", addr: 0x30, count: 3, bits: 16}
-	if got := scoreWiki([]string{"KFZW"}, nil, maps, []refRow{row}); got.Hit != 1 {
+	if got := scoreTuner([]string{"KFZW"}, nil, maps, []refRow{row}); got.Hit != 1 {
 		t.Fatal(got)
 	}
 	dims := map[string]int{"KFZW": 2}
-	_, axes := wikiScore([]string{"KFZW"}, dims, maps, []refRow{row})
+	_, axes := tunerScore([]string{"KFZW"}, dims, maps, []refRow{row})
 	if axes.Hit != 2 || axes.Total != 2 {
 		t.Fatal(axes)
 	}
 	maps[0].Y = nil
-	_, axes = wikiScore([]string{"KFZW"}, dims, maps, nil)
+	_, axes = tunerScore([]string{"KFZW"}, dims, maps, nil)
 	if axes.Hit != 1 || axes.Total != 2 {
 		t.Fatal(axes)
 	}
 	other := []refRow{{name: "OTHER", addr: 0x10}}
-	if got := scoreWiki([]string{"KFZW"}, nil, maps, other); got.Hit != 1 {
+	if got := scoreTuner([]string{"KFZW"}, nil, maps, other); got.Hit != 1 {
 		t.Fatal(got)
 	}
-	_, axes = wikiScore([]string{"KFZW", "KFKHFM"}, map[string]int{"KFZW": 2, "KFKHFM": 0}, []record.Map{
+	_, axes = tunerScore([]string{"KFZW", "KFKHFM"}, map[string]int{"KFZW": 2, "KFKHFM": 0}, []record.Map{
 		{Name: "KFZW", Addr: 0x10, X: &record.Axis{Addr: 0x20, Count: 8, Bits: 8}, Y: &record.Axis{Addr: 0x30, Count: 6, Bits: 16}},
 		{Name: "KFKHFM", Addr: 0x40},
 	}, nil)
 	if axes.Hit != 2 || axes.Total != 2 {
 		t.Fatal(axes)
 	}
-	_, axes = wikiScore([]string{"KFKHFM"}, map[string]int{"KFKHFM": 0}, []record.Map{
+	_, axes = tunerScore([]string{"KFKHFM"}, map[string]int{"KFKHFM": 0}, []record.Map{
 		{Name: "KFKHFM", Addr: 0x40},
 	}, nil)
 	if axes.Total != 0 {
@@ -239,7 +239,7 @@ func TestRunLayout(t *testing.T) {
 	write("b.bin", "")
 	write("ecu/me7info/a.ecu", ecu)
 	write("ecu/me7info/b.ecu", "")
-	write("names/s4wiki.yaml", "tiers:\n  D:\n    2: [KFZW, LAMFA]\n")
+	write("names/tuner.yaml", "tiers:\n  D:\n    2: [KFZW, LAMFA]\n")
 	write("defs/a.json", modelJSON("damos", 3))
 	defOf := func(stem string) string {
 		if stem == "a" {
@@ -273,11 +273,11 @@ func TestRunLayout(t *testing.T) {
 	if len(got.Extras) != 2 || got.Extras[0].Name != "a.bin" || got.Extras[0].Hit != 1 || got.Extras[1].Hit != 2 {
 		t.Fatalf("extras %+v", got.Extras)
 	}
-	if len(got.S4Wiki) != 2 || got.S4Wiki[0].Name != "a.bin" || got.S4Wiki[1].Name != "b.bin" {
-		t.Fatalf("s4wiki %+v", got.S4Wiki)
+	if len(got.Tuner) != 2 || got.Tuner[0].Name != "a.bin" || got.Tuner[1].Name != "b.bin" {
+		t.Fatalf("tuner %+v", got.Tuner)
 	}
-	if got.S4Wiki[0].String() != "50.0% (1/2)" || got.S4Wiki[1].String() != "0.0% (0/2)" {
-		t.Fatalf("s4wiki %+v", got.S4Wiki)
+	if got.Tuner[0].String() != "50.0% (1/2)" || got.Tuner[1].String() != "0.0% (0/2)" {
+		t.Fatalf("tuner %+v", got.Tuner)
 	}
 	if len(got.XDF) != 1 || got.XDF[0].Name != "a.bin" || got.XDF[0].String() != "0.0% (0/3)" || got.XDF[0].Axis.Total != 0 {
 		t.Fatalf("xdf %+v", got.XDF)
@@ -302,7 +302,7 @@ func TestReportText(t *testing.T) {
 			Name: "a.bin", Fraction: Fraction{1, 2}, Beyond: 3, Corpus: Fraction{2, 10},
 		}},
 		Extras: []Image{{Name: "a.bin", Fraction: Fraction{1, 4}}},
-		S4Wiki: []Image{
+		Tuner: []Image{
 			{
 				Name: "a.bin", Fraction: Fraction{1, 2}, Tier: "S",
 				Axis: Fraction{1, 2}, Confidence: Fraction{1, 1}, Block: Fraction{3, 40},
@@ -441,7 +441,7 @@ func TestLoadNames(t *testing.T) {
 		}
 	}
 	blocks := map[string][]string{"b1": {"1"}, "b2": {"2"}}
-	write("names/s4wiki.yaml", "tiers:\n  D:\n    0: [MLHFM]\n    2: [KFZW]\n")
+	write("names/tuner.yaml", "tiers:\n  D:\n    0: [MLHFM]\n    2: [KFZW]\n")
 	write("names/absent.yaml", "absent: {}\n")
 	write("names/cb.yaml", "block: b1\nnames:\n  0: [KRKTE]\n  1: [MLHFM]\n  2: [LAMFA]\n")
 	l, err := loadNames(dir, blocks)
@@ -451,7 +451,7 @@ func TestLoadNames(t *testing.T) {
 	if got := l.forBlock("b1"); !slices.Equal(got, []string{"KFZW", "MLHFM", "KRKTE", "LAMFA"}) {
 		t.Fatalf("b1 %v", got)
 	}
-	if got := l.forBlock("b2"); !slices.Equal(got, l.wiki) {
+	if got := l.forBlock("b2"); !slices.Equal(got, l.tuner) {
 		t.Fatalf("b2 %v", got)
 	}
 	if l.dims["MLHFM"] != 0 || l.dims["LAMFA"] != 2 || l.tier["KFZW"] != "D" {
@@ -461,11 +461,11 @@ func TestLoadNames(t *testing.T) {
 	if _, err := loadNames(dir, blocks); err == nil {
 		t.Fatal("repeated name accepted")
 	}
-	write("names/s4wiki.yaml", "tiers:\n  Z:\n    0: [MLHFM]\n")
+	write("names/tuner.yaml", "tiers:\n  Z:\n    0: [MLHFM]\n")
 	if _, err := loadNames(dir, blocks); err == nil {
 		t.Fatal("unknown tier accepted")
 	}
-	write("names/s4wiki.yaml", "tiers:\n  D:\n    0: [MLHFM]\n")
+	write("names/tuner.yaml", "tiers:\n  D:\n    0: [MLHFM]\n")
 	write("names/cb.yaml", "block: nope\nnames:\n  0: [KRKTE]\n")
 	if _, err := loadNames(dir, blocks); err == nil {
 		t.Fatal("unknown block accepted")
@@ -486,9 +486,9 @@ func TestConfidenceSkipFile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	wiki := lists.wiki
+	tuner := lists.tuner
 	have := map[string]struct{}{}
-	for _, n := range wiki {
+	for _, n := range tuner {
 		have[n] = struct{}{}
 	}
 	if len(skip) == 0 {
@@ -496,7 +496,7 @@ func TestConfidenceSkipFile(t *testing.T) {
 	}
 	for n := range skip {
 		if _, ok := have[n]; !ok {
-			t.Errorf("%s is not an s4wiki name", n)
+			t.Errorf("%s is not a tuner name", n)
 		}
 	}
 }

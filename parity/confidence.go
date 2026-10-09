@@ -26,10 +26,10 @@ const (
 // scoreConfidence judges the body of each name the locator already scored.
 // The denominator is that matched set. A name the locator missed is not in it.
 // High means the body bytes hold up. A shared axis does not change that.
-func scoreConfidence(wiki []string, dims map[string]int, img []byte, maps []record.Map, rows []refRow, peers []binBody) Fraction {
-	scored := wikiMaps(wiki, dims, maps, rows)
+func scoreConfidence(tuner []string, dims map[string]int, img []byte, maps []record.Map, rows []refRow, peers []binBody) Fraction {
+	scored := tunerMaps(tuner, dims, maps, rows)
 	high := 0
-	for _, n := range wiki {
+	for _, n := range tuner {
 		m, ok := scored[n]
 		if !ok {
 			continue
@@ -248,7 +248,7 @@ func zerosMatch(m record.Map, raw []byte, peers []binBody) bool {
 	return seen
 }
 
-func wikiMaps(want []string, dims map[string]int, maps []record.Map, rows []refRow) map[string]record.Map {
+func tunerMaps(want []string, dims map[string]int, maps []record.Map, rows []refRow) map[string]record.Map {
 	addrs := map[string]map[uint32]record.Map{}
 	axis := map[string]map[uint32]struct{}{}
 	for _, m := range maps {

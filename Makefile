@@ -4,10 +4,11 @@
 #   make test             go test ./...; ME7Info parity must be 100% (image tests skip without corpus/)
 #   make build            build/me7info and build/me7logger
 #   make version          git describe (tags vX.Y.Z and vX.Y.Z-rcN)
-#   make parity           legacy ME7Info parity, plus coverage of the YAML lists, the S4wiki names, and supplied XDF address oracles
+#   make parity           legacy ME7Info parity, plus coverage of the YAML lists, the tuner names, and supplied XDF address oracles
 #   make package          dist archives for macos, linux, and windows
 #   make corpus           fetch the corpus submodule at its pinned commit (needs access)
-#   make corpus-bump      move the corpus submodule to the ecu-corpus head (commit it yourself)
+#   make corpus-bump      move the corpus submodule to the ecu-corpus head and copy its
+#                         categories.json to config/ (commit them yourself)
 #
 # Version comes from git tags only. Do not edit a version by hand.
 
@@ -78,8 +79,9 @@ corpus:
 
 corpus-bump:
 	git submodule update --init --checkout --remote --depth 1 corpus
+	cp corpus/categories.json config/categories.json
 	@git -C corpus log -1 --format='corpus now at %h %s'
-	@git status --short corpus
+	@git status --short corpus config/categories.json
 
 clean:
 	rm -rf build dist

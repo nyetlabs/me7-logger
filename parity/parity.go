@@ -1,6 +1,6 @@
 // Package parity scores generated rows against separate oracles.
 // Matching each image's ME7Info file is the only hard mark.
-// Catalog coverage, extras, the shared S4wiki list, a supplied XDF, and
+// Catalog coverage, extras, the shared tuner list, a supplied XDF, and
 // that file's axes are coverage. Outperform counts catalog names that file does not name.
 package parity
 
@@ -29,28 +29,28 @@ import (
 )
 
 // Report is one pass over a parity root.
-// ME7Info is the only hard mark. Extras, S4Wiki, and XDF are coverage.
+// ME7Info is the only hard mark. Extras, Tuner, and XDF are coverage.
 // An empty slice means that kind had no oracle.
 // Corpus, on a ME7Info row, is catalog names located on that image over the
 // full catalog. Extras is the measurement list on that image.
-// Axis and Confidence are set on an S4Wiki row. Axis is the axes on the
+// Axis and Confidence are set on a Tuner row. Axis is the axes on the
 // maps that scored, and a hit matches that image's XDF. Confidence is the
 // body-byte result for the names that row scored.
 // Axis on an XDF or Hand row is every axis in that file.
 // XDF rows score DAMOS sourced corpus definitions. Hand rows score hand made
 // ones, which are oracles, not targets.
-// Disagree lists s4wiki names located at an address a hand made definition
+// Disagree lists tuner names located at an address a hand made definition
 // does not have. Those names still hit.
 type Report struct {
 	ME7Info  []Image
 	Extras   []Image
-	S4Wiki   []Image
+	Tuner    []Image
 	XDF      []Image
 	Hand     []Image
 	Disagree []Disagreement
 }
 
-// Disagreement is one s4wiki name whose located body is not at any of the
+// Disagreement is one tuner name whose located body is not at any of the
 // hand made XDF's addresses for that name. Addresses are file offsets.
 type Disagreement struct {
 	Image, Name string
@@ -62,8 +62,8 @@ type Disagreement struct {
 // Beyond is the count of catalog names located on this image that its
 // ME7Info file does not name. Corpus is that image against the full catalog.
 // Both are set only on ME7Info rows. Tier, Axis, and Confidence are set on
-// S4Wiki rows. Tier is the nameGrade of the image. On an S4Wiki row, Fraction
-// is the s4wiki names and Block is the other names lists of the image's
+// Tuner rows. Tier is the nameGrade of the image. On a Tuner row, Fraction
+// is the tuner names and Block is the other names lists of the image's
 // layout block.
 // Every list is sorted by the layout block tier of its image in
 // layouts-priority.yaml, then by name.
@@ -117,7 +117,7 @@ func (r *Report) Text() string {
 		head    bool
 		beyond  int
 		me7info bool
-		wiki    bool
+		tuner   bool
 		xdf     bool
 	}
 	var lines []line
@@ -134,15 +134,15 @@ func (r *Report) Text() string {
 			})
 		}
 	}
-	if len(r.S4Wiki) > 0 {
+	if len(r.Tuner) > 0 {
 		if len(lines) > 0 {
 			lines = append(lines, line{})
 		}
-		lines = append(lines, line{label: "names", head: true, wiki: true})
-		for _, im := range r.S4Wiki {
+		lines = append(lines, line{label: "names", head: true, tuner: true})
+		for _, im := range r.Tuner {
 			lines = append(lines, line{
 				label: "  " + stemName(im.Name), frac: im.Fraction, tier: im.Tier,
-				axis: im.Axis, conf: im.Confidence, block: im.Block, wiki: true,
+				axis: im.Axis, conf: im.Confidence, block: im.Block, tuner: true,
 			})
 		}
 	}
@@ -201,19 +201,19 @@ func (r *Report) Text() string {
 				}
 			}
 		}
-		if ln.wiki || ln.xdf {
+		if ln.tuner || ln.xdf {
 			axes[i] = fmt.Sprintf("%d/%d", ln.axis.Hit, ln.axis.Total)
 			if len(axes[i]) > axisW {
 				axisW = len(axes[i])
 			}
 		}
-		if ln.wiki && ln.conf.Total > 0 {
+		if ln.tuner && ln.conf.Total > 0 {
 			confs[i] = fmt.Sprintf("%d/%d", ln.conf.Hit, ln.conf.Total)
 			if len(confs[i]) > confW {
 				confW = len(confs[i])
 			}
 		}
-		if ln.wiki && ln.block.Total > 0 {
+		if ln.tuner && ln.block.Total > 0 {
 			blocks[i] = fmt.Sprintf("%d/%d", ln.block.Hit, ln.block.Total)
 			if len(blocks[i]) > blockW {
 				blockW = len(blocks[i])
@@ -239,7 +239,7 @@ func (r *Report) Text() string {
 		switch {
 		case ln.label == "":
 			b.WriteByte('\n')
-		case ln.head && ln.wiki:
+		case ln.head && ln.tuner:
 			// count, gap, percent, gap, tier, gap, then the same pair for axis and confidence.
 			mainSpan := 6 + 2 + countW
 			tierStart := nameW + 2 + mainSpan + 2
@@ -299,7 +299,7 @@ func (r *Report) Text() string {
 			fmt.Fprintf(&b, "%-*s  %*s (%*s)  %6s  %*s  %6s  %*s  %6s\n",
 				nameW, ln.label, countW, counts[i], beyondW, beyonds[i], ln.frac.percent(),
 				corpusW, corpus[i], ln.corpus.percent(), extrasW, extras[i], extraPct)
-		case ln.wiki:
+		case ln.tuner:
 			confPct := ""
 			if ln.conf.Total > 0 {
 				confPct = ln.conf.percent()
@@ -356,7 +356,7 @@ type imageGen func(name string, img []byte) ([]record.Item, []record.Map, error)
 
 // Run generates each image and scores it.
 // The images are the corpus names in images.yaml. Legacy rows are ecu/me7info/<image>.ecu.
-// The names scored are names/s4wiki.yaml on every image, plus each other
+// The names scored are names/tuner.yaml on every image, plus each other
 // names/*.yaml list on the images of its layout block.
 // An address oracle is the image's corpus definition, when the manifest names
 // one. Only a DAMOS one can turn a name hit into a miss.
@@ -398,7 +398,7 @@ func run(dir string, images []string, defOf func(string) string, gen imageGen) (
 	if err != nil {
 		return nil, err
 	}
-	wiki, axes := lists.wiki, lists.dims
+	tuner, axes := lists.tuner, lists.dims
 	ntier := lists.tier
 	layout, err := loadLayoutTiers(dir, blocks)
 	if err != nil {
@@ -450,16 +450,16 @@ func run(dir string, images []string, defOf func(string) string, gen imageGen) (
 		if kind == damosXDF {
 			oracle = xrows
 		}
-		if len(wiki) > 0 {
+		if len(tuner) > 0 {
 			blk := block[layoutID(img)]
 			want := lists.forBlock(blk)
-			scored := wikiMaps(want, axes, maps, oracle)
+			scored := tunerMaps(want, axes, maps, oracle)
 			if kind == handXDF {
 				rep.Disagree = append(rep.Disagree, disagreements(base, want, scored, xrows)...)
 			}
 			gone := absent[blk]
-			rep.S4Wiki = append(rep.S4Wiki, Image{
-				Name: base, Fraction: countScored(wiki, scored),
+			rep.Tuner = append(rep.Tuner, Image{
+				Name: base, Fraction: countScored(tuner, scored),
 				Block: countScored(lists.byBlock[blk], scored),
 				Tier: nameGrade(ntier, lists.byBlock[blk], func(n string) bool {
 					_, ok := scored[n]
@@ -480,7 +480,7 @@ func run(dir string, images []string, defOf func(string) string, gen imageGen) (
 			}
 		}
 	}
-	if len(wiki) > 0 && len(held) > 0 {
+	if len(tuner) > 0 && len(held) > 0 {
 		groups, err := loadDatasets(dir)
 		if err != nil {
 			return nil, err
@@ -490,11 +490,11 @@ func run(dir string, images []string, defOf func(string) string, gen imageGen) (
 			return nil, err
 		}
 		for n := range skip {
-			if !slices.Contains(wiki, n) {
-				return nil, fmt.Errorf("confidence skip: %s is not an s4wiki name", n)
+			if !slices.Contains(tuner, n) {
+				return nil, fmt.Errorf("confidence skip: %s is not a tuner name", n)
 			}
 		}
-		confWiki := omitNames(wiki, skip)
+		confTuner := omitNames(tuner, skip)
 		byStem := map[string]kept{}
 		for _, h := range held {
 			byStem[h.stem] = h
@@ -507,13 +507,13 @@ func run(dir string, images []string, defOf func(string) string, gen imageGen) (
 					continue
 				}
 				peers = append(peers, binBody{
-					img: o.img, maps: o.maps, scored: wikiMaps(wiki, axes, o.maps, o.oracle),
+					img: o.img, maps: o.maps, scored: tunerMaps(tuner, axes, o.maps, o.oracle),
 				})
 			}
-			rep.S4Wiki[i].Confidence = scoreConfidence(confWiki, axes, h.img, h.maps, h.oracle, peers)
+			rep.Tuner[i].Confidence = scoreConfidence(confTuner, axes, h.img, h.maps, h.oracle, peers)
 		}
 	}
-	for _, ims := range [][]Image{rep.ME7Info, rep.Extras, rep.S4Wiki, rep.XDF, rep.Hand} {
+	for _, ims := range [][]Image{rep.ME7Info, rep.Extras, rep.Tuner, rep.XDF, rep.Hand} {
 		sortImages(ims, tierOf)
 	}
 	slices.SortStableFunc(rep.Disagree, func(a, b Disagreement) int {
@@ -621,9 +621,9 @@ func loadOracle(path string) (maps []Map, axes []Axis, rows []refRow, kind strin
 
 // disagreements lists the scored names whose body is not at a hand made XDF
 // row of that name.
-func disagreements(image string, wiki []string, scored map[string]record.Map, rows []refRow) []Disagreement {
+func disagreements(image string, tuner []string, scored map[string]record.Map, rows []refRow) []Disagreement {
 	var out []Disagreement
-	for _, n := range wiki {
+	for _, n := range tuner {
 		m, ok := scored[n]
 		if !ok || referenceHit(m, rows) {
 			continue
@@ -678,20 +678,20 @@ func measurementNames() ([]string, error) {
 	return out, nil
 }
 
-// The name lists are names/<source>.yaml. s4wiki.yaml is scored on every
+// The name lists are names/<source>.yaml. tuner.yaml is scored on every
 // image and is the only list with tiers.
 const (
 	namesDir   = "names"
-	wikiList   = "s4wiki"
+	tunerList  = "tuner"
 	absentFile = "absent.yaml"
 )
 
-// nameLists is every names/*.yaml list. wiki is s4wiki.yaml. byBlock is the
-// other names of each layout block, in file order, without s4wiki names.
-// dims is the axis count of every name; s4wiki.yaml wins a conflict.
-// tier is the finder tier of each s4wiki name.
+// nameLists is every names/*.yaml list. tuner is tuner.yaml. byBlock is the
+// other names of each layout block, in file order, without tuner names.
+// dims is the axis count of every name; tuner.yaml wins a conflict.
+// tier is the finder tier of each tuner name.
 type nameLists struct {
-	wiki    []string
+	tuner   []string
 	byBlock map[string][]string
 	dims    map[string]int
 	tier    map[string]string
@@ -700,16 +700,16 @@ type nameLists struct {
 // forBlock is the names scored on an image of block.
 func (l nameLists) forBlock(block string) []string {
 	if len(l.byBlock[block]) == 0 {
-		return l.wiki
+		return l.tuner
 	}
-	return append(slices.Clip(l.wiki), l.byBlock[block]...)
+	return append(slices.Clip(l.tuner), l.byBlock[block]...)
 }
 
-// loadNames reads names/*.yaml. A list other than s4wiki.yaml names a
-// layout block in block. A missing s4wiki.yaml returns no lists.
+// loadNames reads names/*.yaml. A list other than tuner.yaml names a
+// layout block in block. A missing tuner.yaml returns no lists.
 func loadNames(dir string, blocks map[string][]string) (nameLists, error) {
 	out := nameLists{byBlock: map[string][]string{}, dims: map[string]int{}}
-	wiki, _, tier, err := loadNameList(filepath.Join(dir, namesDir, wikiList+".yaml"))
+	tuner, _, tier, err := loadNameList(filepath.Join(dir, namesDir, tunerList+".yaml"))
 	if os.IsNotExist(err) {
 		return nameLists{}, nil
 	}
@@ -717,11 +717,11 @@ func loadNames(dir string, blocks map[string][]string) (nameLists, error) {
 		return nameLists{}, err
 	}
 	if tier == nil {
-		return nameLists{}, fmt.Errorf("%s.yaml: want tiers", wikiList)
+		return nameLists{}, fmt.Errorf("%s.yaml: want tiers", tunerList)
 	}
 	out.tier = tier
-	for _, n := range wiki {
-		out.wiki = append(out.wiki, n.name)
+	for _, n := range tuner {
+		out.tuner = append(out.tuner, n.name)
 		out.dims[n.name] = n.axes
 	}
 	paths, err := filepath.Glob(filepath.Join(dir, namesDir, "*.yaml"))
@@ -730,7 +730,7 @@ func loadNames(dir string, blocks map[string][]string) (nameLists, error) {
 	}
 	for _, p := range paths {
 		base := filepath.Base(p)
-		if base == wikiList+".yaml" || base == absentFile {
+		if base == tunerList+".yaml" || base == absentFile {
 			continue
 		}
 		list, block, tier, err := loadNameList(p)
@@ -738,7 +738,7 @@ func loadNames(dir string, blocks map[string][]string) (nameLists, error) {
 			return nameLists{}, err
 		}
 		if tier != nil {
-			return nameLists{}, fmt.Errorf("%s: only %s.yaml has tiers", base, wikiList)
+			return nameLists{}, fmt.Errorf("%s: only %s.yaml has tiers", base, tunerList)
 		}
 		if _, ok := blocks[block]; !ok {
 			return nameLists{}, fmt.Errorf("%s: block %q is not in layouts.yaml", base, block)
@@ -1024,14 +1024,14 @@ func itemNames(items []record.Item) []string {
 	return out
 }
 
-// wikiScore is the tuner names and, beside them, the axes of the maps that
+// tunerScore is the tuner names and, beside them, the axes of the maps that
 // scored. A name counts at one address with an axis. An axis count of 0 is a
 // scalar, so the address is enough. A second address is a miss. When the XDF
 // names that row, the body address has to match. dims is how many axes that
 // table has: 1 is the column, 2 is the column and the row. A hit is that axis
 // present on the map. The address file is a separate score.
-func wikiScore(want []string, dims map[string]int, maps []record.Map, rows []refRow) (names, axes Fraction) {
-	scored := wikiMaps(want, dims, maps, rows)
+func tunerScore(want []string, dims map[string]int, maps []record.Map, rows []refRow) (names, axes Fraction) {
+	scored := tunerMaps(want, dims, maps, rows)
 	return countScored(want, scored), scoreAxes(scored, dims)
 }
 
@@ -1045,9 +1045,9 @@ func countScored(want []string, scored map[string]record.Map) Fraction {
 	return Fraction{hit, len(want)}
 }
 
-// scoreWiki is the name half of wikiScore.
-func scoreWiki(want []string, dims map[string]int, maps []record.Map, rows []refRow) Fraction {
-	names, _ := wikiScore(want, dims, maps, rows)
+// scoreTuner is the name half of tunerScore.
+func scoreTuner(want []string, dims map[string]int, maps []record.Map, rows []refRow) Fraction {
+	names, _ := tunerScore(want, dims, maps, rows)
 	return names
 }
 

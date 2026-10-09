@@ -10,6 +10,7 @@ flowchart LR
   subgraph corpus[ecu-corpus submodule]
     bin[images/*.bin]
     def[defs/*.json + provenance]
+    cats[categories.json]
   end
   subgraph win[Windows only]
     exe[ME7Info.exe]
@@ -20,7 +21,9 @@ flowchart LR
   port --> cfg[config/*.yaml]
   bin --> gen[me7info generate]
   cfg --> gen
-  gen --> out[.ecu + .xdf]
+  cats -->|make corpus-bump copies| cfg
+  cats -->|xdfkit publish| tuner[PACK-tuner.xdf]
+  gen --> out[.ecu + tuner .xdf, --full-xdf]
   out --> log[me7logger log] --> csv[CSV]
   out --> par[me7info parity]
   oracle --> par
@@ -29,7 +32,7 @@ flowchart LR
   par -->|definition errors| src
 ```
 
-Stage new originals in the gitignored `testdata/parity/incoming/`. Definitions are fixed and published in the corpus with xdfkit, then pulled with `make corpus-bump`. ME7Info's `.ecu` output for each image is the only hard 100% oracle.
+Stage new originals in the gitignored `testdata/parity/incoming/`. Definitions are fixed and published in the corpus with xdfkit. Corpus edits, `categories.json` included, are committed and pushed in the full clone `../ecu-corpus`, then pulled with `make corpus-bump`; `corpus/` is a read-only shallow submodule (xdfkit `docs/corpus.md`). ME7Info's `.ecu` output for each image is the only hard 100% oracle.
 
 ## Design
 
@@ -47,6 +50,8 @@ Files load from `./config` when it exists, else the embedded copy. `--core`, `--
 
 `signatures.yaml` rows run top to bottom, and the first row that hits fills a name. Prepended axis counts become rows and columns only when they account for every byte up to the body; never invent a count of 1. Only named maps reach the XDF.
 
+`config/categories.json` is the corpus `categories.json` (xdfkit `docs/corpus.md`), copied by `make corpus-bump`; a test fails when they differ. It files each XDF map under a category. The tuner XDF holds only its names plus the maps their axes link to; `--full-xdf` holds every named map, with the rest under `Other`.
+
 ### Axes on an interpolator call
 
 The body is R12, or R13 page plus R12 low bits. The column header is the first of: an R13 immediate; R15 page with R14 low bits; a RAM load of R14 or R13; the header immediate stored through R12 before `MOV [ram], R4`. A second header loaded near the call is the row; conflicting or missing rows stay unset for `ytable` to fill. A `CALLS` into segment 0 outside the flash image uses the row's own `interp`.
@@ -63,7 +68,7 @@ Images are in the private [ecu-corpus](https://github.com/nyetlabs/ecu-corpus) s
 
 A name hits when it has an address and its listed axes. Each image's definition is its corpus model JSON. Fix definitions in the corpus, not here. `provenance.origin` `damos`/`a2l` is the reference, and a different address is a miss. `hand` or unset is an oracle only: disagreements still hit and are listed under `hand xdf disagrees`.
 
-The tier grade is the highest S4wiki tier where every name hits or is in `names/absent.yaml`. `confidence` is high for bodies under 16 cells or matching a peer in `datasets.yaml` within two cells or 3%, and low for zero bodies unless every peer is zero.
+The tier grade is the highest tier in `names/tuner.yaml` where every name hits or is in `names/absent.yaml`. `confidence` is high for bodies under 16 cells or matching a peer in `datasets.yaml` within two cells or 3%, and low for zero bodies unless every peer is zero.
 
 ## Version
 

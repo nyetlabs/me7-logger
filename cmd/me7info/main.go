@@ -80,7 +80,7 @@ Legacy ME7Info parity is the only hard mark, scored one image at a time.
 The catalog column is coverage. The measurement list is the extras
 column on each ECU row.
 
-The names section scores names/s4wiki.yaml on every image, and each
+The names section scores names/tuner.yaml on every image, and each
 other names/*.yaml list on the images of its layout block:
   - A hit is one address and its axes. An axis count of 0 is a scalar,
     so the address alone is the hit. One axis is a curve, two a map.
@@ -100,7 +100,7 @@ name elsewhere is listed under "hand xdf disagrees" for review, since hand
 made files can be wrong. Its x and y axes that have an address are the axis
 column of that section.
 
-The names column scores the S4wiki list. The other names lists of an
+The names column scores the tuner list. The other names lists of an
 image's layout block are scored in the block column.
 `
 
@@ -151,7 +151,8 @@ func cmdGenerate(args []string) error {
 	fs := cli.NewFlagSet("me7info", "generate", "[flags] <image.bin>", "")
 	d := defFlags(fs)
 	out := fs.String("o", "", "ecu output `<file>`, - for stdout (default <image>.ecu)")
-	xdfPath := fs.String("xdf", "", "xdf output `<file>`, - for stdout (default <image>.xdf when maps were located)")
+	xdfPath := fs.String("xdf", "", "tuner xdf output `<file>`, - for stdout (default <image>.xdf when listed maps were located)")
+	fullPath := fs.String("full-xdf", "", "also write every located named map to this xdf `<file>`, - for stdout")
 	scale := fs.String("5120", "auto", "mbar scaling `<mode>`: auto, on, or off")
 	clock := fs.Int("clock", 0, "CPU clock `<MHz>`: 20, 24, 32, or 40; 0 uses config/names.yaml")
 	conn := fs.String("connect", "", "override Connect with `<mode>`, for example SLOW-0x11")
@@ -187,17 +188,20 @@ func cmdGenerate(args []string) error {
 	if res.File.Connect == "" {
 		fmt.Fprintln(os.Stderr, "Connect was not set; add the slow-init needle named in config/names.yaml")
 	}
-	return writeXDF(*xdfPath, imgPath, len(img), res.Maps)
-}
-
-func writeXDF(path, imgPath string, size int, maps []record.Map) error {
-	n := 0
-	for _, m := range maps {
-		if m.Name != "" {
-			n++
+	cats, err := config.LoadCategories("")
+	if err != nil {
+		return err
+	}
+	if *fullPath != "" {
+		if err := writeXDF(*fullPath, imgPath, len(img), res.Maps, cats, false); err != nil {
+			return err
 		}
 	}
-	if n == 0 {
+	return writeXDF(*xdfPath, imgPath, len(img), res.Maps, cats, true)
+}
+
+func writeXDF(path, imgPath string, size int, maps []record.Map, cats map[string]string, tuner bool) error {
+	if xdf.Count(maps, cats, tuner) == 0 {
 		return nil
 	}
 	if path == "" {
@@ -205,14 +209,14 @@ func writeXDF(path, imgPath string, size int, maps []record.Map) error {
 	}
 	title := filepath.Base(imgPath)
 	if path == "-" {
-		return xdf.Write(os.Stdout, title, size, maps)
+		return xdf.Write(os.Stdout, title, size, maps, cats, tuner)
 	}
 	f, err := os.Create(path)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	if err := xdf.Write(f, title, size, maps); err != nil {
+	if err := xdf.Write(f, title, size, maps, cats, tuner); err != nil {
 		return err
 	}
 	fmt.Fprintf(os.Stderr, "wrote %s\n", path)
@@ -286,8 +290,14 @@ func cmdProbe(args []string) error {
 		}
 		named++
 	}
+	cats, err := config.LoadCategories("")
+	if err != nil {
+		return err
+	}
 	fmt.Printf("maps: %d named (%d maps, %d curves, %d scalars), %d unnamed\n",
 		named, grids, curves, scalars, len(res.Maps)-named)
+	fmt.Printf("xdf: %d in the tuner xdf, %d in the full xdf\n",
+		xdf.Count(res.Maps, cats, true), xdf.Count(res.Maps, cats, false))
 	return nil
 }
 

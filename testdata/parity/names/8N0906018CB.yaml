@@ -2,7 +2,7 @@
 # calibration (git 81a885f, testdata/parity/xdf/8N0906018CB-0003.xdf). It
 # is not the CB-0003 software, so its addresses are not used: each name
 # only has to be located as a plausible map on the images in block.
-# Keys are axis counts, as in s4wiki.yaml, which wins when both list a name.
+# Keys are axis counts, as in tuner.yaml, which wins when both list a name.
 block: 1.8T
 names:
   0: [A0, A1, A2, ABGMSIGH, ABOINI, ABOLRAR, ABOMX, ADCC_T_UM, ADKATNF,
