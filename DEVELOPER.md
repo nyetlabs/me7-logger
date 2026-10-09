@@ -197,13 +197,13 @@ A `*-priority.yaml` file is a `tiers` map. The tiers are `S`, `A`, `B`, `C`, and
 
 `xdf/s4wiki/names.yaml` is one name list, scored on every image. The tuner set is <https://s4wiki.com/wiki/Tuning>. It is not a per-CPU list, and not a second 100%.
 
-`xdf/s4wiki/names-priority.yaml` puts every name on that list in one finder tier. It is opinion and does not change a score. Parity fails when a name is missing, repeated, or not on the list.
+`xdf/s4wiki/names-priority.yaml` puts every name on that list in one finder tier. D is the least a finder must locate (stage 1), and S is everything. It is opinion and does not change a score. Parity fails when a name is missing, repeated, or not on the list.
 
-`xdf/s4wiki/absent.yaml` lists, per block in `layouts.yaml`, the names that layout does not have. Only a DAMOS export that omits the name is evidence. Parity fails on an unknown block or a name not on the list. An absent name still misses in the count.
+`xdf/s4wiki/absent.yaml` lists, per block in `layouts.yaml`, the names that layout does not have. A DAMOS export that omits the name is evidence. Without one, a comment says why the name is listed, and it stays until a DAMOS export settles it. Parity fails on an unknown block or a name not on the list. An absent name still misses in the count.
 
-The `tier` grade is the number of tiers complete, counted from S. A tier is complete when each of its names hits or is absent on that image's block. All five tiers complete is `S`. Then `A` is S through C, `B` is S through B, `C` is S and A, and `D` is S only. When S is incomplete the grade is `-`.
+The `tier` grade is the highest name tier complete, counted up from D. A tier is complete when each of its names hits or is absent on that image's block. `D` is stage 1 done and `S` is every name. When D is incomplete the grade is `-`.
 
-A name hits when the locator stores one address and an axis. A count of 0 on that list is a scalar, so the address alone is the hit. Any other body with no axis is a miss. When `xdf/<image>.xdf` contains the name, the body address has to match one row of that file. A DAMOS export lists a map whose axes are stored in front of the body with no axis addresses, at the count header in front of the first axis. That row also matches.
+A name hits when the locator stores one address and an axis. A count of 0 on that list is a scalar, so the address alone is the hit. Any other body with no axis is a miss. When `xdf/<image>.xdf` contains the name, the body address has to match one row of that file. A DAMOS export lists a map whose axes are stored in front of the body with no axis addresses, at the count header in front of the first axis. That row also matches. A row whose 16-bit axis starts on the odd pad byte, with the body right after that axis, puts the body one byte early, so it matches one byte later. A DAMOS row that only matches that way is likely wrong in the export.
 
 The number on the list is how many axes the table has, and those counts are the `axis` column. A count of 0 adds nothing. The denominator is 0 only when every map that hit has a count of 0. A count of 1 is a curve and 2 is a map. A hit on that column is the axis present on the map.
 

@@ -176,6 +176,19 @@ func TestScoreWikiAxisMatchesReference(t *testing.T) {
 	}
 }
 
+func TestReferenceHitPad(t *testing.T) {
+	row := refRow{name: "LAMFA", addr: 0x2B, axes: map[string]axisSig{
+		"x": {id: "x", addr: 0x1F, count: 6, bits: 16},
+	}}
+	if !referenceHit(record.Map{Name: "LAMFA", Addr: 0x2C}, []refRow{row}) {
+		t.Fatal("pad shifted body did not match")
+	}
+	row.axes["x"] = axisSig{id: "x", addr: 0x20, count: 6, bits: 16}
+	if referenceHit(record.Map{Name: "LAMFA", Addr: 0x2D}, []refRow{row}) {
+		t.Fatal("even axis matched one byte later")
+	}
+}
+
 func TestRunLayout(t *testing.T) {
 	dir := t.TempDir()
 	write := func(name, body string) {
@@ -282,7 +295,7 @@ func TestNameGrade(t *testing.T) {
 		hit  string
 		want string
 	}{
-		{"sabcd", "S"}, {"sabc", "A"}, {"sab", "B"}, {"sa", "C"}, {"s", "D"}, {"abcd", "-"}, {"sbcd", "D"},
+		{"sabcd", "S"}, {"abcd", "A"}, {"bcd", "B"}, {"cd", "C"}, {"d", "D"}, {"sabc", "-"}, {"sabd", "D"},
 	} {
 		got := nameGrade(tierOf, func(n string) bool { return strings.Contains(tc.hit, n) })
 		if got != tc.want {

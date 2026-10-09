@@ -1,7 +1,13 @@
-# Names a code layout block (layouts.yaml) does not have. Only a DAMOS export
-# that omits the name is evidence. An image in that block counts the name as
-# hit for the tier grade. It still misses in the s4wiki count.
+# Names a code layout block (layouts.yaml) does not have. A DAMOS export
+# that omits the name is evidence. Without one, the comment says why the name
+# is listed, and the entry stays until a DAMOS export settles it. An image in
+# that block counts the name as hit for the tier grade. It still misses in the
+# s4wiki count.
 absent:
+  # No DAMOS export yet. No map_interp_table8_b call with M's arguments on T,
+  # and the 8D0907551H hand XDF does not have it.
+  22N:
+    - KFVPLGU
   # Not in the 06A906032HF DAMOS export.
   1.8T:
     - CDLSHV

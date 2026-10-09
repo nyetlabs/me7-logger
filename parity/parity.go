@@ -729,9 +729,8 @@ func loadAbsent(dir string, blocks map[string][]string, names map[string]string)
 	return out, nil
 }
 
-// nameGrade is S when every name tier is complete, then A through D as fewer
-// tiers counted from S are complete, and "-" when S is not. A tier is
-// complete when each of its names is hit or absent.
+// nameGrade is the highest name tier complete, counted up from D, or "-"
+// when D is not. A tier is complete when each of its names is hit or absent.
 func nameGrade(tierOf map[string]string, hit func(string) bool) string {
 	done := map[string]bool{}
 	for _, t := range tierOrder {
@@ -742,14 +741,11 @@ func nameGrade(tierOf map[string]string, hit func(string) bool) string {
 			done[t] = false
 		}
 	}
-	k := 0
-	for k < len(tierOrder) && done[tierOrder[k]] {
-		k++
+	grade := "-"
+	for i := len(tierOrder) - 1; i >= 0 && done[tierOrder[i]]; i-- {
+		grade = tierOrder[i]
 	}
-	if k == 0 {
-		return "-"
-	}
-	return tierOrder[len(tierOrder)-k]
+	return grade
 }
 
 // tierRank is the index of label in tierOrder. No tier sorts last.
@@ -894,7 +890,9 @@ type refRow struct {
 // referenceHit is true when this image has no XDF row of that name, or one row
 // has this body address. A DAMOS export lists a table whose axes are stored in
 // front of the body with no axis addresses, at the count header in front of
-// the first axis. The axes are scored on their own.
+// the first axis. A row whose 16-bit axis starts on the odd pad byte and whose
+// body starts where that axis ends is one byte early. The axes are scored on
+// their own.
 func referenceHit(m record.Map, rows []refRow) bool {
 	if len(rows) == 0 {
 		return true
@@ -906,11 +904,22 @@ func referenceHit(m record.Map, rows []refRow) bool {
 			continue
 		}
 		seen = true
-		if row.addr == off || len(row.axes) == 0 && countHeader(m) == row.addr {
+		if row.addr == off || len(row.axes) == 0 && countHeader(m) == row.addr || padShifted(row) && row.addr+1 == off {
 			return true
 		}
 	}
 	return !seen
+}
+
+// padShifted is true when a 16-bit axis of row starts on an odd address and
+// ends at the row body.
+func padShifted(row refRow) bool {
+	for _, a := range row.axes {
+		if a.bits == 16 && a.addr%2 == 1 && a.addr+uint32(2*a.count) == row.addr {
+			return true
+		}
+	}
+	return false
 }
 
 // countHeader is the file offset of the counts in front of the first axis of
