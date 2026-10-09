@@ -13,7 +13,8 @@
 # size      Width in bytes.
 # from      Lowest address to search. Omitted means 0x804000.
 # pattern   Bytes to find. One string, or a list tried in order.
-#           X, x, and ? are nibble wildcards. {name:MID} splices a known
+#           X is a nibble wildcard. [VV/MM] is one byte whose
+#           bits under mask MM equal VV. {name:MID} splices a known
 #           address in EXTP form: page, the name, then the word.
 # open      Find this copy first. The DB00 window around it limits pattern.
 #           The copy has to occur once unless first is set.
@@ -55,6 +56,8 @@
 # table     The hit is the count byte of a breakpoint table.
 # xtable    Column table, by name. Its count has to match cols.
 # ytable    Row table, by name. Its count has to match rows.
+# also      More maps from the same hit. Each copies this row with its own
+#           name and add, and runs right after it.
 #
 # A later row with the same map name fills it only when the earlier window missed.
 
@@ -102,13 +105,13 @@ signatures:
   from: "0x820000"
   # scanKrkte tries F2 FX, then C2 FX.
   pattern:
-  - "F2FXxxxx{rk_w:F2FX}1BXX"
-  - "C2FXxxxx{rk_w:F2FX}1BXX"
+  - "F2FXXXXX{rk_w:F2FX}1BXX"
+  - "C2FXXXXX{rk_w:F2FX}1BXX"
   at: 2
 - name: ftek_w
   size: 1
   after: frkte_w
-  pattern: "F2FXxxxxF2FXxxxx1BXX"
+  pattern: "F2FXXXXXF2FXXXXX1BXX"
   at: 2
   also:
   - name: tevfa_w
@@ -118,124 +121,124 @@ signatures:
   size: 2
   from: "0x820000"
   open: "06F0XX00{ftek_w:F6F4}"
-  pattern: "C2FCxxxxE6FDxxxxE6FExxxxD740XX02C2FFxxxxDAXXxxxx"
+  pattern: "C2FCXXXXE6FDXXXXE6FEXXXXD740XX02C2FFXXXXDAXXXXXX"
   at: -38 # ptrAt(hit - 0x26)
 - name: zwgru
   size: 1
   from: "0x820000"
   open: "{lambts_w:F6F4}080X"
-  pattern: "F3FXxxxx{zwopt:F3FX}21XX"
+  pattern: "F3FXXXXX{zwopt:F3FX}21XX"
   at: 2
 - name: dzwg
   size: 1
   in: zwgru
-  absent: "DA8Xxxxx06F00C00"
+  absent: "DA8XXXXX06F00C00"
   at: 2
   steps:
-  - pattern: "42F4xxxxFD02"
-  - pattern: "22F4xxxx42F4xxxxFD01"
+  - pattern: "42F4XXXXFD02"
+  - pattern: "22F4XXXX42F4XXXXFD01"
     skip: 4
-  - pattern: "42F4xxxxFD02"
+  - pattern: "42F4XXXXFD02"
     skip: 8
-  - pattern: "D2F4xxxxF4AXxxxx0DXX"
+  - pattern: "D2F4XXXXF4AXXXXX0DXX"
     skip: 6
 - name: dzwg
   size: 1
   in: zwgru
   at: 2
   steps:
-  - pattern: "42F4xxxxFD0X"
-  - pattern: "22F4xxxx9D01"
+  - pattern: "42F4XXXXFD0X"
+  - pattern: "22F4XXXX9D01"
     skip: 4
-  - pattern: "42F4xxxxFD0XE128"
+  - pattern: "42F4XXXXFD0XE128"
     skip: 4
-  - pattern: "42F4xxxxFD0XE188"
+  - pattern: "42F4XXXXFD0XE188"
     skip: 4
-  - pattern: "C2F4xxxx684X"
-  - pattern: "D2F4xxxxF4A4xxxx"
+  - pattern: "C2F4XXXX684X"
+  - pattern: "D2F4XXXXF4A4XXXX"
     skip: 4
 - name: detazwbs
   size: 1
   in: zwgru
-  absent: "DA8Xxxxx06F00C00"
+  absent: "DA8XXXXX06F00C00"
   at: -20
   steps:
-  - pattern: "42F4xxxxFD02"
-  - pattern: "22F4xxxx42F4xxxxFD01"
+  - pattern: "42F4XXXXFD02"
+  - pattern: "22F4XXXX42F4XXXXFD01"
     skip: 4
-  - pattern: "42F4xxxxFD02"
+  - pattern: "42F4XXXXFD02"
     skip: 8
-  - pattern: "D2F4xxxxF4AXxxxx0DXX"
+  - pattern: "D2F4XXXXF4AXXXXX0DXX"
     skip: 6
-  - pattern: "E6FCxxxxE6FDxxxxE6FExxxxE6FFxxxxDA8Xxxxx"
+  - pattern: "E6FCXXXXE6FDXXXXE6FEXXXXE6FFXXXXDA8XXXXX"
     skip: 6
-  - pattern: "C2FCxxxxE6FDxxxxE6FExxxxDA8Xxxxx"
+  - pattern: "C2FCXXXXE6FDXXXXE6FEXXXXDA8XXXXX"
     skip: 16
 - name: detazwbs
   size: 1
   in: zwgru
   at: -32
   steps:
-  - pattern: "42F4xxxxFD0X"
-  - pattern: "22F4xxxx9D01"
+  - pattern: "42F4XXXXFD0X"
+  - pattern: "22F4XXXX9D01"
     skip: 4
-  - pattern: "42F4xxxxFD0XE128"
+  - pattern: "42F4XXXXFD0XE128"
     skip: 4
-  - pattern: "42F4xxxxFD0XE188"
+  - pattern: "42F4XXXXFD0XE188"
     skip: 4
-  - pattern: "88508840E6FCxxxxE6FDxxxxE6FExxxxE6FFxxxxDA8Xxxxx"
+  - pattern: "88508840E6FCXXXXE6FDXXXXE6FEXXXXE6FFXXXXDA8XXXXX"
     skip: 4
-  - pattern: "C2F4xxxx684X"
-  - pattern: "D2F4xxxxF4A4xxxx"
+  - pattern: "C2F4XXXX684X"
+  - pattern: "D2F4XXXXF4A4XXXX"
     skip: 4
-  - pattern: "E6FCxxxxE6FDxxxxE6FExxxxE6FFxxxxDA8Xxxxx"
+  - pattern: "E6FCXXXXE6FDXXXXE6FEXXXXE6FFXXXXDA8XXXXX"
     skip: 4
-  - pattern: "C2FCxxxxE6FDxxxxE6FExxxxD740XX02C2FFxxxxDA8Xxxxx"
+  - pattern: "C2FCXXXXE6FDXXXXE6FEXXXXD740XX02C2FFXXXXDA8XXXXX"
     skip: 4
 - name: tabgbts_w
   size: 2
   after: detazwbs
   at: 14
   steps:
-  - pattern: "F2FCxxxxF0D7F2FExxxxF2FFxxxx"
-  - pattern: "E6FCxxxxE6FDxxxx"
+  - pattern: "F2FCXXXXF0D7F2FEXXXXF2FFXXXX"
+  - pattern: "E6FCXXXXE6FDXXXX"
     skip: 4
 - name: detazwbs
   size: 1
   in: zwgru
   at: -32
   steps:
-  - pattern: "42F4xxxxFD0X"
-  - pattern: "22F4xxxx9D01"
+  - pattern: "42F4XXXXFD0X"
+  - pattern: "22F4XXXX9D01"
     skip: 4
-  - pattern: "42F4xxxxFD0XE128"
+  - pattern: "42F4XXXXFD0XE128"
     skip: 4
-  - pattern: "42F4xxxxFD0XE188"
+  - pattern: "42F4XXXXFD0XE188"
     skip: 4
-  - pattern: "C2F4xxxx684X"
-  - pattern: "D2F4xxxxF4A4xxxx"
+  - pattern: "C2F4XXXX684X"
+  - pattern: "D2F4XXXXF4A4XXXX"
     skip: 4
-  - pattern: "D4CXxxxxD4DXxxxxE6FExxxxE6FFxxxxDA8Xxxxx"
+  - pattern: "D4CXXXXXD4DXXXXXE6FEXXXXE6FFXXXXDA8XXXXX"
     skip: 4
-  - pattern: "C2FCxxxxE6FDxxxxE6FExxxxD740XX02C2FFxxxxDA8Xxxxx"
+  - pattern: "C2FCXXXXE6FDXXXXE6FEXXXXD740XX02C2FFXXXXDA8XXXXX"
     skip: 4
 - name: fkhfm
   size: 1
   from: "0x820000"
-  open: "E6FXxxxx{nmot:C2FX}{rl:C2FX}DAXXxxxxF7F8xxxxC0845C74F6F4xxxx"
-  pattern: "E6FCxxxx{nmot:C2FD}{rl:C2FE}{slot:13}"
+  open: "E6FXXXXX{nmot:C2FX}{rl:C2FX}DAXXXXXXF7F8XXXXC0845C74F6F4XXXX"
+  pattern: "E6FCXXXX{nmot:C2FD}{rl:C2FE}{slot:13}"
   at: 18 # ptrAt(hit + 0x12)
 # Second fkhfm site. The address is the F7 F8 word.
 - name: fkhfm
   size: 1
   from: "0x820000"
-  open: "E6FXxxxx{nmot:C2FX}{rl:C2FX}DAXXxxxxF7F8xxxxC2F4xxxxC2F5xxxx0B45"
-  pattern: "F7F8xxxxC2F4xxxxC2F5xxxx0B45"
+  open: "E6FXXXXX{nmot:C2FX}{rl:C2FX}DAXXXXXXF7F8XXXXC2F4XXXXC2F5XXXX0B45"
+  pattern: "F7F8XXXXC2F4XXXXC2F5XXXX0B45"
   at: 2
 - name: ldptv
   size: 2
   from: "0x820000"
-  pattern: "F2FXxxxxF0XXBCFXF2FXxxxxF0XXBCFX"
+  pattern: "F2FXXXXXF0XXBCFXF2FXXXXXF0XXBCFX"
   single: true
   at: 2
   also:
@@ -248,7 +251,7 @@ signatures:
 - name: ldptv
   size: 2
   from: "0x820000"
-  pattern: "F2F4xxxxF054BCF5F2FAxxxxF0BABCFB004A"
+  pattern: "F2F4XXXXF054BCF5F2FAXXXXF0BABCFB004A"
   single: true
   at: 22
   also:
@@ -261,55 +264,55 @@ signatures:
 - name: ldtvr_ptr
   size: 2
   after: ldptv
-  pattern: "E6FCxxxxE6FDxxxxE6FExxxxE6FFxxxxDA8Xxxxx"
+  pattern: "E6FCXXXXE6FDXXXXE6FEXXXXE6FFXXXXDA8XXXXX"
   at: -10
 - name: ldtvr_w
   size: 2
   from: "0x800200"
-  pattern: "E6FCxxxxE6FDxxxxF2FExxxx{ldtvr_ptr:F2FF}DAXXxxxx{ldtvr_ptr:F6F4}"
+  pattern: "E6FCXXXXE6FDXXXXF2FEXXXX{ldtvr_ptr:F2FF}DAXXXXXX{ldtvr_ptr:F6F4}"
   single: true
   at: 10
 - name: ldtvr_w
   size: 2
   from: "0x820000"
-  pattern: "0D02F048F059F6F4xxxxE6FCxxxxE6FD"
+  pattern: "0D02F048F059F6F4XXXXE6FCXXXXE6FD"
   single: true
   at: 8
 - name: ldtvr_w
   size: 2
   from: "0x820000"
-  pattern: "FD03E6F4FF7F0D01F048D740E100F6F4xxxxE6FCxxxxE6FDxxxxF0E4"
+  pattern: "FD03E6F4FF7F0D01F048D740E100F6F4XXXXE6FCXXXXE6FDXXXXF0E4"
   single: true
   at: 16
 - name: plsolr_w
   size: 2
   from: "0x820000"
-  pattern: "20479D01E004D740E100F6F4xxxxE6FCxxxxE6FDxxxxF0E4"
+  pattern: "20479D01E004D740E100F6F4XXXXE6FCXXXXE6FDXXXXF0E4"
   single: true
   at: 12
 # scanLdr tries this uniqueWindow before the F3FX fallback.
 - name: lde_ptr
   size: 1
   from: "0x820000"
-  open: "9AXXxxxx{plsol:C2FX}{pvdkds:C2FX}20XX"
-  pattern: "E6FCxxxxE6FDxxxxE6FExxxxE6FFxxxxDA8Xxxxx"
+  open: "9AXXXXXX{plsol:C2FX}{pvdkds:C2FX}20XX"
+  pattern: "E6FCXXXXE6FDXXXXE6FEXXXXE6FFXXXXDA8XXXXX"
   at: -10
 - name: lde_ptr
   size: 1
   from: "0x820000"
   open: "{plsol:F3FX}{pvdkds:23FX}8DXX"
-  pattern: "E6FCxxxxE6FDxxxxE6FExxxxE6FFxxxxDA8Xxxxx"
+  pattern: "E6FCXXXXE6FDXXXXE6FEXXXXE6FFXXXXDA8XXXXX"
   at: -10
 - name: lde
   size: 1
   from: "0x800200"
-  pattern: "E6FCxxxxD2FDxxxx{lde_ptr:F2FE}DAXXxxxx{lde_ptr:F6F4}"
+  pattern: "E6FCXXXXD2FDXXXX{lde_ptr:F2FE}DAXXXXXX{lde_ptr:F6F4}"
   single: true
   at: 6
 - name: lde
   size: 1
   from: "0x820000"
-  pattern: "F6F4xxxxE6FCxxxxD2FDxxxxF2FExxxxDA00D275F6F4xxxxE6FCxxxxC2FDxxxxF2FExxxxDA00"
+  pattern: "F6F4XXXXE6FCXXXXD2FDXXXXF2FEXXXXDA00D275F6F4XXXXE6FCXXXXC2FDXXXXF2FEXXXXDA00"
   single: true
   at: 10
   also:
@@ -319,14 +322,14 @@ signatures:
 - name: lde
   size: 1
   from: "0x820000"
-  pattern: "E6FC7000D740E100D2FDxxxxF2FE"
+  pattern: "E6FC7X00D740E100D2FDXXXXF2FE"
   single: true
   at: 10
 - name: dzwlam_ptr
   size: 1
   from: "0x820000"
-  open: "{mrfa_w:F2F4}8840{nmot:C2F5}8850E6FXxxxxE6F5xxxx88X088X0"
-  pattern: "E6FCxxxxE6FDxxxxE6FExxxxE6FFxxxxDAXXxxxx"
+  open: "{mrfa_w:F2F4}8840{nmot:C2F5}8850E6FXXXXXE6F5XXXX88X088X0"
+  pattern: "E6FCXXXXE6FDXXXXE6FEXXXXE6FFXXXXDAXXXXXX"
   at: -10
   also:
   - name: dzwlam_ext
@@ -335,31 +338,31 @@ signatures:
 - name: dzwlamfaw
   size: 1
   from: "0x800200"
-  pattern: "E6FCxxxxE6FDxxxxC2FExxxx{dzwlam_ptr:F2FF}DAXXxxxx{dzwlam_ptr:F6F4}"
+  pattern: "E6FCXXXXE6FDXXXXC2FEXXXX{dzwlam_ptr:F2FF}DAXXXXXX{dzwlam_ptr:F6F4}"
   single: true
   at: 10
 - name: dzwlamfaw
   size: 1
   from: "0x800200"
-  pattern: "E6FCxxxxE6FDxxxxD740E100C2FExxxx{dzwlam_ext:F2FF}DAXXxxxx{dzwlam_ext:F6F4}"
+  pattern: "E6FCXXXXE6FDXXXXD740E100C2FEXXXX{dzwlam_ext:F2FF}DAXXXXXX{dzwlam_ext:F6F4}"
   single: true
   at: 14
 - name: wdkbadmn_w
   size: 2
   from: "0x820000"
-  open: "DAXXxxxx{mldmn_w:F6F4}"
-  pattern: "E6FCxxxxE6FDxxxxF2FExxxxF2FFxxxxDA8Xxxxx{mldmn_w:F6FX}"
+  open: "DAXXXXXX{mldmn_w:F6F4}"
+  pattern: "E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDA8XXXXX{mldmn_w:F6FX}"
   at: 10
 - name: wdkbadmx_w
   size: 2
   from: "0x820000"
-  open: "DAXXxxxx{mldmx_w:F6F4}"
-  pattern: "E6FCxxxxE6FDxxxxF2FExxxxF2FFxxxxDA8Xxxxx{mldmx_w:F6FX}"
+  open: "DAXXXXXX{mldmx_w:F6F4}"
+  pattern: "E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDA8XXXXX{mldmx_w:F6FX}"
   at: 10
 - name: wdkbadmx_w
   size: 2
   from: "0x820000"
-  pattern: "E6F40010F6F4xxxx0D04F2F4xxxxF6F4"
+  pattern: "E6F40010F6F4XXXX0D04F2F4XXXXF6F4"
   at: 6
   also:
   - name: wdkbadmn_w
@@ -368,22 +371,22 @@ signatures:
 - name: misopl1_w
   size: 2
   from: "0x820000"
-  open: "{etazwbm:C2FX}C2F4xxxx0BX4F2FXxxxx"
-  pattern: "E6FCxxxxF2FDxxxxF2FExxxx{slot:14}"
+  open: "{etazwbm:C2FX}C2F4XXXX0BX4F2FXXXXX"
+  pattern: "E6FCXXXXF2FDXXXXF2FEXXXX{slot:14}"
   at: 10
 # scanMirl uses this window only when the slot pattern above missed.
 - name: misopl1_w
   size: 2
   from: "0x820000"
-  open: "{etazwbm:C2FX}C2F4xxxx0BX4F2FXxxxx"
-  absent: "E6FCxxxxF2FDxxxxF2FExxxx{slot:14}"
-  pattern: "E6FCxxxxE6FDxxxxF2FExxxxF2FFxxxxDA8Xxxxx"
+  open: "{etazwbm:C2FX}C2F4XXXX0BX4F2FXXXXX"
+  absent: "E6FCXXXXF2FDXXXXF2FEXXXX{slot:14}"
+  pattern: "E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDA8XXXXX"
   at: 14
 - name: uzue
   size: 1
   from: "0x820000"
   # ME7Info uses the E7 F8 FF 00 copy. A D7 40 copy of this tail is a different word.
-  pattern: "E7F8FF00F7F8xxxxE6FCxxxxE6FDxxxxC08EC2FFxxxxDAXXxxxx"
+  pattern: "E7F8FF00F7F8XXXXE6FCXXXXE6FDXXXXC08EC2FFXXXXDAXXXXXX"
   single: true
   at: 6
   also:
@@ -394,7 +397,7 @@ signatures:
 - name: uzue
   size: 1
   from: "0x820000"
-  pattern: "E7F8FF00F7F8xxxxE6FCxxxxC08DC2FExxxxDA00xxxx"
+  pattern: "E7F8FF00F7F8XXXXE6FCXXXXC08DC2FEXXXXDA00XXXX"
   single: true
   at: 6
   also:
@@ -404,53 +407,53 @@ signatures:
 - name: ngfil_w
   size: 2
   after: uzue
-  pattern: "C2FCxxxxE6FDxxxxE6FExxxxD740XX02C2FFxxxxDAXXxxxx"
+  pattern: "C2FCXXXXE6FDXXXXE6FEXXXXD740XX02C2FFXXXXDAXXXXXX"
   at: -32
 # ngfil_w after the C0 8D uzue match.
 - name: ngfil_w
   size: 2
   after: uzue
-  pattern: "C2FCxxxxE6FDxxxxC2FExxxxE6FFxxxxDA00xxxx"
+  pattern: "C2FCXXXXE6FDXXXXC2FEXXXXE6FFXXXXDA00XXXX"
   at: -10
 - name: ngfil
   size: 1
   from: "0x820000"
-  pattern: "C2FCxxxxE6FDxxxxE6FExxxxD7400702C2FFxxxxDA8Xxxxx06F00C00D740E100F6F4xxxx0D04D740E100F68ExxxxA840"
+  pattern: "C2FCXXXXE6FDXXXXE6FEXXXXD7400702C2FFXXXXDA8XXXXX06F00C00D740E100F6F4XXXX0D04D740E100F68EXXXXA840"
   single: true
   at: -42
 - name: ngfil
   size: 1
   from: "0x820000"
-  pattern: "C2FCxxxxE6FDxxxxE6FExxxxD7400902C2FFxxxxDA8Xxxxx06F00C00D740E100F6F4xxxx0D04D740E100F68E"
+  pattern: "C2FCXXXXE6FDXXXXE6FEXXXXD7400902C2FFXXXXDA8XXXXX06F00C00D740E100F6F4XXXX0D04D740E100F68E"
   single: true
   at: -32
 - name: ngfil
   size: 1
-  pattern: "7C97F6F272974820DD05BC820941F7F4xxxx"
+  pattern: "7C97F6F272974820DD05BC820941F7F4XXXX"
   single: true
   at: 16
 - name: tmotrvmx_b2w
   size: 2
   from: "0x820000"
-  open: "{tmot:F3F8}43F8xxxx9D03{tmot:F3F8}0D02"
-  pattern: "E6FCxxxxE6FDxxxxC08EDAXxxxxx"
+  open: "{tmot:F3F8}43F8XXXX9D03{tmot:F3F8}0D02"
+  pattern: "E6FCXXXXE6FDXXXXC08EDAXXXXXX"
   at: -2
 - name: tmotrvmx_b2w
   size: 2
   from: "0x820000"
   # The call word after DA is not 1C 5C on every 4Z7 image. F0 74 is the instruction after it.
-  pattern: "D740E100F7FXxxxxE6FCxxxxE6FDxxxxC08EDAXXXXXXF074"
+  pattern: "D740E100F7FXXXXXE6FCXXXXE6FDXXXXC08EDAXXXXXXF074"
   single: true
   at: 6
 - name: tolc_b2w
   size: 2
   in: tmotrvmx_b2w
-  pattern: "E6FCxxxxE6FDxxxxC2FExxxxDAXXxxxx"
+  pattern: "E6FCXXXXE6FDXXXXC2FEXXXXDAXXXXXX"
   at: 10
 - name: perffilt_w
   size: 2
   from: "0x804000"
-  pattern: "F2FXxxxx42FXxxxxEA80xxxxF6FXxxxx{rl:F3FX}F7FXxxxx{nmot:F3FX}F7FXxxxx"
+  pattern: "F2FXXXXX42FXXXXXEA80XXXXF6FXXXXX{rl:F3FX}F7FXXXXX{nmot:F3FX}F7FXXXXX"
   single: true
   at: 2
   also:
@@ -460,115 +463,115 @@ signatures:
 - name: perffilt_w
   size: 2
   from: "0x804000"
-  pattern: "F2F2xxxxF6F2xxxxC2F3"
+  pattern: "F2F2XXXXF6F2XXXXC2F3"
   single: true
   at: 6
 - name: perffilt_w
   size: 2
   from: "0x804000"
-  pattern: "F6F4xxxxF6F5xxxxF2F2xxxxF6F2xxxxC2F3"
+  pattern: "F6F4XXXXF6F5XXXXF2F2XXXXF6F2XXXXC2F3"
   at: 14
 - name: perfmax_w
   size: 2
   from: "0x804000"
-  pattern: "42FXxxxxEA80xxxxF6FXxxxxF3FXxxxxF7FX"
+  pattern: "42FXXXXXEA80XXXXF6FXXXXXF3FXXXXXF7FX"
   single: true
   at: 2
 - name: dns_ptr
   size: 1
   from: "0x820000"
   pattern:
-  - "E6FCxxxxE6FDxxxxF2FExxxxF2FFxxxxDA005678F0C4xxxx"
-  - "E6FCxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}F1C803FCxxxx5D03"
+  - "E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDA005678F0C4XXXX"
+  - "E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}F1C803FCXXXX5D03"
   single: true
   at: 14
 - name: dns
   size: 1
   from: "0x800200"
-  pattern: "E6FCxxxxD2FDxxxx{dns_ptr:F2FE}DAXXxxxx{dns_ptr:F6F4}"
+  pattern: "E6FCXXXXD2FDXXXX{dns_ptr:F2FE}DAXXXXXX{dns_ptr:F6F4}"
   single: true
   at: 6
 - name: dns
   size: 1
   from: "0x820000"
-  pattern: "C2FCxxxxE6FDxxxxE6FExxxxD2FFxxxxDAXXxxxxF1C8"
+  pattern: "C2FCXXXXE6FDXXXXE6FEXXXXD2FFXXXXDAXXXXXXF1C8"
   single: true
   at: 14
 - name: mifa_ptr
   size: 2
   from: "0x820000"
-  open: "{vfzg:F3FX}43FXxxxx9DXXE6FCxxxxE6FDxxxxF2FExxxxF2FFxxxxDAXXxxxx"
+  open: "{vfzg:F3FX}43FXXXXX9DXXE6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDAXXXXXX"
   first: true
-  pattern: "E6FCxxxxE6FDxxxxF2FExxxxF2FFxxxxDAXXxxxx"
+  pattern: "E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDAXXXXXX"
   at: 14
 # axisAt tries this window before the F6F4 tail below.
 - name: mifa_w
   size: 2
   from: "0x800200"
-  pattern: "E6FCxxxxE6FDxxxxF6FExxxx{mifa_ptr:F2FF}DAXXxxxx{mifa_ptr:F6F4}"
+  pattern: "E6FCXXXXE6FDXXXXF6FEXXXX{mifa_ptr:F2FF}DAXXXXXX{mifa_ptr:F6F4}"
   at: 10
 - name: mifa_w
   size: 2
   from: "0x800200"
-  pattern: "E6FCxxxxF2FDxxxxDAXXxxxx{mifa_ptr:F6F4}"
+  pattern: "E6FCXXXXF2FDXXXXDAXXXXXX{mifa_ptr:F6F4}"
   single: true
   at: 6
 # scanUm's KFMI_UM window. axisAt binds rl_um and nmot_um from these pointers.
 - name: rl_um_ptr
   size: 1
   from: "0x820000"
-  open: "F6FXxxxxF6FXxxxxB1X041XX"
-  pattern: "E6FCxxxxE6FDxxxxF2FExxxxF2FFxxxxDA8Xxxxx"
+  open: "F6FXXXXXF6FXXXXXB1X041XX"
+  pattern: "E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDA8XXXXX"
   at: 10
 - name: nmot_um_ptr
   size: 1
   from: "0x820000"
-  open: "F6FXxxxxF6FXxxxxB1X041XX"
-  pattern: "E6FCxxxxE6FDxxxxF2FExxxxF2FFxxxxDA8Xxxxx"
+  open: "F6FXXXXXF6FXXXXXB1X041XX"
+  pattern: "E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDA8XXXXX"
   at: 14
 - name: rl_um
   size: 1
   from: "0x800200"
-  pattern: "E6FCxxxxE6FDxxxxF6FExxxx{rl_um_ptr:F2FF}DAXXxxxx{rl_um_ptr:F6F4}"
+  pattern: "E6FCXXXXE6FDXXXXF6FEXXXX{rl_um_ptr:F2FF}DAXXXXXX{rl_um_ptr:F6F4}"
   at: 10
 - name: nmot_um
   size: 1
   from: "0x800200"
-  pattern: "E6FCxxxxE6FDxxxxF6FExxxx{nmot_um_ptr:F2FF}DAXXxxxx{nmot_um_ptr:F6F4}"
+  pattern: "E6FCXXXXE6FDXXXXF6FEXXXX{nmot_um_ptr:F2FF}DAXXXXXX{nmot_um_ptr:F6F4}"
   at: 10
 - name: nmot_um
   size: 1
   from: "0x800200"
-  pattern: "E6FCxxxxC2FDxxxxC2FExxxxDA8Xxxxx"
+  pattern: "E6FCXXXXC2FDXXXXC2FEXXXXDA8XXXXX"
   single: true
   at: 10
 - name: rl_um
   size: 1
   from: "0x800200"
-  pattern: "F6F4xxxx9140F6F4xxxxE6FCxxxxC2FDxxxxDA8XxxxxF6F4"
+  pattern: "F6F4XXXX9140F6F4XXXXE6FCXXXXC2FDXXXXDA8XXXXXF6F4"
   at: 16
 - name: wkrmsu_w
   size: 2
   from: "0x820000"
-  pattern: "F2F4xxxx02F4xxxx9D02E6F4FFFFF6F4xxxxF2F5xxxx8850"
+  pattern: "F2F4XXXX02F4XXXX9D02E6F4FFFFF6F4XXXXF2F5XXXX8850"
   single: true
   at: 16
 - name: wkrmsu_w
   size: 2
   from: "0x820000"
-  pattern: "F2F4xxxxD740E10002F4xxxx9D02E6F4FFFFD740E100F6F4xxxxF2F5xxxx8850"
+  pattern: "F2F4XXXXD740E10002F4XXXX9D02E6F4FFFFD740E100F6F4XXXXF2F5XXXX8850"
   single: true
   at: 24
 - name: wkrmsu_w
   size: 2
   from: "0x820000"
-  pattern: "F6F4xxxxD740E100F2F5xxxxD740E10002F5xxxx9D02E6F5FFFFD740E100F6F5xxxx"
+  pattern: "F6F4XXXXD740E100F2F5XXXXD740E10002F5XXXX9D02E6F5FFFFD740E100F6F5XXXX"
   single: true
   at: 32
 - name: wkrmsu_w
   size: 2
   from: "0x820000"
-  pattern: "DA004276F6F4xxxxF2F5xxxx02F5xxxx9D02E6F5FFFFF6F5xxxx"
+  pattern: "DA004276F6F4XXXXF2F5XXXX02F5XXXX9D02E6F5FFFFF6F5XXXX"
   single: true
   at: 24
 # scanLdrxn binds tsel from ptrAt(hit+2) inside the rlmx_w window.
@@ -576,18 +579,18 @@ signatures:
   size: 1
   from: "0x820000"
   open: "{rlmx_w:F6XX}"
-  pattern: "F7FXxxxxE6FCxxxxE6FDxxxxC2FExxxxC0XFDA8Xxxxx"
+  pattern: "F7FXXXXXE6FCXXXXE6FDXXXXC2FEXXXXC0XFDA8XXXXX"
   at: 2
 - name: tsel
   size: 1
   from: "0x820000"
-  pattern: "E6FCxxxxE6FDxxxxC2FExxxxD740E100C2FFxxxxDA8XxxxxXXXXD740E100C2FX"
+  pattern: "E6FCXXXXE6FDXXXXC2FEXXXXD740E100C2FFXXXXDA8XXXXXXXXXD740E100C2FX"
   single: true
   at: 18
 - name: imlatm
   size: 1
   from: "0x820000"
-  pattern: "C2FCxxxxE6FDxxxxE6FExxxxD740XX02C2FFxxxxDA8Xxxxx06F00C00D0845C7498507C15"
+  pattern: "C2FCXXXXE6FDXXXXE6FEXXXXD740XX02C2FFXXXXDA8XXXXX06F00C00D0845C7498507C15"
   single: true
   at: -42
   also:
@@ -598,15 +601,15 @@ signatures:
 - name: ldimxak_w
   size: 2
   from: "0x820000"
-  pattern: "F2FCxxxxE6FDxxxxE6FExxxxD740XX02F2FFxxxxDA8Xxxxx"
+  pattern: "F2FCXXXXE6FDXXXXE6FEXXXXD740XX02F2FFXXXXDA8XXXXX"
   single: true
   at: -32
 # scanStart KFSZT window.
 - name: ub
   size: 1
   from: "0x820000"
-  open: "{nmot_w:F2F4}46F47017EDXXE6FCxxxxE6FDxxxxC2FExxxxDAXXxxxx"
-  pattern: "E6FCxxxxE6FDxxxxC2FExxxxC2FFxxxxDAXXxxxx"
+  open: "{nmot_w:F2F4}46F47017EDXXE6FCXXXXE6FDXXXXC2FEXXXXDAXXXXXX"
+  pattern: "E6FCXXXXE6FDXXXXC2FEXXXXC2FFXXXXDAXXXXXX"
   at: 10
   also:
   - name: nmot
@@ -616,7 +619,7 @@ signatures:
 - name: toelk_w
   size: 2
   from: "0x820000"
-  pattern: "E6FCxxxxE6FDxxxxD740E100F2FExxxxDAXXxxxx"
+  pattern: "E6FCXXXXE6FDXXXXD740E100F2FEXXXXDAXXXXXX"
   single: true
   at: 10
 # scanLdrapp KFLDRAPP window.
@@ -625,7 +628,7 @@ signatures:
   from: "0x820000"
   open: "{ldtvm:F7F8}"
   first: true
-  pattern: "E6FCxxxxE6FDxxxxC2FExxxxC2FFxxxxDAXXxxxx"
+  pattern: "E6FCXXXXE6FDXXXXC2FEXXXXC2FFXXXXDAXXXXXX"
   at: 14
   also:
   - name: nmot
@@ -634,12 +637,12 @@ signatures:
 - name: imlatm
   size: 1
   from: "0x820000"
-  pattern: "E6FCxxxxE6FDxxxxD740E100C2FExxxxDA8XxxxxD740E100F7F8"
+  pattern: "E6FCXXXXE6FDXXXXD740E100C2FEXXXXDA8XXXXXD740E100F7F8"
   at: 14
 - name: tnst
   size: 1
   from: "0x820000"
-  pattern: "E6F3FFFFB83046F3FF00FD03F78Fxxxx"
+  pattern: "E6F3FFFFB83046F3FF00FD03F78FXXXX"
   single: true
   at: 14
 # scanDlul binds dplsplsdn 14 bytes before this window when the E6FC
@@ -647,30 +650,30 @@ signatures:
 - name: dplsplsdn
   size: 2
   from: "0x820000"
-  open: "E6FCxxxxE6FDxxxx{nmot:C2FE}{wdkba:C2FF}DA8Xxxxx"
-  absent: "E6FCxxxxE6FDxxxxC2FExxxxC2FFxxxxDA8Xxxxx"
-  pattern: "88508840D740XXXXC2FCxxxxE6FDxxxxE6FExxxxDA8Xxxxx0806"
+  open: "E6FCXXXXE6FDXXXX{nmot:C2FE}{wdkba:C2FF}DA8XXXXX"
+  absent: "E6FCXXXXE6FDXXXXC2FEXXXXC2FFXXXXDA8XXXXX"
+  pattern: "88508840D740XXXXC2FCXXXXE6FDXXXXE6FEXXXXDA8XXXXX0806"
   at: -14
 # scanFwl's first segment pattern. rlp_w is not in the catalog.
 - name: rlp_w
   size: 2
   from: "0x820000"
-  pattern: "E6FCxxxxF2FDxxxxE6FE1X00DAXXxxxx7C14F05X00545D0X"
+  pattern: "E6FCXXXXF2FDXXXXE6FE1X00DAXXXXXX7C14F05X00545D0X"
   single: true
   at: 6
 - name: rlp_w
   size: 2
   from: "0x820000"
-  absent: "E6FCxxxxF2FDxxxxE6FE1X00DAXXxxxx7C14F05X00545D0X"
-  pattern: "E6FCxxxxF2FDxxxxE6FE1F00DAXXxxxxF05X7C14"
+  absent: "E6FCXXXXF2FDXXXXE6FE1X00DAXXXXXX7C14F05X00545D0X"
+  pattern: "E6FCXXXXF2FDXXXXE6FE1F00DAXXXXXXF05X7C14"
   single: true
   at: 6
 # scanKlf rebinds nmot and rl from this window when both are already stored.
 - name: nmot
   size: 1
   from: "0x820000"
-  open: "06F480018840E6FCxxxxE6FDxxxx{nmot:C2FE}{rl:C2FF}DA8Xxxxx"
-  pattern: "E6FCxxxxE6FDxxxxC2FExxxxC2FFxxxxDAXXxxxx"
+  open: "06F480018840E6FCXXXXE6FDXXXX{nmot:C2FE}{rl:C2FF}DA8XXXXX"
+  pattern: "E6FCXXXXE6FDXXXXC2FEXXXXC2FFXXXXDAXXXXXX"
   at: 10
   also:
   - name: rl
@@ -679,123 +682,131 @@ signatures:
 - name: detazwbs
   size: 1
   from: "0x804000"
-  pattern: "D740E100F7FAxxxx9A44"
+  pattern:
+  - "D740E100F7FAXXXX9A44"
+  - "D740E100F7FAXXXX9A420A70"
   single: true
   at: 6
 - name: dzwg
   size: 1
   from: "0x804000"
-  pattern: "D740E100F78Exxxx0D06F480"
+  pattern: "D740E100F78EXXXX0D06F480"
   single: true
   at: 6
 - name: fkhfm
   size: 1
   from: "0x800200"
-  pattern: "F6F5A0E0E118xxxx9CE0"
+  pattern: "F6F5A0E0E118XXXX9CE0"
   single: true
   at: 6
 - name: misopl1_w
   size: 2
   from: "0x804000"
-  pattern: "0EFE3D03F68Fxxxx0D19"
+  pattern: "0EFE3D03F68FXXXX0D19"
   single: true
   at: 6
 - name: ngfil_w
   size: 2
   from: "0x804000"
-  pattern: "F2F008E4F2F5xxxx7D01"
+  pattern: "F2F008E4F2F5XXXX7D01"
   single: true
   at: 6
 - name: tsel
   size: 1
   from: "0x804000"
-  pattern: "D740E100C2FFxxxxDA83243FD740E100C2F5"
+  pattern: "D740E100C2FFXXXXDA83243FD740E100C2F5"
   single: true
   at: 6
 - name: tsrldyn
   size: 1
   from: "0x804000"
-  pattern: "0D03F049F7F8xxxxF3F8"
+  pattern: "0D03F049F7F8XXXXF3F8"
   single: true
   at: 6
 - name: uzue
   size: 1
   from: "0x804000"
-  pattern: "E7F8FF00F7F8xxxxE6FC"
+  pattern: "E7F8FF00F7F8XXXXE6FC"
   single: true
   at: 6
 - name: zwgru
   size: 1
   from: "0x804000"
-  pattern: "88908880D2F4xxxxD2F5"
+  pattern: "88908880D2F4XXXXD2F5"
   single: true
   at: 6
 - name: gangllr
   size: 1
   from: "0x804000"
-  pattern: "F3F8xxxxD740E100F7F8xxxx0D04D740E100F78ExxxxE6FC"
+  pattern: "F3F8XXXXD740E100F7F8XXXX0D04D740E100F78EXXXXE6FC"
   single: true
   at: 10
 - name: fcmEnd
   size: 1
   from: "0x804000"
-  pattern: "0D0509C143FCxxxxEA804ADC"
+  pattern: "0D0509C143FCXXXXEA804ADC"
   single: true
   at: 6
+- name: fcmEnd
+  size: 1
+  from: "0x804000"
+  pattern: "74E00D0509C143FCXXXXEA80"
+  single: true
+  at: 8
 - name: tevfakge_w
   size: 2
   from: "0x804000"
-  pattern: "C695F2F474E09AF402E0EA00xxxxF3F8"
+  pattern: "C695F2F474E09AF402E0EA00XXXXF3F8"
   single: true
   at: 12
 - name: tmotrvmx_b2w
   size: 2
   from: "0x804000"
-  pattern: "D740E100F7F8xxxxE6FC181D"
+  pattern: "D740E100F7F8XXXXE6FC181D"
   single: true
   at: 6
 - name: pvdkdsu_w
   size: 2
   from: "0x804000"
-  pattern: "9D01E005D740E100F6F5xxxxF6F5DC93"
+  pattern: "9D01E005D740E100F6F5XXXXF6F5DC93"
   at: 10
 # signVars stores pvdkds from this window when the pvdks_w chain missed.
 - name: pvdkds
   size: 1
   from: "0x804000"
-  pattern: "{pvdkds_w:F2FX}7C8XF7FXxxxx"
+  pattern: "{pvdkds_w:F2FX}7C8XF7FXXXXX"
   at: 8
 - name: frkte_w
   size: 1
   from: "0x804000"
   pattern:
-  - "EA009621C2F4xxxxF2F5"
-  - "EA00xxxxC2F4xxxxF2F5"
-  - "E6F5FFFFF7FAxxxxC2FCEC1D"
+  - "EA009621C2F4XXXXF2F5"
+  - "EA00XXXXC2F4XXXXF2F5"
+  - "E6F5FFFFF7FAXXXXC2FCEC1D"
   single: true
   at: 6
 - name: ftek_w
   size: 1
   from: "0x804000"
-  pattern: "E6F40080F6F4xxxxE6F50080F6F562A2"
+  pattern: "E6F40080F6F4XXXXE6F50080F6F562A2"
   single: true
   at: 6
 - name: tevfa_w
   size: 1
   from: "0x804000"
-  pattern: "1B54F2FF0CFEF2FE0EFE46FF1F003D0246FEE0FFFD03F68Fxxxx0D09"
+  pattern: "1B54F2FF0CFEF2FE0EFE46FF1F003D0246FEE0FFFD03F68FXXXX0D09"
   single: true
   at: 24
 - name: tevfakge_w
   size: 2
   from: "0x804000"
-  pattern: "F2F46AA2F6F4xxxx4840"
+  pattern: "F2F46AA2F6F4XXXX4840"
   single: true
   at: 6
 - name: uhfm_w
   size: 2
   from: "0x804000"
-  pattern: "66F1FF03F6F1xxxxF2F4"
+  pattern: "66F1FF03F6F1XXXXF2F4"
   single: true
   at: 6
 - name: wkrmdy_w
@@ -803,22 +814,22 @@ signatures:
   from: "0x804000"
   # The mov r12 immediate is 04 01, or 26 01 on the 512K 06A file.
   pattern:
-  - "E6FC0401F2FDxxxxF2FE"
-  - "E6FC2601F2FDxxxxF2FE"
+  - "E6FC0401F2FDXXXXF2FE"
+  - "E6FC2601F2FDXXXXF2FE"
   single: true
   at: 6
 - name: wkrmstat_w
   size: 2
   from: "0x804000"
   pattern:
-  - "E6FCF200F2FDxxxxF2FE"
-  - "E6FC1401F2FDxxxxF2FE"
+  - "E6FCF200F2FDXXXXF2FE"
+  - "E6FC1401F2FDXXXXF2FE"
   single: true
   at: 6
 - name: zwoutar_0
   size: 1
   from: "0x800200"
-  pattern: "E6FC6000E6FDxxxx998D"
+  pattern: "E6FC6000E6FDXXXX998D"
   single: true
   at: 6
   also:
@@ -834,36 +845,67 @@ signatures:
 # fkhfm on F22ig, loaded through DPP2.
 - name: fkhfm
   size: 1
-  pattern: "1273F7F8xxxxC2F4058B"
+  pattern: "1273F7F8XXXXC2F4058B"
   single: true
   at: 4
 - name: ftek_w
   size: 1
-  pattern: "E6F40080F6F4xxxxDB009A4A55B0"
+  pattern: "E6F40080F6F4XXXXDB009A4A55B0"
   single: true
   at: 6
 - name: tevfakge_w
   size: 2
-  pattern: "F2F438A1F6F4xxxx48403D05"
+  pattern: "F2F438A1F6F4XXXX48403D05"
   single: true
   at: 6
 - name: uhfm_w
   size: 2
-  pattern: "66F2FF03F6F2xxxxF2F404F8"
+  pattern: "66F2FF03F6F2XXXXF2F404F8"
   single: true
   at: 6
 # uhfm_w is the word after F2 FX in the KRKTE scan.
 - name: uhfm_w
   size: 2
   from: "0x804000"
-  pattern: "F2FXxxxx7C1X5C1XD4XXxxxx"
+  pattern: "F2FXXXXX7C1X5C1XD4XXXXXX"
   single: true
   at: 2
 
 mapsigs:
+# 22N fault path class table, read as [Rw + 0x073B]. 22N has one more path
+# before these than 22m, so each index is one past the 22m index. The rows
+# come first because the 22m rows below also hit 22N at other addresses.
+- name: CLAATR
+  pattern: "F4800A00C084F4A43B07E4A0"
+  at: 8
+  add: 4
+  also:
+  - name: CLAATR2
+    add: 5
+  - name: CLAATS
+    add: 8
+  - name: CLAATS2
+    add: 9
+  - name: CLAHSH
+    add: 68
+  - name: CLAHSH2
+    add: 69
+  - name: CLAHSHE
+    add: 70
+  - name: CLAHSHE2
+    add: 71
+  - name: CLALSH
+    add: 107
+  - name: CLALSH2
+    add: 108
 - name: ESKONF
   pattern: "510DBD0C8D0CXXXX8711E310"
   at: 6
+# Every ME7 checks one ESKONF byte against 0x55 this way. The byte is the
+# first of ESKONF only on these 06A images.
+- name: ESKONF
+  pattern: "8880887088602804F3F84F0C47F85500"
+  at: 10
 - name: KLDMASRL
   pattern: "060242F474359D02XXXX0D0FF2F46A9D"
   at: 8
@@ -894,6 +936,9 @@ mapsigs:
 - name: CLAHSH
   pattern: "9413F00350A00014XXXX303030C0"
   at: 8
+  also:
+  - name: CLAHSH2
+    add: 1
 - name: CLAHSHE
   pattern: "80001C678000XXXX8000D461"
   at: 6
@@ -1117,6 +1162,66 @@ mapsigs:
 - name: KFLF
   pattern: "C2F4XXXX5C84F6F438A3"
   add: 31
+# Variant byte times 4 indexes a far pointer table; the indexes are pushed
+# as R4 and R5 first.
+- name: KFFWL_0_A
+  pattern: "F2F4XXXX8840F2F5XXXX8850C2F2XXXX5C22D4C2XXXXD4D2XXXXE6FEXXXXE6FFXXXXDA82"
+  at: 20
+  deref: 1
+  dereffar: true
+  rows: 12
+  cols: 12
+  xat: 2
+  yat: 8
+- name: KFFWL_1_A
+  pattern: "F2F4XXXX8840F2F5XXXX8850C2F2XXXX5C22D4C2XXXXD4D2XXXXE6FEXXXXE6FFXXXXDA82"
+  at: 20
+  deref: 1
+  derefat: 4
+  dereffar: true
+  rows: 12
+  cols: 12
+  xat: 2
+  yat: 8
+- name: KFLBTS_0_A
+  pattern: "F2FFXXXXDA82XXXXD740XXXXF6F4XXXXD740XXXXF2F5XXXX88508840C2F2XXXX5C22D4C2XXXXD4D2XXXXE6FEXXXXE6FFXXXXDA82"
+  at: 36
+  deref: 1
+  dereffar: true
+  rows: 12
+  cols: 16
+  ybits: 16
+  xat: 22
+  yat: 2
+- name: KFFWL_0_A
+  pattern: "F2F4XXXX8840F2F5XXXX8850C2F2XXXX5C22D4C2XXXXD4D2XXXXE6FEXXXXE6FFXXXXDA80XXXX0804F7F8XXXXE6FCXXXXE6FD0602"
+  at: 20
+  deref: 1
+  dereffar: true
+  rows: 12
+  cols: 12
+  xat: 2
+  yat: 8
+- name: KFFWL_1_A
+  pattern: "F2F4XXXX8840F2F5XXXX8850C2F2XXXX5C22D4C2XXXXD4D2XXXXE6FEXXXXE6FFXXXXDA80XXXX0804F7F8XXXXE6FCXXXXE6FD0602"
+  at: 20
+  deref: 1
+  derefat: 4
+  dereffar: true
+  rows: 12
+  cols: 12
+  xat: 2
+  yat: 8
+- name: KFLBTS_0_A
+  pattern: "F2FFXXXXDA80XXXXD740XXXXF6F4XXXXD740XXXXF2F5XXXX88508840C2F2XXXX5C22D4C2XXXXD4D2XXXXE6FEXXXXE6FFXXXXDA80"
+  at: 36
+  deref: 1
+  dereffar: true
+  rows: 12
+  cols: 16
+  ybits: 16
+  xat: 22
+  yat: 2
 - name: KFFWL_0_A
   pattern: "D7400602C2F4XXXX68412D06C0E45C14C2F5XX0F"
   at: 6
@@ -1146,12 +1251,11 @@ mapsigs:
 - name: CLAATR
   pattern: "C2F4XXXX68412D09E6F4"
   add: 58
-- name: CLAATR2
-  pattern: "C2F4XXXX68412D09E6F4"
-  add: 59
-- name: CLAATS
-  pattern: "C2F4XXXX68412D09E6F4"
-  add: 62
+  also:
+  - name: CLAATR2
+    add: 59
+  - name: CLAATS
+    add: 62
 - name: CLALSH2
   pattern: "E6F4XXXXF6F4268F0D05"
   add: 24
@@ -1203,10 +1307,6 @@ mapsigs:
   rows: 15
   cols: 6
   xbits: 16
-- name: CLAHSH2
-  pattern: "9413F00350A00014XXXX303030C0"
-  at: 8
-  add: 1
 - name: CLAHSHE2
   pattern: "380E80001C678000XXXX8000D461"
   at: 8
@@ -1284,8 +1384,55 @@ mapsigs:
   pattern: "E6F4XXXXF6F4DEA4F6F4"
   add: 1
 - name: KFVPLGU
+  pattern: "DB00F2F4XXXX8840F2F5XXXX8850E6FCXXXXE6FDXXXXE6FEXXXXE6FFXXXXDA82XXXX08048840F2F4"
+  at: 16
+  frame: true
+  rows: 16
+  cols: 8
+  ybits: 16
+  xat: 4
+  yat: 10
+- name: KFVPLGU
   pattern: "C2FFXXXXDA823C6806F00C00D740E100F6F4BC0C"
   add: 63
+# 4Z7 T calls these through a segment 0 entry that is not in the flash
+# image, so the interpolation needles never see them. R14 and R15 are
+# the RAM words whose setup stored the row and column headers.
+- name: KFMRES
+  pattern: "0D0CE6FCXXXXE6FDXXXXF2FEF489F2FFEA89DA00CC2A"
+  at: 4
+  xat: 16
+  yat: 12
+- name: KFMRESK
+  pattern: "9D0DE6FCXXXXE6FDXXXXF2FEF489F2FFEA89DA00CC2A"
+  at: 4
+  xat: 16
+  yat: 12
+- name: KFZWOP
+  pattern: "F6F422A5E6FCXXXXE6FDXXXXF2FE0A8AF2FF1EA5DA00242B"
+  at: 6
+  xat: 18
+  yat: 14
+- name: KFZWOP2
+  pattern: "F1E8E6FCXXXXE6FDXXXXF2FE0A8AF2FF1EA5DA00242B"
+  at: 4
+  xat: 16
+  yat: 12
+- name: KFZW
+  pattern: "3D0FE6FCXXXXE6FDXXXXF2FE0E8AF2FF1E8ADA00242B"
+  at: 4
+  xat: 16
+  yat: 12
+- name: KFZW2
+  pattern: "3D10E6FCXXXXE6FDXXXXF2FE0E8AF2FF1E8ADA00242B"
+  at: 4
+  xat: 16
+  yat: 12
+- name: KFZWWLNM
+  pattern: "C088E6FCXXXXE6FDXXXXF2FEFE89F2FF288ADA00242B"
+  at: 4
+  xat: 16
+  yat: 12
 - name: KFMRES
   pattern: "0D0CE6FCXXXXE6FD8831"
   at: 4
@@ -1321,10 +1468,31 @@ mapsigs:
 - name: WDKUGDN
   pattern: "E6FCXXXXF2FDB889"
 - name: KFMIRL
+  pattern: "0D09E6FCXXXXF2FDXXF8F2FE"
+  at: 4
+  add: 68
+  rows: 16
+  cols: 16
+  ybits: 16
+  xbits: 16
+- name: KFMIRL
+  pattern: "B89FE6FCXXXXF2FD"
+  at: 4
+  add: 68
+  cols: 16
+  rows: 16
+  xbits: 16
+  ybits: 16
+- name: KFMIRL
   pattern: "F048XXXX0804"
   add: 28
+  rows: 16
+  cols: 16
+  ybits: 16
+  xbits: 16
 - name: TVUB
   pattern: "E6FEXXXXC2FF1486"
+  cols: 5
 - name: FBSTABGM
   pattern: "42F4XXXXDD05D740070242F4782EAD02DF3D"
   add: 14
@@ -1338,9 +1506,12 @@ mapsigs:
 - name: FWFTBRTA
   pattern: "C2F4XXXX6842EA20BC05"
   add: 59
+  cols: 14
 - name: KFFWTBR
   pattern: "C2F4XXXX6842EA20BC05"
   add: 110
+  rows: 10
+  cols: 8
 - name: KFLF
   pattern: "F3F8XXXXD740E100F7F8B208D7400602"
   add: 31
@@ -1350,12 +1521,14 @@ mapsigs:
 - name: KFLAFWL
   pattern: "C2F5XXXX66F540003D07"
   add: 8
-- name: KFLAMKR
-  pattern: "C2F5XXXX66F540003D07"
-  add: 56
-- name: KFLAMKRL
-  pattern: "C2F5XXXX66F540003D07"
-  add: 92
+  also:
+  - name: KFLAMKR
+    add: 56
+  - name: KFLAMKRL
+    add: 92
+  - name: CWLAMFAW
+  - name: ZKWLAFWL
+    add: 166
 - name: KFLBTS_0_A
   pattern: "C2F4XXXX6842EA20BED9"
   add: 385
@@ -1365,17 +1538,20 @@ mapsigs:
 - name: KRFKLN
   pattern: "F3F8XXXXD7400602F3FAFB1B"
   add: 17
+  also:
+  - name: KRANH
 - name: KFLDIOPU
   pattern: "DD1CD7400602C2F7XXXX"
   at: 8
   add: 1
-- name: KFWPLGTA
-  pattern: "DD1CD7400602C2F7XXXX"
-  at: 8
-  add: 65
+  also:
+  - name: KFWPLGTA
+    add: 65
 - name: LDIATA
   pattern: "F3F8XXXXD7400602F3FCB91F"
   add: 1
+  also:
+  - name: LDHIA
 - name: NLDIAPU
   pattern: "43F6XXXXFD024F4D"
   add: 4
@@ -1388,9 +1564,9 @@ mapsigs:
 - name: LDORXN
   pattern: "43F8XXXX9D040981F7F810A3"
   add: 1
-- name: LDPBN
-  pattern: "43F8XXXX9D040981F7F810A3"
-  add: 9
+  also:
+  - name: LDPBN
+    add: 9
 - name: KFLDRAPP
   pattern: "F3F8XXXXD740E100F7F82609"
   add: 19
@@ -1402,9 +1578,12 @@ mapsigs:
   pattern: "42A3D7400602C2F4XXXX"
   at: 8
   add: 107
+  rows: 10
+  cols: 12
 - name: NDLDRAPU
   pattern: "43F8XXXXFD10F3FA3CA3"
   add: 4
+  cols: 2
 - name: KFNLLNST
   pattern: "43F8XXXX9D040981F7F838A3"
   add: 200
@@ -1423,9 +1602,9 @@ mapsigs:
 - name: KFPBRK
   pattern: "F2FCXXXXF0D2F2FE"
   add: 46
-- name: KFPBRKNW
-  pattern: "F2FCXXXXF0D2F2FE"
-  add: 290
+  also:
+  - name: KFPBRKNW
+    add: 290
 - name: KFWDKMSN
   pattern: "F2FCXXXXE6FD3827"
   add: 66
@@ -1438,9 +1617,13 @@ mapsigs:
 - name: DLAMTANS
   pattern: "C2FCXXXXE6FD2B2D"
   add: 5
+  cols: 4
 - name: LAMFA
   pattern: "C2FFXXXXDA824A6706F00C00C0845C54"
-  add: 28
+  add: 29
+  rows: 15
+  cols: 6
+  xbits: 16
 - name: KFLDIMX
   pattern: "F2FFXXXXDA825A6606F00C00E005"
   add: 32
@@ -1453,42 +1636,45 @@ mapsigs:
 - name: LDRQ1DY
   pattern: "F2F4XXXXF6F4FAA2"
   add: 2
-- name: LDRQ1ST
-  pattern: "F2F4XXXXF6F4FAA2"
-  add: 34
+  also:
+  - name: LDRQ1ST
+    add: 34
+  - name: LDRQ0S
+- name: KFFLLDE
+  pattern: "D740E100F6F4XXXXF2F5XXXX8850F2F2XXXX8820E6FCXXXXE6FDXXXXE6FEXXXXE6FFXXXXDA82XXXX0804F084"
+  at: 22
+  frame: true
+  rows: 8
+  cols: 8
+  xbits: 16
+  ybits: 16
+  xat: 10
+  yat: 16
 - name: KFFLLDE
   pattern: "F2F4XXXXD740E100F6F45414"
   add: 172
 - name: CLAATR
   pattern: "C2FCXXXXE6FD0100"
   add: 56
-- name: CLAATR2
-  pattern: "C2FCXXXXE6FD0100"
-  add: 57
-- name: CLAATS
-  pattern: "C2FCXXXXE6FD0100"
-  add: 60
-- name: CLAATS2
-  pattern: "C2FCXXXXE6FD0100"
-  add: 61
-- name: CLAHSH
-  pattern: "C2FCXXXXE6FD0100"
-  add: 122
-- name: CLAHSH2
-  pattern: "C2FCXXXXE6FD0100"
-  add: 123
-- name: CLAHSHE
-  pattern: "C2FCXXXXE6FD0100"
-  add: 124
-- name: CLAHSHE2
-  pattern: "C2FCXXXXE6FD0100"
-  add: 125
-- name: CLALSH
-  pattern: "C2FCXXXXE6FD0100"
-  add: 160
-- name: CLALSH2
-  pattern: "C2FCXXXXE6FD0100"
-  add: 161
+  also:
+  - name: CLAATR2
+    add: 57
+  - name: CLAATS
+    add: 60
+  - name: CLAATS2
+    add: 61
+  - name: CLAHSH
+    add: 122
+  - name: CLAHSH2
+    add: 123
+  - name: CLAHSHE
+    add: 124
+  - name: CLAHSHE2
+    add: 125
+  - name: CLALSH
+    add: 160
+  - name: CLALSH2
+    add: 161
 - name: CWDNMAX
   pattern: "C2F4XXXX68412D169AF9"
 - name: NWPMBBR
@@ -1569,42 +1755,31 @@ mapsigs:
   pattern: "C2F4XXXX68413A8888364A880262"
 - name: CWDLSAHK
   pattern: "C2F5XXXX66F510002D1B"
-- name: CWLAMFAW
-  pattern: "C2F5XXXX66F540003D07"
 - name: CATR
   pattern: "C2F4XXXX68412D026F880D016E884A883F60"
 - name: FKHABMN
   pattern: "43F8XXXXED0DE6F4"
 - name: KRALH
   pattern: "F3F8XXXXD740E100F3FA1A09"
-- name: KRANH
-  pattern: "F3F8XXXXD7400602F3FAFB1B"
-- name: LDHIA
-  pattern: "F3F8XXXXD7400602F3FCB91F"
 - name: UMDYLDR
   pattern: "43F8XXXXBD01"
 - name: EDLDRP
   pattern: "43F8XXXXAD16"
 - name: TDLDRA
   pattern: "43F8XXXX9D040981F7F837A3"
-- name: TDLDRA2
-  pattern: "43F8XXXX9D040981F7F837A3"
-  add: 1
+  also:
+  - name: TDLDRA2
+    add: 1
 - name: TULV1
   pattern: "43F8XXXX9D040981F7F836A3"
 - name: CLRHKA
   pattern: "C2F4XXXX68413D07D740E100F3F85A08"
 - name: FKVA
   pattern: "C2F2XXXX1B42F2F50CFEF2F40EFEE6FA"
-- name: ZKWLAFWL
-  pattern: "C2F5XXXX66F540003D07"
-  add: 166
 - name: TABGBTS
   pattern: "42F4XXXXFD04E11875F8C586"
 - name: FHOKH
   pattern: "42F4XXXXFD099A35"
-- name: LDRQ0S
-  pattern: "F2F4XXXXF6F4FAA2"
 - name: KFTARX
   pattern: "0D15F2F41AA38840F2F5BA898850E6FCXXXXE6FD"
   at: 16
@@ -1623,12 +1798,15 @@ mapsigs:
   rows: 9
   cols: 10
 - name: DLBTS
-  pattern: "FD07D7400702F2F4XXXXF6F4"
-  at: 8
+  pattern: "5CC27042D7400702XXXXXXXXFD07D7400702F2F4XXXXF6F4"
+  at: 20
   add: 25
+  cols: 8
 - name: KFLDHBN
   anchor: KFTARX
   add: -64
+  rows: 8
+  cols: 8
 - name: KFKHFM
   pattern: "CD0DF3F4XXXXF7F471F8F3F4D40A"
   at: 4
@@ -1696,6 +1874,8 @@ mapsigs:
   pattern: "0602F3F8XXXXD7400602F3FC7D19"
   at: 4
   add: 13
+  also:
+  - name: LDHIA
 - name: KFLDRXO
   pattern: "060243F8XXXXBD019F4D"
   at: 4
@@ -1736,18 +1916,16 @@ mapsigs:
   pattern: "F7F8F28DXXXX22E0C2F4"
   at: 4
   add: 82
-- name: CLAHSHE2
-  pattern: "F7F8F28DXXXX22E0C2F4"
-  at: 4
-  add: 83
+  also:
+  - name: CLAHSHE2
+    add: 83
 - name: CLALSH
   pattern: "8D05E6F4XXXXF6F4788D0D05C2F4A88A"
   at: 4
   add: 15
-- name: CLALSH2
-  pattern: "8D05E6F4XXXXF6F4788D0D05C2F4A88A"
-  at: 4
-  add: 16
+  also:
+  - name: CLALSH2
+    add: 16
 - name: CWDNMAX
   pattern: "F2F4F209XXXXAF11BE11"
   at: 4
@@ -1760,17 +1938,15 @@ mapsigs:
   pattern: "6A0CF20CXXXX700D5A0D"
   at: 4
   add: 3
-- name: DPUPS
-  pattern: "6A0CF20CXXXX700D5A0D"
-  at: 4
-  add: 29
+  also:
+  - name: DPUPS
+    add: 29
 - name: MDIMX
   pattern: "3D05C2F5XXXX5C85C4500600"
   at: 4
-- name: VNMX
-  pattern: "3D05C2F5XXXX5C85C4500600"
-  at: 4
-  add: 14
+  also:
+  - name: VNMX
+    add: 14
 - name: CWMSRCAN
   pattern: "C08CDA00DA1D9890DB002802D180E61AXXXX"
   at: 16
@@ -1791,51 +1967,44 @@ mapsigs:
   pattern: "F7F8C28BXXXX04B0E14A"
   at: 4
   add: 24
-- name: ITNMXH
-  pattern: "F7F8C28BXXXX04B0E14A"
-  at: 4
-  add: 28
-- name: NMAX
-  pattern: "F7F8C28BXXXX04B0E14A"
-  at: 4
-  add: 30
+  also:
+  - name: ITNMXH
+    add: 28
+  - name: NMAX
+    add: 30
 - name: NMAXOG
   pattern: "FF04F2F5XXXXF6F5D28D"
   at: 4
+  also:
+  - name: TNMXH
+    add: 24
 - name: TMOTNMX
   pattern: "0702C2FCXXXXE6FD9D2C"
   at: 4
   add: 74
-- name: TNMXH
-  pattern: "FF04F2F5XXXXF6F5D28D"
-  at: 4
-  add: 24
+  also:
+  - name: VMAXNB
+    add: 82
 - name: CDATS
   pattern: "A90168412D04E01474F4BA8C0D04E6F4FEFF64F4BA8CD7400602C2F4XXXX"
   at: 28
 - name: CDHSH
   pattern: "BA8CD7400602C2F49901"
   at: 8
-- name: CDHSHE
-  pattern: "BA8CD7400602C2F49901"
-  at: 8
-  add: 1
+  also:
+  - name: CDHSHE
+    add: 1
 - name: CDKAT
   pattern: "BA8CD7400602C2F49B01"
   at: 8
   add: 2
-- name: CDLASH
-  pattern: "BA8CD7400602C2F49B01"
-  at: 8
-  add: 4
-- name: CDLATV
-  pattern: "BA8CD7400602C2F49B01"
-  at: 8
-  add: 6
-- name: CDLDP
-  pattern: "BA8CD7400602C2F49B01"
-  at: 8
-  add: 7
+  also:
+  - name: CDLASH
+    add: 4
+  - name: CDLATV
+    add: 6
+  - name: CDLDP
+    add: 7
 - name: CDLSH
   pattern: "FFBF64F4BC8CD7400602C2F4XXXX68412D05E6F41000"
   at: 12
@@ -1865,17 +2034,13 @@ mapsigs:
 - name: KRANH
   pattern: "0602F3F8XXXXD7400602F3FAC115"
   at: 4
-- name: LDHIA
-  pattern: "0602F3F8XXXXD7400602F3FC7D19"
-  at: 4
 - name: TDLDRA
   pattern: "4E3C43F800F89D0CD7400602C2F4XXXX"
   at: 14
   add: 1
-- name: TDLDRA2
-  pattern: "4E3C43F800F89D0CD7400602C2F4XXXX"
-  at: 14
-  add: 2
+  also:
+  - name: TDLDRA2
+    add: 2
 - name: TULV1
   pattern: "060243F8XXXX9D040981F7F88CA60D0B"
   at: 4
@@ -1895,10 +2060,9 @@ mapsigs:
   pattern: "0602F2F2XXXXF2F3268F"
   at: 4
   add: 78
-- name: TABGSS2
-  pattern: "0602F2F2XXXXF2F3268F"
-  at: 4
-  add: 80
+  also:
+  - name: TABGSS2
+    add: 80
 - name: FHOKH
   pattern: "DCEDE004884088908840E6F456E58840D7400702F2F4XXXX"
   at: 22
@@ -1906,10 +2070,6 @@ mapsigs:
 - name: LDRQ0S
   pattern: "0702F2F4XXXXF6F45AA6"
   at: 4
-- name: VMAXNB
-  pattern: "0702C2FCXXXXE6FD9D2C"
-  at: 4
-  add: 82
 - name: KFFWL_1_A
   pattern: "0580F3F8XXXX05F810A5"
   at: 4
@@ -1930,14 +2090,9 @@ mapsigs:
   cols: 10
   ybits: 16
   xbits: 16
-- name: KFPBRKNW
-  pattern: "86140D04D740E100F3FCBD08D7400602F2FCXXXX"
-  at: 18
-  add: 316
-  rows: 10
-  cols: 10
-  ybits: 16
-  xbits: 16
+  also:
+  - name: KFPBRKNW
+    add: 316
 - name: CLRKA
   pattern: "DB00C2F4XXXX6841EA2002BF"
   at: 4
@@ -1965,6 +2120,1418 @@ mapsigs:
   rows: 12
   cols: 12
   xat: -118
+# 22N copies of 22m rows. Same code, shifted RAM and pointer words.
+- name: CWLAMFAW
+  pattern: "BC9FD7400602C2F4XXXX66F408002D05"
+  at: 8
+- name: DLAMTANS
+  pattern: "F2F4XXXXF6F48C9FF2F4"
+  add: 33
+  cols: 4
+- name: KFDLULS
+  pattern: "C2F4XXXXF6F434A30D0B"
+  add: 21
+- name: KFLDRXO
+  pattern: "FCA2D740060243F8XXXX9D040981"
+  at: 8
+  add: 34
+  rows: 8
+  cols: 4
+- name: KRALH
+  pattern: "4487D7400602C2F5XXXX2045C2F58DF9"
+  at: 8
+- name: KRANH
+  pattern: "6016D7400602C2F5XXXX2045C2F57AF8"
+  at: 8
+- name: LAMFA
+  pattern: "8D13D740070242F4XXXXED0E8A4B"
+  at: 8
+  add: 66
+  rows: 15
+  cols: 6
+  xbits: 16
+- name: LDHIA
+  pattern: "02A3D7400602F3F8XXXXD7400602F3FC"
+  at: 8
+- name: NLDIAPU
+  pattern: "7C83D740060243F6XXXXFD021F4C"
+  at: 8
+  add: 2
+- name: SNM16OPUW
+  pattern: "4276F6F4448AE6FCXXXXF2FD7CF8"
+  at: 8
+  add: 2
+- name: TABGBTS
+  pattern: "3F3E0D0CD7400702F2F4XXXXD740070222F4AE05"
+  at: 10
+- name: TDLDRA
+  pattern: "39A3D740060243F8XXXX9D040981F7F8"
+  at: 8
+- name: TDLDRA2
+  pattern: "3DA3D740060243F8XXXX9D040981F7F8"
+  at: 8
+- name: TULV1
+  pattern: "38A3D740060243F8XXXX9D040981F7F8"
+  at: 8
+- name: ZKWLAFWL
+  pattern: "D7400702F2FCXXXXF0D8F2FEB69F"
+  at: 6
+- name: KFMIRL
+  pattern: "F6F24A9EE6FCXXXXF2FD7CF8"
+  at: 6
+  add: 60
+  rows: 16
+  cols: 12
+  ybits: 16
+  xbits: 16
+- name: KFLDHBN
+  pattern: "E6FCXXXXE6FD0602C2FE7AF8C2FF9487DA80B644"
+  frame: true
+  add: 18
+  rows: 8
+  cols: 8
+- name: CDATR
+  pattern: "FFFD64F4DE88D7400602C2F4XXXX68412D05E6F40004"
+  at: 12
+- name: CDATS
+  pattern: "FEFF64F4DE88D7400602C2F4XXXX68412D05E6F40002"
+  at: 12
+- name: CDHSH
+  pattern: "64F4DE88D7400602C2F4XXXX68412D05E6F48000"
+  at: 10
+- name: CDHSHE
+  pattern: "64F4E088D7400602C2F4XXXX68412D05E6F48000"
+  at: 10
+- name: CDKAT
+  pattern: "64F4DE88D7400602C2F4XXXX68412D05E6F40001"
+  at: 10
+- name: CDLASH
+  pattern: "DFFF64F4E088D7400602C2F4XXXX68412D05E6F44000"
+  at: 12
+- name: CDLATV
+  pattern: "64F4E088D7400602C2F4XXXX68412D05E6F42000"
+  at: 10
+- name: CDLSH
+  pattern: "64F4E288D7400602C2F4XXXX68412D05E6F41000"
+  at: 10
+- name: CDSLS
+  pattern: "E088D7400602C2F4XXXX68412D04E014"
+  at: 8
+- name: CWKONABG
+  pattern: "8084D7400602F3FAXXXX69A13A888836"
+  at: 8
+- name: CWDLSAHK
+  pattern: "07A0D7400602C2F4XXXX66F408002D09"
+  at: 8
+- name: CLRHK
+  pattern: "DB00E11875F88588C2F4XXXX66F408002D05F3F8"
+  at: 10
+- name: FKVA
+  pattern: "84AAD7400602C2F2XXXX1B42F2F50CFE"
+  at: 8
+- name: FHOKH
+  pattern: "D740070242F4XXXXFD079A34"
+  at: 6
+- name: TVUB
+  pattern: "E6FDC74FE6FEXXXXC2FF0886"
+  at: 6
+  cols: 5
+- name: KFLF
+  pattern: "C2F4XXXX5C84F6F4AE9E"
+  add: 31
+- name: KFFWL_0_A
+  pattern: "D7400602C2F4XXXX68412D06C0E45C14C2F5XX10"
+  at: 6
+  add: 1
+  rows: 12
+  cols: 12
+  xat: -124
+  yat: -118
+- name: KFWDKMSN
+  pattern: "F3FCD386D7400602F2FCXXXXC0CDF2FE"
+  at: 10
+  add: 68
+  rows: 16
+  cols: 6
+  ybits: 16
+  xbits: 16
+- name: FBSTABGM
+  pattern: "88602804E6FCXXXXF2FDXXXXDA00D0714840"
+  at: 6
+  add: 10
+  cols: 4
+  xbits: 16
+- name: FKKVS
+  pattern: "C2FFXXXXDA80184F06F00C00F6F4F49E"
+  add: 49
+  rows: 16
+  cols: 16
+  xbits: 16
+# 4Z7 S copies of 4Z7 R rows. Same code, shifted RAM and branch words.
+- name: DLAMTANS
+  pattern: "C2FCXXXXE6FD412D"
+  add: 5
+  cols: 4
+- name: EDLDRP
+  pattern: "43F8XXXXAD0E"
+- name: FBSTABGM
+  pattern: "42F4XXXXDD05D740070242F48E2EAD02FF3D"
+  add: 14
+- name: FWFTBRTA
+  pattern: "C2F4XXXX6842EA20F2F1"
+  add: 59
+  cols: 14
+- name: KFDLULS
+  pattern: "3EA3D7400602C2F4XXXX"
+  at: 8
+  add: 19
+- name: KFFWTBR
+  pattern: "C2F4XXXX6842EA20F2F1"
+  add: 110
+  rows: 10
+  cols: 8
+- name: KFLDRAPP
+  pattern: "F3F8XXXXD740E100F7F82709"
+  add: 19
+- name: KFLDRAPP
+  pattern: "13B0E6FCXXXXE6FDXXXXC2FE9AF8C2FF9D89"
+  at: 4
+  frame: true
+  add: 18
+  rows: 8
+  cols: 8
+- name: KFLDRXO
+  pattern: "43FAXXXXFD03AF4D"
+  add: 15
+- name: KFTARX
+  pattern: "0D15F2F416A38840F2F5BC898850E6FCXXXXE6FD"
+  at: 16
+  add: 98304
+- name: KFTARXZK
+  pattern: "1670F2F416A38840F2F5BC898850E6FCXXXXE6FD"
+  at: 16
+  add: 98304
+- name: KFVPDKLD
+  pattern: "3EA3D7400602C2F4XXXX"
+  at: 8
+  add: 107
+  rows: 10
+  cols: 12
+- name: KFZWOP
+  pattern: "1EA5E6FCXXXX"
+  at: 4
+- name: KFZWOP2
+  pattern: "F1E8E6FCXXXXE6FD5469"
+  at: 4
+- name: KRALH
+  pattern: "F3F8XXXXD740E100F3FA1B09"
+- name: LAMFA
+  pattern: "C2FFXXXXDA82586706F00C00C0845C54"
+  add: 29
+  rows: 15
+  cols: 6
+  xbits: 16
+- name: LDORXN
+  pattern: "43F8XXXX9D040981F7F80CA3"
+  add: 1
+  also:
+  - name: LDPBN
+    add: 9
+- name: MDIMX
+  pattern: "C2F4XXXXF6F4928B"
+- name: NLDIAPU
+  pattern: "43F6XXXXFD025F4D"
+  add: 4
+- name: CATR
+  pattern: "C2F4XXXX68412D026F880D016E884A883F61"
+- name: CDATR
+  pattern: "C2F4XXXX68412D05E6F4000474F4DC88"
+- name: CDATS
+  pattern: "C2F4XXXX68412D05E6F4000274F4DC88"
+- name: CDLSH
+  pattern: "C2F4XXXX68412D05E6F4100074F4DC88"
+- name: CLRHK
+  pattern: "DB00E11875F87C88C2F4XXXX"
+  at: 10
+- name: CLRHKA
+  pattern: "C2F4XXXX68413D07D740E100F3F85B08"
+- name: CLRKA
+  pattern: "C2F4XXXX6841EA203EB2"
+- name: FKKVS
+  pattern: "C2FFXXXXDA82F86706F00C00F6F47C9E"
+  add: 49
+  rows: 16
+  cols: 16
+  xbits: 16
+- name: KFLF
+  pattern: "F3F8XXXXD740E100F7F8B308D7400602"
+  add: 31
+- name: KFNLLNST
+  pattern: "43F8XXXX9D040981F7F834A3"
+  add: 200
+- name: TVUB
+  pattern: "E6FEXXXXC2FF1386"
+  cols: 5
+# 4Z7 AA copies of 4Z7 S rows.
+- name: KFLDRXO
+  pattern: "43FAXXXXFD03CF4D"
+  add: 15
+- name: KFTARXZK
+  pattern: "1690F2F416A38840F2F5BC898850E6FCXXXXE6FD"
+  at: 16
+  add: 98304
+- name: KFZWOP2
+  pattern: "F1E8E6FCXXXXE6FD5869"
+  at: 4
+- name: NLDIAPU
+  pattern: "43F6XXXXFD027F4D"
+  add: 4
+- name: CLRKA
+  pattern: "C2F4XXXX6841EA2010B3"
+# 4Z7 T copies of 4Z7 S rows.
+- name: CATR
+  pattern: "C2F4XXXX68412D026F880D016E884A884060"
+- name: CDATR
+  pattern: "C2F4XXXX68412D05E6F4000474F42089"
+- name: CDATS
+  pattern: "C2F4XXXX68412D05E6F4000274F42089"
+- name: CDHSH
+  pattern: "64F42289D7400602C2F4XXXX68412D05E6F48000"
+  at: 10
+- name: CDHSHE
+  pattern: "C2F4XXXX68412D05E6F4400074F42289"
+- name: CDKAT
+  pattern: "64F42289D7400602C2F4XXXX68412D05E6F40001"
+  at: 10
+- name: CDLASH
+  pattern: "C2F4XXXX68412D05E6F4400074F42089"
+- name: CDLATV
+  pattern: "C2F4XXXX68412D05E6F4200074F42089"
+- name: CDLSH
+  pattern: "C2F4XXXX68412D05E6F4100074F42089"
+- name: CDLSHV
+  pattern: "C2F4XXXX68412D04E08474F42289"
+- name: CDSLS
+  pattern: "C2F4XXXX68412D04E01474F42089"
+- name: CLRHK
+  pattern: "DB00E11875F8C088C2F4XXXX"
+  at: 10
+- name: CLRHKA
+  pattern: "C2F4XXXX68413D07D740E100F3F88208"
+- name: CLRKA
+  pattern: "C2F4XXXX6841EA200041"
+- name: DLAMTANS
+  pattern: "C2FCXXXXE6FD272D"
+  add: 5
+  cols: 4
+- name: DWKRMSN
+  pattern: "C2F4XXXX68412D1BF2F48897"
+  add: 1
+- name: FBSTABGM
+  pattern: "42F4XXXXAD05D740070242F4742EDD02EF3E"
+  add: 14
+- name: FHOKH
+  pattern: "42F4XXXXFD099A36"
+- name: FKKVS
+  pattern: "C2FFXXXXDA804A4D06F00C00F6F4929E"
+  add: 49
+  rows: 16
+  cols: 16
+  xbits: 16
+- name: FWFTBRTA
+  pattern: "C2F4XXXX6842EA20A07F"
+  add: 59
+  cols: 14
+- name: KFFLLDE
+  pattern: "D740E100F6F4XXXXF2F5XXXX8850F2F2XXXX8820E6FCXXXXE6FDXXXXE6FEXXXXE6FFXXXXDA80XXXX0804F084"
+  at: 22
+  frame: true
+  rows: 8
+  cols: 8
+  xbits: 16
+  ybits: 16
+  xat: 10
+  yat: 16
+- name: KFFWTBR
+  pattern: "C2F4XXXX6842EA20A07F"
+  add: 110
+  rows: 10
+  cols: 8
+- name: KFLDRXO
+  pattern: "43FAXXXXFD03BF4E"
+  add: 15
+- name: KFLF
+  pattern: "F3F8XXXXD740E100F7F8E908D7400602"
+  add: 31
+- name: KFTARX
+  pattern: "0D15F2F41AA38840F2F5028A8850E6FCXXXXE6FD"
+  at: 16
+  add: 98304
+- name: KFTARXZK
+  pattern: "1680F2F41AA38840F2F5028A8850E6FCXXXXE6FD"
+  at: 16
+  add: 98304
+- name: KFZWOP2
+  pattern: "F1E8E6FCXXXXE6FD7A6A"
+  at: 4
+- name: KRANH
+  pattern: "F3F8XXXXD7400602F3FAE11E"
+  also:
+  - name: KRFKLN
+    add: 17
+- name: LAMFA
+  pattern: "C2FFXXXXDA80AA4C06F00C00C0845C54"
+  add: 29
+  rows: 15
+  cols: 6
+  xbits: 16
+- name: LDHIA
+  pattern: "F3F8XXXXD7400602F3FC9F22"
+- name: MDIMX
+  pattern: "C2F4XXXXF6F4B88B"
+- name: NFSM
+  pattern: "43F8XXXX9D05D7400602F3F88925"
+  add: 1
+- name: NLDIAPU
+  pattern: "43F6XXXXFD026F4E"
+  add: 4
+- name: NLLM
+  pattern: "43F8XXXX9D05D7400602F3F89125"
+  add: 41
+- name: SNM16OPUW
+  pattern: "E6FCXXXXF2FD8AF8F2FE088A"
+  add: 2
+- name: TABGBTS
+  pattern: "42F4XXXXFD04E11875F8FA86"
+- name: TMNSMN
+  pattern: "43F8XXXXED05F3FA0E87"
+- name: TVUB
+  pattern: "E6FEXXXXC2FF2F86"
+  cols: 5
+- name: CWKONLS
+  pattern: "4A880060D7400602C2F4XXXX68413A8888364A880264"
+  at: 10
+- name: KRALH
+  pattern: "D7400602F3F8XXXXD740E100F3FA5F09"
+  at: 6
+- name: KFVPLGU
+  pattern: "DB00F2F4XXXX8840F2F5XXXX8850E6FCXXXXE6FD0902E6FEXXXXE6FFXXXXDA80XXXX08048840F2F4"
+  at: 16
+  frame: true
+  rows: 16
+  cols: 8
+  ybits: 16
+  xat: 4
+  yat: 10
+- name: CLAATR
+  pattern: "43F84DB38DE0E6F4XXXXE6F50602C0C20042"
+  at: 8
+  frame: true
+  add: 2
+  also:
+  - name: CLAATR2
+    add: 3
+  - name: CLAATS
+    add: 6
+  - name: CLAATS2
+    add: 7
+  - name: CLAHSH
+    add: 73
+  - name: CLAHSH2
+    add: 74
+  - name: CLAHSHE
+    add: 75
+  - name: CLAHSHE2
+    add: 76
+  - name: CLALSH
+    add: 111
+  - name: CLALSH2
+    add: 112
+# 1.8T rows, each checked against every 1.8T reference XDF it hits.
+- name: CATR
+  pattern: "01E00D08D7400602F3F8XXXX"
+  at: 10
+- name: CATR
+  pattern: "8A3301200D08D7400602F3F8XXXX"
+  at: 12
+- name: CATR
+  pattern: "2804E6FCXXXXE6FDXXXXC2FE9AF8"
+  at: 4
+  frame: true
+- name: CDATR
+  pattern: "FFFD64F4C08BD7400602C2F4XXXX"
+  at: 12
+- name: CDATR
+  pattern: "FFFD64F4948BD7400602C2F4XXXX"
+  at: 12
+- name: CDATR
+  pattern: "FFFD64F4A48BD7400602C2F4XXXX"
+  at: 12
+- name: CDATS
+  pattern: "FEFF64F4C08BD7400602C2F4XXXX"
+  at: 12
+- name: CDATS
+  pattern: "FEFF64F4948BD7400602C2F4XXXX"
+  at: 12
+- name: CDATS
+  pattern: "FEFF64F4A48BD7400602C2F4XXXX"
+  at: 12
+- name: CDHSH
+  pattern: "BFFF64F4C08BD7400602C2F4XXXX"
+  at: 12
+- name: CDHSH
+  pattern: "BFFF64F4948BD7400602C2F4XXXX"
+  at: 12
+- name: CDHSH
+  pattern: "BFFF64F4A48BD7400602C2F4XXXX"
+  at: 12
+- name: CDHSHE
+  pattern: "BFFF64F4C28BD7400602C2F4XXXX"
+  at: 12
+- name: CDHSHE
+  pattern: "BFFF64F4968BD7400602C2F4XXXX"
+  at: 12
+- name: CDHSHE
+  pattern: "BFFF64F4A68BD7400602C2F4XXXX"
+  at: 12
+- name: CDKAT
+  pattern: "7FFF64F4C08BD7400602C2F4XXXX"
+  at: 12
+- name: CDKAT
+  pattern: "7FFF64F4EA8BD7400602C2F4XXXX"
+  at: 12
+- name: CDKAT
+  pattern: "7FFF64F4948BD7400602C2F4XXXX"
+  at: 12
+- name: CDKAT
+  pattern: "7FFF64F4A48BD7400602C2F4XXXX"
+  at: 12
+- name: CDLASH
+  pattern: "DFFF64F4C28BD7400602C2F4XXXX"
+  at: 12
+- name: CDLASH
+  pattern: "DFFF64F4968BD7400602C2F4XXXX"
+  at: 12
+- name: CDLASH
+  pattern: "DFFF64F4A68BD7400602C2F4XXXX"
+  at: 12
+- name: CDLATV
+  pattern: "EFFF64F4C28BD7400602C2F4XXXX"
+  at: 12
+- name: CDLATV
+  pattern: "EFFF64F4968BD7400602C2F4XXXX"
+  at: 12
+- name: CDLATV
+  pattern: "EFFF64F4A68BD7400602C2F4XXXX"
+  at: 12
+- name: CDLSH
+  pattern: "FFFB64F4C28BD7400602C2F4XXXX"
+  at: 12
+- name: CDLSH
+  pattern: "FFFB64F4968BD7400602C2F4XXXX"
+  at: 12
+- name: CDLSH
+  pattern: "FFFB64F4A68BD7400602C2F4XXXX"
+  at: 12
+- name: CDSLS
+  pattern: "C2F4XXXX68412D04E01474F4C28B"
+- name: CDSLS
+  pattern: "C2F4XXXX68412D04E01474F4968B"
+- name: CDSLS
+  pattern: "C2F4XXXX68412D04E01474F4A68B"
+- name: CLAATR
+  pattern: "FF8003FCXXXX0809"
+  at: 4
+- name: CLAATR
+  pattern: "F7F8XXXXF7F8D308F78E71A3"
+- name: CLAATR2
+  pattern: "B21BD750E100F7F8D608F7F8XXXX"
+  at: 12
+- name: CLAHSHE
+  pattern: "258F1209F3F8XXXX"
+  at: 6
+- name: CWDLSAHK
+  pattern: "F3F8XXXX6984EA209016"
+- name: CWDLSAHK
+  pattern: "1B35D7400602C2F4XXXX"
+  at: 8
+- name: CWDLSAHK
+  pattern: "C2F4XXXX66F410002D094890"
+- name: CWDLSAHK
+  pattern: "43F8XXXXFD04E12A75FA7289"
+- name: CWLAMFAW
+  pattern: "D89FD7400602C2F4XXXX"
+  at: 8
+- name: CWLAMFAW
+  pattern: "B4A0D7400602C2F4XXXX"
+  at: 8
+- name: CWLAMFAW
+  pattern: "65F8ACA0D7400602C2F4XXXX"
+  at: 10
+- name: CWLAMFAW
+  pattern: "380BD7400602C2F5XXXX"
+  at: 8
+- name: CWLAMFAW
+  pattern: "FA9FD7400602C2F5XXXX"
+  at: 8
+- name: DLAMFAW
+  pattern: "1490E6FCXXXXE6FD"
+  at: 4
+  frame: true
+- name: DLAMTANS
+  pattern: "8840C2F40F8A8840E6F4XXXX"
+  at: 10
+  frame: true
+  cols: 4
+- name: DPUPS
+  pattern: "CC8A43F8XXXXFD03"
+  at: 4
+- name: DPUPS
+  pattern: "E88A43F8XXXXFD03"
+  at: 4
+- name: DPUPS
+  pattern: "EAF943F8XXXXFD03"
+  at: 4
+- name: DPUPS
+  pattern: "978A43F8XXXXFD03"
+  at: 4
+- name: DPUPS
+  pattern: "DC9EC2F3XXXX66F3"
+  at: 4
+- name: DWKRMSN
+  pattern: "5A61D740E100F7F8BF08E6FCXXXX"
+  at: 12
+  frame: true
+- name: DWKRMSN
+  pattern: "8A61D740E100F7F8BE08E6FCXXXX"
+  at: 12
+  frame: true
+- name: DWKRMSN
+  pattern: "0262D740E100F7F8CC08E6FCXXXX"
+  at: 12
+  frame: true
+- name: DWKRMSN
+  pattern: "9462D740E100F7F8D008E6FCXXXX"
+  at: 12
+  frame: true
+- name: DWKRMSN
+  pattern: "CC08E6FCXXXXE6FDXXXXD740E100F2FEA009"
+  at: 4
+  frame: true
+- name: EDLDRP
+  pattern: "43F8XXXXBD09F2F450A3"
+- name: EDLDRP
+  pattern: "43F8XXXXBD09F2F43AA4"
+- name: EDLDRP
+  pattern: "A2A3D740E100C2F4CE08D7400602C2F5XXXX"
+  at: 16
+- name: EDLDRP
+  pattern: "2D18D7400602C2F4XXXX5C84"
+  at: 8
+- name: EDLDRP
+  pattern: "C2F4F78A68422D1BD7400602C2F4XXXX5C84"
+  at: 14
+- name: FHOKH
+  pattern: "42F4XXXXFD099A2C0750"
+- name: FHOKH
+  pattern: "42F4XXXXFD099A2A07A0"
+- name: FKKVS
+  pattern: "A4A08840C2F59EF88850E6F4XXXX"
+  at: 12
+  frame: true
+- name: FKVA
+  pattern: "C2F4XXXXF05CF6F50EFE5B444D03F2F40EFE0D02E6F4FFFFD740E100C2F51B09"
+- name: KFFLLDE
+  pattern: "8820E6FCXXXXE6FDXXXXE6FE6A1E"
+  at: 4
+  frame: true
+- name: KFFLLDE
+  pattern: "8820E6FCXXXXE6FDXXXXE6FEB231"
+  at: 4
+  frame: true
+- name: KFFLLDE
+  pattern: "8820E6FCXXXXE6FDXXXXE6FE2436"
+  at: 4
+  frame: true
+- name: KFFLLDE
+  pattern: "8820E6FCXXXXE6FDXXXXE6FE6E37"
+  at: 4
+  frame: true
+- name: KFFLLDE
+  pattern: "8820E6FCXXXXE6FDXXXXE6FEB020"
+  at: 4
+  frame: true
+- name: KFLAMKRL
+  pattern: "A80988508840E6FCXXXX"
+  at: 8
+  frame: true
+- name: KFLDIMX
+  pattern: "E6FCXXXXE6FDXXXXE6FE481E"
+  frame: true
+- name: KFLDIMX
+  pattern: "E6FCXXXXE6FDXXXXE6FE361E"
+  frame: true
+- name: KFLDIMX
+  pattern: "E6FCXXXXE6FDXXXXE6FE9E20"
+  frame: true
+- name: KFLDIMX
+  pattern: "3CA48840F2F5BC8C8850E6FCXXXX"
+  at: 12
+  frame: true
+- name: KFLDIMX
+  pattern: "56A48840F2F5C88C8850E6FCXXXX"
+  at: 12
+  frame: true
+- name: KFLDIOPU
+  pattern: "868C8850E6FCXXXX"
+  at: 6
+  frame: true
+- name: KFLDIOPU
+  pattern: "5A8C8850E6FCXXXX"
+  at: 6
+  frame: true
+- name: KFLDIOPU
+  pattern: "828C8840F2F56A8C8850E6FCXXXX"
+  at: 12
+  frame: true
+- name: KFLDRL
+  pattern: "E6FCXXXXE6FDXXXXE6FE462C"
+  frame: true
+- name: KFLDRL
+  pattern: "E6FCXXXXE6FDXXXXE6FEE02A"
+  frame: true
+- name: KFLDRL
+  pattern: "E6FCXXXXE6FDXXXXE6FE4230"
+  frame: true
+- name: KFLDRL
+  pattern: "E6FCXXXXE6FDXXXXE6FE8C31"
+  frame: true
+- name: KFLDRL
+  pattern: "E6FCXXXXE6FDXXXXE6FE283B"
+  frame: true
+- name: KFMIOP
+  pattern: "F0F4E6FCXXXXE6FD1269"
+  at: 4
+- name: KFMIOP
+  pattern: "F0F4E6FCXXXXE6FDF469"
+  at: 4
+- name: KFMIOP
+  pattern: "F0F4E6FCXXXXE6FD3A67"
+  at: 4
+- name: KFMIZUFIL
+  pattern: "E6FCXXXXE6FD8E00F2FECE8C"
+- name: KFMIZUFIL
+  pattern: "E6FCXXXXE6FD8D00F2FEB28C"
+- name: KFMIZUFIL
+  pattern: "0D0BE6FCXXXXE6FD8D00F2FE988C"
+  at: 4
+- name: KFMIZUNS
+  pattern: "0CA0E6FCXXXXE6FD8D00"
+  at: 4
+- name: KFMIZUOF
+  pattern: "FEA5E6FCXXXXE6FD8E00"
+  at: 4
+- name: KFMIZUOF
+  pattern: "D2A5E6FCXXXXE6FD8D00"
+  at: 4
+- name: KFMIZUOF
+  pattern: "C6A6E6FCXXXXE6FD8E00"
+  at: 4
+- name: KFMIZUOF
+  pattern: "E2A6E6FCXXXXE6FD8E00"
+  at: 4
+- name: KFMIZUOF
+  pattern: "FCA6E6FCXXXXE6FD8D00"
+  at: 4
+- name: KFMRES
+  pattern: "0D0BE6FCXXXXE6FD0230"
+  at: 4
+- name: KFMRES
+  pattern: "D48A43F8XXXXBD0A"
+  at: 4
+- name: KFMRES
+  pattern: "0D0BE6FCXXXXE6FDBE2F"
+  at: 4
+- name: KFMRES
+  pattern: "0D0BE6FCXXXXE6FD1A34"
+  at: 4
+- name: KFMRESK
+  pattern: "AD149D0CE6FCXXXX"
+  at: 6
+- name: KFMRESK
+  pattern: "A4149D0CE6FCXXXX"
+  at: 6
+- name: KFMRESK
+  pattern: "06189D0CE6FCXXXX"
+  at: 6
+- name: KFNLLNST
+  pattern: "7E098850E6FCXXXX"
+  at: 6
+  frame: true
+- name: KFNLLNST
+  pattern: "8C098850E6FCXXXXE6FDXXXXE6FEC502"
+  at: 6
+  frame: true
+- name: KFNLLNST
+  pattern: "E6FCXXXXE6FDXXXXE6FEAB02E6FF0602"
+  frame: true
+- name: KFTARX
+  pattern: "0D12F2F4B28C8840F2F5928C8850E6FCXXXX"
+  at: 16
+  frame: true
+- name: KFTARX
+  pattern: "0D13F2F468A48840F2F5B88C8850E6FCXXXX"
+  at: 16
+  frame: true
+- name: KFTARX
+  pattern: "0D13F2F482A48840F2F5C48C8850E6FCXXXX"
+  at: 16
+  frame: true
+- name: KFTARX
+  pattern: "F0980D289A531330F2F482A38840F2F5768C8850E6FCXXXXE6FD0702E6FEE018E6FF0602DA8238630804F0840D12F2F482A38840F2F5768C8850E6FCXXXX"
+  at: 60
+  frame: true
+- name: KFTARX
+  pattern: "0D12F2F480A48840F2F5668C8850E6FCXXXX"
+  at: 16
+  frame: true
+- name: KFTARXZK
+  pattern: "1390F2F4B28C8840F2F5928C8850E6FCXXXX"
+  at: 16
+  frame: true
+- name: KFTARXZK
+  pattern: "2D13F2F49E8C8840F2F5BA8C8850E6FCXXXX"
+  at: 16
+  frame: true
+- name: KFTARXZK
+  pattern: "2D13F2F4AA8C8840F2F5C68C8850E6FCXXXX"
+  at: 16
+  frame: true
+- name: KFTARXZK
+  pattern: "F0980D289A531330F2F482A38840F2F5768C8850E6FCXXXX"
+  at: 22
+  frame: true
+- name: KFTARXZK
+  pattern: "1350F2F480A48840F2F5668C8850E6FCXXXX"
+  at: 16
+  frame: true
+- name: KFWPLGTA
+  pattern: "E6FCXXXXE6FDXXXXE6FE6001"
+  frame: true
+- name: KFWPLGTA
+  pattern: "E6FCXXXXE6FDXXXXE6FE5F01"
+  frame: true
+- name: KFWPLGTA
+  pattern: "E6FCXXXXE6FDXXXXE6FE4301"
+  frame: true
+- name: KFWPLGTA
+  pattern: "E6FCXXXXE6FDXXXXE6FE3C01"
+  frame: true
+- name: KFZW
+  pattern: "3D0FE6FCXXXXE6FD1A31"
+  at: 4
+- name: KFZW
+  pattern: "3D0FE6FCXXXXE6FDC230"
+  at: 4
+- name: KFZW
+  pattern: "3D0FE6FCXXXXE6FDD630"
+  at: 4
+- name: KFZW
+  pattern: "3D0FE6FCXXXXE6FD8631"
+  at: 4
+- name: KFZW
+  pattern: "3D0FE6FCXXXXE6FD3235"
+  at: 4
+- name: KFZW2
+  pattern: "3D10E6FCXXXXE6FD1A31"
+  at: 4
+- name: KFZW2
+  pattern: "3D10E6FCXXXXE6FDD630"
+  at: 4
+- name: KFZW2
+  pattern: "3D10E6FCXXXXE6FD8631"
+  at: 4
+- name: KFZW2
+  pattern: "3D10E6FCXXXXE6FDC230"
+  at: 4
+- name: KFZW2
+  pattern: "3D10E6FCXXXXE6FD3235"
+  at: 4
+- name: KFZWOP
+  pattern: "0200E6FCXXXXE6FDD06A"
+  at: 4
+- name: KFZWOP
+  pattern: "0200E6FCXXXXE6FD3A67"
+  at: 4
+- name: KFZWOP
+  pattern: "0200E6FCXXXXE6FD1269"
+  at: 4
+- name: KFZWOP
+  pattern: "0200E6FCXXXXE6FDF469"
+  at: 4
+- name: KFZWOP
+  pattern: "0200E6FCXXXXE6FD306D"
+  at: 4
+- name: KFZWOP2
+  pattern: "B2A5E6FCXXXXE6FDD06A"
+  at: 4
+- name: KFZWOP2
+  pattern: "84A5E6FCXXXXE6FD3A67"
+  at: 4
+- name: KFZWOP2
+  pattern: "7AA6E6FCXXXXE6FD1269"
+  at: 4
+- name: KFZWOP2
+  pattern: "96A6E6FCXXXXE6FDF469"
+  at: 4
+- name: KFZWOP2
+  pattern: "ACA6E6FCXXXXE6FD306D"
+  at: 4
+- name: KRALH
+  pattern: "D6A10D12D7400602F3F8XXXX"
+  at: 10
+- name: KRALH
+  pattern: "26A30D12D7400602F3F8XXXX"
+  at: 10
+- name: KRALH
+  pattern: "43F8XXXX9D11F3FA8B8A49A1"
+- name: KRANH
+  pattern: "E717D7400602C2F5XXXX"
+  at: 8
+- name: KRANH
+  pattern: "5B18D7400602C2F5XXXX"
+  at: 8
+- name: KRANH
+  pattern: "9D18D7400602C2F5XXXX"
+  at: 8
+- name: KRANH
+  pattern: "A819D7400602C2F5XXXX"
+  at: 8
+- name: KRANH
+  pattern: "8A61F7F87A8AE6FCXXXX"
+  at: 8
+  frame: true
+- name: KRFKLN
+  pattern: "9B8A9A3A0DF0E6FCXXXX"
+  at: 8
+  frame: true
+- name: KRFKLN
+  pattern: "878A9A3A0D90E6FCXXXX"
+  at: 8
+  frame: true
+- name: KRFKLN
+  pattern: "B78A9A390DC0E6FCXXXX"
+  at: 8
+  frame: true
+- name: KRFKLN
+  pattern: "C08A9A390D80E6FCXXXX"
+  at: 8
+  frame: true
+- name: KRFKLN
+  pattern: "668A9A390D50E6FCXXXX"
+  at: 8
+  frame: true
+- name: KVB
+  pattern: "1500D740060243F8XXXX9D06"
+  at: 8
+- name: LAMFA
+  pattern: "24A68840C2F59CF88850E6F4XXXX"
+  at: 12
+  frame: true
+  rows: 15
+  cols: 6
+  xbits: 16
+- name: LAMFA
+  pattern: "40A68840C2F5A2F88850E6F4XXXX"
+  at: 12
+  frame: true
+  rows: 15
+  cols: 6
+  xbits: 16
+- name: LAMFA
+  pattern: "56A68840C2F59EF88850E6F4XXXX"
+  at: 12
+  frame: true
+  rows: 15
+  cols: 6
+  xbits: 16
+- name: LDHIA
+  pattern: "C2FEXXXXD7400602C2FF1919"
+- name: LDHIA
+  pattern: "C2FEXXXXD7400602C2FF8D19"
+- name: LDHIA
+  pattern: "C2FEXXXXD7400602C2FFD019"
+- name: LDHIA
+  pattern: "C2FEXXXXD7400602C2FF4E1C"
+- name: LDIATA
+  pattern: "E6FCXXXXE6FDXXXXF2FE968CDA82"
+  frame: true
+  also:
+  - name: LDHIA
+    add: -1
+- name: LDIATA
+  pattern: "E6FCXXXXE6FDXXXXF2FEB28CDA82"
+  frame: true
+- name: LDIATA
+  pattern: "E6FCXXXXE6FDXXXXF2FED68CDA82"
+  frame: true
+- name: LDIATA
+  pattern: "D0848840E6FCXXXXE6FDXXXXF2FEE28CDA82"
+  at: 6
+  frame: true
+- name: LDIATA
+  pattern: "E6FCXXXXE6FDXXXXF2FE848CDA83"
+  frame: true
+- name: LDORXN
+  pattern: "8E0BC4400A00E6FCXXXX"
+  at: 8
+  frame: true
+- name: LDORXN
+  pattern: "080CC4400C00E6FCXXXX"
+  at: 8
+  frame: true
+- name: LDORXN
+  pattern: "2D0DE6FCXXXXE6FD0602F2FEAC8C"
+  at: 4
+  frame: true
+- name: LDORXN
+  pattern: "2D0DE6FCXXXXE6FD0602F2FEB88C"
+  at: 4
+  frame: true
+- name: LDORXN
+  pattern: "F2F87A0BE6FCXXXXE6FDXXXXF2FE6A8C"
+  at: 6
+  frame: true
+- name: LDPBN
+  pattern: "8E0BE6FCXXXXE6FDXXXXF2FE"
+  at: 4
+  frame: true
+- name: LDPBN
+  pattern: "080CE6FCXXXXE6FD"
+  at: 4
+  frame: true
+- name: LDPBN
+  pattern: "7C148840E6FCXXXXE6FD0602F2FEAC8C"
+  at: 6
+  frame: true
+- name: LDPBN
+  pattern: "7C148840E6FCXXXXE6FD0602F2FEB88C"
+  at: 6
+  frame: true
+- name: LDPBN
+  pattern: "F6F47A0BE6FCXXXXE6FDXXXXF2FE6A8C"
+  at: 6
+  frame: true
+- name: MDIMX
+  pattern: "668E0D04C2F4XXXX"
+  at: 6
+- name: MDIMX
+  pattern: "9A260F00F3F8XXXX"
+  at: 6
+- name: NFSM
+  pattern: "4361E6FCXXXXE6FD"
+  at: 4
+  frame: true
+- name: RLSALULL
+  pattern: "F3F8XXXX0D0AE6FC6B04"
+- name: RLSALUN
+  pattern: "6A040D0AE6FCXXXX"
+  at: 6
+- name: SDLDRL
+  pattern: "1010D7400602C2F4XXXX"
+  at: 8
+- name: SDLDRL
+  pattern: "C2F4XXXX5C5442F4BCF99D08"
+- name: SDLDRL
+  pattern: "C2F4XXXX5C5442F4B6F99D02"
+- name: SNM16OPUW
+  pattern: "4276F6F4708CE6FCXXXXF2FD9EF8"
+  at: 8
+  add: 2
+- name: SNM16OPUW
+  pattern: "4276F6F4968CE6FCXXXXF2FD9EF8"
+  at: 8
+  add: 2
+- name: SNM16OPUW
+  pattern: "4276F6F4A28CE6FCXXXXF2FDA4F8"
+  at: 8
+  add: 2
+- name: SNM16OPUW
+  pattern: "548CE6FCXXXXF2FD9CF8"
+  at: 4
+- name: TABGBTS
+  pattern: "42F4XXXXFD04E11875F8408A"
+- name: TABGBTS
+  pattern: "42F4XXXXFD04E11875F82D8A"
+- name: TABGBTS
+  pattern: "42F4XXXXFD04E11875F85A8A"
+- name: TABGBTS
+  pattern: "42F4XXXXFD04E11875F85D8A"
+- name: TABGBTS
+  pattern: "42F4XXXXFD04E11875F80B8A"
+- name: TABGSS
+  pattern: "42F4XXXX8D018F34"
+- name: TABGSS
+  pattern: "42F4XXXX8D01CF32"
+- name: TDLDRA
+  pattern: "C2FEXXXXDA83EE43F7F8DCA3"
+- name: TDLDRA
+  pattern: "F0D4D7400602C2FEXXXXDA83EE43F7F88AA4"
+  at: 8
+- name: TDLDRA
+  pattern: "F0D4D7400602C2FEXXXXDA83F246F7F8A4A4"
+  at: 8
+- name: TDLDRA
+  pattern: "C2FEXXXXDA83E44DF7F8C8A4"
+- name: TDLDRA
+  pattern: "C2FEXXXXDA83EE43F7F8A4A3"
+- name: TDLDRA2
+  pattern: "C2FEXXXXDA83EE43F7F8BEA34980"
+- name: TDLDRA2
+  pattern: "9BA4D08DD7400602C2FEXXXX"
+  at: 10
+- name: TDLDRA2
+  pattern: "B5A4D08DD7400602C2FEXXXX"
+  at: 10
+- name: TDLDRA2
+  pattern: "C2FEXXXXDA83E44DF7F8AAA4"
+- name: TDLDRA2
+  pattern: "C2FEXXXXDA83EE43F7F8C0A3"
+- name: TEMIN
+  pattern: "58540D02F2FEXXXX"
+  at: 6
+- name: TEMIN
+  pattern: "C23F0D02F2FEXXXX"
+  at: 6
+- name: TEMINVA
+  pattern: "9A320390F2FEXXXX"
+  at: 6
+- name: TEMINVA
+  pattern: "03D0F2FEXXXX0D02"
+  at: 4
+- name: TEMINVA
+  pattern: "50540D02F2FEXXXX"
+  at: 6
+- name: TMNSMN
+  pattern: "458A43F8XXXXED05"
+  at: 4
+- name: TMNSMN
+  pattern: "608A43F8XXXXED05"
+  at: 4
+- name: TMNSMN
+  pattern: "D4F943F8XXXXED05"
+  at: 4
+- name: TMNSMN
+  pattern: "108A43F8XXXXED05"
+  at: 4
+- name: TMNSMN
+  pattern: "318A43FAXXXXFD12"
+  at: 4
+- name: TULV1
+  pattern: "CDA3D7400602C2FEXXXX"
+  at: 8
+- name: TULV1
+  pattern: "C0EDD7400602C2FEXXXX"
+  at: 8
+- name: TULV1
+  pattern: "B3A4C08DD7400602C2FEXXXX"
+  at: 10
+- name: TULV1
+  pattern: "B9A4D7400602C2FEXXXX"
+  at: 8
+- name: TULV1
+  pattern: "C2FEXXXXDA83EE43F7F8AEA3"
+- name: TVUB
+  pattern: "E6FEXXXXC2FF6089"
+- name: ZKWLAFWL
+  pattern: "9A4E4620D7400602C2FCXXXX"
+  at: 10
+- name: ZKWLAFWL
+  pattern: "9A4E46C0D7400602C2FCXXXX"
+  at: 10
+- name: ZKWLAFWL
+  pattern: "9A4E4630D7400602C2FCXXXX"
+  at: 10
+- name: ZKWLAFWL
+  pattern: "43FAXXXX8D1AAE31"
+- name: ZKWLAFWL
+  pattern: "C2FCXXXX5C8CE6FD0080F0E4F2FF3EA1"
+- name: CLAATR
+  pattern: "43F8XXXXED28F3FA"
+  add: 6
+  also:
+  - name: CLAATR2
+    add: 7
+  - name: CLAATS
+    add: 10
+  - name: CLAATS2
+    add: 11
+- name: CLAHSH
+  pattern: "E6F4XXXXF2F5C29D"
+  add: 1
+  also:
+  - name: CLAHSH2
+    add: 2
+  - name: CLAHSHE
+    add: 3
+  - name: CLALSH
+    add: 33
+- name: CWKONABG
+  pattern: "C2F4XXXX68423D0D9A53"
+  add: 6
+- name: FBSTABGM
+  pattern: "E6FCXXXXE6FDXXXXD740E100F2FE[6C/EC]0B"
+  frame: true
+  add: 10
+  cols: 4
+  xbits: 16
+- name: FBSTABGM
+  pattern: "E6FCXXXXE6FDXXXXD740E100F2FE360B"
+  frame: true
+  add: 10
+  cols: 4
+  xbits: 16
+- name: KFLF
+  pattern: "7408DB008890C2F49E8806F480018840E6FCXXXX"
+  at: 18
+  frame: true
+  add: 30
+- name: NDLDRAPU
+  pattern: "0400D740E100F6F4240CE6FCXXXX"
+  at: 12
+  frame: true
+  add: 3
+  cols: 2
+- name: NDLDRAPU
+  pattern: "0400D740E100F6F4000CE6FCXXXX"
+  at: 12
+  frame: true
+  add: 3
+  cols: 2
+- name: NLDIAPU
+  pattern: "B980E6FCXXXXE6FDXXXXD740E100C2FE6108"
+  at: 4
+  frame: true
+  add: 3
+- name: NLDIAPU
+  pattern: "B980E6FCXXXXE6FDXXXXD740E100C2FE6508"
+  at: 4
+  frame: true
+  add: 3
+- name: DLAMTANS
+  pattern: "5C548840C2F4XX8A8840E6F4XXXX"
+  at: 12
+  frame: true
+  cols: 4
+- name: FBSTABGM
+  pattern: "30A0D740E100F6F4080BE6FCXXXX"
+  at: 12
+  frame: true
+  add: 10
+  cols: 4
+  xbits: 16
+- name: FBSTABGM
+  pattern: "58A0D740E100F6F4F80AE6FCXXXX"
+  at: 12
+  frame: true
+  add: 10
+  cols: 4
+  xbits: 16
+- name: FKKVS
+  pattern: "449F8840C2F59CF88850E6F4XXXX"
+  at: 12
+  frame: true
+  rows: 16
+  cols: 16
+  xbits: 16
+- name: FWFTBRTA
+  pattern: "F7F86608E6FCXXXX"
+  at: 6
+  frame: true
+  add: 15
+  cols: 14
+- name: FWFTBRTA
+  pattern: "318AD740E100F7F86A08E6FCXXXX"
+  at: 12
+  frame: true
+  add: 15
+  cols: 14
+- name: FWFTBRTA
+  pattern: "5F8AD740E100F7F86808E6FCXXXX"
+  at: 12
+  frame: true
+  add: 15
+  cols: 14
+- name: FWFTBRTA
+  pattern: "678AD740E100F7F86C08E6FCXXXX"
+  at: 12
+  frame: true
+  add: 15
+  cols: 14
+- name: FWFTBRTA
+  pattern: "F7F87008E6FCXXXX"
+  at: 6
+  frame: true
+  add: 15
+  cols: 14
+- name: KFDLULS
+  pattern: "F079E6FCXXXXE6FDXXXXC2FE9XF8"
+  at: 4
+  frame: true
+  add: 18
+  cols: 8
+  rows: 8
+- name: KFFWTBR
+  pattern: "XX0ADB00889088808870E6FCXXXX"
+  at: 12
+  frame: true
+  add: 20
+  cols: 8
+  rows: 10
+- name: KFLDRXO
+  pattern: "CEB98AF55300E6FCXXXX"
+  at: 8
+  frame: true
+  add: 14
+  cols: 4
+  rows: 8
+- name: KFLDRXO
+  pattern: "D8B98AF55300E6FCXXXX"
+  at: 8
+  frame: true
+  add: 14
+  cols: 4
+  rows: 8
+- name: KFLF
+  pattern: "8840E6FCXXXXE6FDXXXXC2FE9CF8C2FFB3F9"
+  at: 4
+  frame: true
+  add: 30
+  rows: 12
+  cols: 16
+- name: KFMIRL
+  pattern: "E49EE6FCXXXXF2FD"
+  at: 4
+  add: 68
+  cols: 16
+  rows: 16
+  xbits: 16
+  ybits: 16
+- name: KFMIRL
+  pattern: "0C9FE6FCXXXXF2FD"
+  at: 4
+  add: 68
+  cols: 16
+  rows: 16
+  xbits: 16
+  ybits: 16
+- name: KFMIRL
+  pattern: "C09FE6FCXXXXF2FD"
+  at: 4
+  add: 68
+  cols: 16
+  rows: 16
+  xbits: 16
+  ybits: 16
+- name: KFVPDKLD
+  pattern: "E10CE6FCXXXXE6FDXXXXC2FE9XF8"
+  at: 4
+  frame: true
+  add: 24
+  cols: 12
+  rows: 10
+- name: KFVPDKLD
+  pattern: "9CA4E6FCXXXXE6FDXXXXC2FE9CF8"
+  at: 4
+  frame: true
+  add: 24
+  cols: 12
+  rows: 10
+- name: KFVPDKLD
+  pattern: "B6A4E6FCXXXXE6FDXXXXC2FEA2F8"
+  at: 4
+  frame: true
+  add: 24
+  cols: 12
+  rows: 10
+- name: LAMFA
+  pattern: "900EE6FE0702D7400702C2FFXXXX"
+  at: 12
+  add: 29
+  cols: 6
+  rows: 15
+  xbits: 16
+- name: LAMFA
+  pattern: "800DE6FE0702D7400702C2FFXXXX"
+  at: 12
+  add: 29
+  cols: 6
+  rows: 15
+  xbits: 16
+- name: NDLDRAPU
+  pattern: "1600E6FCXXXXE6FDXXXXD740E100C2FEXX08"
+  at: 4
+  frame: true
+  add: 3
+  cols: 2
+- name: NLDIAPU
+  pattern: "0100E6FCXXXXE6FDXXXXD740E100C2FEXX08"
+  at: 4
+  frame: true
+  add: 3
+  cols: 2
+- name: TVUB
+  pattern: "E6FEXXXXC2FF9D89"
+  cols: 5
+- name: KFFWTBR
+  pattern: "8870E6FCXXXXE6FDXXXXC2FEB3F9"
+  at: 4
+  frame: true
+  add: 20
+  cols: 8
+  rows: 10
+- name: KFLDIOPU
+  pattern: "E6FCXXXXE6FDXXXXE6FECD00E6FF0402DA82"
+  frame: true
+  cols: 8
+  rows: 8
+- name: KFLDRXO
+  pattern: "5300E6FCXXXXE6FDXXXXC2FE9CF8"
+  at: 4
+  frame: true
+  add: 14
+  cols: 4
+  rows: 8
+- name: KFLDRXO
+  pattern: "5300E6FCXXXXE6FDXXXXC2FEA2F8"
+  at: 4
+  frame: true
+  add: 14
+  cols: 4
+  rows: 8
+- name: KFLDRXO
+  pattern: "3600E6FCXXXXE6FDXXXXC2FE9EF8"
+  at: 4
+  frame: true
+  add: 14
+  cols: 4
+  rows: 8
+- name: KFMIZUFIL
+  pattern: "E10CE6FCXXXXE6FD8E00"
+  at: 4
+  cols: 8
+  rows: 8
+- name: KRALH
+  pattern: "C2F5XXXX2045C2F5B3F94054CD05"
+- name: MDIMX
+  pattern: "4DF847F8FF003D05F3FAXXXX"
+  at: 10
+- name: MDIMX
+  pattern: "53F847F8FF003D05F3FAXXXX"
+  at: 10
+- name: TEMINVA
+  pattern: "0390F2FEXXXX0D02"
+  at: 4
 # Breakpoint tables shared by several curves. The hit is the count byte.
 # SGA06MDUB is the gear axis of KFDMDADP and KFDMDARO. The caller reads it
 # from RAM 0x8EBE. That word is stored as 0x0500, then copied from RAM 0x8AF8.
@@ -2005,9 +3572,6 @@ mapsigs:
   cols: 16
   xtable: bp_nmot
 # 22N copy of RLSALULL. The tail matches the row above; these front bytes differ.
-- name: RLSALULL
-  pattern: "ED842D03F3F8XXXX0D0AE6FC"
-  at: 6
 - name: NWPMBBR
   pattern: "F3F87AF843F8XXXX8D0AF3FA"
   at: 6
@@ -2033,298 +3597,236 @@ mapsigs:
 # addMapAt is absent: its address is the body after the counts.
 - name: MLHFM
   from: "0x820000"
-  pattern: "F2FXxxxx7C1X5C1XD4XXxxxx"
+  pattern: "F2FXXXXX7C1X5C1XD4XXXXXX"
   at: 10
   cols: 512
   plain: true
 - name: MLHFM
   from: "0x820000"
-  pattern: "F2FXxxxx7C1X46FX00029DXXF0XX5C1XD4XXxxxx"
+  pattern: "F2FXXXXX7C1X46FX00029DXXF0XX5C1XD4XXXXXX"
   at: 18
   cols: 512
   plain: true
 - name: WFRL
-  pattern: "E6FCxxxxF2FDxxxxE6FE1F00DAXXxxxxF05X7C14"
+  pattern: "E6FCXXXXF2FDXXXXE6FE1F00DAXXXXXXF05X7C14"
   at: 2
   cols: 31
   plain: true
 - name: KFFWL_0_A
-  pattern: "E6FCxxxxF2FDxxxxE6FE1X00DAXXxxxxXXXXXXXXXXXX"
+  pattern: "E6FCXXXXF2FDXXXXE6FE1X00DAXXXXXXXXXXXXXXXXXX"
   at: 20
   deref: 1
   dereffar: true
 - name: KFFWL_1_A
-  pattern: "E6FCxxxxF2FDxxxxE6FE1X00DAXXxxxxXXXXXXXXXXXX"
+  pattern: "E6FCXXXXF2FDXXXXE6FE1X00DAXXXXXXXXXXXXXXXXXX"
   at: 20
   deref: 1
   derefat: 4
   dereffar: true
 - name: KFFWLW
-  pattern: "E6FCxxxxF2FDxxxxE6FE1X00DAXXxxxxXXXXXXXXXXXXXXXX"
+  pattern: "E6FCXXXXF2FDXXXXE6FE1X00DAXXXXXXXXXXXXXXXXXXXXXX"
   at: 18
   frame: true
 - name: KFFWLW
-  pattern: "E6FCxxxxF2FDxxxxE6FE1X00DAXXxxxxXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+  pattern: "E6FCXXXXF2FDXXXXE6FE1X00DAXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
   at: 34
   frame: true
 - name: FZWWLRLN
-  open: "E6FCxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}X0XX0B98"
-  pattern: "E6FCxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:16}"
+  open: "E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}X0XX0B98"
+  pattern: "E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:16}"
   at: 2
   xat: 10
   yat: 14
 - name: KFZWWLNM
-  open: "E6FCxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}X0XX0B98"
-  pattern: "E6FCxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}"
+  open: "E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}X0XX0B98"
+  pattern: "E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}"
   at: 2
 - name: KFMI_UM
-  open: "F3FXxxxxF3FXxxxxB1X041XX"
-  pattern: "E6FCxxxxE6FDxxxxF2FExxxxF2FFxxxxDA8Xxxxx"
+  open: "F3FXXXXXF3FXXXXXB1X041XX"
+  pattern: "E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDA8XXXXX"
   at: 2
   xat: 10
   yat: 14
 - name: KFZW
-  open: "88X0E6FCxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}F7F8xxxxD089"
-  pattern: "E6FCxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}"
+  open: "88X0E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}F7F8XXXXD089"
+  pattern: "E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}"
   at: 2
 - name: KFZW2_0_A
   open: "{zwgru:F7F8}08XX"
-  pattern: "47FXFF003DXXC2FXxxxx5C1XD4CXxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}"
+  pattern: "47FXFF003DXXC2FXXXXX5C1XD4CXXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}"
   at: 14
   deref: 1
 - name: KFZW2_0_A
   open: "{zwgru:F7F8}98X0"
-  pattern: "47FXFF003DXXC2FXxxxx5C1XD4CXxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}"
+  pattern: "47FXFF003DXXC2FXXXXX5C1XD4CXXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}"
   at: 14
   deref: 1
 - name: KFZW2_0_A
-  open: "{zwgru:F7F8}9AXXxxxx"
-  pattern: "47FXFF003DXXC2FXxxxx5C1XD4CXxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}"
+  open: "{zwgru:F7F8}9AXXXXXX"
+  pattern: "47FXFF003DXXC2FXXXXX5C1XD4CXXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}"
   at: 14
   deref: 1
 - name: KFZW2_0_A
-  open: "{zwgru:F7F8}C2F4xxxx"
-  pattern: "47FXFF003DXXC2FXxxxx5C1XD4CXxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}"
+  open: "{zwgru:F7F8}C2F4XXXX"
+  pattern: "47FXFF003DXXC2FXXXXX5C1XD4CXXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}"
   at: 14
   deref: 1
 - name: KFZW2_1_A
   open: "{zwgru:F7F8}08XX"
-  pattern: "47FXFF003DXXC2FXxxxx5C1XD4CXxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}"
+  pattern: "47FXFF003DXXC2FXXXXX5C1XD4CXXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}"
   at: 14
   deref: 1
   derefat: 2
 - name: KFZW2_1_A
   open: "{zwgru:F7F8}98X0"
-  pattern: "47FXFF003DXXC2FXxxxx5C1XD4CXxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}"
+  pattern: "47FXFF003DXXC2FXXXXX5C1XD4CXXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}"
   at: 14
   deref: 1
   derefat: 2
 - name: KFZW2_1_A
-  open: "{zwgru:F7F8}9AXXxxxx"
-  pattern: "47FXFF003DXXC2FXxxxx5C1XD4CXxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}"
+  open: "{zwgru:F7F8}9AXXXXXX"
+  pattern: "47FXFF003DXXC2FXXXXX5C1XD4CXXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}"
   at: 14
   deref: 1
   derefat: 2
 - name: KFZW2_1_A
-  open: "{zwgru:F7F8}C2F4xxxx"
-  pattern: "47FXFF003DXXC2FXxxxx5C1XD4CXxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}"
+  open: "{zwgru:F7F8}C2F4XXXX"
+  pattern: "47FXFF003DXXC2FXXXXX5C1XD4CXXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}"
   at: 14
   deref: 1
   derefat: 2
 - name: KFZW2
   open: "{zwgru:F7F8}08XX"
-  pattern: "47FXFF003DXXE6FCxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}"
+  pattern: "47FXFF003DXXE6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}"
   at: 18
 - name: KFZW2
   open: "{zwgru:F7F8}98X0"
-  pattern: "47FXFF003DXXE6FCxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}"
+  pattern: "47FXFF003DXXE6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}"
   at: 18
 - name: KFZW2
-  open: "{zwgru:F7F8}9AXXxxxx"
-  pattern: "47FXFF003DXXE6FCxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}"
+  open: "{zwgru:F7F8}9AXXXXXX"
+  pattern: "47FXFF003DXXE6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}"
   at: 18
 - name: KFZW2
-  open: "{zwgru:F7F8}C2F4xxxx"
-  pattern: "47FXFF003DXXE6FCxxxxE6FDxxxxF2FExxxxF2FFxxxx{slot:17}"
+  open: "{zwgru:F7F8}C2F4XXXX"
+  pattern: "47FXFF003DXXE6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}"
   at: 18
 - name: KFLDRQ1
-  open: "9AXXxxxx{plsol:C2FX}{pvdkds:C2FX}20XX"
-  pattern: "E6FCxxxxE6FDxxxxE6FExxxxE6FFxxxxDA8Xxxxx"
+  open: "9AXXXXXX{plsol:C2FX}{pvdkds:C2FX}20XX"
+  pattern: "E6FCXXXXE6FDXXXXE6FEXXXXE6FFXXXXDA8XXXXX"
   at: 2
   frame: true
 - name: KFLDRQ1
   open: "{plsol:F3FX}{pvdkds:23FX}8DXX"
-  pattern: "E6FCxxxxE6FDxxxxE6FExxxxE6FFxxxxDA8Xxxxx"
+  pattern: "E6FCXXXXE6FDXXXXE6FEXXXXE6FFXXXXDA8XXXXX"
   at: 2
   frame: true
 - name: KFMRESK
-  open: "{vfzg:F3FX}43FXxxxx9DXX"
+  open: "{vfzg:F3FX}43FXXXXX9DXX"
   first: true
-  pattern: "E6FCxxxxE6FDxxxxF2FExxxxF2FFxxxxDAXXxxxx"
+  pattern: "E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDAXXXXXX"
   at: 2
 - name: NFSM
-  open: "{dns:F7FX}0D02{dns:F78E}E6FCxxxx"
+  open: "{dns:F7FX}0D02{dns:F78E}E6FCXXXX"
   first: true
-  pattern: "E6FCxxxxE6FDxxxxF2FExxxxDAXXxxxx8840"
+  pattern: "E6FCXXXXE6FDXXXXF2FEXXXXDAXXXXXX8840"
   at: 2
   frame: true
 - name: NFSM
-  open: "DAXXxxxx"
-  pattern: "E6FCxxxxE6FDxxxxD740E100F2FExxxxDAXXxxxx"
+  open: "DAXXXXXX"
+  pattern: "E6FCXXXXE6FDXXXXD740E100F2FEXXXXDAXXXXXX"
   at: 2
   frame: true
+  also:
+  - name: NFS2M
+  - name: NLLM
+  - name: NLL2M
 - name: NFSM
-  open: "DAXXxxxx"
-  pattern: "E6FCxxxxE6FDxxxxF2FExxxxDAXXxxxx"
+  open: "DAXXXXXX"
+  pattern: "E6FCXXXXE6FDXXXXF2FEXXXXDAXXXXXX"
   at: 2
   frame: true
+  also:
+  - name: NFS2M
+  - name: NLLM
+  - name: NLL2M
 - name: NLLMGFS
-  open: "DAXXxxxx"
-  pattern: "E6FCxxxxE6FDxxxxE6FExxxxE6FFxxxxDAXXxxxx0804"
+  open: "DAXXXXXX"
+  pattern: "E6FCXXXXE6FDXXXXE6FEXXXXE6FFXXXXDAXXXXXX0804"
   at: 2
   frame: true
-- name: NFS2M
-  open: "DAXXxxxx"
-  pattern: "E6FCxxxxE6FDxxxxD740E100F2FExxxxDAXXxxxx"
-  at: 2
-  frame: true
-- name: NFS2M
-  open: "DAXXxxxx"
-  pattern: "E6FCxxxxE6FDxxxxF2FExxxxDAXXxxxx"
-  at: 2
-  frame: true
+  also:
+  - name: NLLMG
 - name: NFS2M_0_A
-  open: "DAXXxxxx"
-  pattern: "D4C4xxxxD4D4xxxxD740E100F2FExxxxDAXXxxxx"
+  open: "DAXXXXXX"
+  pattern: "D4C4XXXXD4D4XXXXD740E100F2FEXXXXDAXXXXXX"
   at: 2
   deref: 1
   dereffar: true
+  also:
+  - name: NLL2M_0_A
 - name: NFS2M_1_A
-  open: "DAXXxxxx"
-  pattern: "D4C4xxxxD4D4xxxxD740E100F2FExxxxDAXXxxxx"
+  open: "DAXXXXXX"
+  pattern: "D4C4XXXXD4D4XXXXD740E100F2FEXXXXDAXXXXXX"
   at: 2
   deref: 1
   derefat: 4
   dereffar: true
+  also:
+  - name: NLL2M_1_A
 - name: NFS2M_0_A
-  open: "DAXXxxxx"
-  pattern: "D4C4xxxxD4D4xxxxF2FExxxxDAXXxxxx"
+  open: "DAXXXXXX"
+  pattern: "D4C4XXXXD4D4XXXXF2FEXXXXDAXXXXXX"
   at: 2
   deref: 1
   dereffar: true
+  also:
+  - name: NLL2M_0_A
 - name: NFS2M_1_A
-  open: "DAXXxxxx"
-  pattern: "D4C4xxxxD4D4xxxxF2FExxxxDAXXxxxx"
+  open: "DAXXXXXX"
+  pattern: "D4C4XXXXD4D4XXXXF2FEXXXXDAXXXXXX"
   at: 2
   deref: 1
   derefat: 4
   dereffar: true
-- name: NLLM
-  open: "DAXXxxxx"
-  pattern: "E6FCxxxxE6FDxxxxD740E100F2FExxxxDAXXxxxx"
-  at: 2
-  frame: true
-- name: NLLM
-  open: "DAXXxxxx"
-  pattern: "E6FCxxxxE6FDxxxxF2FExxxxDAXXxxxx"
-  at: 2
-  frame: true
+  also:
+  - name: NLL2M_1_A
 - name: NLLM_0_A
-  open: "DAXXxxxx"
-  pattern: "D4C5xxxxD4D5xxxxD740E100F2FExxxxDAXXxxxx"
+  open: "DAXXXXXX"
+  pattern: "D4C5XXXXD4D5XXXXD740E100F2FEXXXXDAXXXXXX"
   at: 2
   deref: 1
   dereffar: true
+  also:
+  - name: NLL2M_0_A
 - name: NLLM_1_A
-  open: "DAXXxxxx"
-  pattern: "D4C5xxxxD4D5xxxxD740E100F2FExxxxDAXXxxxx"
+  open: "DAXXXXXX"
+  pattern: "D4C5XXXXD4D5XXXXD740E100F2FEXXXXDAXXXXXX"
   at: 2
   deref: 1
   derefat: 4
   dereffar: true
+  also:
+  - name: NLL2M_1_A
 - name: NLLM_2_A
-  open: "DAXXxxxx"
-  pattern: "D4C5xxxxD4D5xxxxD740E100F2FExxxxDAXXxxxx"
+  open: "DAXXXXXX"
+  pattern: "D4C5XXXXD4D5XXXXD740E100F2FEXXXXDAXXXXXX"
   at: 2
   deref: 1
   derefat: 8
   dereffar: true
+  also:
+  - name: NLL2M_2_A
 - name: NLLM_3_A
-  open: "DAXXxxxx"
-  pattern: "D4C5xxxxD4D5xxxxD740E100F2FExxxxDAXXxxxx"
+  open: "DAXXXXXX"
+  pattern: "D4C5XXXXD4D5XXXXD740E100F2FEXXXXDAXXXXXX"
   at: 2
   deref: 1
   derefat: 12
   dereffar: true
-- name: NLLMG
-  open: "DAXXxxxx"
-  pattern: "E6FCxxxxE6FDxxxxE6FExxxxE6FFxxxxDAXXxxxx0804"
-  at: 2
-  frame: true
-- name: NLL2M
-  open: "DAXXxxxx"
-  pattern: "E6FCxxxxE6FDxxxxD740E100F2FExxxxDAXXxxxx"
-  at: 2
-  frame: true
-- name: NLL2M
-  open: "DAXXxxxx"
-  pattern: "E6FCxxxxE6FDxxxxF2FExxxxDAXXxxxx"
-  at: 2
-  frame: true
-- name: NLL2M_0_A
-  open: "DAXXxxxx"
-  pattern: "D4C4xxxxD4D4xxxxD740E100F2FExxxxDAXXxxxx"
-  at: 2
-  deref: 1
-  dereffar: true
-- name: NLL2M_1_A
-  open: "DAXXxxxx"
-  pattern: "D4C4xxxxD4D4xxxxD740E100F2FExxxxDAXXxxxx"
-  at: 2
-  deref: 1
-  derefat: 4
-  dereffar: true
-- name: NLL2M_0_A
-  open: "DAXXxxxx"
-  pattern: "D4C4xxxxD4D4xxxxF2FExxxxDAXXxxxx"
-  at: 2
-  deref: 1
-  dereffar: true
-- name: NLL2M_1_A
-  open: "DAXXxxxx"
-  pattern: "D4C4xxxxD4D4xxxxF2FExxxxDAXXxxxx"
-  at: 2
-  deref: 1
-  derefat: 4
-  dereffar: true
-- name: NLL2M_0_A
-  open: "DAXXxxxx"
-  pattern: "D4C5xxxxD4D5xxxxD740E100F2FExxxxDAXXxxxx"
-  at: 2
-  deref: 1
-  dereffar: true
-- name: NLL2M_1_A
-  open: "DAXXxxxx"
-  pattern: "D4C5xxxxD4D5xxxxD740E100F2FExxxxDAXXxxxx"
-  at: 2
-  deref: 1
-  derefat: 4
-  dereffar: true
-- name: NLL2M_2_A
-  open: "DAXXxxxx"
-  pattern: "D4C5xxxxD4D5xxxxD740E100F2FExxxxDAXXxxxx"
-  at: 2
-  deref: 1
-  derefat: 8
-  dereffar: true
-- name: NLL2M_3_A
-  open: "DAXXxxxx"
-  pattern: "D4C5xxxxD4D5xxxxD740E100F2FExxxxDAXXxxxx"
-  at: 2
-  deref: 1
-  derefat: 12
-  dereffar: true
+  also:
+  - name: NLL2M_3_A
 - name: KFPEDR
-  open: "E6FCxxxx{wped_w:F2FD}{slot:11}E6FCxxxx{nmot_w:F2FD}{slot:11}F6F4xxxx"
-  pattern: "E6FCxxxxE6FDxxxxF2FExxxxF2FFxxxxDA8Xxxxx"
+  open: "E6FCXXXX{wped_w:F2FD}{slot:11}E6FCXXXX{nmot_w:F2FD}{slot:11}F6F4XXXX"
+  pattern: "E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDA8XXXXX"
   at: 2

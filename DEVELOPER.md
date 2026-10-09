@@ -6,7 +6,7 @@ One Go module, two programs: `me7info` (`generate`, `probe`, `parity`) and `me7l
 
 The generator is a masked search plus a closed set of opcodes (the result-type selector, case bounds, and `EXTP`). It is not a C166 disassembler. A template that only matches after a real decode is a failed needle. Fix that needle in `config/needles.yaml`. A Bosch name located by a signature, a window, or a chain is a row in `config/signatures.yaml`. The bytes, the window, and the call slot are fields on that row.
 
-`Connect` is set from the slow-init needle named by `connect.slow_init_needle` in `config/names.yaml` when that needle has one hit. The line is `SLOW-` plus `prefer_address` when that address is the KWP2000 row, and `fallback_address` otherwise. `-connect` overrides it.
+`Connect` is set from the slow-init needle named by `connect.slow_init_needle` in `config/names.yaml` when that needle has one hit. The line is `SLOW-` plus `prefer_address` when that address is the KWP2000 row, and `fallback_address` otherwise. `--connect` overrides it.
 
 Out of scope: `.kp`, OLS, DAMOS, WinOLS scripts, ecuxplot, and `mapdump`. This tree does not load a needle list from another checkout.
 
@@ -14,11 +14,11 @@ This tree is MIT ([LICENSE](LICENSE)). Do not copy NefMoto `Communication/`. The
 
 ## Config files
 
-`config/needles.yaml` (`ME7_CORE`, `-core`) holds the result selector, the 5-baud and fast-init rows, and the table and curve interpolation entries (8-bit or 16-bit).
+`config/needles.yaml` (`ME7_CORE`, `--core`) holds the result selector, the 5-baud and fast-init rows, and the table and curve interpolation entries (8-bit or 16-bit).
 
 `config/signatures.yaml` is embedded with the other config files. `generate` runs the rows after the selector and after `opcode/sign.go`, so a row can embed a name an earlier row already stored. New rows go in this file.
 
-A pattern can splice in an address that is already known:
+A pattern is two hex digits per byte, as compiled by `needle.Compile` for both this file and the needle files. `X` is a nibble wildcard, and `[VV/MM]` is one byte whose bits under mask `MM` equal `VV`. A pattern can splice in an address that is already known:
 
 - `{name:MID}` is that address in ME7Info's EXTP form.
 - `{slot:N}` is `callsSlot(N)`. The word comes from the `calls` table after the bootrom version is chosen by counting calls.
@@ -40,7 +40,7 @@ How the address is taken from the hit:
 
 A name already stored stays as it is. A name that is not in the catalog is kept so a later row can embed it, and that name is not written.
 
-`mapsigs` in the same file locates a map the caller list does not name. `pattern` is one window and `XX` is the address word inside it. `at` is the distance from the hit to that word, 2 when omitted. A negative `at` reads the pointer in front of the hit. `add` is the byte distance from the decoded pointer to the body. `anchor` names a map this list already locates, and then `add` is the distance from that map. An anchor uses the base row's axis words when it does not name its own. `open` finds a copy first and limits `pattern` to the DB00 window around it. `first` keeps the first copy of `open` when several exist. `from` is the search floor. An `open` with no `from` starts at 0x820000. `single` keeps that pattern only when it occurs once in the window. `frame` reads the 6-byte segmented pointer at `at`. `far` reads the 4-byte form. `deref` reads that many further words, and `derefat` is added before the first of those reads. `dereffar` makes that read the 4-byte segmented pointer.
+`mapsigs` in the same file locates a map the caller list does not name. `pattern` is one window and `XX` is the address word inside it. `at` is the distance from the hit to that word, 2 when omitted. A negative `at` reads the pointer in front of the hit. `add` is the byte distance from the decoded pointer to the body. `anchor` names a map this list already locates, and then `add` is the distance from that map. An anchor uses the base row's axis words when it does not name its own. `open` finds a copy first and limits `pattern` to the DB00 window around it. `first` keeps the first copy of `open` when several exist. `from` is the search floor. An `open` with no `from` starts at 0x820000. `single` keeps that pattern only when it occurs once in the window. `frame` reads the 6-byte segmented pointer at `at`. `far` reads the 4-byte form. `deref` reads that many further words, and `derefat` is added before the first of those reads. `dereffar` makes that read the 4-byte segmented pointer. `also` lists more maps from the same hit. Each entry is a copy of the row with its own `name` and `add`, and runs right after it. A hit on a body the caller list located without a name names that map. The hit's axes replace the caller's only when the hit decodes some.
 
 The axes come from one of these:
 
@@ -76,7 +76,7 @@ flowchart TD
 - **RAM** — load of R14, or of R13 when R13 is not an immediate.
 - **R12 setup** — the header that setup stored through R12.
 
-The setup is the header immediate in front of `MOV [ram], R4`. An R13 page immediate there overrides the DPP. With no page, the top bits of the header immediate select the DPP. An `F2` of R13 may sit between that immediate and the reload of the word.
+The setup is the header immediate in front of `MOV [ram], R4`. An R13 page immediate there overrides the DPP. With no page, the top bits of the header immediate select the DPP. An `F2` of R13 or R14, or an `F0` register move, may sit between that immediate and the reload of the word. An `EXTP #pag,#1` in front of the store, the reload, or the move is skipped, and one may also sit in the argument frame of the call.
 
 Once the column is known, these words are candidates for the row:
 
@@ -90,19 +90,19 @@ A page call that never loads a row word leaves the row unset. `ytable` on that c
 
 The axis equation is not filled from an address file.
 
-`config/catalog/` (`ME7_MAP`, `-map`; a single file is still accepted) is the RAM result-type catalog. `scales.yaml` holds the scales, `bits.yaml` the bitmask rows, and `values.yaml` the rest. The `.ecu` map name stays `catalog.yaml`.
+`config/catalog/` (`ME7_MAP`, `--map`; a single file is still accepted) is the RAM result-type catalog. `scales.yaml` holds the scales, `bits.yaml` the bitmask rows, and `values.yaml` the rest. The `.ecu` map name stays `catalog.yaml`.
 
 An omitted field is size 0, bitmask 0, unit "", signed false, inverse false, factor 1, offset 0. A size and unit pair applies only when the size is 1 or 2. A single-bit bitmask is a flag and does not take that pair. A field written on the row is kept.
 
-`config/names.yaml` (`ME7_NAMES`, `-names`) holds ME7 names and conversions. An omitted conversion size is 2. A conversion fills omitted signed, inverse, factor, and offset from a size and a unit. A named conversion is selected with `conversion`. That conversion is not the size-and-unit default, so its unit may be "".
+`config/names.yaml` (`ME7_NAMES`, `--names`) holds ME7 names and conversions. An omitted conversion size is 2. A conversion fills omitted signed, inverse, factor, and offset from a size and a unit. A named conversion is selected with `conversion`. That conversion is not the size-and-unit default, so its unit may be "".
 
-`config/measurements.yaml` (`ME7_MEAS`, `-meas`) is the measurement list. Overlay and field defaults are in the next section.
+`config/measurements.yaml` (`ME7_MEAS`, `--meas`) is the measurement list. Overlay and field defaults are in the next section.
 
-`config/aliases.yaml` (`ME7_ALIAS`, `-alias`) renames the catalog name. `was` is the previous alias. The Bosch variable name is unchanged. `$1` in an alias is a regex reference. ecuxplot uses it in `loggers.yaml`. It is not a literal.
+`config/aliases.yaml` (`ME7_ALIAS`, `--alias`) renames the catalog name. `was` is the previous alias. The Bosch variable name is unchanged. `$1` in an alias is a regex reference. ecuxplot uses it in `loggers.yaml`. It is not a literal.
 
 ## config/user
 
-Every `.yaml` and `.yml` file in `config/user/` is read, in filename order, on top of the shipped lists. A later file replaces a needle or measurement of the same name. Files you add there stay out of git. A missing `config/user` is skipped. `-user` and `ME7_USER` select another directory, and that path must exist. The same flag is on `me7info generate`, `me7info probe`, and `me7logger log`.
+Every `.yaml` and `.yml` file in `config/user/` is read, in filename order, on top of the shipped lists. A later file replaces a needle or measurement of the same name. Files you add there stay out of git. A missing `config/user` is skipped. `--user` and `ME7_USER` select another directory, and that path must exist. The same flag is on `me7info generate`, `me7info probe`, and `me7logger log`.
 
 A release archive includes `config/user/measurements.yaml` and `config/user/maps.yaml`. Each file is the comment header from the shipped list and an empty list.
 
@@ -125,11 +125,11 @@ A row with `needle_hex` replaces that name, or adds it:
 ```yaml
 functions:
   - name: my_caller
-    needle_hex: "DA ?? ?? ?? DB 00"
+    needle_hex: "DA XX XX XX DB 00"
     unique: true
 ```
 
-`??` is one wildcard byte. Spaces are optional. Only word-aligned hits count. An omitted `unique` is true, so more than one hit is reported and skipped. An omitted `back_up` on a needle row is 0, so the label is the hit. A negative `back_up` moves the label forward. `back_up: [min, max]` needs an even span and `entry_after`. `entry_after` is a list of byte strings, and one of them must precede the label.
+`XX` is one wildcard byte, using the pattern syntax of `config/signatures.yaml`. Spaces are optional. Only word-aligned hits count. An omitted `unique` is true, so more than one hit is reported and skipped. An omitted `back_up` on a needle row is 0, so the label is the hit. A negative `back_up` moves the label forward. `back_up: [min, max]` needs an even span and `entry_after`. `entry_after` is a list of byte strings, and one of them must precede the label.
 
 A row that omits `needle_hex` updates only the fields it lists, on a needle that already exists:
 
@@ -159,7 +159,7 @@ After editing, `me7info probe image.bin` prints `hit`, `miss`, `ambig`, or `noen
 
 Running from the repo reads the source files. Running from anywhere else uses the embed until some other directory happens to be named `config`.
 
-An explicit flag or environment variable replaces one file: `-core`, `-names`, `-meas`, `-map`, `-alias`, and `ME7_CORE`, `ME7_NAMES`, `ME7_MEAS`, `ME7_MAP`, `ME7_ALIAS`. `signatures.yaml` has no override flag. `config/examples/needles.yaml` is not embedded.
+An explicit flag or environment variable replaces one file: `--core`, `--names`, `--meas`, `--map`, `--alias`, and `ME7_CORE`, `ME7_NAMES`, `ME7_MEAS`, `ME7_MAP`, `ME7_ALIAS`. `signatures.yaml` has no override flag. `config/examples/needles.yaml` is not embedded.
 
 Editing a shipped file and running `go test` or `go run` rebuilds the embedded copy. A binary that was already built does not see that edit unless a flag or environment variable points at the file.
 
@@ -177,7 +177,7 @@ The sample images come from the private [ecu-corpus](https://github.com/nyetlabs
 
 With read access to `ecu-corpus`, `make corpus` fetches the submodule at its pinned commit. `make corpus-bump` moves it to the corpus head; commit the change yourself. The submodule URL is HTTPS. To use SSH, run `git config --global url.git@github.com:.insteadOf https://github.com/`. Without access, `corpus/` stays empty and `make test` skips the tests that read images. `XDFKIT_CORPUS` points the tests and `me7info parity` at another corpus checkout. `XDFKIT_REQUIRE_CORPUS=1`, set in CI, makes a missing corpus a failure. xdfkit's `docs/corpus.md` is the corpus specification.
 
-`make parity` builds `build/me7info` and runs `me7info parity -data testdata/parity`, which reads the images from `corpus/` (`-corpus`). It prints a report and exits 0.
+`make parity` builds `build/me7info` and runs `me7info parity --data testdata/parity`, which reads the images from `corpus/` (`--corpus`). It prints a report and exits 0.
 
 `make test` fails when any image is short of 100% on `vs ecu-specific`. That column is the image against `ecu/me7info/<image>.ecu`, matched on name, address, size, and bitmask. It is the only hard 100%.
 
@@ -185,7 +185,7 @@ A row that file does not name stays. Catalog names located on that image which t
 
 `vs corpus` is that image against every name in `config/catalog/` (`values.yaml` and `bits.yaml`). It is not 100% on every binary.
 
-Do not point `generate` at the oracle files without `-o` and `-xdf` aimed somewhere else.
+Do not point `generate` at the oracle files without `-o` and `--xdf` aimed somewhere else.
 
 That run reads the shipped YAML. It does not read `config/user`. Adding files there leaves the score unchanged. A drop means a shipped file in `config/` changed.
 
@@ -197,13 +197,17 @@ A `*-priority.yaml` file is a `tiers` map. The tiers are `S`, `A`, `B`, `C`, and
 
 `xdf/s4wiki/names.yaml` is one name list, scored on every image. The tuner set is <https://s4wiki.com/wiki/Tuning>. It is not a per-CPU list, and not a second 100%.
 
-`xdf/s4wiki/names-priority.yaml` puts every name on that list in one finder tier. It is opinion and does not change a score. Parity fails when a name is missing, repeated, or not on the list.
+`xdf/s4wiki/names-priority.yaml` puts every name on that list in one finder tier. D is the least a finder must locate (stage 1), and S is everything. It is opinion and does not change a score. Parity fails when a name is missing, repeated, or not on the list.
 
-A name hits when the locator stores one address and an axis. A count of 0 on that list is a scalar, so the address alone is the hit. Any other body with no axis is a miss. When `xdf/<image>.xdf` contains the name, the body address has to match one row of that file.
+`xdf/s4wiki/absent.yaml` lists, per block in `layouts.yaml`, the names that layout does not have. A DAMOS export that omits the name is evidence. Without one, a comment says why the name is listed, and it stays until a DAMOS export settles it. Parity fails on an unknown block or a name not on the list. An absent name still misses in the count.
+
+The `tier` grade is the highest name tier complete, counted up from D. A tier is complete when each of its names hits or is absent on that image's block. `D` is stage 1 done and `S` is every name. When D is incomplete the grade is `-`.
+
+A name hits when the locator stores one address and an axis. A count of 0 on that list is a scalar, so the address alone is the hit. Any other body with no axis is a miss. When `xdf/<image>.xdf` contains the name, the body address has to match one row of that file. A DAMOS export lists a map whose axes are stored in front of the body with no axis addresses, at the count header in front of the first axis. That row also matches. A row whose 16-bit axis starts on the odd pad byte, with the body right after that axis, puts the body one byte early, so it matches one byte later. A DAMOS row that only matches that way is likely wrong in the export.
 
 The number on the list is how many axes the table has, and those counts are the `axis` column. A count of 0 adds nothing. The denominator is 0 only when every map that hit has a count of 0. A count of 1 is a curve and 2 is a map. A hit on that column is the axis present on the map.
 
-`xdf/<image>.xdf`, when present, checks that image's own address file. A missing file is omitted from the report. The file is not the S4wiki list, and it does not locate maps. A body hit is the same address. An axis hit is the same address, point count, and width. An axis with no address is left out of the score. A 16-bit axis or body is the even address. The odd byte in front of it is a pad, not a value.
+`xdf/<image>.xdf`, when present, checks that image's own address file. A missing file is omitted from the report. The file is not the S4wiki list, and it does not locate maps. An address file that disagrees with the addresses the image's code reads is removed, not kept. A body hit is the same address. An axis hit is the same address, point count, and width. An axis with no address is left out of the score. A 16-bit axis or body is the even address. The odd byte in front of it is a pad, not a value.
 
 Maps are located on that image from the caller that passes the map to the interpolator. How the column and the row are read is in the `config/maps.yaml` section above. `addMapAt` reads the row and column counts when they sit in front of the axes. A count the image does not hold stays unset, and that map is written as a constant, unless the row is `plain`. A mapsig row names a header with `xat` or `yat` when a setup stored it in a RAM word.
 
@@ -233,10 +237,10 @@ Peers are the images grouped in `testdata/parity/datasets.yaml`. A shared axis d
 The report sections are:
 
 - `ecu me7info` is the legacy file, then a count of catalog names that file does not name, then that image against the full catalog. The `extras` column is the measurement list on that image. The torque scale is the `torque` conversion in `config/names.yaml`.
-- `xdf s4wiki` is the shared name list, then `tier`, then its `axis` column, then `confidence`. `tier` is the tier of the image's block in `layouts-priority.yaml`.
+- `xdf s4wiki` is the shared name list, then its `tier` grade, its `axis` column, and `confidence`.
 - `xdf` is every body in the per-image address file. Its `axis` column is every axis in that file.
 
-Every section lists images by that block tier, then by name. An image in no block sorts last.
+Every section lists images by the tier of the image's block in `layouts-priority.yaml`, then by name. An image in no block sorts last.
 
 ## Version
 

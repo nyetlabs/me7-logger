@@ -47,7 +47,7 @@ split_commits = false
 # First match wins. chore(deps) sits above the generic chore rule, and Dependabot merges
 # above the "Merge pull request" skip. ".*" stays last.
 commit_parsers = [
-  { message = "(?i)^(feat|add)", group = "<!-- 00 -->Features" },
+  { message = "(?i)^(feat|add|ui)", group = "<!-- 00 -->Features" },
   { message = "(?i)^fix", group = "<!-- 01 -->Bug Fixes" },
   { message = "(?i)^(needle|pattern)", group = "<!-- 02 -->Signatures" },
   { message = "(?i)^docs?", group = "<!-- 03 -->Documentation" },

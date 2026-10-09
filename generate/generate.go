@@ -563,6 +563,8 @@ func applyAxes(img []byte, dpp [4]uint16, h opcode.MapHit, m *record.Map) {
 
 // mergeMaps keeps a caller-slot name when both locators found it.
 // A pattern or an anchor supplies a name the caller list does not have.
+// An unnamed call to that body takes the name, and keeps the call's axes
+// when the hit decodes none.
 // A packed header in front of that body fills the row and column counts.
 func mergeMaps(img []byte, dpp [4]uint16, maps []record.Map, hits []opcode.MapHit) []record.Map {
 	have := map[string]struct{}{}
@@ -582,10 +584,27 @@ func mergeMaps(img []byte, dpp [4]uint16, maps []record.Map, hits []opcode.MapHi
 		have[h.Name] = struct{}{}
 		m := record.Map{Name: h.Name, Addr: h.Addr}
 		applyAxes(img, dpp, h, &m)
+		if i := unnamedAt(maps, h.Addr); i >= 0 {
+			if m.X != nil || m.Y != nil {
+				maps[i] = m
+			} else {
+				maps[i].Name = h.Name
+			}
+			continue
+		}
 		maps = append(maps, m)
 	}
 	sort.Slice(maps, func(i, j int) bool { return maps[i].Addr < maps[j].Addr })
 	return maps
+}
+
+func unnamedAt(maps []record.Map, addr uint32) int {
+	for i, m := range maps {
+		if m.Name == "" && m.Addr == addr {
+			return i
+		}
+	}
+	return -1
 }
 
 func stubNote(ms []config.Measure) string {

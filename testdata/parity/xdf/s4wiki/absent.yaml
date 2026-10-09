@@ -1,0 +1,53 @@
+# Names a code layout block (layouts.yaml) does not have. A DAMOS export
+# that omits the name is evidence. Without one, the comment says why the name
+# is listed, and the entry stays until a DAMOS export settles it. An image in
+# that block counts the name as hit for the tier grade. It still misses in the
+# s4wiki count.
+absent:
+  # No DAMOS export yet. No map_interp_table8_b call with M's arguments on T,
+  # and the 8D0907551H hand XDF does not have it.
+  22N:
+    - KFVPLGU
+  # Not in the 4B0906018CM DAMOS export.
+  1.8T-CM:
+    - CDLSHV
+    - CLAHSHE2
+    - CLALSH2
+    - CLRHK
+    - CLRHKA
+    - CLRKA
+    - DLBTS
+    - KFLAFWL
+    - KFLAMKR
+    - KFLBTS_0_A
+    - KFVPLGU
+    - NLLM
+    - RLSALULL
+    - RLSALUN
+    - SNM16OPUW
+    - TABGSS2
+  # Not in the 06A906032HF DAMOS export.
+  1.8T:
+    - CDLSHV
+    - CLAHSHE2
+    - CLALSH2
+    - CLRHK
+    - CLRHKA
+    - CLRKA
+    - DLBTS
+    - FKHABMN
+    # Not in the LP or NL code. Both go from the boost loads straight to
+    # KFVPDKLD, where HF calls KFDLULS in between. No DAMOS export for
+    # either. To do: look for it by hand in WinOLS.
+    - KFDLULS
+    - KFLBTS_0_A
+    - KFMIZUNS
+    - KFVPLGU
+    - NLLM
+    - RLSALULL
+    - RLSALUN
+    # The HF DAMOS export lists it at 0x130A6, the count word, and the
+    # finder stores 0x130A8. To do: look for it by hand in WinOLS and
+    # confirm.
+    - SNM16OPUW
+    - TABGSS2

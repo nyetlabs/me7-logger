@@ -9,7 +9,7 @@ me7info probe image.bin
 me7info generate image.bin
 ```
 
-`probe` prints one line per needle. `generate` writes `image.ecu` next to the image, and `image.xdf` when it locates maps. It does not open a serial port.
+`probe` prints one line per needle. `probe --maps` also counts the calibration maps that `generate` would write to the XDF. `generate` writes `image.ecu` next to the image, and `image.xdf` when it locates maps. It does not open a serial port.
 
 ## Log
 

@@ -5,9 +5,10 @@ tiers:
     - 22m
   A:
     - 22N
-    - 4Z7
     - 1.8T
+    - 1.8T-CM
   B:
+    - 4Z7
     - 4Z7-like
   C:
     - 23g

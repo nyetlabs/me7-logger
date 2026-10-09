@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -10,6 +11,7 @@ import (
 	"path/filepath"
 
 	"go.nyet.org/me7-logger/config"
+	"go.nyet.org/me7-logger/internal/cli"
 	"go.nyet.org/me7-logger/kwp"
 	"go.nyet.org/me7-logger/logcfg"
 	"go.nyet.org/me7-logger/logger"
@@ -27,15 +29,18 @@ func main() {
 	switch os.Args[1] {
 	case "log":
 		err = cmdLog(os.Args[2:])
-	case "version", "-version", "--version":
+	case "-v", "--version":
 		fmt.Println(version)
-	case "-h", "-help", "--help", "help":
+	case "-h", "--help", "help":
 		usage()
 	default:
 		usage()
 		os.Exit(2)
 	}
 	if err != nil {
+		if errors.Is(err, flag.ErrHelp) {
+			return
+		}
 		fmt.Fprintf(os.Stderr, "me7logger: %v\n", err)
 		os.Exit(1)
 	}
@@ -44,31 +49,36 @@ func main() {
 func usage() {
 	fmt.Fprintf(os.Stderr, `me7logger %s
 
-  me7logger log [flags] image.bin config.cfg
-  me7logger version
+Usage:
+  me7logger log [flags] <image.bin> <config.cfg>
+  me7logger -v, --version
+  me7logger -h, --help
 
-log samples RAM over stock KWP2000. It does not write flash or EEPROM.
-Logging stays at 10400 baud, which is the init baud.
+Commands:
+  log  Sample RAM over stock KWP2000 and write CSV. Does not write
+       flash or EEPROM. Logging stays at 10400 baud, the init baud.
+
+Run "me7logger log -h" for its flags.
 `, version)
 }
 
 func cmdLog(args []string) error {
-	fs := flag.NewFlagSet("log", flag.ContinueOnError)
-	core := fs.String("core", config.Path("ME7_CORE", config.NeedlesFile), "needle yaml path")
-	names := fs.String("names", config.Path("ME7_NAMES", config.NamesFile), "ME7 name yaml path")
-	meas := fs.String("meas", config.Path("ME7_MEAS", config.MeasuresFile), "per-part measurement yaml path")
-	mapPath := fs.String("map", config.Path("ME7_MAP", config.MapDir), "result-type catalog")
-	alias := fs.String("alias", config.Path("ME7_ALIAS", config.AliasFile), "alias file")
-	port := fs.String("p", "", "serial port")
-	sps := fs.Int("s", 0, "samples per second, overrides the cfg")
-	baud := fs.Int("b", 0, "baud override; only 10400 is implemented")
-	out := fs.String("o", "", "csv path (default stdout)")
+	fs := cli.NewFlagSet("me7logger", "log", "[flags] <image.bin> <config.cfg>", "")
+	core := fs.String("core", config.Path("ME7_CORE", config.NeedlesFile), "needle YAML `<file>`")
+	names := fs.String("names", config.Path("ME7_NAMES", config.NamesFile), "ME7 name YAML `<file>`")
+	meas := fs.String("meas", config.Path("ME7_MEAS", config.MeasuresFile), "per-part measurement YAML `<file>`")
+	mapPath := fs.String("map", config.Path("ME7_MAP", config.MapDir), "result-type catalog `<dir>`")
+	alias := fs.String("alias", config.Path("ME7_ALIAS", config.AliasFile), "alias `<file>`")
+	port := fs.String("p", "", "serial `<port>`, for example /dev/tty.usbserial or COM3 (required)")
+	sps := fs.Int("s", 0, "`<samples>` per second, overrides the cfg")
+	baud := fs.Int("b", 0, "`<baud>` override; only 10400 is implemented")
+	out := fs.String("o", "", "csv output `<file>`, appended to (default stdout)")
 	one := fs.Bool("1", false, "read one sample and stop")
-	scale := fs.String("5120", "auto", "mbar scaling: auto, on, or off")
-	clock := fs.Int("clock", 0, "CPU clock MHz; 0 uses config/names.yaml")
-	user := fs.String("user", config.Path("ME7_USER", "user"), "directory of user needles, measurements, and conversions")
-	fs.SetOutput(os.Stderr)
-	if err := fs.Parse(args); err != nil {
+	scale := fs.String("5120", "auto", "mbar scaling `<mode>`: auto, on, or off")
+	clock := fs.Int("clock", 0, "CPU clock `<MHz>`: 20, 24, 32, or 40; 0 uses config/names.yaml")
+	user := fs.String("user", config.Path("ME7_USER", "user"), "`<dir>` of user needles, measurements, and conversions")
+	cli.Short(fs, "n", "names", "a", "alias", "u", "user", "5", "5120")
+	if err := cli.Parse(fs, args); err != nil {
 		return err
 	}
 	if fs.NArg() != 2 {
@@ -118,11 +128,5 @@ func cmdLog(args []string) error {
 }
 
 func resolveUser(fs *flag.FlagSet, dir string) (string, error) {
-	explicit := os.Getenv("ME7_USER") != ""
-	fs.Visit(func(f *flag.Flag) {
-		if f.Name == "user" {
-			explicit = true
-		}
-	})
-	return config.ResolveUserDir(dir, explicit)
+	return config.ResolveUserDir(dir, os.Getenv("ME7_USER") != "" || cli.IsSet(fs, "user"))
 }

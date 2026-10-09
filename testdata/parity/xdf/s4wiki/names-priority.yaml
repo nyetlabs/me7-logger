@@ -1,13 +1,116 @@
 # Finder priority for the names in names.yaml. Opinion, not measurement.
-# Tiers run S, A, B, C, D, highest first. Every name in names.yaml is in exactly
-# one tier. Keep each tier sorted by name. The tier is the tuning stage that needs it:
-#   S  stage 1: boost, timing, torque monitoring, knock, BTS and open loop fueling
-#   A  stage 2: injector and FPR changes, exhaust DTCs
+# Tiers run S, A, B, C, D. D is the least a finder must locate and S is
+# everything. Every name in names.yaml is in exactly one tier. Keep each tier
+# sorted by name. The tier is the tuning stage that needs it:
+#   D  stage 1: boost, timing, torque monitoring, knock, BTS and open loop fueling
+#   C  stage 2: injector and FPR changes, exhaust DTCs
 #   B  stage 3-: bigger turbos: base boost, wastegate spring, LDR PID scheduling, MAP sensor limit
-#   C  stage 3: MAF and intake, ARMD
-#   D  niceties and everything else
+#   A  stage 3: MAF and intake, ARMD
+#   S  niceties and everything else
 tiers:
   S:
+    - AIMVM
+    - CDLDP
+    - CDTES
+    - CWDNMAX
+    - CWMSRCAN
+    - DNMAXH
+    - ITNMXH
+    - KFTSRL
+    - KISRM
+    - KLDMASRL
+    - KUMSRL
+    - NASNOTKL
+    - NMAX
+    - NMAXF
+    - NMAXOG
+    - NWPMBBR
+    - TMOTNMX
+    - TNMXH
+    - VMAXNB
+    - VNMX
+    - VWPMBBR
+  A:
+    - KFDMDADP
+    - KFDMDARO
+    - KFKHFM
+    - KFMLDMX
+    - KFNW
+    - KFNWWL
+    - KFPBRK
+    - KFPBRKNW
+    - KFPRG
+    - KFURL
+    - KIFZGHG
+    - MLHFM
+    - MLMAX
+    - MLOFS
+  B:
+    - DSLOFS
+    - KFLDRQ2
+    - KFMSNWDK
+    - KFVPDKSD
+    - KFVPDKSE
+    - KFWDKMSN
+    - LDEIAP
+    - LDRQ0DY
+    - LDRQ0S
+    - LDRQ1DY
+    - LDRQ1ST
+    - TLDIAPN
+    - UMDYLDR
+    - WDKUGDN
+  C:
+    - CATR
+    - CDATR
+    - CDATS
+    - CDHSH
+    - CDHSHE
+    - CDKAT
+    - CDLASH
+    - CDLATV
+    - CDLSH
+    - CDLSHV
+    - CDSLS
+    - CLAATR
+    - CLAATR2
+    - CLAATS
+    - CLAATS2
+    - CLAHSH
+    - CLAHSH2
+    - CLAHSHE
+    - CLAHSHE2
+    - CLALSH
+    - CLALSH2
+    - CLRHK
+    - CLRHKA
+    - CLRKA
+    - CWDLSAHK
+    - CWKONABG
+    - CWKONLS
+    - ESKONF
+    - FHOKH
+    - FKHABMN
+    - FKKVS
+    - FKVA
+    - KFFWL_0_A
+    - KFFWL_1_A
+    - KFLF
+    - KFMRES
+    - KFMRESK
+    - KFNLLNST
+    - KRKTE
+    - KVB
+    - NFSM
+    - NLLM
+    - RLSALULL
+    - RLSALUN
+    - TABGSS
+    - TABGSS2
+    - TEMIN
+    - TEMINVA
+    - TVUB
+  D:
     - CWLAMFAW
     - CWMDAPP
     - DLAMFAW
@@ -68,105 +171,3 @@ tiers:
     - TMNSMN
     - TULV1
     - ZKWLAFWL
-  A:
-    - CATR
-    - CDATR
-    - CDATS
-    - CDHSH
-    - CDHSHE
-    - CDKAT
-    - CDLASH
-    - CDLATV
-    - CDLSH
-    - CDLSHV
-    - CDSLS
-    - CLAATR
-    - CLAATR2
-    - CLAATS
-    - CLAATS2
-    - CLAHSH
-    - CLAHSH2
-    - CLAHSHE
-    - CLAHSHE2
-    - CLALSH
-    - CLALSH2
-    - CLRHK
-    - CLRHKA
-    - CLRKA
-    - CWDLSAHK
-    - CWKONABG
-    - CWKONLS
-    - ESKONF
-    - FHOKH
-    - FKHABMN
-    - FKKVS
-    - FKVA
-    - KFFWL_0_A
-    - KFFWL_1_A
-    - KFLF
-    - KFMRES
-    - KFMRESK
-    - KFNLLNST
-    - KRKTE
-    - KVB
-    - NFSM
-    - NLLM
-    - RLSALULL
-    - RLSALUN
-    - TABGSS
-    - TABGSS2
-    - TEMIN
-    - TEMINVA
-    - TVUB
-  B:
-    - DSLOFS
-    - KFLDRQ2
-    - KFMSNWDK
-    - KFVPDKSD
-    - KFVPDKSE
-    - KFWDKMSN
-    - LDEIAP
-    - LDRQ0DY
-    - LDRQ0S
-    - LDRQ1DY
-    - LDRQ1ST
-    - TLDIAPN
-    - UMDYLDR
-    - WDKUGDN
-  C:
-    - KFDMDADP
-    - KFDMDARO
-    - KFKHFM
-    - KFMLDMX
-    - KFNW
-    - KFNWWL
-    - KFPBRK
-    - KFPBRKNW
-    - KFPRG
-    - KFURL
-    - KIFZGHG
-    - MLHFM
-    - MLMAX
-    - MLOFS
-  D:
-    - AIMVM
-    - CDLDP
-    - CDTES
-    - CWDNMAX
-    - CWMSRCAN
-    - DNMAXH
-    - ITNMXH
-    - KFTSRL
-    - KISRM
-    - KLDMASRL
-    - KUMSRL
-    - NASNOTKL
-    - NMAX
-    - NMAXF
-    - NMAXOG
-    - NWPMBBR
-    - TMOTNMX
-    - TNMXH
-    - VMAXNB
-    - VNMX
-    - VWPMBBR

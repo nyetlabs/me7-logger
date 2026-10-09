@@ -26,12 +26,12 @@ func TestApplySigAfterWindow(t *testing.T) {
 signatures:
 - name: first
   size: 1
-  pattern: "F2FXxxxx{rk_w:F2FX}1BXX"
+  pattern: "F2FXXXXX{rk_w:F2FX}1BXX"
   at: 2
 - name: second
   size: 1
   after: first
-  pattern: "F6FXxxxx"
+  pattern: "F6FXXXXX"
   at: 2
 `)
 	doc, err := ParseSigs(body)
@@ -235,6 +235,42 @@ mapsigs:
 	copy(img[16:], []byte{0xD7, 0x40, 0x00, 0x02, 0x00, 0x00, 0x10, 0x00})
 	if MapAddrs(img, StandardDPP, doc.Maps) != nil {
 		t.Fatal("a second copy of the window stored a map")
+	}
+}
+
+func TestMapSigAlsoAndBitmask(t *testing.T) {
+	body := []byte(`
+mapsigs:
+- name: BASE
+  pattern: "D7400002[00/F0]XXXXXX"
+  at: 6
+  add: 1
+  also:
+  - name: NEXT
+    add: 3
+  - name: SAME
+`)
+	doc, err := ParseSigs(body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	img := make([]byte, 32)
+	copy(img, []byte{0xD7, 0x40, 0x00, 0x02, 0x0C, 0x00, 0x10, 0x00})
+	have := map[string]uint32{}
+	for _, h := range MapAddrs(img, StandardDPP, doc.Maps) {
+		have[h.Name] = h.Addr
+	}
+	if have["BASE"] != 0x800011 || have["NEXT"] != 0x800013 || have["SAME"] != 0x800010 {
+		t.Fatalf("%v", have)
+	}
+	img[4] = 0x1C
+	if MapAddrs(img, StandardDPP, doc.Maps) != nil {
+		t.Fatal("a masked bit that differs matched")
+	}
+	for _, p := range []string{"[0F/F0]", "[00/F0", "AA[1/FF]"} {
+		if _, _, ok := compilePat(p); ok {
+			t.Fatalf("%s compiled", p)
+		}
 	}
 }
 

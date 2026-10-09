@@ -168,7 +168,7 @@ func (f rawNeedle) compile() (Needle, error) {
 	pats := make([][]byte, len(f.NeedleHex.items))
 	masks := make([][]byte, len(f.NeedleHex.items))
 	for i, hex := range f.NeedleHex.items {
-		pat, mask, err := parsePattern(hex)
+		pat, mask, err := Compile(hex)
 		if err != nil {
 			return Needle{}, fmt.Errorf("%s: %w", f.Name, err)
 		}
@@ -276,25 +276,44 @@ func parseNum(s string) (int, error) {
 	return out, nil
 }
 
-// parsePattern splits hex byte tokens. "??" is a wildcard (mask 0).
-func parsePattern(s string) (pat, mask []byte, err error) {
+// Compile reads a byte pattern. Spaces are ignored. A byte is two hex digits,
+// X is a nibble wildcard, and [VV/MM] is a byte whose bits under MM equal VV.
+func Compile(s string) (pat, mask []byte, err error) {
 	s = strings.Join(strings.Fields(s), "")
-	if len(s)%2 != 0 {
-		return nil, nil, fmt.Errorf("odd hex length")
-	}
-	for i := 0; i < len(s); i += 2 {
-		tok := s[i : i+2]
-		if tok == "??" {
-			pat = append(pat, 0)
-			mask = append(mask, 0)
+	for i := 0; i < len(s); {
+		if s[i] == '[' {
+			if i+7 > len(s) || s[i+3] != '/' || s[i+6] != ']' {
+				return nil, nil, fmt.Errorf("bad bitmask byte at %q", s[i:])
+			}
+			v, err1 := strconv.ParseUint(s[i+1:i+3], 16, 8)
+			m, err2 := strconv.ParseUint(s[i+4:i+6], 16, 8)
+			if err1 != nil || err2 != nil || v&^m != 0 {
+				return nil, nil, fmt.Errorf("bad bitmask byte %q", s[i:i+7])
+			}
+			pat, mask = append(pat, byte(v)), append(mask, byte(m))
+			i += 7
 			continue
 		}
-		v, err := strconv.ParseUint(tok, 16, 8)
-		if err != nil {
-			return nil, nil, fmt.Errorf("bad hex %q", tok)
+		if i+1 >= len(s) {
+			return nil, nil, fmt.Errorf("odd hex length")
 		}
-		pat = append(pat, byte(v))
-		mask = append(mask, 0xff)
+		var p, m byte
+		for _, c := range []byte{s[i], s[i+1]} {
+			p, m = p<<4, m<<4
+			if c == 'X' {
+				continue
+			}
+			v, err := strconv.ParseUint(string(c), 16, 8)
+			if err != nil {
+				return nil, nil, fmt.Errorf("bad hex %q", s[i:i+2])
+			}
+			p, m = p|byte(v), m|0x0F
+		}
+		pat, mask = append(pat, p), append(mask, m)
+		i += 2
+	}
+	if len(pat) == 0 {
+		return nil, nil, fmt.Errorf("empty pattern")
 	}
 	return pat, mask, nil
 }

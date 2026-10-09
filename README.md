@@ -10,11 +10,11 @@
 
 ```bash
 me7info probe image.bin
-me7info generate -o out.ecu -xdf out.xdf image.bin
+me7info generate -o out.ecu --xdf out.xdf image.bin
 me7logger log -p /dev/tty.usbserial -1 -o log.csv image.bin session.cfg
 ```
 
-`generate` does not open a serial port. Without `-o` and `-xdf` it writes the `.ecu` and `.xdf` next to the image. `log` stays at 10400 baud. See [Quickstart](QUICKSTART.md). Overlay rules and `make parity` are in [DEVELOPER.md](DEVELOPER.md).
+`generate` does not open a serial port. Without `-o` and `--xdf` it writes the `.ecu` and `.xdf` next to the image. `log` stays at 10400 baud. See [Quickstart](QUICKSTART.md). Overlay rules and `make parity` are in [DEVELOPER.md](DEVELOPER.md).
 
 Shipped behavior comes from the YAML in `config/`. Files you add under `config/user/` stay out of git.
 

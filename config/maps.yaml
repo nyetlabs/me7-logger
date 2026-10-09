@@ -133,15 +133,15 @@ maps:
   interp: map_interp_table8_page
 - name: KFFLLDE
   caller: LDRLMX_ldhbn
-  at: ['0x148', '0x1D4']
+  at: ['0x148', '0x1D4', '0x174']
   interp: map_interp_table16_page
 - name: KFTARXZK
   caller: LDRLMX_ldhbn
-  at: '0x244'
+  at: ['0x244', '0x2AA']
   interp: map_interp_table16_page
 - name: KFTARX
   caller: LDRLMX_ldhbn
-  at: '0x26C'
+  at: ['0x26C', '0x2D2']
   interp: map_interp_table16_page
 - name: KFLDHBN
   caller: LDRLMX_ldhbn
@@ -149,15 +149,19 @@ maps:
   interp: map_interp_table8_page
 - name: LDPBN
   caller: LDRLMX_ldhbn
-  at: ['0x334', '0x49C']
+  at: ['0x334', '0x49C', '0x3D0']
   interp: map_interp_curve8
 - name: LDORXN
   caller: LDRLMX_ldhbn
-  at: ['0x42C', '0x5C0']
+  at: ['0x42C', '0x5C0', '0x4C8']
   interp: map_interp_curve8
 - name: KFWPLGTA
   caller: LDRPID_ldiopu
   at: '0x26'
+  interp: map_interp_table8_page
+- name: KFWPLGTA
+  caller: LDRPID_plsolr
+  at: '0x40'
   interp: map_interp_table8_page
 - name: KFLDIOPU
   caller: LDRPID_ldiopu
@@ -173,7 +177,7 @@ maps:
   interp: map_interp_table16_page
 - name: TLDIAPN
   caller: LDRPID_ldiopu
-  at: ['0x352', '0x3B8']
+  at: ['0x352', '0x3B8', '0x458']
   interp: map_interp_curve8
 - name: KFLDRQ2
   caller: LDRPID_ldrq

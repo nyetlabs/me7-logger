@@ -165,7 +165,7 @@ func TestSFRBitRow(t *testing.T) {
 
 func TestUserNeedle(t *testing.T) {
 	dir := t.TempDir()
-	body := "measurements:\n  - name: dzwb\n    needle_hex: \"39 A0 F7 FA ?? ?? 49 A0 DD 02\"\n    back_up: -4\n"
+	body := "measurements:\n  - name: dzwb\n    needle_hex: \"39 A0 F7 FA XX XX 49 A0 DD 02\"\n    back_up: -4\n"
 	if err := os.WriteFile(filepath.Join(dir, "dzwb.yaml"), []byte(body), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -189,7 +189,7 @@ func TestUserNeedle(t *testing.T) {
 
 func TestMeasureBitWord(t *testing.T) {
 	dir := t.TempDir()
-	body := "measurements:\n  - name: B_ar\n    bitmask: \"0x0200\"\n    bit: true\n    needle_hex: \"F0 94 9A ?? 04 50\"\n    back_up: -2\n"
+	body := "measurements:\n  - name: B_ar\n    bitmask: \"0x0200\"\n    bit: true\n    needle_hex: \"F0 94 9A XX 04 50\"\n    back_up: -2\n"
 	if err := os.WriteFile(filepath.Join(dir, "bit.yaml"), []byte(body), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -217,18 +217,18 @@ func TestUserConversion(t *testing.T) {
 measurements:
   - name: dzwb
     factor: -0.5
-    needle_hex: "39 A0 F7 FA ?? ?? 49 A0 DD 02"
+    needle_hex: "39 A0 F7 FA XX XX 49 A0 DD 02"
     back_up: -4
   - name: user_rpm
     size: 1
     unit: rpm
-    needle_hex: "AA 55 BB 66 ?? ?? CC 11 DD 22"
+    needle_hex: "AA 55 BB 66 XX XX CC 11 DD 22"
     back_up: -4
     unique: true
   - name: user_flag
     size: 1
     bitmask: "0x01"
-    needle_hex: "11 22 33 44 ?? ?? 55 66 77 88"
+    needle_hex: "11 22 33 44 XX XX 55 66 77 88"
     back_up: -4
     unique: true
 `

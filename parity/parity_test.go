@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 	"testing"
 
 	"go.nyet.org/me7-logger/internal/ecucorpus"
@@ -175,6 +176,19 @@ func TestScoreWikiAxisMatchesReference(t *testing.T) {
 	}
 }
 
+func TestReferenceHitPad(t *testing.T) {
+	row := refRow{name: "LAMFA", addr: 0x2B, axes: map[string]axisSig{
+		"x": {id: "x", addr: 0x1F, count: 6, bits: 16},
+	}}
+	if !referenceHit(record.Map{Name: "LAMFA", Addr: 0x2C}, []refRow{row}) {
+		t.Fatal("pad shifted body did not match")
+	}
+	row.axes["x"] = axisSig{id: "x", addr: 0x20, count: 6, bits: 16}
+	if referenceHit(record.Map{Name: "LAMFA", Addr: 0x2D}, []refRow{row}) {
+		t.Fatal("even axis matched one byte later")
+	}
+}
+
 func TestRunLayout(t *testing.T) {
 	dir := t.TempDir()
 	write := func(name, body string) {
@@ -275,6 +289,21 @@ func TestReportText(t *testing.T) {
 	}
 }
 
+func TestNameGrade(t *testing.T) {
+	tierOf := map[string]string{"s": "S", "a": "A", "b": "B", "c": "C", "d": "D"}
+	for _, tc := range []struct {
+		hit  string
+		want string
+	}{
+		{"sabcd", "S"}, {"abcd", "A"}, {"bcd", "B"}, {"cd", "C"}, {"d", "D"}, {"sabc", "-"}, {"sabd", "D"},
+	} {
+		got := nameGrade(tierOf, func(n string) bool { return strings.Contains(tc.hit, n) })
+		if got != tc.want {
+			t.Errorf("hit %q: %s, want %s", tc.hit, got, tc.want)
+		}
+	}
+}
+
 func TestConfidenceSkipFile(t *testing.T) {
 	dir := filepath.Join("..", "testdata", "parity")
 	skip, err := loadConfidenceSkip(dir)
@@ -320,7 +349,7 @@ func TestLayoutBlocks(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := loadLayoutTiers(dir); err != nil {
+	if _, err := loadLayoutTiers(dir, blocks); err != nil {
 		t.Fatal(err)
 	}
 

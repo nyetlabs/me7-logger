@@ -7,7 +7,7 @@
 data:
   # Application: bit 7 of page 30 byte 8 -> P0602 / P1681 fault path. Not present in CH.
   - name: app_flash_fault_test
-    needle_hex: "DB 00 28 02 84 00 ?? ?? C2 F4 ?? ?? 66 F4 80 00 2D"
+    needle_hex: "DB 00 28 02 84 00 XX XX C2 F4 XX XX 66 F4 80 00 2D"
     back_up: -8
 
   # MOV R12,#lo / MOV R13,#hi / MOV R14,#len / CALLS
@@ -36,7 +36,7 @@ functions:
   # (arm); the steps right after it differ between builds (551M, 551C/D/E), so the needle
   # stops there. 0x188 after the entry, 0x17A in 551C/D/E and 4B0906018.
   - name: k_27_SecurityAccess
-    needle_hex: "D4 50 10 00 B9 85 E6 F4 00 18 74 F4 ?? ?? E6 F4 FF BF 64 F4 ?? ??"
+    needle_hex: "D4 50 10 00 B9 85 E6 F4 00 18 74 F4 XX XX E6 F4 FF BF 64 F4 XX XX"
     back_up: [0x17A, 0x188]
     entry_after: ["DB 00", "FF FF"]
 
@@ -55,12 +55,12 @@ functions:
 
   # KWP 0x35. Hit is the upload latch = 1 store.
   - name: k_35_RequestUpload
-    needle_hex: "E6 F5 FF FD 64 F5 ?? ?? E0 12 F6 F2 ?? ??"
+    needle_hex: "E6 F5 FF FD 64 F5 XX XX E0 12 F6 F2 XX XX"
     back_up: 0x112
     entry_after: ["DB 00", "FF FF"]
 
-  # CRC32 table walk (IDA ME7.1 FindBinary seed; the leading "??" word-aligns the hit).
+  # CRC32 table walk (IDA ME7.1 FindBinary seed; the leading "XX" word-aligns the hit).
   - name: XORChkSumGenerate
-    needle_hex: "?? 8c f0 9d 0d 1e dc 09 a9 88 f0 56 51 a8 b9 a0"
+    needle_hex: "XX 8c f0 9d 0d 1e dc 09 a9 88 f0 56 51 a8 b9 a0"
     back_up: 0x14
     entry_after: ["DB 00"]

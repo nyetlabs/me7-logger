@@ -46,8 +46,10 @@ type Report struct {
 // Image is one binary scored against one oracle.
 // Beyond is the count of catalog names located on this image that its
 // ME7Info file does not name. Corpus is that image against the full catalog.
-// Both are set only on ME7Info rows. Tier, Axis, and Confidence are set on S4Wiki rows.
-// Tier is the layout block tier of the image in layouts-priority.yaml.
+// Both are set only on ME7Info rows. Tier, Axis, and Confidence are set on
+// S4Wiki rows. Tier is the nameGrade of the image.
+// Every list is sorted by the layout block tier of its image in
+// layouts-priority.yaml, then by name.
 type Image struct {
 	Name string
 	Fraction
@@ -205,8 +207,7 @@ func (r *Report) Text() string {
 			// count, gap, percent, gap, tier, gap, then the same pair for axis and confidence.
 			mainSpan := 6 + 2 + countW
 			tierStart := nameW + 2 + mainSpan + 2
-			tierSpan := len("tier")
-			axisStart := tierStart + tierSpan + 2
+			axisStart := tierStart + len("tier") + 2
 			axisSpan := 6 + 2 + axisW
 			confStart := axisStart + axisSpan + 2
 			confSpan := 6 + 2 + confW
@@ -329,13 +330,23 @@ func run(dir string, images []string, gen imageGen) (*Report, error) {
 	if err != nil {
 		return nil, err
 	}
-	if _, err := loadNamesPriority(dir, axes); err != nil {
-		return nil, err
-	}
-	layout, err := loadLayoutTiers(dir)
+	ntier, err := loadNamesPriority(dir, axes)
 	if err != nil {
 		return nil, err
 	}
+	blocks, err := loadBlocks(dir)
+	if err != nil {
+		return nil, err
+	}
+	layout, err := loadLayoutTiers(dir, blocks)
+	if err != nil {
+		return nil, err
+	}
+	absent, err := loadAbsent(dir, blocks, ntier)
+	if err != nil {
+		return nil, err
+	}
+	block := blockOf(blocks)
 	tierOf := map[string]string{}
 	rep := &Report{}
 	type kept struct {
@@ -375,9 +386,14 @@ func run(dir string, images []string, gen imageGen) (*Report, error) {
 		}
 		if len(wiki) > 0 {
 			scored := wikiMaps(wiki, axes, maps, oracle)
+			gone := absent[block[layoutID(img)]]
 			rep.S4Wiki = append(rep.S4Wiki, Image{
 				Name: base, Fraction: countScored(wiki, scored),
-				Tier: tierOf[base], Axis: scoreAxes(scored, axes),
+				Tier: nameGrade(ntier, func(n string) bool {
+					_, ok := scored[n]
+					return ok || gone[n]
+				}),
+				Axis: scoreAxes(scored, axes),
 			})
 			held = append(held, kept{base: base, stem: stem, img: img, maps: maps, oracle: oracle})
 		}
@@ -655,22 +671,81 @@ func loadBlocks(dir string) (map[string][]string, error) {
 }
 
 // loadLayoutTiers maps each layout id to the tier of its block in layouts-priority.yaml.
-func loadLayoutTiers(dir string) (map[string]string, error) {
-	blocks, err := loadBlocks(dir)
-	if err != nil || blocks == nil {
-		return nil, err
+func loadLayoutTiers(dir string, blocks map[string][]string) (map[string]string, error) {
+	if blocks == nil {
+		return nil, nil
 	}
 	tiers, err := loadTiers(filepath.Join(dir, "layouts-priority.yaml"), blocks)
 	if err != nil {
 		return nil, err
 	}
 	out := map[string]string{}
+	for id, block := range blockOf(blocks) {
+		out[id] = tiers[block]
+	}
+	return out, nil
+}
+
+// blockOf maps each layout id to its block.
+func blockOf(blocks map[string][]string) map[string]string {
+	out := map[string]string{}
 	for block, ids := range blocks {
 		for _, id := range ids {
-			out[id] = tiers[block]
+			out[id] = block
+		}
+	}
+	return out
+}
+
+// loadAbsent reads xdf/s4wiki/absent.yaml: the s4wiki names each layout
+// block does not have. A missing file returns nil.
+func loadAbsent(dir string, blocks map[string][]string, names map[string]string) (map[string]map[string]bool, error) {
+	b, err := os.ReadFile(filepath.Join(dir, "xdf", "s4wiki", "absent.yaml"))
+	if os.IsNotExist(err) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	var doc struct {
+		Absent map[string][]string `yaml:"absent"`
+	}
+	if err := yaml.Unmarshal(b, &doc); err != nil {
+		return nil, fmt.Errorf("absent.yaml: %w", err)
+	}
+	out := map[string]map[string]bool{}
+	for block, list := range doc.Absent {
+		if _, ok := blocks[block]; !ok {
+			return nil, fmt.Errorf("absent.yaml: %s is not a block in layouts.yaml", block)
+		}
+		out[block] = map[string]bool{}
+		for _, n := range list {
+			if _, ok := names[n]; !ok {
+				return nil, fmt.Errorf("absent.yaml: %s is not an s4wiki name", n)
+			}
+			out[block][n] = true
 		}
 	}
 	return out, nil
+}
+
+// nameGrade is the highest name tier complete, counted up from D, or "-"
+// when D is not. A tier is complete when each of its names is hit or absent.
+func nameGrade(tierOf map[string]string, hit func(string) bool) string {
+	done := map[string]bool{}
+	for _, t := range tierOrder {
+		done[t] = true
+	}
+	for n, t := range tierOf {
+		if !hit(n) {
+			done[t] = false
+		}
+	}
+	grade := "-"
+	for i := len(tierOrder) - 1; i >= 0 && done[tierOrder[i]]; i-- {
+		grade = tierOrder[i]
+	}
+	return grade
 }
 
 // tierRank is the index of label in tierOrder. No tier sorts last.
@@ -813,7 +888,11 @@ type refRow struct {
 }
 
 // referenceHit is true when this image has no XDF row of that name, or one row
-// has this body address. The axes are scored on their own.
+// has this body address. A DAMOS export lists a table whose axes are stored in
+// front of the body with no axis addresses, at the count header in front of
+// the first axis. A row whose 16-bit axis starts on the odd pad byte and whose
+// body starts where that axis ends is one byte early. The axes are scored on
+// their own.
 func referenceHit(m record.Map, rows []refRow) bool {
 	if len(rows) == 0 {
 		return true
@@ -825,11 +904,46 @@ func referenceHit(m record.Map, rows []refRow) bool {
 			continue
 		}
 		seen = true
-		if row.addr == off {
+		if row.addr == off || len(row.axes) == 0 && countHeader(m) == row.addr || padShifted(row) && row.addr+1 == off {
 			return true
 		}
 	}
 	return !seen
+}
+
+// padShifted is true when a 16-bit axis of row starts on an odd address and
+// ends at the row body.
+func padShifted(row refRow) bool {
+	for _, a := range row.axes {
+		if a.bits == 16 && a.addr%2 == 1 && a.addr+uint32(2*a.count) == row.addr {
+			return true
+		}
+	}
+	return false
+}
+
+// countHeader is the file offset of the counts in front of the first axis of
+// a map whose axes are stored in front of its body. 0 is none.
+func countHeader(m record.Map) uint32 {
+	var first *record.Axis
+	axes := 0
+	for _, a := range []*record.Axis{m.X, m.Y} {
+		if a == nil || a.Addr == 0 || a.Addr >= m.Addr {
+			continue
+		}
+		axes++
+		if first == nil || a.Addr < first.Addr {
+			first = a
+		}
+	}
+	if first == nil {
+		return 0
+	}
+	width := 1
+	if first.Bits == 16 {
+		width = 2
+	}
+	return opcode.FileOffset(first.Addr) - uint32(axes*width)
 }
 
 func matchECU(got []record.Item, want []record.Item) (int, int) {
