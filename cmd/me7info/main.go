@@ -2,11 +2,12 @@ package main
 
 import (
 	"errors"
-	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/spf13/pflag"
 
 	"go.nyet.org/xdfkit/model"
 	kitxdf "go.nyet.org/xdfkit/xdf"
@@ -46,7 +47,7 @@ func main() {
 		os.Exit(2)
 	}
 	if err != nil {
-		if errors.Is(err, flag.ErrHelp) {
+		if errors.Is(err, pflag.ErrHelp) {
 			return
 		}
 		fmt.Fprintf(os.Stderr, "me7info: %v\n", err)
@@ -112,21 +113,20 @@ type defs struct {
 	core, names, meas, mapPath, alias, user *string
 }
 
-func defFlags(fs *flag.FlagSet) defs {
-	defer cli.Short(fs, "n", "names", "a", "alias", "u", "user")
+func defFlags(fs *pflag.FlagSet) defs {
 	return defs{
 		core:    fs.String("core", config.Path("ME7_CORE", config.NeedlesFile), "needle YAML `<file>`"),
-		names:   fs.String("names", config.Path("ME7_NAMES", config.NamesFile), "ME7 name YAML `<file>`"),
+		names:   fs.StringP("names", "n", config.Path("ME7_NAMES", config.NamesFile), "ME7 name YAML `<file>`"),
 		meas:    fs.String("meas", config.Path("ME7_MEAS", config.MeasuresFile), "per-part measurement YAML `<file>`"),
 		mapPath: fs.String("map", config.Path("ME7_MAP", config.MapDir), "result-type catalog `<dir>`"),
-		alias:   fs.String("alias", config.Path("ME7_ALIAS", config.AliasFile), "alias `<file>`"),
-		user:    fs.String("user", config.Path("ME7_USER", "user"), "`<dir>` of user needles, measurements, and conversions"),
+		alias:   fs.StringP("alias", "a", config.Path("ME7_ALIAS", config.AliasFile), "alias `<file>`"),
+		user:    fs.StringP("user", "u", config.Path("ME7_USER", "user"), "`<dir>` of user needles, measurements, and conversions"),
 	}
 }
 
 // image parses args, wants one flash image, and resolves --user.
-func image(fs *flag.FlagSet, d defs, args []string) (path string, img []byte, userDir string, err error) {
-	if err = cli.Parse(fs, args); err != nil {
+func image(fs *pflag.FlagSet, d defs, args []string) (path string, img []byte, userDir string, err error) {
+	if err = fs.Parse(args); err != nil {
 		return
 	}
 	if fs.NArg() != 1 {
@@ -153,13 +153,12 @@ func (d defs) generate(imgPath string, img []byte, userDir string, clock int, sc
 func cmdGenerate(args []string) error {
 	fs := cli.NewFlagSet("me7info", "generate", "[flags] <image.bin>", "")
 	d := defFlags(fs)
-	out := fs.String("o", "", "ecu output `<file>`, - for stdout (default <image>.ecu)")
-	xdfPath := fs.String("xdf", "", "tuner xdf output `<file>`, - for stdout (default <image>.xdf when listed maps were located)")
+	out := fs.StringP("output", "o", "", "ecu output `<file>`, - for stdout (default <image>.ecu)")
+	xdfPath := fs.StringP("xdf", "x", "", "tuner xdf output `<file>`, - for stdout (default <image>.xdf when listed maps were located)")
 	fullPath := fs.String("full-xdf", "", "also write every located named map to this xdf `<file>`, - for stdout")
 	scale := fs.String("5120", "auto", "mbar scaling `<mode>`: auto, on, or off")
 	clock := fs.Int("clock", 0, "CPU clock `<MHz>`: 20, 24, 32, or 40; 0 uses config/names.yaml")
 	conn := fs.String("connect", "", "override Connect with `<mode>`, for example SLOW-0x11")
-	cli.Short(fs, "x", "xdf", "5", "5120")
 	imgPath, img, userDir, err := image(fs, d, args)
 	if err != nil {
 		return err
@@ -240,10 +239,9 @@ func writeXDF(path, imgPath string, img []byte, maps []record.Map, cats *model.C
 
 func cmdParity(args []string) error {
 	fs := cli.NewFlagSet("me7info", "parity", "[flags]", parityHelp)
-	dir := fs.String("data", "testdata/parity", "parity root `<dir>`: images.yaml, ecu/me7info, and xdf")
-	cli.Short(fs, "d", "data")
+	dir := fs.StringP("data", "d", "testdata/parity", "parity root `<dir>`: images.yaml, ecu/me7info, and xdf")
 	corpus := fs.String("corpus", ecucorpus.Dir("."), "ecu-corpus checkout `<dir>`; XDFKIT_CORPUS sets the default")
-	if err := cli.Parse(fs, args); err != nil {
+	if err := fs.Parse(args); err != nil {
 		return err
 	}
 	if fs.NArg() != 0 {
@@ -327,8 +325,8 @@ func cmdProbe(args []string) error {
 	return nil
 }
 
-func resolveUser(fs *flag.FlagSet, dir string) (string, error) {
-	return config.ResolveUserDir(dir, os.Getenv("ME7_USER") != "" || cli.IsSet(fs, "user"))
+func resolveUser(fs *pflag.FlagSet, dir string) (string, error) {
+	return config.ResolveUserDir(dir, os.Getenv("ME7_USER") != "" || fs.Changed("user"))
 }
 
 func fmtOffs(offs []int) string {

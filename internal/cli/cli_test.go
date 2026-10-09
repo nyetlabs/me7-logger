@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"flag"
 	"io"
 	"testing"
 )
@@ -12,36 +11,27 @@ func TestParse(t *testing.T) {
 		ok   bool
 	}{
 		{[]string{"--maps", "-o", "x", "img"}, true},
-		{[]string{"-m", "--core=a", "img"}, true},
+		{[]string{"-u", "d", "--core=a", "img"}, true},
+		{[]string{"--user", "d", "img"}, true},
 		{[]string{"-o", "-maps", "img"}, true},
-		{[]string{"img", "-maps"}, true},
+		{[]string{"img", "--maps"}, true},
 		{[]string{"--", "-maps"}, true},
 		{[]string{"-maps", "img"}, false},
 		{[]string{"-core=a", "img"}, false},
-		{[]string{"--m", "img"}, false},
-		{[]string{"--o", "x", "img"}, false},
+		{[]string{"--u", "d", "img"}, false},
 	} {
-		fs := flag.NewFlagSet("t", flag.ContinueOnError)
+		fs := NewFlagSet("t", "t", "", "")
 		fs.SetOutput(io.Discard)
 		fs.Bool("maps", false, "")
-		fs.Bool("m", false, "")
 		fs.String("core", "", "")
-		fs.String("o", "", "")
-		if err := Parse(fs, tc.args); (err == nil) != tc.ok {
+		fs.StringP("output", "o", "", "")
+		user := fs.StringP("user", "u", "", "")
+		err := fs.Parse(tc.args)
+		if (err == nil) != tc.ok {
 			t.Errorf("%q: err %v, want ok %v", tc.args, err, tc.ok)
 		}
-	}
-}
-
-func TestShort(t *testing.T) {
-	fs := flag.NewFlagSet("t", flag.ContinueOnError)
-	fs.SetOutput(io.Discard)
-	user := fs.String("user", "", "")
-	Short(fs, "u", "user")
-	if err := Parse(fs, []string{"-u", "d", "img"}); err != nil {
-		t.Fatal(err)
-	}
-	if *user != "d" || !IsSet(fs, "user") {
-		t.Fatalf("user %q set %v", *user, IsSet(fs, "user"))
+		if err == nil && *user != "" && !fs.Changed("user") {
+			t.Errorf("%q: --user %q not marked changed", tc.args, *user)
+		}
 	}
 }

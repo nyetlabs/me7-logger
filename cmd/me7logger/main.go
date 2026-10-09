@@ -3,12 +3,13 @@ package main
 import (
 	"context"
 	"errors"
-	"flag"
 	"fmt"
 	"io"
 	"os"
 	"os/signal"
 	"path/filepath"
+
+	"github.com/spf13/pflag"
 
 	"go.nyet.org/me7-logger/config"
 	"go.nyet.org/me7-logger/internal/cli"
@@ -38,7 +39,7 @@ func main() {
 		os.Exit(2)
 	}
 	if err != nil {
-		if errors.Is(err, flag.ErrHelp) {
+		if errors.Is(err, pflag.ErrHelp) {
 			return
 		}
 		fmt.Fprintf(os.Stderr, "me7logger: %v\n", err)
@@ -65,27 +66,26 @@ Run "me7logger log -h" for its flags.
 func cmdLog(args []string) error {
 	fs := cli.NewFlagSet("me7logger", "log", "[flags] <image.bin> <config.cfg>", "")
 	core := fs.String("core", config.Path("ME7_CORE", config.NeedlesFile), "needle YAML `<file>`")
-	names := fs.String("names", config.Path("ME7_NAMES", config.NamesFile), "ME7 name YAML `<file>`")
+	names := fs.StringP("names", "n", config.Path("ME7_NAMES", config.NamesFile), "ME7 name YAML `<file>`")
 	meas := fs.String("meas", config.Path("ME7_MEAS", config.MeasuresFile), "per-part measurement YAML `<file>`")
 	mapPath := fs.String("map", config.Path("ME7_MAP", config.MapDir), "result-type catalog `<dir>`")
-	alias := fs.String("alias", config.Path("ME7_ALIAS", config.AliasFile), "alias `<file>`")
-	port := fs.String("p", "", "serial `<port>`, for example /dev/tty.usbserial or COM3 (required)")
-	sps := fs.Int("s", 0, "`<samples>` per second, overrides the cfg")
-	baud := fs.Int("b", 0, "`<baud>` override; only 10400 is implemented")
-	out := fs.String("o", "", "csv output `<file>`, appended to (default stdout)")
-	one := fs.Bool("1", false, "read one sample and stop")
+	alias := fs.StringP("alias", "a", config.Path("ME7_ALIAS", config.AliasFile), "alias `<file>`")
+	port := fs.StringP("port", "p", "", "serial `<port>`, for example /dev/tty.usbserial or COM3 (required)")
+	sps := fs.IntP("sps", "s", 0, "`<samples>` per second, overrides the cfg")
+	baud := fs.IntP("baud", "b", 0, "`<baud>` override; only 10400 is implemented")
+	out := fs.StringP("output", "o", "", "csv output `<file>`, appended to (default stdout)")
+	one := fs.BoolP("one", "1", false, "read one sample and stop")
 	scale := fs.String("5120", "auto", "mbar scaling `<mode>`: auto, on, or off")
 	clock := fs.Int("clock", 0, "CPU clock `<MHz>`: 20, 24, 32, or 40; 0 uses config/names.yaml")
-	user := fs.String("user", config.Path("ME7_USER", "user"), "`<dir>` of user needles, measurements, and conversions")
-	cli.Short(fs, "n", "names", "a", "alias", "u", "user", "5", "5120")
-	if err := cli.Parse(fs, args); err != nil {
+	user := fs.StringP("user", "u", config.Path("ME7_USER", "user"), "`<dir>` of user needles, measurements, and conversions")
+	if err := fs.Parse(args); err != nil {
 		return err
 	}
 	if fs.NArg() != 2 {
 		return fmt.Errorf("log wants a flash image and a cfg file")
 	}
 	if *port == "" {
-		return fmt.Errorf("log wants -p <serial port>")
+		return fmt.Errorf("log wants -p, --port <serial port>")
 	}
 	img, err := os.ReadFile(fs.Arg(0))
 	if err != nil {
@@ -127,6 +127,6 @@ func cmdLog(args []string) error {
 	}, w)
 }
 
-func resolveUser(fs *flag.FlagSet, dir string) (string, error) {
-	return config.ResolveUserDir(dir, os.Getenv("ME7_USER") != "" || cli.IsSet(fs, "user"))
+func resolveUser(fs *pflag.FlagSet, dir string) (string, error) {
+	return config.ResolveUserDir(dir, os.Getenv("ME7_USER") != "" || fs.Changed("user"))
 }
