@@ -4,6 +4,20 @@
 # that block counts the name as hit for the tier grade. It still misses in the
 # tuner count.
 absent:
+  # Not in the 8D0907551M-0002 DAMOS export. It has KFLDRQ2, KFZW2 and NLLM
+  # without the _N_A variants, and only NFS2M_0/1_A and NLL2M_0/1_A.
+  22m:
+    - KFLDRQ1
+    - KFZW2_0_A
+    - KFZW2_1_A
+    - NFS2M
+    - NLL2M
+    - NLL2M_2_A
+    - NLL2M_3_A
+    - NLLM_0_A
+    - NLLM_1_A
+    - NLLM_2_A
+    - NLLM_3_A
   # No DAMOS export yet. No map_interp_table8_b call with M's arguments on T,
   # and the 8D0907551H hand XDF does not have it.
   22N:

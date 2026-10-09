@@ -7,6 +7,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"os"
+	"slices"
 	"sort"
 
 	"go.nyet.org/me7-logger/config"
@@ -566,6 +567,8 @@ func applyAxes(img []byte, dpp [4]uint16, h opcode.MapHit, m *record.Map) {
 // An unnamed call to that body takes the name, and keeps the call's axes
 // when the hit decodes none.
 // A packed header in front of that body fills the row and column counts.
+// A hit that decodes no axes on a body another name holds with axes is
+// that map seen from another call, and is dropped.
 func mergeMaps(img []byte, dpp [4]uint16, maps []record.Map, hits []opcode.MapHit) []record.Map {
 	have := map[string]struct{}{}
 	for _, m := range maps {
@@ -581,9 +584,14 @@ func mergeMaps(img []byte, dpp [4]uint16, maps []record.Map, hits []opcode.MapHi
 			fillPacked(img, dpp, maps, h)
 			continue
 		}
-		have[h.Name] = struct{}{}
 		m := record.Map{Name: h.Name, Addr: h.Addr}
 		applyAxes(img, dpp, h, &m)
+		if m.X == nil && m.Y == nil && slices.ContainsFunc(maps, func(o record.Map) bool {
+			return o.Name != "" && o.Addr == h.Addr && (o.X != nil || o.Y != nil)
+		}) {
+			continue
+		}
+		have[h.Name] = struct{}{}
 		if i := unnamedAt(maps, h.Addr); i >= 0 {
 			if m.X != nil || m.Y != nil {
 				maps[i] = m

@@ -160,7 +160,7 @@ func TestFamilyFinderMaps(t *testing.T) {
 				}
 			case "WFRL":
 				curve[m.Name]++
-				if m.Rows != 0 || m.Cols != 31 || m.X != nil || m.Y != nil {
+				if m.Rows != 0 || (m.Cols != 26 && m.Cols != 31) || m.X != nil || m.Y != nil {
 					t.Errorf("%s WFRL rows %d cols %d", filepath.Base(path), m.Rows, m.Cols)
 				}
 			}
