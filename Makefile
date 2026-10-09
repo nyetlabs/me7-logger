@@ -6,6 +6,9 @@
 #   make version          git describe (tags vX.Y.Z and vX.Y.Z-rcN)
 #   make parity           legacy ME7Info parity, plus coverage of the YAML lists, the tuner names, and the corpus definitions
 #   make package          dist archives for macos, linux, and windows
+#   make install          after make build: binaries and config/ in PREFIX/lib/me7-logger, links in PREFIX/bin
+#                         (PREFIX=/usr/local; DESTDIR stages a package)
+#   make uninstall        remove those and the links that point into them; config/user/ is kept
 #   make corpus           fetch the corpus submodule at its pinned commit (needs access)
 #   make corpus-bump      move the corpus submodule to the ecu-corpus head and copy its
 #                         categories.json to config/ (commit them yourself)
@@ -19,14 +22,22 @@ SHELL := /bin/bash
 
 VERSION ?= $(patsubst v%,%,$(shell git describe --tags --match 'v[0-9]*' --dirty --always 2>/dev/null))
 
-.PHONY: all test build version parity package corpus corpus-bump work xdfkit-bump check-pinned clean help
+.PHONY: all test build version parity package install uninstall corpus corpus-bump work xdfkit-bump check-pinned clean help
 
 # Archive name uses macos; the Go port is darwin.
 PLATFORMS := darwin/amd64 darwin/arm64 linux/amd64 linux/arm64 windows/amd64
 
 # The binaries read config/ beside themselves. user/ is the reader's own, so
 # --delete leaves it alone.
-CONFIG_SYNC := rsync -a --delete --exclude '*.go' --exclude 'user/' --exclude '.DS_Store' config/
+CONFIG_EXCLUDE := --exclude '*.go' --exclude 'user/' --exclude '.DS_Store'
+CONFIG_SYNC := rsync -a --delete $(CONFIG_EXCLUDE) config/
+
+# install: binaries and config/ in LIBDIR, symlinks in BINDIR. DESTDIR stages
+# a package (PREFIX=/usr gives /usr/lib/me7-logger and /usr/bin).
+PREFIX ?= /usr/local
+LIBDIR ?= $(PREFIX)/lib/me7-logger
+BINDIR ?= $(PREFIX)/bin
+PROGRAMS := me7info me7logger
 
 all: test build
 
@@ -105,8 +116,28 @@ check-pinned:
 	GOWORK=off go build ./...
 	GOWORK=off go vet ./...
 
+# install does not build, so sudo make install runs no go build as root.
+install:
+	@for p in $(PROGRAMS); do test -x build/$$p || { echo "build/$$p missing: run make build first" >&2; exit 1; }; done
+	install -d "$(DESTDIR)$(LIBDIR)" "$(DESTDIR)$(BINDIR)"
+	install -m 0755 $(addprefix build/,$(PROGRAMS)) "$(DESTDIR)$(LIBDIR)/"
+	rsync -rlt --delete $(CONFIG_EXCLUDE) config/ "$(DESTDIR)$(LIBDIR)/config/"
+	chmod -R u=rwX,go=rX "$(DESTDIR)$(LIBDIR)/config"
+	for p in $(PROGRAMS); do ln -sfn "$(LIBDIR)/$$p" "$(DESTDIR)$(BINDIR)/$$p"; done
+
+# uninstall removes only the BINDIR links that point into LIBDIR, and keeps
+# config/user/.
+uninstall:
+	@case "$(LIBDIR)" in */me7-logger) ;; *) echo "LIBDIR must end in /me7-logger" >&2; exit 1;; esac
+	for p in $(PROGRAMS); do \
+		if [[ "$$(readlink "$(DESTDIR)$(BINDIR)/$$p")" == "$(LIBDIR)/$$p" ]]; then rm -f "$(DESTDIR)$(BINDIR)/$$p"; fi; \
+		rm -f "$(DESTDIR)$(LIBDIR)/$$p"; \
+	done
+	if [[ -d "$(DESTDIR)$(LIBDIR)/config" ]]; then find "$(DESTDIR)$(LIBDIR)/config" -mindepth 1 -maxdepth 1 ! -name user -exec rm -rf {} +; fi
+	rmdir "$(DESTDIR)$(LIBDIR)/config" "$(DESTDIR)$(LIBDIR)" 2>/dev/null || echo "kept $(DESTDIR)$(LIBDIR)/config/user"
+
 clean:
 	rm -rf build dist
 
 help:
-	@sed -n '2,15p' Makefile
+	@sed -n '2,18p' Makefile

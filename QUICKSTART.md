@@ -1,6 +1,6 @@
 # Quickstart
 
-The programs read `config/` beside the executable, symlinks resolved: the unpacked release, or `build/` after `make`. A file missing there uses the built-in copy.
+The programs read `config/` beside the executable, symlinks resolved: the unpacked release, `build/` after `make`, or the `make install` directory (`/usr/local/lib/me7-logger`). A file missing there uses the built-in copy.
 
 ```bash
 me7info probe image.bin       # one line per needle; --maps counts XDF maps

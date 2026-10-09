@@ -88,7 +88,7 @@ flowchart LR
   merged --> tools[me7info, me7logger]
 ```
 
-The programs read `config/` beside the executable, symlinks resolved, so a symlink in `/usr/local/bin` works: the unpacked release, or `build/` after `make`. Each file documents its fields in its header. Rows in `config/user/` with the same name replace the shipped ones; `--user` or `ME7_USER` picks another directory.
+The programs read `config/` beside the executable, symlinks resolved, so a symlink in `/usr/local/bin` works: the unpacked release, `build/` after `make`, or the `make install` directory. Each file documents its fields in its header. Rows in `config/user/` with the same name replace the shipped ones; `--user` or `ME7_USER` picks another directory.
 
 ## Install
 
@@ -97,9 +97,12 @@ Release archives for macOS, Linux and Windows (amd64; arm64 for macOS and Linux)
 From source, with Go installed:
 
 ```bash
-make          # runs the tests, builds build/me7info and build/me7logger
-make help     # all targets
+make                 # runs the tests, builds build/me7info and build/me7logger
+sudo make install    # /usr/local/lib/me7-logger, links in /usr/local/bin
+make help            # all targets
 ```
+
+`PREFIX` moves the install (`PREFIX=/usr` gives `/usr/lib/me7-logger` and `/usr/bin`). `DESTDIR` stages it for a package. The installed `config/` is root-owned, so put your rows elsewhere and point `ME7_USER` at them. `make uninstall` removes the install and the links that point into it, and keeps any `config/user/` there.
 
 ## Development
 

@@ -60,17 +60,17 @@ func LoadCategories(path string) (*model.CategoryTable, error) {
 	return t, nil
 }
 
-// Dir is config/ beside the executable, symlinks resolved.
+// Dir is config/ beside the executable, symlinks resolved when they can be.
 // It is "config" when the executable path cannot be read.
 var Dir = sync.OnceValue(func() string { return dirFor(os.Executable) })
 
 func dirFor(exe func() (string, error)) string {
 	p, err := exe()
-	if err == nil {
-		p, err = filepath.EvalSymlinks(p)
-	}
 	if err != nil {
 		return "config"
+	}
+	if r, err := filepath.EvalSymlinks(p); err == nil {
+		p = r
 	}
 	return filepath.Join(filepath.Dir(p), "config")
 }

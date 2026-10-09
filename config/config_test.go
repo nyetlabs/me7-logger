@@ -34,8 +34,8 @@ func TestDirFor(t *testing.T) {
 	if got := dirFor(func() (string, error) { return "", os.ErrNotExist }); got != "config" {
 		t.Errorf("no exe path: %s, want config", got)
 	}
-	if got := dirFor(func() (string, error) { return filepath.Join(real, "gone"), nil }); got != "config" {
-		t.Errorf("missing exe: %s, want config", got)
+	if got := dirFor(func() (string, error) { return filepath.Join(real, "gone"), nil }); got != filepath.Join(real, "config") {
+		t.Errorf("unresolvable exe: %s, want %s/config", got, real)
 	}
 }
 
