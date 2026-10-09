@@ -6,7 +6,7 @@ One Go module, two programs: `me7info` (`generate`, `probe`, `parity`) and `me7l
 
 The generator is a masked search plus a closed set of opcodes (the result-type selector, case bounds, and `EXTP`). It is not a C166 disassembler. A template that only matches after a real decode is a failed needle. Fix that needle in `config/needles.yaml`. A Bosch name located by a signature, a window, or a chain is a row in `config/signatures.yaml`. The bytes, the window, and the call slot are fields on that row.
 
-`Connect` is set from the slow-init needle named by `connect.slow_init_needle` in `config/names.yaml` when that needle has one hit. The line is `SLOW-` plus `prefer_address` when that address is the KWP2000 row, and `fallback_address` otherwise. `-connect` overrides it.
+`Connect` is set from the slow-init needle named by `connect.slow_init_needle` in `config/names.yaml` when that needle has one hit. The line is `SLOW-` plus `prefer_address` when that address is the KWP2000 row, and `fallback_address` otherwise. `--connect` overrides it.
 
 Out of scope: `.kp`, OLS, DAMOS, WinOLS scripts, ecuxplot, and `mapdump`. This tree does not load a needle list from another checkout.
 
@@ -14,7 +14,7 @@ This tree is MIT ([LICENSE](LICENSE)). Do not copy NefMoto `Communication/`. The
 
 ## Config files
 
-`config/needles.yaml` (`ME7_CORE`, `-core`) holds the result selector, the 5-baud and fast-init rows, and the table and curve interpolation entries (8-bit or 16-bit).
+`config/needles.yaml` (`ME7_CORE`, `--core`) holds the result selector, the 5-baud and fast-init rows, and the table and curve interpolation entries (8-bit or 16-bit).
 
 `config/signatures.yaml` is embedded with the other config files. `generate` runs the rows after the selector and after `opcode/sign.go`, so a row can embed a name an earlier row already stored. New rows go in this file.
 
@@ -90,19 +90,19 @@ A page call that never loads a row word leaves the row unset. `ytable` on that c
 
 The axis equation is not filled from an address file.
 
-`config/catalog/` (`ME7_MAP`, `-map`; a single file is still accepted) is the RAM result-type catalog. `scales.yaml` holds the scales, `bits.yaml` the bitmask rows, and `values.yaml` the rest. The `.ecu` map name stays `catalog.yaml`.
+`config/catalog/` (`ME7_MAP`, `--map`; a single file is still accepted) is the RAM result-type catalog. `scales.yaml` holds the scales, `bits.yaml` the bitmask rows, and `values.yaml` the rest. The `.ecu` map name stays `catalog.yaml`.
 
 An omitted field is size 0, bitmask 0, unit "", signed false, inverse false, factor 1, offset 0. A size and unit pair applies only when the size is 1 or 2. A single-bit bitmask is a flag and does not take that pair. A field written on the row is kept.
 
-`config/names.yaml` (`ME7_NAMES`, `-names`) holds ME7 names and conversions. An omitted conversion size is 2. A conversion fills omitted signed, inverse, factor, and offset from a size and a unit. A named conversion is selected with `conversion`. That conversion is not the size-and-unit default, so its unit may be "".
+`config/names.yaml` (`ME7_NAMES`, `--names`) holds ME7 names and conversions. An omitted conversion size is 2. A conversion fills omitted signed, inverse, factor, and offset from a size and a unit. A named conversion is selected with `conversion`. That conversion is not the size-and-unit default, so its unit may be "".
 
-`config/measurements.yaml` (`ME7_MEAS`, `-meas`) is the measurement list. Overlay and field defaults are in the next section.
+`config/measurements.yaml` (`ME7_MEAS`, `--meas`) is the measurement list. Overlay and field defaults are in the next section.
 
-`config/aliases.yaml` (`ME7_ALIAS`, `-alias`) renames the catalog name. `was` is the previous alias. The Bosch variable name is unchanged. `$1` in an alias is a regex reference. ecuxplot uses it in `loggers.yaml`. It is not a literal.
+`config/aliases.yaml` (`ME7_ALIAS`, `--alias`) renames the catalog name. `was` is the previous alias. The Bosch variable name is unchanged. `$1` in an alias is a regex reference. ecuxplot uses it in `loggers.yaml`. It is not a literal.
 
 ## config/user
 
-Every `.yaml` and `.yml` file in `config/user/` is read, in filename order, on top of the shipped lists. A later file replaces a needle or measurement of the same name. Files you add there stay out of git. A missing `config/user` is skipped. `-user` and `ME7_USER` select another directory, and that path must exist. The same flag is on `me7info generate`, `me7info probe`, and `me7logger log`.
+Every `.yaml` and `.yml` file in `config/user/` is read, in filename order, on top of the shipped lists. A later file replaces a needle or measurement of the same name. Files you add there stay out of git. A missing `config/user` is skipped. `--user` and `ME7_USER` select another directory, and that path must exist. The same flag is on `me7info generate`, `me7info probe`, and `me7logger log`.
 
 A release archive includes `config/user/measurements.yaml` and `config/user/maps.yaml`. Each file is the comment header from the shipped list and an empty list.
 
@@ -159,7 +159,7 @@ After editing, `me7info probe image.bin` prints `hit`, `miss`, `ambig`, or `noen
 
 Running from the repo reads the source files. Running from anywhere else uses the embed until some other directory happens to be named `config`.
 
-An explicit flag or environment variable replaces one file: `-core`, `-names`, `-meas`, `-map`, `-alias`, and `ME7_CORE`, `ME7_NAMES`, `ME7_MEAS`, `ME7_MAP`, `ME7_ALIAS`. `signatures.yaml` has no override flag. `config/examples/needles.yaml` is not embedded.
+An explicit flag or environment variable replaces one file: `--core`, `--names`, `--meas`, `--map`, `--alias`, and `ME7_CORE`, `ME7_NAMES`, `ME7_MEAS`, `ME7_MAP`, `ME7_ALIAS`. `signatures.yaml` has no override flag. `config/examples/needles.yaml` is not embedded.
 
 Editing a shipped file and running `go test` or `go run` rebuilds the embedded copy. A binary that was already built does not see that edit unless a flag or environment variable points at the file.
 
@@ -177,7 +177,7 @@ The sample images come from the private [ecu-corpus](https://github.com/nyetlabs
 
 With read access to `ecu-corpus`, `make corpus` fetches the submodule at its pinned commit. `make corpus-bump` moves it to the corpus head; commit the change yourself. The submodule URL is HTTPS. To use SSH, run `git config --global url.git@github.com:.insteadOf https://github.com/`. Without access, `corpus/` stays empty and `make test` skips the tests that read images. `XDFKIT_CORPUS` points the tests and `me7info parity` at another corpus checkout. `XDFKIT_REQUIRE_CORPUS=1`, set in CI, makes a missing corpus a failure. xdfkit's `docs/corpus.md` is the corpus specification.
 
-`make parity` builds `build/me7info` and runs `me7info parity -data testdata/parity`, which reads the images from `corpus/` (`-corpus`). It prints a report and exits 0.
+`make parity` builds `build/me7info` and runs `me7info parity --data testdata/parity`, which reads the images from `corpus/` (`--corpus`). It prints a report and exits 0.
 
 `make test` fails when any image is short of 100% on `vs ecu-specific`. That column is the image against `ecu/me7info/<image>.ecu`, matched on name, address, size, and bitmask. It is the only hard 100%.
 
@@ -185,7 +185,7 @@ A row that file does not name stays. Catalog names located on that image which t
 
 `vs corpus` is that image against every name in `config/catalog/` (`values.yaml` and `bits.yaml`). It is not 100% on every binary.
 
-Do not point `generate` at the oracle files without `-o` and `-xdf` aimed somewhere else.
+Do not point `generate` at the oracle files without `-o` and `--xdf` aimed somewhere else.
 
 That run reads the shipped YAML. It does not read `config/user`. Adding files there leaves the score unchanged. A drop means a shipped file in `config/` changed.
 

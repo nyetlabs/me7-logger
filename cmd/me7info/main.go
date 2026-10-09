@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -9,6 +10,7 @@ import (
 
 	"go.nyet.org/me7-logger/config"
 	"go.nyet.org/me7-logger/generate"
+	"go.nyet.org/me7-logger/internal/cli"
 	"go.nyet.org/me7-logger/internal/ecucorpus"
 	"go.nyet.org/me7-logger/opcode"
 	"go.nyet.org/me7-logger/parity"
@@ -32,15 +34,18 @@ func main() {
 		err = cmdProbe(os.Args[2:])
 	case "parity":
 		err = cmdParity(os.Args[2:])
-	case "version", "-version", "--version":
+	case "-v", "--version":
 		fmt.Println(version)
-	case "-h", "-help", "--help", "help":
+	case "-h", "--help", "help":
 		usage()
 	default:
 		usage()
 		os.Exit(2)
 	}
 	if err != nil {
+		if errors.Is(err, flag.ErrHelp) {
+			return
+		}
 		fmt.Fprintf(os.Stderr, "me7info: %v\n", err)
 		os.Exit(1)
 	}
@@ -49,55 +54,104 @@ func main() {
 func usage() {
 	fmt.Fprintf(os.Stderr, `me7info %s
 
-  me7info generate [flags] image.bin
-  me7info probe [flags] image.bin
-  me7info parity [-data testdata/parity] [-corpus corpus]
-  me7info version
+Usage:
+  me7info generate [flags] <image.bin>
+  me7info probe [flags] <image.bin>
+  me7info parity [flags]
+  me7info -v, --version
+  me7info -h, --help
 
-generate writes an .ecu file and, when calibration maps were located, a TunerPro XDF.
-It does not open a serial port. probe reports the DPP block and needle hits.
-parity scores each image. Legacy ME7Info parity is the only hard mark, one image at a time.
-The catalog is coverage. The measurement list is the extras column on each ECU row.
-The S4wiki name list is the same on every image. A hit is one address and an axis. An axis count of 0 is a scalar, so one address is the hit. When that image's XDF contains the name, the body address must match one row. The axis denominator is the axis count on that list for the maps that hit. A count of 0 adds nothing. That denominator is 0 only when every map that hit has a count of 0. One axis is a curve and two axes are a map. A hit is that axis present on the map. The confidence column is the body bytes of the names that hit. Its denominator is that matched set, not the tuner list. An XDF file is an address oracle for that image when one is present. Its x and y axes that have an address are the axis column of that section.
-Needle names, connect bytes, and per-part addresses are the YAML files in config/.
+Commands:
+  generate  Write an .ecu file for the image and, when calibration maps
+            were located, a TunerPro XDF. Does not open a serial port.
+  probe     Report the DPP block and needle hits. --maps also counts the
+            calibration maps generate would write to the XDF.
+  parity    Score each corpus image against legacy ME7Info output.
+
+Run "me7info <command> -h" for that command's flags.
+
+Needle names, connect bytes, and per-part addresses are the YAML files
+in config/.
 `, version)
 }
 
-func cmdGenerate(args []string) error {
-	fs := flag.NewFlagSet("generate", flag.ContinueOnError)
-	core := fs.String("core", config.Path("ME7_CORE", config.NeedlesFile), "needle yaml path")
-	names := fs.String("names", config.Path("ME7_NAMES", config.NamesFile), "ME7 name yaml path")
-	meas := fs.String("meas", config.Path("ME7_MEAS", config.MeasuresFile), "per-part measurement yaml path")
-	mapPath := fs.String("map", config.Path("ME7_MAP", config.MapDir), "result-type catalog")
-	alias := fs.String("alias", config.Path("ME7_ALIAS", config.AliasFile), "alias file")
-	out := fs.String("o", "", "ecu output path (default <image>.ecu)")
-	xdfPath := fs.String("xdf", "", "xdf output path (default <image>.xdf when maps were located)")
-	scale := fs.String("5120", "auto", "mbar scaling: auto, on, or off")
-	clock := fs.Int("clock", 0, "CPU clock MHz: 20, 24, 32, or 40; 0 uses config/names.yaml")
-	conn := fs.String("connect", "", "override Connect, for example SLOW-0x11")
-	user := fs.String("user", config.Path("ME7_USER", "user"), "directory of user needles, measurements, and conversions")
-	fs.SetOutput(os.Stderr)
-	if err := fs.Parse(args); err != nil {
-		return err
+const parityHelp = `
+Legacy ME7Info parity is the only hard mark, scored one image at a time.
+The catalog column is coverage. The measurement list is the extras
+column on each ECU row.
+
+The S4wiki name list is the same on every image:
+  - A hit is one address and its axes. An axis count of 0 is a scalar,
+    so the address alone is the hit. One axis is a curve, two a map.
+  - When that image's XDF contains the name, the body address must
+    match one of its rows.
+  - The axis column counts the axes present on the maps that hit. Its
+    denominator is the list's axis count for those maps, so a scalar
+    adds nothing. It is 0 only when every map that hit is a scalar.
+  - The confidence column is the body bytes of the names that hit. Its
+    denominator is that matched set, not the tuner list.
+
+An XDF, when present, is the address oracle for that image. Its x and y
+axes that have an address are the axis column of that section.
+`
+
+// defs are the definition file flags shared by generate and probe.
+type defs struct {
+	core, names, meas, mapPath, alias, user *string
+}
+
+func defFlags(fs *flag.FlagSet) defs {
+	defer cli.Short(fs, "n", "names", "a", "alias", "u", "user")
+	return defs{
+		core:    fs.String("core", config.Path("ME7_CORE", config.NeedlesFile), "needle YAML `<file>`"),
+		names:   fs.String("names", config.Path("ME7_NAMES", config.NamesFile), "ME7 name YAML `<file>`"),
+		meas:    fs.String("meas", config.Path("ME7_MEAS", config.MeasuresFile), "per-part measurement YAML `<file>`"),
+		mapPath: fs.String("map", config.Path("ME7_MAP", config.MapDir), "result-type catalog `<dir>`"),
+		alias:   fs.String("alias", config.Path("ME7_ALIAS", config.AliasFile), "alias `<file>`"),
+		user:    fs.String("user", config.Path("ME7_USER", "user"), "`<dir>` of user needles, measurements, and conversions"),
+	}
+}
+
+// image parses args, wants one flash image, and resolves --user.
+func image(fs *flag.FlagSet, d defs, args []string) (path string, img []byte, userDir string, err error) {
+	if err = cli.Parse(fs, args); err != nil {
+		return
 	}
 	if fs.NArg() != 1 {
-		return fmt.Errorf("generate wants one flash image")
+		err = fmt.Errorf("%s wants one flash image", fs.Name())
+		return
 	}
-	imgPath := fs.Arg(0)
-	img, err := os.ReadFile(imgPath)
-	if err != nil {
-		return err
+	path = fs.Arg(0)
+	if img, err = os.ReadFile(path); err != nil {
+		return
 	}
-	userDir, err := resolveUser(fs, *user)
-	if err != nil {
-		return err
-	}
-	res, err := generate.Generate(generate.Options{
+	userDir, err = resolveUser(fs, *d.user)
+	return
+}
+
+func (d defs) generate(imgPath string, img []byte, userDir string, clock int, scale, conn string) (*generate.Result, error) {
+	return generate.Generate(generate.Options{
 		Image: img, ImageName: filepath.Base(imgPath),
-		CorePath: *core, NamesPath: *names, MeasPath: *meas,
-		MapPath: *mapPath, AliasPath: *alias,
-		Clock: *clock, Scale: *scale, Connect: *conn, UserDir: userDir,
+		CorePath: *d.core, NamesPath: *d.names, MeasPath: *d.meas,
+		MapPath: *d.mapPath, AliasPath: *d.alias,
+		Clock: clock, Scale: scale, Connect: conn, UserDir: userDir,
 	})
+}
+
+func cmdGenerate(args []string) error {
+	fs := cli.NewFlagSet("me7info", "generate", "[flags] <image.bin>", "")
+	d := defFlags(fs)
+	out := fs.String("o", "", "ecu output `<file>`, - for stdout (default <image>.ecu)")
+	xdfPath := fs.String("xdf", "", "xdf output `<file>`, - for stdout (default <image>.xdf when maps were located)")
+	scale := fs.String("5120", "auto", "mbar scaling `<mode>`: auto, on, or off")
+	clock := fs.Int("clock", 0, "CPU clock `<MHz>`: 20, 24, 32, or 40; 0 uses config/names.yaml")
+	conn := fs.String("connect", "", "override Connect with `<mode>`, for example SLOW-0x11")
+	cli.Short(fs, "x", "xdf", "5", "5120")
+	imgPath, img, userDir, err := image(fs, d, args)
+	if err != nil {
+		return err
+	}
+	res, err := d.generate(imgPath, img, userDir, *clock, *scale, *conn)
 	if err != nil {
 		return err
 	}
@@ -157,11 +211,11 @@ func writeXDF(path, imgPath string, size int, maps []record.Map) error {
 }
 
 func cmdParity(args []string) error {
-	fs := flag.NewFlagSet("parity", flag.ContinueOnError)
-	dir := fs.String("data", "testdata/parity", "parity root: images.yaml, ecu/me7info, and xdf")
-	corpus := fs.String("corpus", ecucorpus.Dir("."), "ecu-corpus checkout; XDFKIT_CORPUS sets the default")
-	fs.SetOutput(os.Stderr)
-	if err := fs.Parse(args); err != nil {
+	fs := cli.NewFlagSet("me7info", "parity", "[flags]", parityHelp)
+	dir := fs.String("data", "testdata/parity", "parity root `<dir>`: images.yaml, ecu/me7info, and xdf")
+	cli.Short(fs, "d", "data")
+	corpus := fs.String("corpus", ecucorpus.Dir("."), "ecu-corpus checkout `<dir>`; XDFKIT_CORPUS sets the default")
+	if err := cli.Parse(fs, args); err != nil {
 		return err
 	}
 	if fs.NArg() != 0 {
@@ -180,25 +234,14 @@ func cmdParity(args []string) error {
 }
 
 func cmdProbe(args []string) error {
-	fs := flag.NewFlagSet("probe", flag.ContinueOnError)
-	core := fs.String("core", config.Path("ME7_CORE", config.NeedlesFile), "needle yaml path")
-	user := fs.String("user", config.Path("ME7_USER", "user"), "directory of user needles, measurements, and conversions")
-	fs.SetOutput(os.Stderr)
-	if err := fs.Parse(args); err != nil {
-		return err
-	}
-	if fs.NArg() != 1 {
-		return fmt.Errorf("probe wants one flash image")
-	}
-	img, err := os.ReadFile(fs.Arg(0))
+	fs := cli.NewFlagSet("me7info", "probe", "[flags] <image.bin>", "")
+	d := defFlags(fs)
+	maps := fs.Bool("maps", false, "also count the calibration maps generate would write to the XDF")
+	imgPath, img, userDir, err := image(fs, d, args)
 	if err != nil {
 		return err
 	}
-	userDir, err := resolveUser(fs, *user)
-	if err != nil {
-		return err
-	}
-	ns, err := config.LoadNeedles(*core, userDir)
+	ns, err := config.LoadNeedles(*d.core, userDir)
 	if err != nil {
 		return err
 	}
@@ -213,17 +256,34 @@ func cmdProbe(args []string) error {
 			fmt.Println(ln)
 		}
 	}
+	if !*maps {
+		return nil
+	}
+	res, err := d.generate(imgPath, img, userDir, 0, "auto", "")
+	if err != nil {
+		return err
+	}
+	var named, scalars, curves, grids int
+	for _, m := range res.Maps {
+		switch {
+		case m.Name == "":
+			continue
+		case m.Y != nil:
+			grids++
+		case m.X != nil:
+			curves++
+		default:
+			scalars++
+		}
+		named++
+	}
+	fmt.Printf("maps: %d named (%d maps, %d curves, %d scalars), %d unnamed\n",
+		named, grids, curves, scalars, len(res.Maps)-named)
 	return nil
 }
 
 func resolveUser(fs *flag.FlagSet, dir string) (string, error) {
-	explicit := os.Getenv("ME7_USER") != ""
-	fs.Visit(func(f *flag.Flag) {
-		if f.Name == "user" {
-			explicit = true
-		}
-	})
-	return config.ResolveUserDir(dir, explicit)
+	return config.ResolveUserDir(dir, os.Getenv("ME7_USER") != "" || cli.IsSet(fs, "user"))
 }
 
 func fmtOffs(offs []int) string {

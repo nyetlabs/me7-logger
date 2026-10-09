@@ -70,7 +70,7 @@ package:
 	done
 
 parity: build
-	./build/me7info parity -data testdata/parity
+	./build/me7info parity --data testdata/parity
 
 # --checkout overrides update = none in .gitmodules.
 corpus:
