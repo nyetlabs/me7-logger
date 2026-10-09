@@ -58,7 +58,8 @@
 # xtable    Column table, by name. Its count has to match cols.
 # ytable    Row table, by name. Its count has to match rows.
 # also      More maps from the same hit. Each copies this row with its own
-#           name and add, and runs right after it.
+#           name and add, and runs right after it. The pointer is not read
+#           as a packed header in front of a copy; set cols for its axes.
 #
 # A later row with the same map name fills it only when the earlier window missed.
 

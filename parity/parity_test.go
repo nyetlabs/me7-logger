@@ -36,74 +36,23 @@ func TestMatchMapsFileOffset(t *testing.T) {
 
 const needleBase = 0x800000
 
-func TestParseXDF(t *testing.T) {
-	b := []byte(`<?xml version="1.0"?>
-<XDFFORMAT>
-<XDFCONSTANT><title>KRKTE</title><EMBEDDEDDATA mmedaddress="0x10" /></XDFCONSTANT>
-<XDFTABLE><title>LAMFA</title>
-<XDFAXIS id="x"><EMBEDDEDDATA mmedaddress="0x1" /></XDFAXIS>
-<XDFAXIS id="z"><EMBEDDEDDATA mmedaddress="0x20" /></XDFAXIS>
-</XDFTABLE>
-</XDFFORMAT>`)
-	got, err := ParseXDF(b)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(got) != 2 || got[0].Name != "KRKTE" || got[0].Addr != 0x10 || got[1].Name != "LAMFA" || got[1].Addr != 0x20 {
-		t.Fatalf("%+v", got)
-	}
-}
-
-func TestParseXDFTitleName(t *testing.T) {
-	const doc = `<?xml version="1.0"?>
-<XDFFORMAT>
-<XDFCONSTANT><title>Codewort für DLSU (CWDLSU)</title><EMBEDDEDDATA mmedaddress="0x10" /></XDFCONSTANT>
-<XDFCONSTANT><title>(TC6LDPC5)</title><EMBEDDEDDATA mmedaddress="0x11" /></XDFCONSTANT>
-<XDFCONSTANT><title>%s</title><EMBEDDEDDATA mmedaddress="0x12" /></XDFCONSTANT>
-</XDFFORMAT>`
+func TestTitleNamer(t *testing.T) {
 	for _, tc := range []struct{ third, want string }{
 		{"Software Version", "CWDLSU TC6LDPC5 Software Version"},
 		{"Axis: RPM (PID)", "CWDLSU TC6LDPC5 PID"},
 	} {
-		got, err := ParseXDF(fmt.Appendf(nil, doc, tc.third))
-		if err != nil {
-			t.Fatal(err)
-		}
+		titles := []string{"Codewort für DLSU (CWDLSU)", "(TC6LDPC5)", tc.third}
+		nameOf := titleNamer(titles)
 		var names []string
-		for _, m := range got {
-			names = append(names, m.Name)
+		for _, s := range titles {
+			names = append(names, nameOf(s))
 		}
 		if s := strings.Join(names, " "); s != tc.want {
 			t.Errorf("%q: got %q, want %q", tc.third, s, tc.want)
 		}
 	}
-	got, err := ParseXDF([]byte(`<XDFFORMAT>
-<XDFCONSTANT><title>KRKTE</title><EMBEDDEDDATA mmedaddress="0x10" /></XDFCONSTANT>
-<XDFCONSTANT><title>Axis: RPM (PID)</title><EMBEDDEDDATA mmedaddress="0x11" /></XDFCONSTANT>
-</XDFFORMAT>`))
-	if err != nil || got[1].Name != "Axis: RPM (PID)" {
-		t.Fatalf("minority file renamed: %+v %v", got, err)
-	}
-}
-
-func TestParseXDFAxes(t *testing.T) {
-	b := []byte(`<?xml version="1.0"?>
-<XDFFORMAT>
-<XDFTABLE><title>LAMFA</title>
-<XDFAXIS id="x">
-<EMBEDDEDDATA mmedaddress="0x100FF" mmedelementsizebits="8" />
-<indexcount>12</indexcount>
-</XDFAXIS>
-<XDFAXIS id="y"><indexcount>16</indexcount></XDFAXIS>
-<XDFAXIS id="z"><EMBEDDEDDATA mmedaddress="0x20" mmedelementsizebits="8" /></XDFAXIS>
-</XDFTABLE>
-</XDFFORMAT>`)
-	got, err := ParseXDFAxes(b)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(got) != 1 || got[0].Name != "LAMFA" || got[0].ID != "x" || got[0].Addr != 0x100FF || got[0].Count != 12 || got[0].Bits != 8 {
-		t.Fatalf("%+v", got)
+	if got := titleNamer([]string{"KRKTE", "Axis: RPM (PID)"})("Axis: RPM (PID)"); got != "Axis: RPM (PID)" {
+		t.Fatalf("minority file renamed: %q", got)
 	}
 }
 
@@ -351,16 +300,16 @@ func TestDisagreements(t *testing.T) {
 // modelJSON is a model JSON of the given origin with KRKTE at 0x10 and n-1
 // other constants.
 func modelJSON(origin string, n int) string {
-	objs := []string{`{"id":"KRKTE","shape":"value","address":"0x10"}`}
+	objs := []string{`{"key":"KRKTE","id":"KRKTE","shape":"value","address":"0x10"}`}
 	for i := 1; i < n; i++ {
-		objs = append(objs, fmt.Sprintf(`{"id":"EXTRA%d","shape":"value","address":"0x%X"}`, i, 0x20+i))
+		objs = append(objs, fmt.Sprintf(`{"key":"EXTRA%d","id":"EXTRA%d","shape":"value","address":"0x%X"}`, i, i, 0x20+i))
 	}
-	return `{"provenance":{"origin":"` + origin + `"},"objects":[` + strings.Join(objs, ",") + `]}`
+	return `{"schema":"xdfkit-model/1","provenance":{"format":"kp","origin":"` + origin + `"},"objects":[` + strings.Join(objs, ",") + `]}`
 }
 
 func TestLoadOracleKind(t *testing.T) {
 	dir := t.TempDir()
-	for origin, want := range map[string]string{"damos": damosXDF, "a2l": damosXDF, "hand": handXDF, "": handXDF, "kp": ""} {
+	for origin, want := range map[string]string{"damos": damosXDF, "a2l": damosXDF, "hand": handXDF, "": handXDF, "kp": "", "located": ""} {
 		p := filepath.Join(dir, "o"+origin+".json")
 		if err := os.WriteFile(p, []byte(modelJSON(origin, 2)), 0o644); err != nil {
 			t.Fatal(err)
@@ -382,14 +331,14 @@ func TestLoadOracleKind(t *testing.T) {
 }
 
 func TestParseModel(t *testing.T) {
-	b := []byte(`{"objects":[
-{"id":"KFLDRQ2 (AR 27C02)","shape":"2d","address":"0x40","rows":4,"cols":6,
+	b := []byte(`{"schema":"xdfkit-model/1","objects":[
+{"key":"KFLDRQ2","id":"KFLDRQ2 (AR 27C02)","shape":"2d","address":"0x40","rows":4,"cols":6,
  "x":{"source":"image","stored":"absolute","address":"0x20","data":{"bits":16}},
  "y":{"source":"image","stored":"subtract","address":"0x30","data":{"bits":8}}},
-{"id":"","description":"Kennlinie (KFX)","shape":"1d","address":"0x60","rows":1,"cols":3,
+{"key":"obj-2","id":"","description":"Kennlinie (KFX)","shape":"1d","address":"0x60","rows":1,"cols":3,
  "x":{"source":"editable","address":"0x58","data":{"bits":8}}},
-{"id":"","description":"Codewort (CWDLSU)","shape":"value","address":"0x10"},
-{"id":"","description":"Faktor (FKAT)","shape":"1d","address":"0x50","rows":1,"cols":3,
+{"key":"obj-3","id":"","description":"Codewort (CWDLSU)","shape":"value","address":"0x10"},
+{"key":"obj-4","id":"","description":"Faktor (FKAT)","shape":"1d","address":"0x50","rows":1,"cols":3,
  "x":{"source":"ordinal"}}]}`)
 	maps, axes, rows, origin, err := parseModel(b)
 	if err != nil || origin != "" {

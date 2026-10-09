@@ -29,7 +29,7 @@ func TestShippedCategories(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if cats["KFZW"] == "" {
+	if cats.Categories["KFZW"] == "" {
 		t.Fatal("KFZW has no category")
 	}
 	bad := filepath.Join(t.TempDir(), CategoriesFile)

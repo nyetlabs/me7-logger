@@ -14,5 +14,7 @@
 /me7-logger
 /me7-logger.exe
 /plans/
+/go.work
+/go.work.sum
 /config/user/*.yaml
 /config/user/*.yml

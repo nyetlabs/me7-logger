@@ -5,9 +5,7 @@
 package config
 
 import (
-	"bytes"
 	"embed"
-	"encoding/json"
 	"fmt"
 	"io/fs"
 	"os"
@@ -17,6 +15,7 @@ import (
 	"strconv"
 	"strings"
 
+	"go.nyet.org/xdfkit/model"
 	"gopkg.in/yaml.v3"
 
 	"go.nyet.org/me7-logger/mapfile"
@@ -46,26 +45,17 @@ const (
 )
 
 // LoadCategories reads the category table: the tuner map names, each with its
-// XDF category (xdfkit docs/corpus.md). Unknown keys are an error, as in
-// xdfkit's categories.schema.json.
-func LoadCategories(path string) (map[string]string, error) {
+// XDF category (xdfkit docs/corpus.md), checked by xdfkit.
+func LoadCategories(path string) (*model.CategoryTable, error) {
 	b, err := Read(path, CategoriesFile)
 	if err != nil {
 		return nil, err
 	}
-	var t struct {
-		Schema     int               `json:"schema"`
-		Categories map[string]string `json:"categories"`
-	}
-	dec := json.NewDecoder(bytes.NewReader(b))
-	dec.DisallowUnknownFields()
-	if err := dec.Decode(&t); err != nil {
+	t, err := model.ParseCategoryTable(b)
+	if err != nil {
 		return nil, fmt.Errorf("%s: %w", CategoriesFile, err)
 	}
-	if t.Schema != 1 || len(t.Categories) == 0 {
-		return nil, fmt.Errorf("%s: schema %d with %d names, want schema 1 with names", CategoriesFile, t.Schema, len(t.Categories))
-	}
-	return t.Categories, nil
+	return t, nil
 }
 
 // Path is config/<name>, or the environment variable when it is set.

@@ -23,7 +23,9 @@ flowchart LR
   cfg --> gen
   cats -->|make corpus-bump copies| cfg
   cats -->|xdfkit publish| tuner[PACK-tuner.xdf]
+  gen -->|xdf.Model| kit[xdfkit model + XDF writer]
   gen --> out[.ecu + tuner .xdf, --full-xdf]
+  kit --> out
   out --> log[me7logger log] --> csv[CSV]
   out --> par[me7info parity]
   oracle --> par
@@ -36,11 +38,15 @@ Stage new originals in the gitignored `testdata/parity/incoming/`. Definitions a
 
 ## Design
 
-`me7info` (`generate`, `probe`, `parity`) and `me7logger` (`log`) share one Go module. Both locate items in the image as `record.Item` and `record.Map`; the `.ecu` and XDF writers read those.
+`me7info` (`generate`, `probe`, `parity`) and `me7logger` (`log`) share one Go module. Both locate items in the image as `record.Item` and `record.Map`. The `.ecu` writer reads those. `xdf.Model` converts the maps to an xdfkit model (file offsets, raw values, provenance origin `located`), and xdfkit files it with `Tuner` or `Categorize` and writes the XDF. `parity` reads the corpus definitions with xdfkit `canon` and `model`. me7-logger imports xdfkit; xdfkit never imports me7-logger.
 
 The generator is a masked byte search plus a few opcodes (selector, case bounds, `EXTP`), not a disassembler. A Bosch name located by bytes is a row in `config/signatures.yaml`, never a literal in Go. A row should match a code layout, not one image; check it across the corpus.
 
 Out of scope: `.kp`, OLS, DAMOS, WinOLS, ecuxplot, `mapdump`. Do not copy NefMoto `Communication/`.
+
+## xdfkit
+
+`go.mod` pins xdfkit; there is no committed `replace`. `make work` writes the gitignored `go.work` (`use . ../xdfkit`), so builds and tests use the sibling checkout. Before pushing a change that needs new xdfkit code, push xdfkit, then `make xdfkit-bump` (pins its `master` as a pseudo-version) and `make check-pinned` (builds and vets with `GOWORK=off`, as CI does; `make test` runs it), and fold `go.mod` and `go.sum` into the commit. Bump again after xdfkit history is rewritten. Releases should pin a tagged xdfkit; `make package` warns on a pseudo-version.
 
 ## Config
 
@@ -50,7 +56,9 @@ Files load from `./config` when it exists, else the embedded copy. `--core`, `--
 
 `signatures.yaml` rows run top to bottom, and the first row that hits fills a name. Prepended axis counts become rows and columns only when they account for every byte up to the body; never invent a count of 1. Only named maps reach the XDF.
 
-`config/categories.json` is the corpus `categories.json` (xdfkit `docs/corpus.md`), copied by `make corpus-bump`; a test fails when they differ. It files each XDF map under a category. The tuner XDF holds only its names plus the maps their axes link to; `--full-xdf` holds every named map, with the rest under `Other`.
+`config/categories.json` is the corpus `categories.json` (xdfkit `docs/corpus.md`), copied by `make corpus-bump`; a test fails when they differ. It files each XDF map under a category. The tuner XDF holds only its names plus the maps at their axis addresses; `--full-xdf` holds every named map, with the rest under `Other`.
+
+A constant at a table axis address becomes a 1d breakpoint curve with that axis's count and data, so xdfkit links the axis to it. That happens only when every axis there has the same shape, the image values strictly increase, and no other map starts inside the curve. Otherwise it stays a constant, and `probe --maps` lists it as `xdf: not a breakpoint curve`.
 
 ### Axes on an interpolator call
 

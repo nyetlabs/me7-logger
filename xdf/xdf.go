@@ -1,14 +1,14 @@
-// Package xdf writes TunerPro XDF for calibration maps.
-// It does not write logging variables, .kp, OLS, DAMOS, or WinOLS scripts.
+// Package xdf converts located calibration maps to an xdfkit model, which
+// xdfkit's xdf package writes as TunerPro XDF.
 package xdf
 
 import (
-	"encoding/xml"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
-	"io"
 	"slices"
-	"strconv"
-	"strings"
+
+	"go.nyet.org/xdfkit/model"
 
 	"go.nyet.org/me7-logger/opcode"
 	"go.nyet.org/me7-logger/record"
@@ -17,93 +17,122 @@ import (
 // Other is the category of a map that is not in the category table.
 const Other = "Other"
 
-// Write emits one XDFFORMAT document. An empty map list writes nothing.
-// A map with no name is not written. size is the image length and becomes
-// the header region; 0 omits the region. Each map's unique id is its file
-// offset. An axis whose address is another map in this file is a link to
-// that id. The equation is the one stored on the map.
-//
-// cats is the category table (map name to category). A listed map gets its
-// category; an unlisted map that a listed map's axis links to gets that
-// map's category, and any other map gets Other. tuner keeps only the listed
-// maps and the maps their axes link to.
-func Write(w io.Writer, title string, size int, maps []record.Map, cats map[string]string, tuner bool) error {
-	maps, cat := categorize(named(maps), cats, tuner)
-	if len(maps) == 0 {
-		return nil
+// Model returns the named maps of image as a model, with no categories.
+// Addresses are file offsets. Values are raw: factor 1, no decimals. title
+// is the image file name. A constant at a table's axis address is that
+// axis's breakpoints and becomes a curve of its points, so the writer links
+// the axis to it. conflicts lists the constants left alone: the axes at
+// their address disagree on count or storage, the points read from image
+// don't strictly increase, or the curve would run into the next object.
+func Model(maps []record.Map, image []byte, title string) (m *model.Model, conflicts []string) {
+	sum := sha256.Sum256(image)
+	m = &model.Model{
+		Schema:     model.SchemaID,
+		Provenance: &model.Provenance{Format: "image", Origin: "located", File: title, SHA256: hex.EncodeToString(sum[:])},
+		Objects:    []*model.Object{},
 	}
-	if title == "" {
-		title = "me7info"
-	}
-	ids := map[uint32]struct{}{}
-	for _, m := range maps {
-		ids[opcode.FileOffset(m.Addr)] = struct{}{}
-	}
-	if _, err := io.WriteString(w, xml.Header); err != nil {
-		return err
-	}
-	names := categoryNames(cat)
-	enc := xml.NewEncoder(w)
-	enc.Indent("", "  ")
-	return enc.Encode(xdfDoc{header: newHeader(title, size, names), items: newItems(maps, ids, cat, names)})
-}
-
-// Count is the number of maps Write would write.
-func Count(maps []record.Map, cats map[string]string, tuner bool) int {
-	maps, _ = categorize(named(maps), cats, tuner)
-	return len(maps)
-}
-
-// categorize returns the maps to write and each one's category, by file
-// offset.
-func categorize(maps []record.Map, cats map[string]string, tuner bool) ([]record.Map, map[uint32]string) {
-	cat := map[uint32]string{}
-	for _, m := range maps {
-		if c, ok := cats[m.Name]; ok {
-			cat[opcode.FileOffset(m.Addr)] = c
+	for _, r := range maps {
+		if r.Name != "" {
+			m.Objects = append(m.Objects, object(r))
 		}
 	}
-	listed := make(map[uint32]string, len(cat))
-	for k, v := range cat {
-		listed[k] = v
+	m.AssignKeys()
+	return m, breakpoints(m, image)
+}
+
+// breakpoints turns each constant at a table's axis address into a curve
+// holding that axis's points, unless the axes there disagree, the points
+// don't strictly increase, or another object starts inside the curve.
+func breakpoints(m *model.Model, image []byte) (conflicts []string) {
+	type points struct {
+		n int
+		d model.Data
 	}
-	for _, m := range maps {
-		c, ok := listed[opcode.FileOffset(m.Addr)]
-		if !ok {
+	at := map[model.Addr][]points{}
+	for _, o := range m.Objects {
+		for _, a := range []struct {
+			x *model.Axis
+			n int
+		}{{o.X, o.Cols}, {o.Y, o.Rows}} {
+			if a.x != nil {
+				p := points{a.n, *a.x.Data}
+				if !slices.Contains(at[*a.x.Address], p) {
+					at[*a.x.Address] = append(at[*a.x.Address], p)
+				}
+			}
+		}
+	}
+	for _, o := range m.Objects {
+		ps := at[o.Address]
+		if o.Shape != "value" || len(ps) == 0 {
 			continue
 		}
-		for _, ax := range []*record.Axis{m.X, m.Y} {
-			if ax == nil || ax.Addr == 0 {
-				continue
-			}
-			if off := opcode.FileOffset(ax.Addr); cat[off] == "" {
-				cat[off] = c
+		why := ""
+		switch {
+		case len(ps) > 1:
+			why = fmt.Sprintf("axes of %d different shapes", len(ps))
+		case !increasing(image, o.Address, ps[0].n, ps[0].d.Bits/8):
+			why = "breakpoints not increasing"
+		default:
+			end := o.Address + model.Addr(ps[0].n*ps[0].d.Bits/8)
+			for _, t := range m.Objects {
+				if t != o && t.Address > o.Address && t.Address < end {
+					why = "overlaps " + t.Key
+					break
+				}
 			}
 		}
-	}
-	out := maps[:0:0]
-	for _, m := range maps {
-		off := opcode.FileOffset(m.Addr)
-		if cat[off] == "" {
-			if tuner {
-				continue
-			}
-			cat[off] = Other
+		if why != "" {
+			conflicts = append(conflicts, fmt.Sprintf("%s at 0x%X: %s", o.Key, uint32(o.Address), why))
+			continue
 		}
-		out = append(out, m)
+		o.Shape, o.Cols, o.Data = "1d", ps[0].n, ps[0].d
 	}
-	return out, cat
+	return conflicts
 }
 
-func categoryNames(cat map[uint32]string) []string {
-	var names []string
-	for _, c := range cat {
-		if !slices.Contains(names, c) {
-			names = append(names, c)
-		}
+// increasing reports whether the n unsigned little-endian points of w bytes
+// at addr lie in image and strictly increase.
+func increasing(image []byte, addr model.Addr, n, w int) bool {
+	start := int(addr)
+	if w < 1 || n < 1 || start+n*w > len(image) {
+		return false
 	}
-	slices.Sort(names)
-	return names
+	prev := -1
+	for i := range n {
+		v := 0
+		for j, b := range image[start+i*w : start+(i+1)*w] {
+			v |= int(b) << (8 * j)
+		}
+		if v <= prev {
+			return false
+		}
+		prev = v
+	}
+	return true
+}
+
+func object(r record.Map) *model.Object {
+	o := &model.Object{
+		ID:          r.Name,
+		Description: r.Comment,
+		Shape:       "value",
+		Address:     model.Addr(opcode.FileOffset(r.Addr)),
+		Rows:        1,
+		Cols:        1,
+		Data:        data(r.Bits, r.Signed),
+		Value:       value(r.Unit),
+	}
+	if !tableShape(r) {
+		return o
+	}
+	o.Rows, o.Cols = max(r.Rows, 1), max(r.Cols, 1)
+	o.Shape = "2d"
+	if o.Rows == 1 {
+		o.Shape = "1d"
+	}
+	o.X, o.Y = axis(r.X), axis(r.Y)
+	return o
 }
 
 // tableShape is a map whose row count and column count were both read.
@@ -116,274 +145,27 @@ func tableShape(m record.Map) bool {
 	return m.Rows > 1 || m.Cols > 1 || m.X != nil || m.Y != nil
 }
 
-func named(maps []record.Map) []record.Map {
-	out := make([]record.Map, 0, len(maps))
-	for _, m := range maps {
-		if m.Name != "" {
-			out = append(out, m)
-		}
+// axis is an image axis, or nil (ordinal) when it has no address.
+func axis(a *record.Axis) *model.Axis {
+	if a == nil || a.Addr == 0 {
+		return nil
 	}
-	return out
+	addr := model.Addr(opcode.FileOffset(a.Addr))
+	d := data(a.Bits, false)
+	return &model.Axis{Source: "image", Stored: "absolute", Address: &addr, Data: &d, Value: value(a.Unit)}
 }
 
-// xdfDoc is the document. MarshalXML writes each map in order. A struct
-// field per element would emit every constant before every table.
-type xdfDoc struct {
-	header xdfHeader
-	items  []any
-}
-
-func (d xdfDoc) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
-	start.Name = xml.Name{Local: "XDFFORMAT"}
-	start.Attr = []xml.Attr{{Name: xml.Name{Local: "version"}, Value: "1.70"}}
-	if err := e.EncodeToken(start); err != nil {
-		return err
-	}
-	if err := e.Encode(d.header); err != nil {
-		return err
-	}
-	for _, it := range d.items {
-		if err := e.Encode(it); err != nil {
-			return err
-		}
-	}
-	return e.EncodeToken(start.End())
-}
-
-type xdfHeader struct {
-	XMLName    xml.Name      `xml:"XDFHEADER"`
-	Title      string        `xml:"deftitle"`
-	Region     *xdfRegion    `xml:"REGION,omitempty"`
-	Categories []xdfCategory `xml:"CATEGORY"`
-}
-
-type xdfRegion struct {
-	Size string `xml:"size,attr"`
-}
-
-type xdfCategory struct {
-	Index string `xml:"index,attr"`
-	Name  string `xml:"name,attr"`
-}
-
-// xdfCategoryMem is TunerPro's category reference: the header index plus 1.
-type xdfCategoryMem struct {
-	Index    int `xml:"index,attr"`
-	Category int `xml:"category,attr"`
-}
-
-type xdfConstant struct {
-	XMLName     xml.Name       `xml:"XDFCONSTANT"`
-	ID          string         `xml:"uniqueid,attr"`
-	Title       string         `xml:"title"`
-	Description string         `xml:"description"`
-	CategoryMem xdfCategoryMem `xml:"CATEGORYMEM"`
-	Data        xdfData        `xml:"EMBEDDEDDATA"`
-	Units       string         `xml:"units"`
-	Math        xdfMath        `xml:"MATH"`
-}
-
-type xdfTable struct {
-	XMLName     xml.Name       `xml:"XDFTABLE"`
-	ID          string         `xml:"uniqueid,attr"`
-	Title       string         `xml:"title"`
-	Description string         `xml:"description"`
-	CategoryMem xdfCategoryMem `xml:"CATEGORYMEM"`
-	Axes        []xdfAxis      `xml:"XDFAXIS"`
-}
-
-type xdfAxis struct {
-	XMLName xml.Name   `xml:"XDFAXIS"`
-	ID      string     `xml:"id,attr"`
-	Data    *xdfData   `xml:"EMBEDDEDDATA,omitempty"`
-	Link    *xdfLink   `xml:"embedinfo,omitempty"`
-	Units   *string    `xml:"units,omitempty"`
-	Count   int        `xml:"indexcount,omitempty"`
-	Labels  []xdfLabel `xml:"LABEL,omitempty"`
-	Math    xdfMath    `xml:"MATH"`
-}
-
-type xdfData struct {
-	Addr  string `xml:"mmedaddress,attr"`
-	Bits  int    `xml:"mmedelementsizebits,attr"`
-	Flags string `xml:"mmedtypeflags,attr"`
-	Rows  int    `xml:"mmedrowcount,attr,omitempty"`
-	Cols  int    `xml:"mmedcolcount,attr,omitempty"`
-}
-
-type xdfLink struct {
-	Type int    `xml:"type,attr"`
-	Link string `xml:"linkobjid,attr"`
-}
-
-type xdfLabel struct {
-	Index int    `xml:"index,attr"`
-	Value string `xml:"value,attr"`
-}
-
-type xdfMath struct {
-	Equation string `xml:"equation,attr"`
-	Var      xdfVar `xml:"VAR"`
-}
-
-type xdfVar struct {
-	ID string `xml:"id,attr"`
-}
-
-func newHeader(title string, size int, names []string) xdfHeader {
-	h := xdfHeader{Title: title}
-	for i, n := range names {
-		h.Categories = append(h.Categories, xdfCategory{Index: hex(uint32(i)), Name: n})
-	}
-	h.Categories = append(h.Categories, xdfCategory{Index: "0xFF", Name: "Axes"})
-	if size > 0 {
-		h.Region = &xdfRegion{Size: hex(uint32(size))}
-	}
-	return h
-}
-
-func newItems(maps []record.Map, ids map[uint32]struct{}, cat map[uint32]string, names []string) []any {
-	items := make([]any, 0, len(maps))
-	for _, m := range maps {
-		mem := xdfCategoryMem{Category: slices.Index(names, cat[opcode.FileOffset(m.Addr)]) + 1}
-		if tableShape(m) {
-			t := newTable(m, ids)
-			t.CategoryMem = mem
-			items = append(items, t)
-			continue
-		}
-		c := newConst(m)
-		c.CategoryMem = mem
-		items = append(items, c)
-	}
-	return items
-}
-
-func newConst(m record.Map) xdfConstant {
-	bits := width(m.Bits)
-	return xdfConstant{
-		ID:          hex(opcode.FileOffset(m.Addr)),
-		Title:       m.Name,
-		Description: m.Comment,
-		Data: xdfData{
-			Addr:  hex(opcode.FileOffset(m.Addr)),
-			Bits:  bits,
-			Flags: hexByte(flags(bits, m.Signed)),
-		},
-		Units: m.Unit,
-		Math:  newMath(m.Equation),
-	}
-}
-
-func newTable(m record.Map, ids map[uint32]struct{}) xdfTable {
-	rows, cols := m.Rows, m.Cols
-	if rows == 0 {
-		rows = 1
-	}
-	if cols == 0 {
-		cols = 1
-	}
-	bits := width(m.Bits)
-	return xdfTable{
-		ID:          hex(opcode.FileOffset(m.Addr)),
-		Title:       m.Name,
-		Description: m.Comment,
-		Axes: []xdfAxis{
-			newAxis("x", m.X, cols, ids),
-			newAxis("y", m.Y, rows, ids),
-			zAxis(m, rows, cols, bits),
-		},
-	}
-}
-
-func newAxis(id string, ax *record.Axis, n int, ids map[uint32]struct{}) xdfAxis {
-	out := xdfAxis{ID: id, Count: n, Math: newMath("X")}
-	if ax == nil {
-		return out
-	}
-	if ax.Count != 0 {
-		out.Count = ax.Count
-	}
-	out.Math = newMath(ax.Equation)
-	unit := ax.Unit
-	out.Units = &unit
-	if ax.Addr == 0 {
-		for i, v := range ax.Labels {
-			out.Labels = append(out.Labels, xdfLabel{Index: i, Value: trim(v)})
-		}
-		return out
-	}
-	off := opcode.FileOffset(ax.Addr)
-	if _, ok := ids[off]; ok {
-		out.Link = &xdfLink{Type: 3, Link: hex(off)}
-		return out
-	}
-	bits := width(ax.Bits)
-	out.Data = &xdfData{Addr: hex(off), Bits: bits, Flags: hexByte(flags(bits, false))}
-	return out
-}
-
-func zAxis(m record.Map, rows, cols, bits int) xdfAxis {
-	unit := m.Unit
-	return xdfAxis{
-		ID:    "z",
-		Units: &unit,
-		Data: &xdfData{
-			Addr:  hex(opcode.FileOffset(m.Addr)),
-			Bits:  bits,
-			Flags: hexByte(flags(bits, m.Signed)),
-			Rows:  rows,
-			Cols:  cols,
-		},
-		Math: newMath(m.Equation),
-	}
-}
-
-func newMath(eq string) xdfMath {
-	return xdfMath{Equation: equation(eq), Var: xdfVar{ID: "X"}}
-}
-
-func equation(s string) string {
-	if s == "" {
-		return "X"
-	}
-	return s
-}
-
-func width(bits int) int {
+func data(bits int, signed bool) model.Data {
 	if bits == 0 {
-		return 8
+		bits = 8
 	}
-	return bits
-}
-
-func flags(bits int, signed bool) int {
-	f := 0
+	d := model.Data{Bits: bits, Signed: signed}
 	if bits >= 16 {
-		f |= 0x02
+		d.Endian = "little"
 	}
-	if signed {
-		f |= 0x01
-	}
-	return f
+	return d
 }
 
-func hex(v uint32) string {
-	return fmt.Sprintf("0x%X", v)
-}
-
-func hexByte(v int) string {
-	return fmt.Sprintf("0x%02X", v)
-}
-
-func trim(v float64) string {
-	s := strconv.FormatFloat(v, 'g', 8, 64)
-	if strings.Contains(s, ".") {
-		s = strings.TrimRight(s, "0")
-		s = strings.TrimRight(s, ".")
-	}
-	if s == "" || s == "-" {
-		return "0"
-	}
-	return s
+func value(units string) model.Value {
+	return model.Value{Units: units, Conversion: model.Conversion{Factor: 1}}
 }

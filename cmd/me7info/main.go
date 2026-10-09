@@ -8,6 +8,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	"go.nyet.org/xdfkit/model"
+	kitxdf "go.nyet.org/xdfkit/xdf"
+
 	"go.nyet.org/me7-logger/config"
 	"go.nyet.org/me7-logger/generate"
 	"go.nyet.org/me7-logger/internal/cli"
@@ -193,30 +196,42 @@ func cmdGenerate(args []string) error {
 		return err
 	}
 	if *fullPath != "" {
-		if err := writeXDF(*fullPath, imgPath, len(img), res.Maps, cats, false); err != nil {
+		if err := writeXDF(*fullPath, imgPath, img, res.Maps, cats, false); err != nil {
 			return err
 		}
 	}
-	return writeXDF(*xdfPath, imgPath, len(img), res.Maps, cats, true)
+	return writeXDF(*xdfPath, imgPath, img, res.Maps, cats, true)
 }
 
-func writeXDF(path, imgPath string, size int, maps []record.Map, cats map[string]string, tuner bool) error {
-	if xdf.Count(maps, cats, tuner) == 0 {
-		return nil
+// xdfModel is the model of the maps for the tuner XDF (the table's maps and
+// their axes) or the full XDF (every map, unlisted ones under xdf.Other),
+// and the constants xdf.Model couldn't make breakpoint curves.
+func xdfModel(imgPath string, img []byte, maps []record.Map, cats *model.CategoryTable, tuner bool) (*model.Model, []string, error) {
+	m, conflicts := xdf.Model(maps, img, filepath.Base(imgPath))
+	if tuner {
+		return m, conflicts, m.Tuner(cats)
+	}
+	m.Categorize(cats, xdf.Other)
+	return m, conflicts, nil
+}
+
+func writeXDF(path, imgPath string, img []byte, maps []record.Map, cats *model.CategoryTable, tuner bool) error {
+	m, _, err := xdfModel(imgPath, img, maps, cats, tuner)
+	if err != nil || len(m.Objects) == 0 {
+		return err
+	}
+	b, err := kitxdf.Write(m, img, filepath.Base(imgPath))
+	if err != nil {
+		return err
+	}
+	if path == "-" {
+		_, err = os.Stdout.Write(b)
+		return err
 	}
 	if path == "" {
 		path = strings.TrimSuffix(imgPath, filepath.Ext(imgPath)) + ".xdf"
 	}
-	title := filepath.Base(imgPath)
-	if path == "-" {
-		return xdf.Write(os.Stdout, title, size, maps, cats, tuner)
-	}
-	f, err := os.Create(path)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	if err := xdf.Write(f, title, size, maps, cats, tuner); err != nil {
+	if err := os.WriteFile(path, b, 0o644); err != nil {
 		return err
 	}
 	fmt.Fprintf(os.Stderr, "wrote %s\n", path)
@@ -296,8 +311,19 @@ func cmdProbe(args []string) error {
 	}
 	fmt.Printf("maps: %d named (%d maps, %d curves, %d scalars), %d unnamed\n",
 		named, grids, curves, scalars, len(res.Maps)-named)
-	fmt.Printf("xdf: %d in the tuner xdf, %d in the full xdf\n",
-		xdf.Count(res.Maps, cats, true), xdf.Count(res.Maps, cats, false))
+	var n [2]int
+	var conflicts []string
+	for i, tuner := range []bool{true, false} {
+		m, c, err := xdfModel(imgPath, img, res.Maps, cats, tuner)
+		if err != nil {
+			return err
+		}
+		n[i], conflicts = len(m.Objects), c
+	}
+	fmt.Printf("xdf: %d in the tuner xdf, %d in the full xdf\n", n[0], n[1])
+	for _, c := range conflicts {
+		fmt.Println("xdf: not a breakpoint curve:", c)
+	}
 	return nil
 }
 

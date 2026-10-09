@@ -264,11 +264,15 @@ mapsigs:
 	img := make([]byte, 32)
 	copy(img, []byte{0xD7, 0x40, 0x00, 0x02, 0x0C, 0x00, 0x10, 0x00})
 	have := map[string]uint32{}
+	header := map[string]uint32{}
 	for _, h := range MapAddrs(img, StandardDPP, doc.Maps) {
-		have[h.Name] = h.Addr
+		have[h.Name], header[h.Name] = h.Addr, h.Header
 	}
 	if have["BASE"] != 0x800011 || have["NEXT"] != 0x800013 || have["SAME"] != 0x800010 {
 		t.Fatalf("%v", have)
+	}
+	if header["BASE"] != 0x800010 || header["NEXT"] != 0 {
+		t.Fatalf("an also copy has the first name's pointer as its header: %v", header)
 	}
 	img[4] = 0x1C
 	if MapAddrs(img, StandardDPP, doc.Maps) != nil {

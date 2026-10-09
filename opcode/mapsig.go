@@ -120,6 +120,9 @@ func mapHits(img []byte, dpp [4]uint16, rows []MapSig, known map[string]uint32, 
 		if addr == 0 {
 			continue
 		}
+		if row.Also {
+			header = 0
+		}
 		add(row.Name, addr, header, row, f2Word(img, off, row.XAt), f2Word(img, off, row.YAt))
 	}
 	for again := true; again; {

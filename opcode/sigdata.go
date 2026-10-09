@@ -87,6 +87,9 @@ type MapSig struct {
 	Deref    int
 	DerefAt  int
 	DerefFar bool
+	// Also is a copy made by an also entry. Its add is measured from the
+	// first name's pointer, so that pointer is not a header in front of it.
+	Also bool
 }
 
 // SigDoc is the signature list and the call-slot words it references.
@@ -357,7 +360,7 @@ func ParseSigs(b []byte) (SigDoc, error) {
 			}
 			seen[a.Name] = struct{}{}
 			more := row
-			more.Name, more.Add = a.Name, a.Add
+			more.Name, more.Add, more.Also = a.Name, a.Add, true
 			doc.Maps = append(doc.Maps, more)
 		}
 	}

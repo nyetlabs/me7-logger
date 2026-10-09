@@ -54,27 +54,25 @@ type Call struct {
 	YTable string
 }
 
-// Map is one calibration map. Addr is a CPU address. The XDF writer stores the file offset.
-// Rows and Cols are the table body. Both zero is a constant. Equation empty means X.
+// Map is one calibration map, in raw values. Addr is a CPU address. The XDF
+// model stores the file offset. Rows and Cols are the table body. Both zero
+// is a constant.
 type Map struct {
-	Name     string
-	Addr     uint32
-	Bits     int
-	Signed   bool
-	Rows     int
-	Cols     int
-	Unit     string
-	Equation string
-	Comment  string
-	X, Y     *Axis
+	Name    string
+	Addr    uint32
+	Bits    int
+	Signed  bool
+	Rows    int
+	Cols    int
+	Unit    string
+	Comment string
+	X, Y    *Axis
 }
 
-// Axis is one TunerPro axis. Addr 0 with Labels set is a fixed label list.
+// Axis is one map axis. Addr 0 is an ordinal axis.
 type Axis struct {
-	Unit     string
-	Equation string
-	Addr     uint32
-	Count    int
-	Bits     int
-	Labels   []float64
+	Unit  string
+	Addr  uint32
+	Count int
+	Bits  int
 }

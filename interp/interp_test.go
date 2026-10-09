@@ -121,7 +121,7 @@ functions:
 	if got[0].X == nil || got[0].X.Addr != 0x810111 || got[0].X.Count != 4 || got[0].X.Bits != 8 {
 		t.Fatalf("col %+v", got[0].X)
 	}
-	if got[0].Y == nil || got[0].Y.Addr != 0x8100C1 || got[0].Y.Count != 16 || got[0].Y.Bits != 8 || got[0].Y.Equation != "" {
+	if got[0].Y == nil || got[0].Y.Addr != 0x8100C1 || got[0].Y.Count != 16 || got[0].Y.Bits != 8 {
 		t.Fatalf("row %+v", got[0].Y)
 	}
 }

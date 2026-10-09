@@ -6,17 +6,16 @@ package parity
 
 import (
 	"cmp"
-	"encoding/json"
-	"encoding/xml"
 	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
 	"slices"
 	"sort"
-	"strconv"
 	"strings"
 
+	"go.nyet.org/xdfkit/canon"
+	"go.nyet.org/xdfkit/model"
 	"gopkg.in/yaml.v3"
 
 	"go.nyet.org/me7-logger/config"
@@ -1275,185 +1274,56 @@ type Axis struct {
 	Bits  int
 }
 
-// ParseXDF reads map titles and the address of each constant or table body.
-type xdfFile struct {
-	Constants []xdfConst `xml:"XDFCONSTANT"`
-	Tables    []xdfTable `xml:"XDFTABLE"`
-}
-
-type xdfConst struct {
-	Title string  `xml:"title"`
-	Data  xdfData `xml:"EMBEDDEDDATA"`
-}
-
-type xdfTable struct {
-	Title string    `xml:"title"`
-	Axes  []xdfAxis `xml:"XDFAXIS"`
-}
-
-type xdfAxis struct {
-	ID    string  `xml:"id,attr"`
-	Data  xdfData `xml:"EMBEDDEDDATA"`
-	Count int     `xml:"indexcount"`
-}
-
-type xdfData struct {
-	Addr string `xml:"mmedaddress,attr"`
-	Bits int    `xml:"mmedelementsizebits,attr"`
-}
-
-// ParseXDF returns one row per constant and one per table body.
-func ParseXDF(b []byte) ([]Map, error) {
-	maps, _, _, err := parseXDF(b)
-	return maps, err
-}
-
-// ParseXDFAxes returns each x or y axis that carries an address.
-// A label list with no address is left out. The table body is not an axis.
-func ParseXDFAxes(b []byte) ([]Axis, error) {
-	_, axes, _, err := parseXDF(b)
-	return axes, err
-}
-
-func parseXDF(b []byte) ([]Map, []Axis, []refRow, error) {
-	var doc xdfFile
-	if err := xml.Unmarshal(b, &doc); err != nil {
-		return nil, nil, nil, err
-	}
-	var titles []string
-	for _, c := range doc.Constants {
-		titles = append(titles, c.Title)
-	}
-	for _, t := range doc.Tables {
-		titles = append(titles, t.Title)
-	}
-	nameOf := titleNamer(titles)
-	var maps []Map
-	var axes []Axis
-	var rows []refRow
-	for _, c := range doc.Constants {
-		addr, err := parseAddr(c.Data.Addr)
-		if err != nil {
-			return nil, nil, nil, fmt.Errorf("%s: %w", c.Title, err)
-		}
-		c.Title = nameOf(c.Title)
-		maps = append(maps, Map{Name: c.Title, Addr: addr})
-		rows = append(rows, refRow{name: c.Title, addr: addr})
-	}
-	for _, t := range doc.Tables {
-		t.Title = nameOf(t.Title)
-		var addr uint32
-		var found bool
-		ax := map[string]axisSig{}
-		for _, a := range t.Axes {
-			if a.ID == "z" {
-				if a.Data.Addr == "" {
-					continue
-				}
-				z, err := parseAddr(a.Data.Addr)
-				if err != nil {
-					return nil, nil, nil, fmt.Errorf("%s: %w", t.Title, err)
-				}
-				addr, found = z, true
-				continue
-			}
-			if a.ID != "x" && a.ID != "y" || a.Data.Addr == "" {
-				continue
-			}
-			at, err := parseAddr(a.Data.Addr)
-			if err != nil {
-				return nil, nil, nil, fmt.Errorf("%s %s: %w", t.Title, a.ID, err)
-			}
-			axes = append(axes, Axis{Name: t.Title, ID: a.ID, Addr: at, Count: a.Count, Bits: a.Data.Bits})
-			ax[a.ID] = axisSig{id: a.ID, addr: at, count: a.Count, bits: a.Data.Bits}
-		}
-		if !found {
-			return nil, nil, nil, fmt.Errorf("%s: no table address", t.Title)
-		}
-		maps = append(maps, Map{Name: t.Title, Addr: addr})
-		rows = append(rows, refRow{name: t.Title, addr: addr, axes: ax})
-	}
-	return maps, axes, rows, nil
-}
-
-// modelDoc is the part of an xdfkit model JSON (corpus defs/) that locates
-// maps, and where its definitions came from.
-type modelDoc struct {
-	Provenance struct {
-		Origin string `json:"origin"`
-	} `json:"provenance"`
-	Objects []struct {
-		ID          string     `json:"id"`
-		Description string     `json:"description"`
-		Shape       string     `json:"shape"`
-		Address     string     `json:"address"`
-		Rows        int        `json:"rows"`
-		Cols        int        `json:"cols"`
-		X           *modelAxis `json:"x"`
-		Y           *modelAxis `json:"y"`
-	} `json:"objects"`
-}
-
-type modelAxis struct {
-	Source  string `json:"source"`
-	Stored  string `json:"stored"`
-	Address string `json:"address"`
-	Data    *struct {
-		Bits int `json:"bits"`
-	} `json:"data"`
-}
-
 // located is true when the axis is read from the image at an address. That
 // includes a "subtract" axis, which xdfkit writes to XDF as labels.
-func (a *modelAxis) located() bool {
-	return a != nil && a.Source == "image" && a.Address != "" && a.Data != nil
+func located(a *model.Axis) bool {
+	return a != nil && a.Source == "image" && a.Address != nil && a.Data != nil
 }
 
 // parseModel reads a model JSON. The title is the first word of the id, else
 // the description, as in the XDF xdfkit writes from it. origin is the
 // provenance origin.
 func parseModel(b []byte) (maps []Map, axes []Axis, rows []refRow, origin string, err error) {
-	var doc modelDoc
-	if err := json.Unmarshal(b, &doc); err != nil {
+	var m model.Model
+	if err := canon.Unmarshal(b, &m); err != nil {
 		return nil, nil, nil, "", err
 	}
-	titles := make([]string, len(doc.Objects))
-	for i, o := range doc.Objects {
+	if err := m.Check(); err != nil {
+		return nil, nil, nil, "", err
+	}
+	titles := make([]string, len(m.Objects))
+	for i, o := range m.Objects {
 		titles[i], _, _ = strings.Cut(strings.TrimSpace(o.ID), " ")
 		if titles[i] == "" {
 			titles[i] = strings.TrimSpace(o.Description)
 		}
 	}
 	nameOf := titleNamer(titles)
-	for i, o := range doc.Objects {
+	for i, o := range m.Objects {
 		name := nameOf(titles[i])
-		addr, err := parseAddr(o.Address)
-		if err != nil {
-			return nil, nil, nil, "", fmt.Errorf("%s: %w", name, err)
-		}
-		row := refRow{name: name, addr: addr}
+		row := refRow{name: name, addr: uint32(o.Address)}
 		if o.Shape != "value" {
 			row.axes = map[string]axisSig{}
 			for _, a := range []struct {
 				id    string
-				ax    *modelAxis
+				ax    *model.Axis
 				count int
 			}{{"x", o.X, o.Cols}, {"y", o.Y, o.Rows}} {
-				if !a.ax.located() {
+				if !located(a.ax) {
 					continue
 				}
-				at, err := parseAddr(a.ax.Address)
-				if err != nil {
-					return nil, nil, nil, "", fmt.Errorf("%s %s: %w", name, a.id, err)
-				}
+				at := uint32(*a.ax.Address)
 				axes = append(axes, Axis{Name: name, ID: a.id, Addr: at, Count: a.count, Bits: a.ax.Data.Bits})
 				row.axes[a.id] = axisSig{id: a.id, addr: at, count: a.count, bits: a.ax.Data.Bits}
 			}
 		}
-		maps = append(maps, Map{Name: name, Addr: addr})
+		maps = append(maps, Map{Name: name, Addr: uint32(o.Address)})
 		rows = append(rows, row)
 	}
-	return maps, axes, rows, doc.Provenance.Origin, nil
+	if m.Provenance != nil {
+		origin = m.Provenance.Origin
+	}
+	return maps, axes, rows, origin, nil
 }
 
 var titleName = regexp.MustCompile(`\(([A-Z][A-Z0-9_]*)\)\s*$`)
@@ -1477,15 +1347,4 @@ func titleNamer(titles []string) func(string) string {
 		}
 		return s
 	}
-}
-
-func parseAddr(s string) (uint32, error) {
-	s = strings.TrimSpace(s)
-	s = strings.TrimPrefix(s, "0x")
-	s = strings.TrimPrefix(s, "0X")
-	v, err := strconv.ParseUint(s, 16, 32)
-	if err != nil {
-		return 0, fmt.Errorf("bad address %q", s)
-	}
-	return uint32(v), nil
 }

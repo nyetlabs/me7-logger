@@ -9,7 +9,7 @@ me7info generate --full-xdf image-full.xdf image.bin
 me7logger log -p /dev/tty.usbserial -o log.csv image.bin session.cfg
 ```
 
-`image.xdf` is the tuner XDF: the maps listed in `config/categories.json` (`testdata/parity/names/tuner.yaml`) and their axes, in tuner categories. `--full-xdf` also writes every located map, with the rest under `Other`.
+`image.xdf` is the tuner XDF: the maps listed in `config/categories.json` (`testdata/parity/names/tuner.yaml`) plus the maps at their axis addresses, in tuner categories. `--full-xdf` also writes every located map, with the rest under `Other`.
 
 `session.cfg`:
 
