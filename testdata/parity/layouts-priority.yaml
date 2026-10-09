@@ -13,4 +13,5 @@ tiers:
   C:
     - 23g
   D:
+    - 25C
     - selector-sub

@@ -123,6 +123,13 @@ signatures:
   open: "06F0XX00{ftek_w:F6F4}"
   pattern: "C2FCXXXXE6FDXXXXE6FEXXXXD740XX02C2FFXXXXDAXXXXXX"
   at: -38 # ptrAt(hit - 0x26)
+# scanKrkte's FKKVS_0_A fallback, when that window has no table call.
+- name: tevfakge_w
+  size: 2
+  from: "0x820000"
+  open: "06F0XX00{ftek_w:F6F4}"
+  pattern: "E6FXXXXXC2FXXXXX5C2X00XX"
+  at: -10
 - name: zwgru
   size: 1
   from: "0x820000"
@@ -309,6 +316,13 @@ signatures:
   pattern: "E6FCXXXXD2FDXXXX{lde_ptr:F2FE}DAXXXXXX{lde_ptr:F6F4}"
   single: true
   at: 6
+# axisAt's form with the input read through EXTP.
+- name: lde
+  size: 1
+  from: "0x800200"
+  pattern: "E6FCXXXXD740E100D2FDXXXX{lde_ptr:F2FE}DAXXXXXX{lde_ptr:F6F4}"
+  single: true
+  at: 10
 - name: lde
   size: 1
   from: "0x820000"
@@ -436,6 +450,13 @@ signatures:
   size: 2
   from: "0x820000"
   open: "{tmot:F3F8}43F8XXXX9D03{tmot:F3F8}0D02"
+  pattern: "E6FCXXXXE6FDXXXXC08EDAXXXXXX"
+  at: -2
+# scanVmax's second window, with the compare read through EXTP.
+- name: tmotrvmx_b2w
+  size: 2
+  from: "0x820000"
+  open: "{tmot:F3F8}D740E10043F8XXXXXD03{tmot:F3F8}0D04"
   pattern: "E6FCXXXXE6FDXXXXC08EDAXXXXXX"
   at: -2
 - name: tmotrvmx_b2w

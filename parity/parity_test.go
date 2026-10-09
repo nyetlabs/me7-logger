@@ -240,7 +240,7 @@ func TestRunLayout(t *testing.T) {
 	write("ecu/me7info/a.ecu", ecu)
 	write("ecu/me7info/b.ecu", "")
 	write("names/s4wiki.yaml", "names:\n  KFZW: 2\n  LAMFA: 2\n")
-	write("defs/a.json", modelJSON(damosMaps+1))
+	write("defs/a.json", modelJSON("damos", 3))
 	defOf := func(stem string) string {
 		if stem == "a" {
 			return filepath.Join(dir, "defs/a.json")
@@ -279,7 +279,7 @@ func TestRunLayout(t *testing.T) {
 	if got.S4Wiki[0].String() != "50.0% (1/2)" || got.S4Wiki[1].String() != "0.0% (0/2)" {
 		t.Fatalf("s4wiki %+v", got.S4Wiki)
 	}
-	if len(got.XDF) != 1 || got.XDF[0].Name != "a.bin" || got.XDF[0].String() != "0.0% (0/501)" || got.XDF[0].Axis.Total != 0 {
+	if len(got.XDF) != 1 || got.XDF[0].Name != "a.bin" || got.XDF[0].String() != "0.0% (0/3)" || got.XDF[0].Axis.Total != 0 {
 		t.Fatalf("xdf %+v", got.XDF)
 	}
 }
@@ -305,7 +305,7 @@ func TestReportText(t *testing.T) {
 		S4Wiki: []Image{
 			{
 				Name: "a.bin", Fraction: Fraction{1, 2}, Tier: "S",
-				Axis: Fraction{1, 2}, Confidence: Fraction{1, 1},
+				Axis: Fraction{1, 2}, Confidence: Fraction{1, 1}, Block: Fraction{3, 40},
 			},
 			{Name: "bb.bin", Fraction: Fraction{0, 2}},
 		},
@@ -318,9 +318,9 @@ func TestReportText(t *testing.T) {
 		"ecu me7info   vs ecu-specific     vs corpus       extras\n" +
 		"  a          1/2 (+3)   50.0%  2/10   20.0%  1/4   25.0%\n" +
 		"\n" +
-		"names                     tier         axis   confidence\n" +
-		"  a          1/2   50.0%  S     1/2   50.0%  1/1  100.0%\n" +
-		"  bb         0/2    0.0%        0/0    0.0%             \n" +
+		"names                     tier         axis   confidence         block\n" +
+		"  a          1/2   50.0%  S     1/2   50.0%  1/1  100.0%  3/40    7.5%\n" +
+		"  bb         0/2    0.0%        0/0    0.0%                           \n" +
 		"\n" +
 		"xdf damos                        axis\n" +
 		"  a          0/3    0.0%  1/4   25.0%\n" +
@@ -348,24 +348,32 @@ func TestDisagreements(t *testing.T) {
 	}
 }
 
-// modelJSON is a model JSON of KRKTE at 0x10 and n-1 other constants.
-func modelJSON(n int) string {
+// modelJSON is a model JSON of the given origin with KRKTE at 0x10 and n-1
+// other constants.
+func modelJSON(origin string, n int) string {
 	objs := []string{`{"id":"KRKTE","shape":"value","address":"0x10"}`}
 	for i := 1; i < n; i++ {
 		objs = append(objs, fmt.Sprintf(`{"id":"EXTRA%d","shape":"value","address":"0x%X"}`, i, 0x20+i))
 	}
-	return `{"objects":[` + strings.Join(objs, ",") + `]}`
+	return `{"provenance":{"origin":"` + origin + `"},"objects":[` + strings.Join(objs, ",") + `]}`
 }
 
 func TestLoadOracleKind(t *testing.T) {
 	dir := t.TempDir()
-	for name, n := range map[string]int{"hand": damosMaps, "damos": damosMaps + 1} {
-		p := filepath.Join(dir, name+".json")
-		if err := os.WriteFile(p, []byte(modelJSON(n)), 0o644); err != nil {
+	for origin, want := range map[string]string{"damos": damosXDF, "a2l": damosXDF, "hand": handXDF, "": handXDF, "kp": ""} {
+		p := filepath.Join(dir, "o"+origin+".json")
+		if err := os.WriteFile(p, []byte(modelJSON(origin, 2)), 0o644); err != nil {
 			t.Fatal(err)
 		}
-		if _, _, rows, kind, err := loadOracle(p); err != nil || kind != name || len(rows) != n {
-			t.Fatalf("%s: %d %q %v", name, len(rows), kind, err)
+		_, _, rows, kind, err := loadOracle(p)
+		if want == "" {
+			if err == nil {
+				t.Fatalf("%q: want an error", origin)
+			}
+			continue
+		}
+		if err != nil || kind != want || len(rows) != 2 {
+			t.Fatalf("%q: %d %q %v", origin, len(rows), kind, err)
 		}
 	}
 	if _, _, _, kind, err := loadOracle(""); err != nil || kind != "" {
@@ -383,9 +391,9 @@ func TestParseModel(t *testing.T) {
 {"id":"","description":"Codewort (CWDLSU)","shape":"value","address":"0x10"},
 {"id":"","description":"Faktor (FKAT)","shape":"1d","address":"0x50","rows":1,"cols":3,
  "x":{"source":"ordinal"}}]}`)
-	maps, axes, rows, err := parseModel(b)
-	if err != nil {
-		t.Fatal(err)
+	maps, axes, rows, origin, err := parseModel(b)
+	if err != nil || origin != "" {
+		t.Fatal(origin, err)
 	}
 	if len(maps) != 4 || maps[0] != (Map{Name: "KFLDRQ2", Addr: 0x40}) || maps[1] != (Map{Name: "KFX", Addr: 0x60}) ||
 		maps[2] != (Map{Name: "CWDLSU", Addr: 0x10}) || maps[3] != (Map{Name: "FKAT", Addr: 0x50}) {

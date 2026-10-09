@@ -62,7 +62,9 @@ type Disagreement struct {
 // Beyond is the count of catalog names located on this image that its
 // ME7Info file does not name. Corpus is that image against the full catalog.
 // Both are set only on ME7Info rows. Tier, Axis, and Confidence are set on
-// S4Wiki rows. Tier is the nameGrade of the image.
+// S4Wiki rows. Tier is the nameGrade of the image. On an S4Wiki row, Fraction
+// is the s4wiki names and Block is the other names lists of the image's
+// layout block.
 // Every list is sorted by the layout block tier of its image in
 // layouts-priority.yaml, then by name.
 type Image struct {
@@ -73,6 +75,7 @@ type Image struct {
 	Tier       string
 	Axis       Fraction
 	Confidence Fraction
+	Block      Fraction
 }
 
 // Fraction is hits over the oracle row count.
@@ -109,6 +112,7 @@ func (r *Report) Text() string {
 		tier    string
 		axis    Fraction
 		conf    Fraction
+		block   Fraction
 		extras  Fraction
 		head    bool
 		beyond  int
@@ -138,7 +142,7 @@ func (r *Report) Text() string {
 		for _, im := range r.S4Wiki {
 			lines = append(lines, line{
 				label: "  " + stemName(im.Name), frac: im.Fraction, tier: im.Tier,
-				axis: im.Axis, conf: im.Confidence, wiki: true,
+				axis: im.Axis, conf: im.Confidence, block: im.Block, wiki: true,
 			})
 		}
 	}
@@ -162,8 +166,9 @@ func (r *Report) Text() string {
 	}
 
 	nameW, countW, beyondW, corpusW := 0, 0, 0, 0
-	axisW, confW, extrasW := 0, 0, 0
+	axisW, confW, extrasW, blockW := 0, 0, 0, 0
 	counts := make([]string, len(lines))
+	blocks := make([]string, len(lines))
 	beyonds := make([]string, len(lines))
 	corpus := make([]string, len(lines))
 	axes := make([]string, len(lines))
@@ -208,7 +213,14 @@ func (r *Report) Text() string {
 				confW = len(confs[i])
 			}
 		}
+		if ln.wiki && ln.block.Total > 0 {
+			blocks[i] = fmt.Sprintf("%d/%d", ln.block.Hit, ln.block.Total)
+			if len(blocks[i]) > blockW {
+				blockW = len(blocks[i])
+			}
+		}
 	}
+	showBlock := blockW > 0
 	if axisW < 3 {
 		axisW = 3
 	}
@@ -235,11 +247,18 @@ func (r *Report) Text() string {
 			axisSpan := 6 + 2 + axisW
 			confStart := axisStart + axisSpan + 2
 			confSpan := 6 + 2 + confW
-			hdr := []byte(strings.Repeat(" ", confStart+confSpan))
+			end := confStart + confSpan
+			if showBlock {
+				end += 2 + blockW + 2 + 6
+			}
+			hdr := []byte(strings.Repeat(" ", end))
 			copy(hdr, ln.label)
 			copy(hdr[tierStart:], "tier")
 			copy(hdr[axisStart+axisSpan-len("axis"):], "axis")
 			copy(hdr[confStart+confSpan-len("confidence"):], "confidence")
+			if showBlock {
+				copy(hdr[end-len("block"):], "block")
+			}
 			b.Write(hdr)
 			b.WriteByte('\n')
 		case ln.head && ln.me7info:
@@ -285,9 +304,17 @@ func (r *Report) Text() string {
 			if ln.conf.Total > 0 {
 				confPct = ln.conf.percent()
 			}
-			fmt.Fprintf(&b, "%-*s  %*s  %6s  %-4s  %*s  %6s  %*s  %6s\n",
+			fmt.Fprintf(&b, "%-*s  %*s  %6s  %-4s  %*s  %6s  %*s  %6s",
 				nameW, ln.label, countW, counts[i], ln.frac.percent(), ln.tier,
 				axisW, axes[i], ln.axis.percent(), confW, confs[i], confPct)
+			if showBlock {
+				blockPct := ""
+				if ln.block.Total > 0 {
+					blockPct = ln.block.percent()
+				}
+				fmt.Fprintf(&b, "  %*s  %6s", blockW, blocks[i], blockPct)
+			}
+			b.WriteByte('\n')
 		case ln.xdf:
 			fmt.Fprintf(&b, "%-*s  %*s  %6s  %*s  %6s\n",
 				nameW, ln.label, countW, counts[i], ln.frac.percent(),
@@ -435,7 +462,8 @@ func run(dir string, images []string, defOf func(string) string, gen imageGen) (
 			}
 			gone := absent[blk]
 			rep.S4Wiki = append(rep.S4Wiki, Image{
-				Name: base, Fraction: countScored(want, scored),
+				Name: base, Fraction: countScored(wiki, scored),
+				Block: countScored(lists.byBlock[blk], scored),
 				Tier: nameGrade(ntier, lists.byBlock[blk], func(n string) bool {
 					_, ok := scored[n]
 					return ok || gone[n]
@@ -568,12 +596,9 @@ const (
 	handXDF  = "hand"
 )
 
-// damosMaps is the map count above which a definition is DAMOS or A2L
-// sourced, even when it came through a KP.
-const damosMaps = 500
-
 // loadOracle reads the image's corpus definition at path and returns its
-// kind, or "" when path is "".
+// kind, or "" when path is "". Its provenance origin (xdfkit docs/corpus.md)
+// damos or a2l is damosXDF; hand, or none, is handXDF.
 func loadOracle(path string) (maps []Map, axes []Axis, rows []refRow, kind string, err error) {
 	if path == "" {
 		return nil, nil, nil, "", nil
@@ -582,13 +607,17 @@ func loadOracle(path string) (maps []Map, axes []Axis, rows []refRow, kind strin
 	if err != nil {
 		return nil, nil, nil, "", err
 	}
-	maps, axes, rows, err = parseModel(b)
+	maps, axes, rows, origin, err := parseModel(b)
 	if err != nil {
 		return nil, nil, nil, "", fmt.Errorf("%s: %w", path, err)
 	}
-	kind = handXDF
-	if len(rows) > damosMaps {
+	switch origin {
+	case "damos", "a2l":
 		kind = damosXDF
+	case "hand", "":
+		kind = handXDF
+	default:
+		return nil, nil, nil, "", fmt.Errorf("%s: unknown origin %q", path, origin)
 	}
 	return maps, axes, rows, kind, nil
 }
@@ -1328,8 +1357,11 @@ func parseXDF(b []byte) ([]Map, []Axis, []refRow, error) {
 }
 
 // modelDoc is the part of an xdfkit model JSON (corpus defs/) that locates
-// maps.
+// maps, and where its definitions came from.
 type modelDoc struct {
+	Provenance struct {
+		Origin string `json:"origin"`
+	} `json:"provenance"`
 	Objects []struct {
 		ID          string     `json:"id"`
 		Description string     `json:"description"`
@@ -1358,11 +1390,12 @@ func (a *modelAxis) located() bool {
 }
 
 // parseModel reads a model JSON. The title is the first word of the id, else
-// the description, as in the XDF xdfkit writes from it.
-func parseModel(b []byte) ([]Map, []Axis, []refRow, error) {
+// the description, as in the XDF xdfkit writes from it. origin is the
+// provenance origin.
+func parseModel(b []byte) (maps []Map, axes []Axis, rows []refRow, origin string, err error) {
 	var doc modelDoc
 	if err := json.Unmarshal(b, &doc); err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, "", err
 	}
 	titles := make([]string, len(doc.Objects))
 	for i, o := range doc.Objects {
@@ -1372,14 +1405,11 @@ func parseModel(b []byte) ([]Map, []Axis, []refRow, error) {
 		}
 	}
 	nameOf := titleNamer(titles)
-	var maps []Map
-	var axes []Axis
-	var rows []refRow
 	for i, o := range doc.Objects {
 		name := nameOf(titles[i])
 		addr, err := parseAddr(o.Address)
 		if err != nil {
-			return nil, nil, nil, fmt.Errorf("%s: %w", name, err)
+			return nil, nil, nil, "", fmt.Errorf("%s: %w", name, err)
 		}
 		row := refRow{name: name, addr: addr}
 		if o.Shape != "value" {
@@ -1394,7 +1424,7 @@ func parseModel(b []byte) ([]Map, []Axis, []refRow, error) {
 				}
 				at, err := parseAddr(a.ax.Address)
 				if err != nil {
-					return nil, nil, nil, fmt.Errorf("%s %s: %w", name, a.id, err)
+					return nil, nil, nil, "", fmt.Errorf("%s %s: %w", name, a.id, err)
 				}
 				axes = append(axes, Axis{Name: name, ID: a.id, Addr: at, Count: a.count, Bits: a.ax.Data.Bits})
 				row.axes[a.id] = axisSig{id: a.id, addr: at, count: a.count, bits: a.ax.Data.Bits}
@@ -1403,7 +1433,7 @@ func parseModel(b []byte) ([]Map, []Axis, []refRow, error) {
 		maps = append(maps, Map{Name: name, Addr: addr})
 		rows = append(rows, row)
 	}
-	return maps, axes, rows, nil
+	return maps, axes, rows, doc.Provenance.Origin, nil
 }
 
 var titleName = regexp.MustCompile(`\(([A-Z][A-Z0-9_]*)\)\s*$`)

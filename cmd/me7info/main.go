@@ -93,11 +93,15 @@ other names/*.yaml list on the images of its layout block:
     denominator is that matched set, not the tuner list.
 
 The image's corpus definition (corpus.tsv def), when present, is its
-address oracle. One of more than 500 maps is DAMOS sourced, else hand
-made. Only a DAMOS one turns a name hit into a miss. A hand made one that
-places a name elsewhere is listed under "hand xdf disagrees" for review,
-since hand made files can be wrong. Its x and y axes that have an address
-are the axis column of that section.
+address oracle. Its provenance origin (damos, a2l, hand) says whether it
+is DAMOS sourced; with none, it is hand made. Only
+a DAMOS one turns a name hit into a miss. A hand made one that places a
+name elsewhere is listed under "hand xdf disagrees" for review, since hand
+made files can be wrong. Its x and y axes that have an address are the axis
+column of that section.
+
+The names column scores the S4wiki list. The other names lists of an
+image's layout block are scored in the block column.
 `
 
 // defs are the definition file flags shared by generate and probe.
