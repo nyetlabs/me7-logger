@@ -207,7 +207,7 @@ A name hits when the locator stores one address and an axis. A count of 0 on tha
 
 The number on the list is how many axes the table has, and those counts are the `axis` column. A count of 0 adds nothing. The denominator is 0 only when every map that hit has a count of 0. A count of 1 is a curve and 2 is a map. A hit on that column is the axis present on the map.
 
-`xdf/<image>.xdf`, when present, checks that image's own address file. A missing file is omitted from the report. The file is not the S4wiki list, and it does not locate maps. A body hit is the same address. An axis hit is the same address, point count, and width. An axis with no address is left out of the score. A 16-bit axis or body is the even address. The odd byte in front of it is a pad, not a value.
+`xdf/<image>.xdf`, when present, checks that image's own address file. A missing file is omitted from the report. The file is not the S4wiki list, and it does not locate maps. An address file that disagrees with the addresses the image's code reads is removed, not kept. A body hit is the same address. An axis hit is the same address, point count, and width. An axis with no address is left out of the score. A 16-bit axis or body is the even address. The odd byte in front of it is a pad, not a value.
 
 Maps are located on that image from the caller that passes the map to the interpolator. How the column and the row are read is in the `config/maps.yaml` section above. `addMapAt` reads the row and column counts when they sit in front of the axes. A count the image does not hold stays unset, and that map is written as a constant, unless the row is `plain`. A mapsig row names a header with `xat` or `yat` when a setup stored it in a RAM word.
 

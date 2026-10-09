@@ -209,6 +209,8 @@ functions:
       - needle_hex: "88 60 F2 F4 XX XX 68 43 EA 30 B2 20"
       # 22N memory operand. The jump target matches the first pattern.
       - needle_hex: "88 60 F2 F4 2A 89 68 43 EA 30 B0 57"
+      # NL jump target.
+      - needle_hex: "88 60 F2 F4 XX XX 68 43 EA 30 D2 1E"
 
   - name: LLR_kfmres
     needles:

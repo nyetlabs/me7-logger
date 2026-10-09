@@ -322,7 +322,7 @@ signatures:
 - name: lde
   size: 1
   from: "0x820000"
-  pattern: "E6FC7000D740E100D2FDXXXXF2FE"
+  pattern: "E6FC7X00D740E100D2FDXXXXF2FE"
   single: true
   at: 10
 - name: dzwlam_ptr
@@ -682,7 +682,9 @@ signatures:
 - name: detazwbs
   size: 1
   from: "0x804000"
-  pattern: "D740E100F7FAXXXX9A44"
+  pattern:
+  - "D740E100F7FAXXXX9A44"
+  - "D740E100F7FAXXXX9A420A70"
   single: true
   at: 6
 - name: dzwg
@@ -745,6 +747,12 @@ signatures:
   pattern: "0D0509C143FCXXXXEA804ADC"
   single: true
   at: 6
+- name: fcmEnd
+  size: 1
+  from: "0x804000"
+  pattern: "74E00D0509C143FCXXXXEA80"
+  single: true
+  at: 8
 - name: tevfakge_w
   size: 2
   from: "0x804000"
@@ -1460,13 +1468,21 @@ mapsigs:
 - name: WDKUGDN
   pattern: "E6FCXXXXF2FDB889"
 - name: KFMIRL
-  pattern: "0D09E6FCXXXXF2FD8AF8F2FE"
+  pattern: "0D09E6FCXXXXF2FDXXF8F2FE"
   at: 4
   add: 68
   rows: 16
   cols: 16
   ybits: 16
   xbits: 16
+- name: KFMIRL
+  pattern: "B89FE6FCXXXXF2FD"
+  at: 4
+  add: 68
+  cols: 16
+  rows: 16
+  xbits: 16
+  ybits: 16
 - name: KFMIRL
   pattern: "F048XXXX0804"
   add: 28
@@ -2277,6 +2293,13 @@ mapsigs:
 - name: KFLDRAPP
   pattern: "F3F8XXXXD740E100F7F82709"
   add: 19
+- name: KFLDRAPP
+  pattern: "13B0E6FCXXXXE6FDXXXXC2FE9AF8C2FF9D89"
+  at: 4
+  frame: true
+  add: 18
+  rows: 8
+  cols: 8
 - name: KFLDRXO
   pattern: "43FAXXXXFD03AF4D"
   add: 15
@@ -2640,6 +2663,12 @@ mapsigs:
   pattern: "D89FD7400602C2F4XXXX"
   at: 8
 - name: CWLAMFAW
+  pattern: "B4A0D7400602C2F4XXXX"
+  at: 8
+- name: CWLAMFAW
+  pattern: "65F8ACA0D7400602C2F4XXXX"
+  at: 10
+- name: CWLAMFAW
   pattern: "380BD7400602C2F5XXXX"
   at: 8
 - name: CWLAMFAW
@@ -2653,8 +2682,15 @@ mapsigs:
   pattern: "8840C2F40F8A8840E6F4XXXX"
   at: 10
   frame: true
+  cols: 4
 - name: DPUPS
   pattern: "CC8A43F8XXXXFD03"
+  at: 4
+- name: DPUPS
+  pattern: "E88A43F8XXXXFD03"
+  at: 4
+- name: DPUPS
+  pattern: "EAF943F8XXXXFD03"
   at: 4
 - name: DPUPS
   pattern: "978A43F8XXXXFD03"
@@ -2664,6 +2700,18 @@ mapsigs:
   at: 4
 - name: DWKRMSN
   pattern: "5A61D740E100F7F8BF08E6FCXXXX"
+  at: 12
+  frame: true
+- name: DWKRMSN
+  pattern: "8A61D740E100F7F8BE08E6FCXXXX"
+  at: 12
+  frame: true
+- name: DWKRMSN
+  pattern: "0262D740E100F7F8CC08E6FCXXXX"
+  at: 12
+  frame: true
+- name: DWKRMSN
+  pattern: "9462D740E100F7F8D008E6FCXXXX"
   at: 12
   frame: true
 - name: DWKRMSN
@@ -2677,6 +2725,12 @@ mapsigs:
 - name: EDLDRP
   pattern: "A2A3D740E100C2F4CE08D7400602C2F5XXXX"
   at: 16
+- name: EDLDRP
+  pattern: "2D18D7400602C2F4XXXX5C84"
+  at: 8
+- name: EDLDRP
+  pattern: "C2F4F78A68422D1BD7400602C2F4XXXX5C84"
+  at: 14
 - name: FHOKH
   pattern: "42F4XXXXFD099A2C0750"
 - name: FHOKH
@@ -2692,6 +2746,18 @@ mapsigs:
   at: 4
   frame: true
 - name: KFFLLDE
+  pattern: "8820E6FCXXXXE6FDXXXXE6FEB231"
+  at: 4
+  frame: true
+- name: KFFLLDE
+  pattern: "8820E6FCXXXXE6FDXXXXE6FE2436"
+  at: 4
+  frame: true
+- name: KFFLLDE
+  pattern: "8820E6FCXXXXE6FDXXXXE6FE6E37"
+  at: 4
+  frame: true
+- name: KFFLLDE
   pattern: "8820E6FCXXXXE6FDXXXXE6FEB020"
   at: 4
   frame: true
@@ -2703,10 +2769,17 @@ mapsigs:
   pattern: "E6FCXXXXE6FDXXXXE6FE481E"
   frame: true
 - name: KFLDIMX
+  pattern: "E6FCXXXXE6FDXXXXE6FE361E"
+  frame: true
+- name: KFLDIMX
   pattern: "E6FCXXXXE6FDXXXXE6FE9E20"
   frame: true
 - name: KFLDIMX
   pattern: "3CA48840F2F5BC8C8850E6FCXXXX"
+  at: 12
+  frame: true
+- name: KFLDIMX
+  pattern: "56A48840F2F5C88C8850E6FCXXXX"
   at: 12
   frame: true
 - name: KFLDIOPU
@@ -2717,11 +2790,21 @@ mapsigs:
   pattern: "5A8C8850E6FCXXXX"
   at: 6
   frame: true
+- name: KFLDIOPU
+  pattern: "828C8840F2F56A8C8850E6FCXXXX"
+  at: 12
+  frame: true
 - name: KFLDRL
   pattern: "E6FCXXXXE6FDXXXXE6FE462C"
   frame: true
 - name: KFLDRL
+  pattern: "E6FCXXXXE6FDXXXXE6FEE02A"
+  frame: true
+- name: KFLDRL
   pattern: "E6FCXXXXE6FDXXXXE6FE4230"
+  frame: true
+- name: KFLDRL
+  pattern: "E6FCXXXXE6FDXXXXE6FE8C31"
   frame: true
 - name: KFLDRL
   pattern: "E6FCXXXXE6FDXXXXE6FE283B"
@@ -2729,8 +2812,16 @@ mapsigs:
 - name: KFMIOP
   pattern: "F0F4E6FCXXXXE6FD1269"
   at: 4
+- name: KFMIOP
+  pattern: "F0F4E6FCXXXXE6FDF469"
+  at: 4
+- name: KFMIOP
+  pattern: "F0F4E6FCXXXXE6FD3A67"
+  at: 4
 - name: KFMIZUFIL
   pattern: "E6FCXXXXE6FD8E00F2FECE8C"
+- name: KFMIZUFIL
+  pattern: "E6FCXXXXE6FD8D00F2FEB28C"
 - name: KFMIZUFIL
   pattern: "0D0BE6FCXXXXE6FD8D00F2FE988C"
   at: 4
@@ -2739,6 +2830,15 @@ mapsigs:
   at: 4
 - name: KFMIZUOF
   pattern: "FEA5E6FCXXXXE6FD8E00"
+  at: 4
+- name: KFMIZUOF
+  pattern: "D2A5E6FCXXXXE6FD8D00"
+  at: 4
+- name: KFMIZUOF
+  pattern: "C6A6E6FCXXXXE6FD8E00"
+  at: 4
+- name: KFMIZUOF
+  pattern: "E2A6E6FCXXXXE6FD8E00"
   at: 4
 - name: KFMIZUOF
   pattern: "FCA6E6FCXXXXE6FD8D00"
@@ -2784,12 +2884,32 @@ mapsigs:
   at: 16
   frame: true
 - name: KFTARX
+  pattern: "0D13F2F482A48840F2F5C48C8850E6FCXXXX"
+  at: 16
+  frame: true
+- name: KFTARX
+  pattern: "F0980D289A531330F2F482A38840F2F5768C8850E6FCXXXXE6FD0702E6FEE018E6FF0602DA8238630804F0840D12F2F482A38840F2F5768C8850E6FCXXXX"
+  at: 60
+  frame: true
+- name: KFTARX
   pattern: "0D12F2F480A48840F2F5668C8850E6FCXXXX"
   at: 16
   frame: true
 - name: KFTARXZK
   pattern: "1390F2F4B28C8840F2F5928C8850E6FCXXXX"
   at: 16
+  frame: true
+- name: KFTARXZK
+  pattern: "2D13F2F49E8C8840F2F5BA8C8850E6FCXXXX"
+  at: 16
+  frame: true
+- name: KFTARXZK
+  pattern: "2D13F2F4AA8C8840F2F5C68C8850E6FCXXXX"
+  at: 16
+  frame: true
+- name: KFTARXZK
+  pattern: "F0980D289A531330F2F482A38840F2F5768C8850E6FCXXXX"
+  at: 22
   frame: true
 - name: KFTARXZK
   pattern: "1350F2F480A48840F2F5668C8850E6FCXXXX"
@@ -2799,15 +2919,25 @@ mapsigs:
   pattern: "E6FCXXXXE6FDXXXXE6FE6001"
   frame: true
 - name: KFWPLGTA
+  pattern: "E6FCXXXXE6FDXXXXE6FE5F01"
+  frame: true
+- name: KFWPLGTA
+  pattern: "E6FCXXXXE6FDXXXXE6FE4301"
+  frame: true
+- name: KFWPLGTA
   pattern: "E6FCXXXXE6FDXXXXE6FE3C01"
   frame: true
 - name: KFZW
   pattern: "3D0FE6FCXXXXE6FD1A31"
   at: 4
 - name: KFZW
-  pattern: "F3F6XXXXF7F600AB"
+  pattern: "3D0FE6FCXXXXE6FDC230"
+  at: 4
 - name: KFZW
   pattern: "3D0FE6FCXXXXE6FDD630"
+  at: 4
+- name: KFZW
+  pattern: "3D0FE6FCXXXXE6FD8631"
   at: 4
 - name: KFZW
   pattern: "3D0FE6FCXXXXE6FD3235"
@@ -2819,13 +2949,25 @@ mapsigs:
   pattern: "3D10E6FCXXXXE6FDD630"
   at: 4
 - name: KFZW2
+  pattern: "3D10E6FCXXXXE6FD8631"
+  at: 4
+- name: KFZW2
+  pattern: "3D10E6FCXXXXE6FDC230"
+  at: 4
+- name: KFZW2
   pattern: "3D10E6FCXXXXE6FD3235"
   at: 4
 - name: KFZWOP
   pattern: "0200E6FCXXXXE6FDD06A"
   at: 4
 - name: KFZWOP
+  pattern: "0200E6FCXXXXE6FD3A67"
+  at: 4
+- name: KFZWOP
   pattern: "0200E6FCXXXXE6FD1269"
+  at: 4
+- name: KFZWOP
+  pattern: "0200E6FCXXXXE6FDF469"
   at: 4
 - name: KFZWOP
   pattern: "0200E6FCXXXXE6FD306D"
@@ -2834,7 +2976,13 @@ mapsigs:
   pattern: "B2A5E6FCXXXXE6FDD06A"
   at: 4
 - name: KFZWOP2
+  pattern: "84A5E6FCXXXXE6FD3A67"
+  at: 4
+- name: KFZWOP2
   pattern: "7AA6E6FCXXXXE6FD1269"
+  at: 4
+- name: KFZWOP2
+  pattern: "96A6E6FCXXXXE6FDF469"
   at: 4
 - name: KFZWOP2
   pattern: "ACA6E6FCXXXXE6FD306D"
@@ -2851,6 +2999,12 @@ mapsigs:
   pattern: "E717D7400602C2F5XXXX"
   at: 8
 - name: KRANH
+  pattern: "5B18D7400602C2F5XXXX"
+  at: 8
+- name: KRANH
+  pattern: "9D18D7400602C2F5XXXX"
+  at: 8
+- name: KRANH
   pattern: "A819D7400602C2F5XXXX"
   at: 8
 - name: KRANH
@@ -2859,6 +3013,18 @@ mapsigs:
   frame: true
 - name: KRFKLN
   pattern: "9B8A9A3A0DF0E6FCXXXX"
+  at: 8
+  frame: true
+- name: KRFKLN
+  pattern: "878A9A3A0D90E6FCXXXX"
+  at: 8
+  frame: true
+- name: KRFKLN
+  pattern: "B78A9A390DC0E6FCXXXX"
+  at: 8
+  frame: true
+- name: KRFKLN
+  pattern: "C08A9A390D80E6FCXXXX"
   at: 8
   frame: true
 - name: KRFKLN
@@ -2872,24 +3038,46 @@ mapsigs:
   pattern: "24A68840C2F59CF88850E6F4XXXX"
   at: 12
   frame: true
-  also:
-  - name: LAMFA
+  rows: 15
+  cols: 6
+  xbits: 16
+- name: LAMFA
+  pattern: "40A68840C2F5A2F88850E6F4XXXX"
+  at: 12
+  frame: true
+  rows: 15
+  cols: 6
+  xbits: 16
 - name: LAMFA
   pattern: "56A68840C2F59EF88850E6F4XXXX"
   at: 12
   frame: true
+  rows: 15
+  cols: 6
+  xbits: 16
 - name: LDHIA
   pattern: "C2FEXXXXD7400602C2FF1919"
 - name: LDHIA
-  pattern: "C2FEXXXXD7400602C2FF4E1C"
+  pattern: "C2FEXXXXD7400602C2FF8D19"
 - name: LDHIA
+  pattern: "C2FEXXXXD7400602C2FFD019"
+- name: LDHIA
+  pattern: "C2FEXXXXD7400602C2FF4E1C"
+- name: LDIATA
   pattern: "E6FCXXXXE6FDXXXXF2FE968CDA82"
   frame: true
+  also:
+  - name: LDHIA
+    add: -1
 - name: LDIATA
   pattern: "E6FCXXXXE6FDXXXXF2FEB28CDA82"
   frame: true
 - name: LDIATA
   pattern: "E6FCXXXXE6FDXXXXF2FED68CDA82"
+  frame: true
+- name: LDIATA
+  pattern: "D0848840E6FCXXXXE6FDXXXXF2FEE28CDA82"
+  at: 6
   frame: true
 - name: LDIATA
   pattern: "E6FCXXXXE6FDXXXXF2FE848CDA83"
@@ -2902,6 +3090,18 @@ mapsigs:
   pattern: "080CC4400C00E6FCXXXX"
   at: 8
   frame: true
+- name: LDORXN
+  pattern: "2D0DE6FCXXXXE6FD0602F2FEAC8C"
+  at: 4
+  frame: true
+- name: LDORXN
+  pattern: "2D0DE6FCXXXXE6FD0602F2FEB88C"
+  at: 4
+  frame: true
+- name: LDORXN
+  pattern: "F2F87A0BE6FCXXXXE6FDXXXXF2FE6A8C"
+  at: 6
+  frame: true
 - name: LDPBN
   pattern: "8E0BE6FCXXXXE6FDXXXXF2FE"
   at: 4
@@ -2909,6 +3109,18 @@ mapsigs:
 - name: LDPBN
   pattern: "080CE6FCXXXXE6FD"
   at: 4
+  frame: true
+- name: LDPBN
+  pattern: "7C148840E6FCXXXXE6FD0602F2FEAC8C"
+  at: 6
+  frame: true
+- name: LDPBN
+  pattern: "7C148840E6FCXXXXE6FD0602F2FEB88C"
+  at: 6
+  frame: true
+- name: LDPBN
+  pattern: "F6F47A0BE6FCXXXXE6FDXXXXF2FE6A8C"
+  at: 6
   frame: true
 - name: MDIMX
   pattern: "668E0D04C2F4XXXX"
@@ -2937,12 +3149,24 @@ mapsigs:
   at: 8
   add: 2
 - name: SNM16OPUW
+  pattern: "4276F6F4968CE6FCXXXXF2FD9EF8"
+  at: 8
+  add: 2
+- name: SNM16OPUW
+  pattern: "4276F6F4A28CE6FCXXXXF2FDA4F8"
+  at: 8
+  add: 2
+- name: SNM16OPUW
   pattern: "548CE6FCXXXXF2FD9CF8"
   at: 4
 - name: TABGBTS
   pattern: "42F4XXXXFD04E11875F8408A"
 - name: TABGBTS
+  pattern: "42F4XXXXFD04E11875F82D8A"
+- name: TABGBTS
   pattern: "42F4XXXXFD04E11875F85A8A"
+- name: TABGBTS
+  pattern: "42F4XXXXFD04E11875F85D8A"
 - name: TABGBTS
   pattern: "42F4XXXXFD04E11875F80B8A"
 - name: TABGSS
@@ -2952,6 +3176,12 @@ mapsigs:
 - name: TDLDRA
   pattern: "C2FEXXXXDA83EE43F7F8DCA3"
 - name: TDLDRA
+  pattern: "F0D4D7400602C2FEXXXXDA83EE43F7F88AA4"
+  at: 8
+- name: TDLDRA
+  pattern: "F0D4D7400602C2FEXXXXDA83F246F7F8A4A4"
+  at: 8
+- name: TDLDRA
   pattern: "C2FEXXXXDA83E44DF7F8C8A4"
 - name: TDLDRA
   pattern: "C2FEXXXXDA83EE43F7F8A4A3"
@@ -2959,6 +3189,9 @@ mapsigs:
   pattern: "C2FEXXXXDA83EE43F7F8BEA34980"
 - name: TDLDRA2
   pattern: "9BA4D08DD7400602C2FEXXXX"
+  at: 10
+- name: TDLDRA2
+  pattern: "B5A4D08DD7400602C2FEXXXX"
   at: 10
 - name: TDLDRA2
   pattern: "C2FEXXXXDA83E44DF7F8AAA4"
@@ -2983,6 +3216,12 @@ mapsigs:
   pattern: "458A43F8XXXXED05"
   at: 4
 - name: TMNSMN
+  pattern: "608A43F8XXXXED05"
+  at: 4
+- name: TMNSMN
+  pattern: "D4F943F8XXXXED05"
+  at: 4
+- name: TMNSMN
   pattern: "108A43F8XXXXED05"
   at: 4
 - name: TMNSMN
@@ -2995,6 +3234,9 @@ mapsigs:
   pattern: "C0EDD7400602C2FEXXXX"
   at: 8
 - name: TULV1
+  pattern: "B3A4C08DD7400602C2FEXXXX"
+  at: 10
+- name: TULV1
   pattern: "B9A4D7400602C2FEXXXX"
   at: 8
 - name: TULV1
@@ -3003,6 +3245,12 @@ mapsigs:
   pattern: "E6FEXXXXC2FF6089"
 - name: ZKWLAFWL
   pattern: "9A4E4620D7400602C2FCXXXX"
+  at: 10
+- name: ZKWLAFWL
+  pattern: "9A4E46C0D7400602C2FCXXXX"
+  at: 10
+- name: ZKWLAFWL
+  pattern: "9A4E4630D7400602C2FCXXXX"
   at: 10
 - name: ZKWLAFWL
   pattern: "43FAXXXX8D1AAE31"
@@ -3032,9 +3280,17 @@ mapsigs:
   pattern: "C2F4XXXX68423D0D9A53"
   add: 6
 - name: FBSTABGM
-  pattern: "E6FCXXXXE6FDXXXXD740E100F2FE6C0B"
+  pattern: "E6FCXXXXE6FDXXXXD740E100F2FE[6C/EC]0B"
   frame: true
   add: 10
+  cols: 4
+  xbits: 16
+- name: FBSTABGM
+  pattern: "E6FCXXXXE6FDXXXXD740E100F2FE360B"
+  frame: true
+  add: 10
+  cols: 4
+  xbits: 16
 - name: KFLF
   pattern: "7408DB008890C2F49E8806F480018840E6FCXXXX"
   at: 18
@@ -3045,18 +3301,37 @@ mapsigs:
   at: 12
   frame: true
   add: 3
+  cols: 2
+- name: NDLDRAPU
+  pattern: "0400D740E100F6F4000CE6FCXXXX"
+  at: 12
+  frame: true
+  add: 3
+  cols: 2
 - name: NLDIAPU
   pattern: "B980E6FCXXXXE6FDXXXXD740E100C2FE6108"
   at: 4
   frame: true
   add: 3
+- name: NLDIAPU
+  pattern: "B980E6FCXXXXE6FDXXXXD740E100C2FE6508"
+  at: 4
+  frame: true
+  add: 3
 - name: DLAMTANS
-  pattern: "5C548840C2F4448A8840E6F4XXXX"
+  pattern: "5C548840C2F4XX8A8840E6F4XXXX"
   at: 12
   frame: true
   cols: 4
 - name: FBSTABGM
   pattern: "30A0D740E100F6F4080BE6FCXXXX"
+  at: 12
+  frame: true
+  add: 10
+  cols: 4
+  xbits: 16
+- name: FBSTABGM
+  pattern: "58A0D740E100F6F4F80AE6FCXXXX"
   at: 12
   frame: true
   add: 10
@@ -3075,15 +3350,39 @@ mapsigs:
   frame: true
   add: 15
   cols: 14
+- name: FWFTBRTA
+  pattern: "318AD740E100F7F86A08E6FCXXXX"
+  at: 12
+  frame: true
+  add: 15
+  cols: 14
+- name: FWFTBRTA
+  pattern: "5F8AD740E100F7F86808E6FCXXXX"
+  at: 12
+  frame: true
+  add: 15
+  cols: 14
+- name: FWFTBRTA
+  pattern: "678AD740E100F7F86C08E6FCXXXX"
+  at: 12
+  frame: true
+  add: 15
+  cols: 14
+- name: FWFTBRTA
+  pattern: "F7F87008E6FCXXXX"
+  at: 6
+  frame: true
+  add: 15
+  cols: 14
 - name: KFDLULS
-  pattern: "F079E6FCXXXXE6FDXXXXC2FE9CF8"
+  pattern: "F079E6FCXXXXE6FDXXXXC2FE9XF8"
   at: 4
   frame: true
   add: 18
   cols: 8
   rows: 8
 - name: KFFWTBR
-  pattern: "700ADB00889088808870E6FCXXXX"
+  pattern: "XX0ADB00889088808870E6FCXXXX"
   at: 12
   frame: true
   add: 20
@@ -3091,6 +3390,13 @@ mapsigs:
   rows: 10
 - name: KFLDRXO
   pattern: "CEB98AF55300E6FCXXXX"
+  at: 8
+  frame: true
+  add: 14
+  cols: 4
+  rows: 8
+- name: KFLDRXO
+  pattern: "D8B98AF55300E6FCXXXX"
   at: 8
   frame: true
   add: 14
@@ -3111,8 +3417,38 @@ mapsigs:
   rows: 16
   xbits: 16
   ybits: 16
+- name: KFMIRL
+  pattern: "0C9FE6FCXXXXF2FD"
+  at: 4
+  add: 68
+  cols: 16
+  rows: 16
+  xbits: 16
+  ybits: 16
+- name: KFMIRL
+  pattern: "C09FE6FCXXXXF2FD"
+  at: 4
+  add: 68
+  cols: 16
+  rows: 16
+  xbits: 16
+  ybits: 16
 - name: KFVPDKLD
-  pattern: "E10CE6FCXXXXE6FDXXXXC2FE9CF8"
+  pattern: "E10CE6FCXXXXE6FDXXXXC2FE9XF8"
+  at: 4
+  frame: true
+  add: 24
+  cols: 12
+  rows: 10
+- name: KFVPDKLD
+  pattern: "9CA4E6FCXXXXE6FDXXXXC2FE9CF8"
+  at: 4
+  frame: true
+  add: 24
+  cols: 12
+  rows: 10
+- name: KFVPDKLD
+  pattern: "B6A4E6FCXXXXE6FDXXXXC2FEA2F8"
   at: 4
   frame: true
   add: 24
@@ -3125,14 +3461,21 @@ mapsigs:
   cols: 6
   rows: 15
   xbits: 16
+- name: LAMFA
+  pattern: "800DE6FE0702D7400702C2FFXXXX"
+  at: 12
+  add: 29
+  cols: 6
+  rows: 15
+  xbits: 16
 - name: NDLDRAPU
-  pattern: "1600E6FCXXXXE6FDXXXXD740E100C2FE5F08"
+  pattern: "1600E6FCXXXXE6FDXXXXD740E100C2FEXX08"
   at: 4
   frame: true
   add: 3
   cols: 2
 - name: NLDIAPU
-  pattern: "0100E6FCXXXXE6FDXXXXD740E100C2FE5F08"
+  pattern: "0100E6FCXXXXE6FDXXXXD740E100C2FEXX08"
   at: 4
   frame: true
   add: 3
@@ -3159,6 +3502,20 @@ mapsigs:
   add: 14
   cols: 4
   rows: 8
+- name: KFLDRXO
+  pattern: "5300E6FCXXXXE6FDXXXXC2FEA2F8"
+  at: 4
+  frame: true
+  add: 14
+  cols: 4
+  rows: 8
+- name: KFLDRXO
+  pattern: "3600E6FCXXXXE6FDXXXXC2FE9EF8"
+  at: 4
+  frame: true
+  add: 14
+  cols: 4
+  rows: 8
 - name: KFMIZUFIL
   pattern: "E10CE6FCXXXXE6FD8E00"
   at: 4
@@ -3168,6 +3525,9 @@ mapsigs:
   pattern: "C2F5XXXX2045C2F5B3F94054CD05"
 - name: MDIMX
   pattern: "4DF847F8FF003D05F3FAXXXX"
+  at: 10
+- name: MDIMX
+  pattern: "53F847F8FF003D05F3FAXXXX"
   at: 10
 - name: TEMINVA
   pattern: "0390F2FEXXXX0D02"

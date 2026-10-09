@@ -6,6 +6,7 @@ tiers:
   A:
     - 22N
     - 1.8T
+    - 1.8T-CM
   B:
     - 4Z7
     - 4Z7-like

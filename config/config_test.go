@@ -54,7 +54,7 @@ func TestShippedNeedles(t *testing.T) {
 	if strings.Contains(string(b), "function:") {
 		t.Fatal("function is the list, not a field")
 	}
-	if len(ns) != 63 {
+	if len(ns) != 64 {
 		t.Fatalf("needles %d", len(ns))
 	}
 	if ns[0].Name != "slow_init_table" {

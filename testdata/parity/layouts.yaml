@@ -5,8 +5,9 @@
 # string when the image carries no software number.
 #
 # The blocks come from which variant of each needle hits. A near match stays in
-# the block: F with K and Q, the 4Z7 T with S, AA, and R, LP, CB, and CM with
-# HF and HS, and 06A906032S and 4B0906018Q with A and B.
+# the block: F with K and Q, the 4Z7 T with S, AA, and R, LP and CB with HF and
+# HS, and 06A906032S and 4B0906018Q with A and B. 1.8T-CM is the 1.8T code
+# without maps its DAMOS export does not have.
 # datasets.yaml is a different grouping: calibration contents, not code.
 22m:
   - "1037354145"
@@ -24,6 +25,7 @@
   - "1037369096"
   - "1037369097"
 4Z7-like:
+  - "1037369044"
   - "1037369307"
   - "1037371702"
 1.8T:
@@ -31,6 +33,8 @@
   - "1037363355"
   - "1037366194"
   - "1037366473"
+  - "1037368002"
+1.8T-CM:
   - "1037378160"
 selector-sub:
   - "1037352738"

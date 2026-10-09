@@ -8,6 +8,24 @@ absent:
   # and the 8D0907551H hand XDF does not have it.
   22N:
     - KFVPLGU
+  # Not in the 4B0906018CM DAMOS export.
+  1.8T-CM:
+    - CDLSHV
+    - CLAHSHE2
+    - CLALSH2
+    - CLRHK
+    - CLRHKA
+    - CLRKA
+    - DLBTS
+    - KFLAFWL
+    - KFLAMKR
+    - KFLBTS_0_A
+    - KFVPLGU
+    - NLLM
+    - RLSALULL
+    - RLSALUN
+    - SNM16OPUW
+    - TABGSS2
   # Not in the 06A906032HF DAMOS export.
   1.8T:
     - CDLSHV
@@ -18,10 +36,18 @@ absent:
     - CLRKA
     - DLBTS
     - FKHABMN
+    # Not in the LP or NL code. Both go from the boost loads straight to
+    # KFVPDKLD, where HF calls KFDLULS in between. No DAMOS export for
+    # either. To do: look for it by hand in WinOLS.
+    - KFDLULS
     - KFLBTS_0_A
     - KFMIZUNS
     - KFVPLGU
     - NLLM
     - RLSALULL
     - RLSALUN
+    # The HF DAMOS export lists it at 0x130A6, the count word, and the
+    # finder stores 0x130A8. To do: look for it by hand in WinOLS and
+    # confirm.
+    - SNM16OPUW
     - TABGSS2
