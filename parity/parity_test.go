@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 	"testing"
 
 	"go.nyet.org/me7-logger/internal/ecucorpus"
@@ -252,7 +253,7 @@ func TestReportText(t *testing.T) {
 		Extras: []Image{{Name: "a.bin", Fraction: Fraction{1, 4}}},
 		S4Wiki: []Image{
 			{
-				Name: "a.bin", Fraction: Fraction{1, 2},
+				Name: "a.bin", Fraction: Fraction{1, 2}, Tier: "S",
 				Axis: Fraction{1, 2}, Confidence: Fraction{1, 1},
 			},
 			{Name: "bb.bin", Fraction: Fraction{0, 2}},
@@ -264,14 +265,29 @@ func TestReportText(t *testing.T) {
 		"ecu me7info   vs ecu-specific     vs corpus       extras\n" +
 		"  a          1/2 (+3)   50.0%  2/10   20.0%  1/4   25.0%\n" +
 		"\n" +
-		"xdf s4wiki                       axis   confidence\n" +
-		"  a          1/2   50.0%  1/2   50.0%  1/1  100.0%\n" +
-		"  bb         0/2    0.0%  0/0    0.0%             \n" +
+		"xdf s4wiki                tier         axis   confidence\n" +
+		"  a          1/2   50.0%  S     1/2   50.0%  1/1  100.0%\n" +
+		"  bb         0/2    0.0%        0/0    0.0%             \n" +
 		"\n" +
 		"xdf                              axis\n" +
 		"  a          0/3    0.0%  1/4   25.0%\n"
 	if got != want {
 		t.Fatalf("got\n%s\nwant\n%s", got, want)
+	}
+}
+
+func TestNameGrade(t *testing.T) {
+	tierOf := map[string]string{"s": "S", "a": "A", "b": "B", "c": "C", "d": "D"}
+	for _, tc := range []struct {
+		hit  string
+		want string
+	}{
+		{"sabcd", "S"}, {"sabc", "A"}, {"sab", "B"}, {"sa", "C"}, {"s", "D"}, {"abcd", "-"}, {"sbcd", "D"},
+	} {
+		got := nameGrade(tierOf, func(n string) bool { return strings.Contains(tc.hit, n) })
+		if got != tc.want {
+			t.Errorf("hit %q: %s, want %s", tc.hit, got, tc.want)
+		}
 	}
 }
 
@@ -320,7 +336,7 @@ func TestLayoutBlocks(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := loadLayoutTiers(dir); err != nil {
+	if _, err := loadLayoutTiers(dir, blocks); err != nil {
 		t.Fatal(err)
 	}
 

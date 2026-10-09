@@ -1,0 +1,21 @@
+# Names a code layout block (layouts.yaml) does not have. Only a DAMOS export
+# that omits the name is evidence. An image in that block counts the name as
+# hit for the tier grade. It still misses in the s4wiki count.
+absent:
+  # Not in the 06A906032HF DAMOS export.
+  1.8T:
+    - CDLSHV
+    - CLAHSHE2
+    - CLALSH2
+    - CLRHK
+    - CLRHKA
+    - CLRKA
+    - DLBTS
+    - FKHABMN
+    - KFLBTS_0_A
+    - KFMIZUNS
+    - KFVPLGU
+    - NLLM
+    - RLSALULL
+    - RLSALUN
+    - TABGSS2

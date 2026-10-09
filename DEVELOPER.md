@@ -199,6 +199,10 @@ A `*-priority.yaml` file is a `tiers` map. The tiers are `S`, `A`, `B`, `C`, and
 
 `xdf/s4wiki/names-priority.yaml` puts every name on that list in one finder tier. It is opinion and does not change a score. Parity fails when a name is missing, repeated, or not on the list.
 
+`xdf/s4wiki/absent.yaml` lists, per block in `layouts.yaml`, the names that layout does not have. Only a DAMOS export that omits the name is evidence. Parity fails on an unknown block or a name not on the list. An absent name still misses in the count.
+
+The `tier` grade is the number of tiers complete, counted from S. A tier is complete when each of its names hits or is absent on that image's block. All five tiers complete is `S`. Then `A` is S through C, `B` is S through B, `C` is S and A, and `D` is S only. When S is incomplete the grade is `-`.
+
 A name hits when the locator stores one address and an axis. A count of 0 on that list is a scalar, so the address alone is the hit. Any other body with no axis is a miss. When `xdf/<image>.xdf` contains the name, the body address has to match one row of that file. A DAMOS export lists a map whose axes are stored in front of the body with no axis addresses, at the count header in front of the first axis. That row also matches.
 
 The number on the list is how many axes the table has, and those counts are the `axis` column. A count of 0 adds nothing. The denominator is 0 only when every map that hit has a count of 0. A count of 1 is a curve and 2 is a map. A hit on that column is the axis present on the map.
@@ -233,7 +237,7 @@ Peers are the images grouped in `testdata/parity/datasets.yaml`. A shared axis d
 The report sections are:
 
 - `ecu me7info` is the legacy file, then a count of catalog names that file does not name, then that image against the full catalog. The `extras` column is the measurement list on that image. The torque scale is the `torque` conversion in `config/names.yaml`.
-- `xdf s4wiki` is the shared name list, then its `axis` column, then `confidence`.
+- `xdf s4wiki` is the shared name list, then its `tier` grade, its `axis` column, and `confidence`.
 - `xdf` is every body in the per-image address file. Its `axis` column is every axis in that file.
 
 Every section lists images by the tier of the image's block in `layouts-priority.yaml`, then by name. An image in no block sorts last.

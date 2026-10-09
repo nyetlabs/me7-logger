@@ -46,7 +46,8 @@ type Report struct {
 // Image is one binary scored against one oracle.
 // Beyond is the count of catalog names located on this image that its
 // ME7Info file does not name. Corpus is that image against the full catalog.
-// Both are set only on ME7Info rows. Axis and Confidence are set on S4Wiki rows.
+// Both are set only on ME7Info rows. Tier, Axis, and Confidence are set on
+// S4Wiki rows. Tier is the nameGrade of the image.
 // Every list is sorted by the layout block tier of its image in
 // layouts-priority.yaml, then by name.
 type Image struct {
@@ -54,6 +55,7 @@ type Image struct {
 	Fraction
 	Beyond     int
 	Corpus     Fraction
+	Tier       string
 	Axis       Fraction
 	Confidence Fraction
 }
@@ -89,6 +91,7 @@ func (r *Report) Text() string {
 		label   string
 		frac    Fraction
 		corpus  Fraction
+		tier    string
 		axis    Fraction
 		conf    Fraction
 		extras  Fraction
@@ -119,7 +122,7 @@ func (r *Report) Text() string {
 		lines = append(lines, line{label: "xdf s4wiki", head: true, wiki: true})
 		for _, im := range r.S4Wiki {
 			lines = append(lines, line{
-				label: "  " + stemName(im.Name), frac: im.Fraction,
+				label: "  " + stemName(im.Name), frac: im.Fraction, tier: im.Tier,
 				axis: im.Axis, conf: im.Confidence, wiki: true,
 			})
 		}
@@ -201,14 +204,16 @@ func (r *Report) Text() string {
 		case ln.label == "":
 			b.WriteByte('\n')
 		case ln.head && ln.wiki:
-			// count, gap, percent, gap, then the same pair for axis and confidence.
+			// count, gap, percent, gap, tier, gap, then the same pair for axis and confidence.
 			mainSpan := 6 + 2 + countW
-			axisStart := nameW + 2 + mainSpan + 2
+			tierStart := nameW + 2 + mainSpan + 2
+			axisStart := tierStart + len("tier") + 2
 			axisSpan := 6 + 2 + axisW
 			confStart := axisStart + axisSpan + 2
 			confSpan := 6 + 2 + confW
 			hdr := []byte(strings.Repeat(" ", confStart+confSpan))
 			copy(hdr, ln.label)
+			copy(hdr[tierStart:], "tier")
 			copy(hdr[axisStart+axisSpan-len("axis"):], "axis")
 			copy(hdr[confStart+confSpan-len("confidence"):], "confidence")
 			b.Write(hdr)
@@ -256,8 +261,8 @@ func (r *Report) Text() string {
 			if ln.conf.Total > 0 {
 				confPct = ln.conf.percent()
 			}
-			fmt.Fprintf(&b, "%-*s  %*s  %6s  %*s  %6s  %*s  %6s\n",
-				nameW, ln.label, countW, counts[i], ln.frac.percent(),
+			fmt.Fprintf(&b, "%-*s  %*s  %6s  %-4s  %*s  %6s  %*s  %6s\n",
+				nameW, ln.label, countW, counts[i], ln.frac.percent(), ln.tier,
 				axisW, axes[i], ln.axis.percent(), confW, confs[i], confPct)
 		case ln.xdf:
 			fmt.Fprintf(&b, "%-*s  %*s  %6s  %*s  %6s\n",
@@ -325,13 +330,23 @@ func run(dir string, images []string, gen imageGen) (*Report, error) {
 	if err != nil {
 		return nil, err
 	}
-	if _, err := loadNamesPriority(dir, axes); err != nil {
-		return nil, err
-	}
-	layout, err := loadLayoutTiers(dir)
+	ntier, err := loadNamesPriority(dir, axes)
 	if err != nil {
 		return nil, err
 	}
+	blocks, err := loadBlocks(dir)
+	if err != nil {
+		return nil, err
+	}
+	layout, err := loadLayoutTiers(dir, blocks)
+	if err != nil {
+		return nil, err
+	}
+	absent, err := loadAbsent(dir, blocks, ntier)
+	if err != nil {
+		return nil, err
+	}
+	block := blockOf(blocks)
 	tierOf := map[string]string{}
 	rep := &Report{}
 	type kept struct {
@@ -371,8 +386,13 @@ func run(dir string, images []string, gen imageGen) (*Report, error) {
 		}
 		if len(wiki) > 0 {
 			scored := wikiMaps(wiki, axes, maps, oracle)
+			gone := absent[block[layoutID(img)]]
 			rep.S4Wiki = append(rep.S4Wiki, Image{
 				Name: base, Fraction: countScored(wiki, scored),
+				Tier: nameGrade(ntier, func(n string) bool {
+					_, ok := scored[n]
+					return ok || gone[n]
+				}),
 				Axis: scoreAxes(scored, axes),
 			})
 			held = append(held, kept{base: base, stem: stem, img: img, maps: maps, oracle: oracle})
@@ -651,22 +671,85 @@ func loadBlocks(dir string) (map[string][]string, error) {
 }
 
 // loadLayoutTiers maps each layout id to the tier of its block in layouts-priority.yaml.
-func loadLayoutTiers(dir string) (map[string]string, error) {
-	blocks, err := loadBlocks(dir)
-	if err != nil || blocks == nil {
-		return nil, err
+func loadLayoutTiers(dir string, blocks map[string][]string) (map[string]string, error) {
+	if blocks == nil {
+		return nil, nil
 	}
 	tiers, err := loadTiers(filepath.Join(dir, "layouts-priority.yaml"), blocks)
 	if err != nil {
 		return nil, err
 	}
 	out := map[string]string{}
+	for id, block := range blockOf(blocks) {
+		out[id] = tiers[block]
+	}
+	return out, nil
+}
+
+// blockOf maps each layout id to its block.
+func blockOf(blocks map[string][]string) map[string]string {
+	out := map[string]string{}
 	for block, ids := range blocks {
 		for _, id := range ids {
-			out[id] = tiers[block]
+			out[id] = block
+		}
+	}
+	return out
+}
+
+// loadAbsent reads xdf/s4wiki/absent.yaml: the s4wiki names each layout
+// block does not have. A missing file returns nil.
+func loadAbsent(dir string, blocks map[string][]string, names map[string]string) (map[string]map[string]bool, error) {
+	b, err := os.ReadFile(filepath.Join(dir, "xdf", "s4wiki", "absent.yaml"))
+	if os.IsNotExist(err) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	var doc struct {
+		Absent map[string][]string `yaml:"absent"`
+	}
+	if err := yaml.Unmarshal(b, &doc); err != nil {
+		return nil, fmt.Errorf("absent.yaml: %w", err)
+	}
+	out := map[string]map[string]bool{}
+	for block, list := range doc.Absent {
+		if _, ok := blocks[block]; !ok {
+			return nil, fmt.Errorf("absent.yaml: %s is not a block in layouts.yaml", block)
+		}
+		out[block] = map[string]bool{}
+		for _, n := range list {
+			if _, ok := names[n]; !ok {
+				return nil, fmt.Errorf("absent.yaml: %s is not an s4wiki name", n)
+			}
+			out[block][n] = true
 		}
 	}
 	return out, nil
+}
+
+// nameGrade is S when every name tier is complete, then A through D as fewer
+// tiers counted from S are complete, and "-" when S is not. A tier is
+// complete when each of its names is hit or absent.
+func nameGrade(tierOf map[string]string, hit func(string) bool) string {
+	done := map[string]bool{}
+	for _, t := range tierOrder {
+		done[t] = true
+	}
+	for n, t := range tierOf {
+		if !hit(n) {
+			done[t] = false
+		}
+	}
+	k := 0
+	for k < len(tierOrder) && done[tierOrder[k]] {
+		k++
+	}
+	if k == 0 {
+		return "-"
+	}
+	return tierOrder[len(tierOrder)-k]
 }
 
 // tierRank is the index of label in tierOrder. No tier sorts last.
