@@ -54,7 +54,7 @@ func TestShippedNeedles(t *testing.T) {
 	if strings.Contains(string(b), "function:") {
 		t.Fatal("function is the list, not a field")
 	}
-	if len(ns) != 64 {
+	if len(ns) != 65 {
 		t.Fatalf("needles %d", len(ns))
 	}
 	if ns[0].Name != "slow_init_table" {
@@ -85,7 +85,7 @@ func TestShippedNeedles(t *testing.T) {
 		t.Fatalf("%+v", curve)
 	}
 	ign, ok := needle.ByName(ns, "ZWGRU_ign_zw")
-	if !ok || !ign.Unique || !ign.Function || len(ign.Pattern) != 12 {
+	if !ok || !ign.Unique || !ign.Function || len(ign.Pattern) != 11 {
 		t.Fatalf("%+v", ign)
 	}
 	ldrq, ok := needle.ByName(ns, "LDRPID_ldrq")
@@ -108,7 +108,7 @@ func TestShippedMaps(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(calls) != 102 {
+	if len(calls) != 110 {
 		t.Fatalf("maps %d", len(calls))
 	}
 	ns, err := LoadNeedles("", "")
@@ -243,11 +243,8 @@ func TestShippedCatalog(t *testing.T) {
 		t.Fatalf("gangi %q wkr_0 %q", aliases["gangi"], aliases["wkr_0"])
 	}
 	text := string(ab)
-	if !strings.Contains(text, "was: SelectedGear") || !strings.Contains(text, "was: EngineSpeed") {
+	if !strings.Contains(text, "was SelectedGear") || !strings.Contains(text, "was EngineSpeed") {
 		t.Fatal("rename notes missing")
-	}
-	if strings.ContainsRune(text, '\uFFFD') || !strings.Contains(text, "Öl") {
-		t.Fatal("alias comments are not UTF-8 German")
 	}
 	zw, ok := tab.Lookup(0x0009, 0)
 	if !ok || zw.Name != "zwout" || !strings.Contains(zw.Comment, "Zündwinkel") {

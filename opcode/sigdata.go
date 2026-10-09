@@ -111,31 +111,34 @@ type sigFile struct {
 	Calls map[string]map[string]string `yaml:"calls"`
 }
 
+// mapSigDraft is one mapsig row. A pattern list is that many consecutive
+// rows that differ only in pattern.
 type mapSigDraft struct {
-	Name     string `yaml:"name"`
-	Pattern  string `yaml:"pattern"`
-	At       *int   `yaml:"at"`
-	Add      *int   `yaml:"add"`
-	Anchor   string `yaml:"anchor"`
-	Rows     int    `yaml:"rows"`
-	Cols     int    `yaml:"cols"`
-	XBits    int    `yaml:"xbits"`
-	YBits    int    `yaml:"ybits"`
-	XAt      *int   `yaml:"xat"`
-	YAt      *int   `yaml:"yat"`
-	Table    bool   `yaml:"table"`
-	XTable   string `yaml:"xtable"`
-	YTable   string `yaml:"ytable"`
-	Plain    bool   `yaml:"plain"`
-	Open     string `yaml:"open"`
-	First    bool   `yaml:"first"`
-	From     string `yaml:"from"`
-	Single   bool   `yaml:"single"`
-	Frame    bool   `yaml:"frame"`
-	Far      bool   `yaml:"far"`
-	Deref    int    `yaml:"deref"`
-	DerefAt  int    `yaml:"derefat"`
-	DerefFar bool   `yaml:"dereffar"`
+	Name     string  `yaml:"name"`
+	Patterns sigPats `yaml:"pattern"`
+	Pattern  string  `yaml:"-"`
+	At       *int    `yaml:"at"`
+	Add      *int    `yaml:"add"`
+	Anchor   string  `yaml:"anchor"`
+	Rows     int     `yaml:"rows"`
+	Cols     int     `yaml:"cols"`
+	XBits    int     `yaml:"xbits"`
+	YBits    int     `yaml:"ybits"`
+	XAt      *int    `yaml:"xat"`
+	YAt      *int    `yaml:"yat"`
+	Table    bool    `yaml:"table"`
+	XTable   string  `yaml:"xtable"`
+	YTable   string  `yaml:"ytable"`
+	Plain    bool    `yaml:"plain"`
+	Open     string  `yaml:"open"`
+	First    bool    `yaml:"first"`
+	From     string  `yaml:"from"`
+	Single   bool    `yaml:"single"`
+	Frame    bool    `yaml:"frame"`
+	Far      bool    `yaml:"far"`
+	Deref    int     `yaml:"deref"`
+	DerefAt  int     `yaml:"derefat"`
+	DerefFar bool    `yaml:"dereffar"`
 	Also     []struct {
 		Name string `yaml:"name"`
 		Add  int    `yaml:"add"`
@@ -263,8 +266,18 @@ func ParseSigs(b []byte) (SigDoc, error) {
 		}
 		doc.Rows = append(doc.Rows, row)
 	}
+	var maps []mapSigDraft
+	for _, d := range raw.Maps {
+		if len(d.Patterns.items) == 0 {
+			maps = append(maps, d)
+		}
+		for _, pat := range d.Patterns.items {
+			d.Pattern = pat
+			maps = append(maps, d)
+		}
+	}
 	seen := map[string]struct{}{}
-	for i, d := range raw.Maps {
+	for i, d := range maps {
 		if d.Name == "" || (d.Pattern == "" && d.Anchor == "") || (d.Pattern != "" && d.Anchor != "") {
 			return SigDoc{}, fmt.Errorf("mapsig %d: name and either a pattern or an anchor are required", i+1)
 		}

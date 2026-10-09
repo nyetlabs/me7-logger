@@ -45,13 +45,13 @@ maps:
   interp: map_interp_table8
 - name: KFDMDARO
   caller: ARMD_kfdmd
-  at: ['0x1D4', '0x1EA']
+  at: ['0x1D4', '0x1EA', '0x1C8']
   interp: map_interp_table16_page
   rows: 6
   ytable: SGA06MDUB
 - name: KFDMDADP
   caller: ARMD_kfdmd
-  at: ['0x224', '0x23A']
+  at: ['0x224', '0x23A', '0x218']
   interp: map_interp_table16_page
   rows: 6
   ytable: SGA06MDUB
@@ -133,27 +133,27 @@ maps:
   interp: map_interp_table8_page
 - name: KFFLLDE
   caller: LDRLMX_ldhbn
-  at: ['0x148', '0x1D4', '0x174']
+  at: ['0x148', '0x1D4', '0x174', '0x13C']
   interp: map_interp_table16_page
 - name: KFTARXZK
   caller: LDRLMX_ldhbn
-  at: ['0x244', '0x2AA']
+  at: ['0x244', '0x2AA', '0x238']
   interp: map_interp_table16_page
 - name: KFTARX
   caller: LDRLMX_ldhbn
-  at: ['0x26C', '0x2D2']
+  at: ['0x26C', '0x2D2', '0x260']
   interp: map_interp_table16_page
 - name: KFLDHBN
   caller: LDRLMX_ldhbn
-  at: '0x2F8'
+  at: ['0x2F8', '0x2EC']
   interp: map_interp_table8_page
 - name: LDPBN
   caller: LDRLMX_ldhbn
-  at: ['0x334', '0x49C', '0x3D0']
+  at: ['0x334', '0x49C', '0x3D0', '0x328']
   interp: map_interp_curve8
 - name: LDORXN
   caller: LDRLMX_ldhbn
-  at: ['0x42C', '0x5C0', '0x4C8']
+  at: ['0x42C', '0x5C0', '0x4C8', '0x428']
   interp: map_interp_curve8
 - name: KFWPLGTA
   caller: LDRPID_ldiopu

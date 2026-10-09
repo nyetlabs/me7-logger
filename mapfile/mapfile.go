@@ -117,16 +117,21 @@ func Parse(b []byte, name string, scales map[ScaleKey]Scale, named map[string]Ro
 	}
 	t := Table{ByRT: map[int]map[uint16]Var{}, ByName: map[string]Var{}}
 	for i, r := range raw.Variables {
-		v, err := r.varRow(scales, named)
-		if err != nil {
-			return Table{}, fmt.Errorf("%s: row %d: %w", name, i+1, err)
+		if len(r.RT) == 0 {
+			return Table{}, fmt.Errorf("%s: row %d: %s: missing rt", name, i+1, r.Name)
 		}
-		if t.ByRT[v.ResultType] == nil {
-			t.ByRT[v.ResultType] = map[uint16]Var{}
-		}
-		t.ByRT[v.ResultType][v.Bitmask] = v
-		if _, ok := t.ByName[v.Name]; !ok {
-			t.ByName[v.Name] = v
+		for _, key := range r.RT {
+			v, err := r.varRow(key, scales, named)
+			if err != nil {
+				return Table{}, fmt.Errorf("%s: row %d: %w", name, i+1, err)
+			}
+			if t.ByRT[v.ResultType] == nil {
+				t.ByRT[v.ResultType] = map[uint16]Var{}
+			}
+			t.ByRT[v.ResultType][v.Bitmask] = v
+			if _, ok := t.ByName[v.Name]; !ok {
+				t.ByName[v.Name] = v
+			}
 		}
 	}
 	if len(t.ByRT) == 0 {
@@ -135,9 +140,10 @@ func Parse(b []byte, name string, scales map[ScaleKey]Scale, named map[string]Ro
 	return t, nil
 }
 
+// catalogRow is one name at one or more result types. Each rt entry is a
+// result type, or result type/bitmask for a bit row.
 type catalogRow struct {
-	RT      string     `yaml:"rt"`
-	Bitmask string     `yaml:"bitmask"`
+	RT      oneOrMore  `yaml:"rt"`
 	Name    string     `yaml:"name"`
 	Scale   string     `yaml:"scale"`
 	Size    *int       `yaml:"size"`
@@ -219,20 +225,34 @@ func (f *flexFloat) UnmarshalYAML(n *yaml.Node) error {
 	return nil
 }
 
-func (r catalogRow) varRow(scales map[ScaleKey]Scale, named map[string]RowScale) (Var, error) {
+// oneOrMore is a scalar or a list of scalars.
+type oneOrMore []string
+
+func (o *oneOrMore) UnmarshalYAML(n *yaml.Node) error {
+	if n.Kind == yaml.ScalarNode {
+		*o = []string{n.Value}
+		return nil
+	}
+	var l []string
+	if err := n.Decode(&l); err != nil {
+		return err
+	}
+	*o = l
+	return nil
+}
+
+func (r catalogRow) varRow(key string, scales map[ScaleKey]Scale, named map[string]RowScale) (Var, error) {
 	if strings.TrimSpace(r.Name) == "" {
 		return Var{}, fmt.Errorf("missing name")
 	}
-	if strings.TrimSpace(r.RT) == "" {
-		return Var{}, fmt.Errorf("%s: missing rt", r.Name)
-	}
-	rt, err := ParseUint(r.RT)
+	rts, masks, _ := strings.Cut(key, "/")
+	rt, err := ParseUint(rts)
 	if err != nil {
 		return Var{}, fmt.Errorf("%s rt: %w", r.Name, err)
 	}
 	var mask uint64
-	if strings.TrimSpace(r.Bitmask) != "" {
-		mask, err = ParseUint(r.Bitmask)
+	if strings.TrimSpace(masks) != "" {
+		mask, err = ParseUint(masks)
 		if err != nil {
 			return Var{}, fmt.Errorf("%s bitmask: %w", r.Name, err)
 		}
@@ -326,28 +346,23 @@ func Aliases(path string) (map[string]string, error) {
 	return ParseAliases(b)
 }
 
-// ParseAliases parses alias YAML. A row with an empty alias is omitted.
+// ParseAliases parses an aliases map of name to alias. An empty alias is omitted.
 func ParseAliases(b []byte) (map[string]string, error) {
 	var raw struct {
-		Aliases []struct {
-			Name  string `yaml:"name"`
-			Alias string `yaml:"alias"`
-		} `yaml:"aliases"`
+		Aliases map[string]string `yaml:"aliases"`
 	}
 	if err := yaml.Unmarshal(b, &raw); err != nil {
 		return nil, err
 	}
 	out := map[string]string{}
-	for i, r := range raw.Aliases {
-		name := strings.TrimSpace(r.Name)
+	for name, alias := range raw.Aliases {
+		name, alias = strings.TrimSpace(name), strings.TrimSpace(alias)
 		if name == "" {
-			return nil, fmt.Errorf("alias row %d: missing name", i+1)
+			return nil, fmt.Errorf("alias %q: missing name", alias)
 		}
-		alias := strings.TrimSpace(r.Alias)
-		if alias == "" {
-			continue
+		if alias != "" {
+			out[name] = alias
 		}
-		out[name] = alias
 	}
 	return out, nil
 }

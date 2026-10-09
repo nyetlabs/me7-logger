@@ -11,7 +11,6 @@ func TestLoadFixture(t *testing.T) {
 	path := dir + "/m.yaml"
 	body := `variables:
 - rt: "0x0001"
-  bitmask: "0x00"
   name: nmot
   size: 0
   unit: rpm
@@ -21,7 +20,6 @@ func TestLoadFixture(t *testing.T) {
   offset: 0
   comment: speed
 - rt: "0x0005"
-  bitmask: "0x00"
   name: te_w
   size: 0
   unit: ms
@@ -56,6 +54,16 @@ func TestLoadFixture(t *testing.T) {
 	if !ok || v.A != 0 {
 		t.Fatalf("zero %+v", v)
 	}
+	bits, err := Parse([]byte("variables:\n- {rt: [0x000D/0x80, 0x008E/0x10], name: fcmEnd}\n"), "t", nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if v, ok := bits.Lookup(0x8E, 0x10); !ok || v.Name != "fcmEnd" || v.Bitmask != 0x10 {
+		t.Fatalf("bit list %+v", v)
+	}
+	if _, ok := bits.Lookup(0x0D, 0x80); !ok {
+		t.Fatal("first rt of the list missing")
+	}
 	ratio, err := Parse([]byte("variables:\n- rt: \"0x0020\"\n  name: word\n  factor: 2/0x10000\n- rt: \"0x0021\"\n  name: sixteen\n  factor: 16/0x10000\n- rt: \"0x0022\"\n  name: three\n  factor: -3/4\n"), "t", nil, nil)
 	if err != nil {
 		t.Fatal(err)
@@ -73,7 +81,7 @@ func TestLoadFixture(t *testing.T) {
 		t.Fatalf("three %+v", v)
 	}
 	alias := dir + "/a.yaml"
-	if err := os.WriteFile(alias, []byte("aliases:\n- name: nmot\n  alias: EngineSpeed\n  comment: speed\n- name: abo\n  comment: x\n"), 0o644); err != nil {
+	if err := os.WriteFile(alias, []byte("aliases:\n  nmot: EngineSpeed\n  abo: \"\"\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	a, err := Aliases(alias)

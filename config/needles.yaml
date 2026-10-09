@@ -158,14 +158,14 @@ functions:
   # "XX" is an R12 or R13 immediate, or an address that changes per image.
   - name: DWKR_dwkr
     needle_hex:
-      - "9A 04 0B 60 E6 FC XX XX"
+      - "9A 04 0B XX E6 FC XX XX E6 FD 06 02"
       - "9A 04 0B 70 E6 FC XX XX"
 
   # Ignition-timing caller. config/maps.yaml names the maps at fixed distances
   # from this label. One hit on the images that have it.
   - name: ZWGRU_ign_zw
     needles:
-      - needle_hex: "88 90 88 80 88 70 88 60 9A 58 03 00"
+      - needle_hex: "88 90 88 80 88 70 88 60 9A XX 03"
       # 22N. The jump bit differs. The maps sit at the 22m distances.
       - needle_hex: "88 90 88 80 88 70 88 60 9A 58 03 F0"
       # 23g ignition entry. The warm-up map sits in ZWGRU_ign_wl.
@@ -180,14 +180,15 @@ functions:
       - "88 90 88 80 E6 FC XX XX E6 FD E7 00 F2 FE"
 
   - name: ARMD_kfdmd
-    needle_hex:
-      - "28 04 9A 00 05 90 8A 0D"
+    needles:
+      - needle_hex: "28 04 9A 00 05 90 8A XX 03"
+        entry_after: ["DB 00"]
       # 22N pushes two registers first. The byte after 8A is 0C.
-      - "88 90 88 80 28 04 9A 00 05 90 8A 0C"
+      - needle_hex: "88 90 88 80 28 04 9A 00 05 90 8A 0C"
 
   - name: LAMBTS_kflbts
     needle_hex:
-      - "88 90 88 80 88 70 88 60 28 04 E6 FC XX XX F2 FD E8 9C"
+      - "88 90 88 80 88 70 88 60 28 04 E6 FC XX XX F2 FD XX XX DA 00 D0 71"
       - "88 90 88 80 88 70 88 60 28 04 E6 FC XX XX F2 FD EE 97"
 
   - name: MDBAS_kfmiop
@@ -204,7 +205,7 @@ functions:
   # the images that have the caller.
   - name: MDUEB_kfmped
     needles:
-      - needle_hex: "88 60 F2 F4 0C 8E 68 43 EA 30 B0 57"
+      - needle_hex: "88 60 F2 F4 XX XX 68 43 EA 30 B0 57"
       # Same entry on the 23g images. The memory operand and the jump target differ.
       - needle_hex: "88 60 F2 F4 XX XX 68 43 EA 30 B2 20"
       # 22N memory operand. The jump target matches the first pattern.
@@ -224,7 +225,7 @@ functions:
       - "88 90 88 80 88 70 88 60 D7 40 06 02 F3 FC DF 1E"
 
   - name: FUEDK_kfvplgu
-    needle_hex: "E6 FC XX XX F2 FD 8A A2 F2 FE 3C A7"
+    needle_hex: "E6 FC XX XX F2 FD XX XX F2 FE XX XX DA 00 42 76 F6 F4 XX XX F2 F5"
 
   - name: MDBAS_kfzwop
     needles:
@@ -249,7 +250,7 @@ functions:
 
   - name: LDRPID_ldiopu
     needles:
-      - needle_hex: "88 90 88 80 88 70 88 60 28 02 F2 F4 58 8F"
+      - needle_hex: "88 90 88 80 88 70 88 60 28 02 F2 F4 XX 8F"
       # 23g opens the page with D7 instead of the F2 load above.
       - needle_hex: "88 90 88 80 88 70 88 60 28 02 D7 40 06 02 F3 F8"
       # 22N reserves a larger frame. 28 XX is ambiguous on 23g.
@@ -271,7 +272,7 @@ functions:
 
   - name: LLR_nfsm
     needle_hex:
-      - "88 70 88 60 9A 02 02 80 EA 00 8A 13"
+      - "88 70 88 60 9A 02 02 XX EA 00"
       - "88 70 88 60 9A 02 02 80 EA 00 FE B5"
 
   - name: LLR_nllm
@@ -285,5 +286,5 @@ functions:
 
   - name: BGMSZS_wdkugdn
     needles:
-      - needle_hex: "28 04 F2 F4 D2 A1 F2 F5"
+      - needle_hex: "28 04 F2 F4 XX XX F2 F5 XX XX 1B 54"
       - needle_hex: "C2 F4 XX XX 88 40 F2 FC XX XX F2 FD XX XX E6 FE"

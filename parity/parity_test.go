@@ -239,7 +239,7 @@ func TestRunLayout(t *testing.T) {
 	write("b.bin", "")
 	write("ecu/me7info/a.ecu", ecu)
 	write("ecu/me7info/b.ecu", "")
-	write("names/s4wiki.yaml", "names:\n  KFZW: 2\n  LAMFA: 2\n")
+	write("names/s4wiki.yaml", "tiers:\n  D:\n    2: [KFZW, LAMFA]\n")
 	write("defs/a.json", modelJSON("damos", 3))
 	defOf := func(stem string) string {
 		if stem == "a" {
@@ -441,10 +441,9 @@ func TestLoadNames(t *testing.T) {
 		}
 	}
 	blocks := map[string][]string{"b1": {"1"}, "b2": {"2"}}
-	write("names/s4wiki.yaml", "names:\n  KFZW: 2\n  MLHFM: 0\n")
-	write("names/s4wiki-priority.yaml", "tiers:\n  D: [KFZW, MLHFM]\n")
+	write("names/s4wiki.yaml", "tiers:\n  D:\n    0: [MLHFM]\n    2: [KFZW]\n")
 	write("names/absent.yaml", "absent: {}\n")
-	write("names/cb.yaml", "block: b1\nnames:\n  MLHFM: 1\n  KRKTE: 0\n  LAMFA: 2\n")
+	write("names/cb.yaml", "block: b1\nnames:\n  0: [KRKTE]\n  1: [MLHFM]\n  2: [LAMFA]\n")
 	l, err := loadNames(dir, blocks)
 	if err != nil {
 		t.Fatal(err)
@@ -455,10 +454,19 @@ func TestLoadNames(t *testing.T) {
 	if got := l.forBlock("b2"); !slices.Equal(got, l.wiki) {
 		t.Fatalf("b2 %v", got)
 	}
-	if l.dims["MLHFM"] != 0 || l.dims["LAMFA"] != 2 {
-		t.Fatalf("dims %v", l.dims)
+	if l.dims["MLHFM"] != 0 || l.dims["LAMFA"] != 2 || l.tier["KFZW"] != "D" {
+		t.Fatalf("dims %v tier %v", l.dims, l.tier)
 	}
-	write("names/cb.yaml", "block: nope\nnames:\n  KRKTE: 0\n")
+	write("names/cb.yaml", "block: b1\nnames:\n  0: [KRKTE, KRKTE]\n")
+	if _, err := loadNames(dir, blocks); err == nil {
+		t.Fatal("repeated name accepted")
+	}
+	write("names/s4wiki.yaml", "tiers:\n  Z:\n    0: [MLHFM]\n")
+	if _, err := loadNames(dir, blocks); err == nil {
+		t.Fatal("unknown tier accepted")
+	}
+	write("names/s4wiki.yaml", "tiers:\n  D:\n    0: [MLHFM]\n")
+	write("names/cb.yaml", "block: nope\nnames:\n  0: [KRKTE]\n")
 	if _, err := loadNames(dir, blocks); err == nil {
 		t.Fatal("unknown block accepted")
 	}
@@ -490,25 +498,6 @@ func TestConfidenceSkipFile(t *testing.T) {
 		if _, ok := have[n]; !ok {
 			t.Errorf("%s is not an s4wiki name", n)
 		}
-	}
-}
-
-func TestNamesPriorityFile(t *testing.T) {
-	dir := filepath.Join("..", "testdata", "parity")
-	blocks, err := loadBlocks(dir)
-	if err != nil {
-		t.Fatal(err)
-	}
-	lists, err := loadNames(dir, blocks)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if _, err := loadNamesPriority(dir, lists.wiki); err != nil {
-		t.Fatal(err)
-	}
-	wiki := slices.DeleteFunc(slices.Clone(lists.wiki), func(n string) bool { return n == "KFZW" })
-	if _, err := loadNamesPriority(dir, wiki); err == nil {
-		t.Fatal("want an error for a name outside s4wiki.yaml")
 	}
 }
 

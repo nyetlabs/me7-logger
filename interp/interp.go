@@ -27,52 +27,66 @@ const (
 // unset until this image says what it is. An M-box size is not filled in.
 // The Bosch name is not on the needle. It comes from which caller function
 // made the call. calls names that caller slot. An empty list leaves every
-// map unnamed.
+// map unnamed. A slot whose CALLS goes to segment 0 with no needle label
+// there takes its interpolator from the slot: on some images the segment 0
+// entry is not the routine in the flash image.
 func Locate(data []byte, ns []needle.Needle, dpp [4]uint16, calls []record.Call) []record.Map {
 	var out []record.Map
 	seen := map[uint32]int{}
 	labels := map[string][]int{}
+	done := map[int]bool{}
+	add := func(call int, interp, name string) {
+		done[call] = true
+		r12, r13, r14, r15, hasR13, hasAxis, r13ram, r14ram, r15ram, hasR13Ram, hasR14Ram, hasR15Ram, setup, ok := mapArgs(data, call)
+		if !ok {
+			return
+		}
+		addr, ok := mapPtr(data, dpp, r12, r13, hasR13)
+		if !ok {
+			return
+		}
+		x, y, xOK, yOK := callAxes(data, dpp, r13, hasR13, r14, r15, hasAxis, r13ram, r14ram, r15ram, hasR13Ram, hasR14Ram, hasR15Ram, setup)
+		if i, dup := seen[addr]; dup {
+			if out[i].Name == "" && name != "" {
+				out[i].Name = name
+			}
+			if out[i].X == nil && xOK {
+				out[i].Cols = x.Count
+				out[i].X = &x
+			}
+			if out[i].Y == nil && yOK {
+				out[i].Rows = y.Count
+				out[i].Y = &y
+			}
+			return
+		}
+		m := record.Map{Name: name, Addr: addr, Comment: interp}
+		if xOK {
+			m.Cols = x.Count
+			m.X = &x
+		}
+		if yOK {
+			m.Rows = y.Count
+			m.Y = &y
+		}
+		seen[addr] = len(out)
+		out = append(out, m)
+	}
 	for _, n := range ns {
 		if !strings.HasPrefix(n.Name, "map_interp") {
 			continue
 		}
 		for _, label := range n.Labels(data) {
 			for _, call := range callsTo(data, label) {
-				r12, r13, r14, r15, hasR13, hasAxis, r13ram, r14ram, r15ram, hasR13Ram, hasR14Ram, hasR15Ram, setup, ok := mapArgs(data, call)
-				if !ok {
-					continue
-				}
-				addr, ok := mapPtr(data, dpp, r12, r13, hasR13)
-				if !ok {
-					continue
-				}
-				x, y, xOK, yOK := callAxes(data, dpp, r13, hasR13, r14, r15, hasAxis, r13ram, r14ram, r15ram, hasR13Ram, hasR14Ram, hasR15Ram, setup)
-				name := slotName(data, ns, labels, calls, call, n.Name)
-				if i, dup := seen[addr]; dup {
-					if out[i].Name == "" && name != "" {
-						out[i].Name = name
-					}
-					if out[i].X == nil && xOK {
-						out[i].Cols = x.Count
-						out[i].X = &x
-					}
-					if out[i].Y == nil && yOK {
-						out[i].Rows = y.Count
-						out[i].Y = &y
-					}
-					continue
-				}
-				m := record.Map{Name: name, Addr: addr, Comment: n.Name}
-				if xOK {
-					m.Cols = x.Count
-					m.X = &x
-				}
-				if yOK {
-					m.Rows = y.Count
-					m.Y = &y
-				}
-				seen[addr] = len(out)
-				out = append(out, m)
+				add(call, n.Name, slotName(data, ns, labels, calls, call, n.Name))
+			}
+		}
+	}
+	for _, c := range calls {
+		for _, label := range callerLabels(data, ns, labels, c.Caller) {
+			call := label + c.At
+			if !done[call] && call >= 0 && call+4 <= len(data) && data[call] == 0xDA && data[call+1] == 0 {
+				add(call, c.Interp, c.Name)
 			}
 		}
 	}

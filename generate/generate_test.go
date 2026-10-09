@@ -19,12 +19,12 @@ func TestGenerateSelector(t *testing.T) {
 		t.Fatal(err)
 	}
 	mapPath := filepath.Join(dir, "m.yaml")
-	mapBody := "variables:\n- rt: \"0x0001\"\n  bitmask: \"0x00\"\n  name: nmot\n  size: 0\n  unit: rpm\n  factor: 40\n  offset: 0\n  comment: speed\n"
+	mapBody := "variables:\n- rt: \"0x0001\"\n  name: nmot\n  size: 0\n  unit: rpm\n  factor: 40\n  offset: 0\n  comment: speed\n"
 	if err := os.WriteFile(mapPath, []byte(mapBody), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	alias := filepath.Join(dir, "a.yaml")
-	if err := os.WriteFile(alias, []byte("aliases:\n- name: nmot\n  alias: EngineSpeed\n"), 0o644); err != nil {
+	if err := os.WriteFile(alias, []byte("aliases:\n  nmot: EngineSpeed\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	img := readHex(t, "walk-selector.hex")
@@ -120,7 +120,7 @@ func TestBitRowsShareCaseAddress(t *testing.T) {
 		t.Fatal(err)
 	}
 	mapPath := filepath.Join(dir, "m.yaml")
-	mapBody := "variables:\n- rt: \"0x0001\"\n  bitmask: \"0x02\"\n  name: nmot_bit\n  unit: rpm\n  factor: 40\n- rt: \"0x0001\"\n  bitmask: \"0x01\"\n  name: tmot_bit\n  unit: rpm\n  factor: 40\n"
+	mapBody := "variables:\n- rt: 0x0001/0x02\n  name: nmot_bit\n  unit: rpm\n  factor: 40\n- rt: 0x0001/0x01\n  name: tmot_bit\n  unit: rpm\n  factor: 40\n"
 	if err := os.WriteFile(mapPath, []byte(mapBody), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -150,7 +150,7 @@ func TestSFRBitRow(t *testing.T) {
 		t.Fatal(err)
 	}
 	mapPath := filepath.Join(dir, "m.yaml")
-	if err := os.WriteFile(mapPath, []byte("variables:\n- rt: \"0x0001\"\n  bitmask: \"0x01\"\n  name: B_hsve\n"), 0o644); err != nil {
+	if err := os.WriteFile(mapPath, []byte("variables:\n- rt: 0x0001/0x01\n  name: B_hsve\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	img := readHex(t, "sfr-bit.hex")

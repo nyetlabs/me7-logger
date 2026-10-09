@@ -1,166 +1,42 @@
 # Bosch names from https://s4wiki.com/wiki/Tuning, scored on every image.
-# The number is how many axes the table has, taken from the M-box shapes:
-#   0  scalar, so the address alone counts and the axis score ignores it
-#   1  curve (the column). A one-row table counts as 1
-#   2  map (column and row)
-# When the image XDF contains the name, the body address has to match one of its rows.
-# The axis score counts maps that have their axis. Confidence counts names that hit.
-names:
-  RLSALUN: 1
-  ESKONF: 0
-  KFKHFM: 2
-  KFVPLGU: 2
-  KFMRES: 2
-  KFMRESK: 2
-  KFZWOP: 2
-  KFZWOP2: 2
-  KLDMASRL: 1
-  KFMIZUFIL: 2
-  KFMIZUNS: 2
-  KFMIZUOF: 2
-  KFZW: 2
-  KFZW2: 2
-  KFZWWLNM: 2
-  SNM16OPUW: 0
-  KFMDZOF_UM: 2
-  KFMPED_UM: 2
-  MLHFM: 0
-  KFMSNWDK: 2
-  WDKUGDN: 1
-  KFMIRL: 2
-  TVUB: 1
-  FBSTABGM: 1
-  KFVPDKSD: 2
-  KFVPDKSE: 2
-  KIFZGHG: 0
-  KFMIOP: 2
-  FWFTBRTA: 1
-  KFFWTBR: 2
-  KFNW: 2
-  KFNWWL: 2
-  KFLF: 2
-  KFFWL_0_A: 2
-  KFFWL_1_A: 2
-  KFLAFWL: 2
-  KFLAMKR: 2
-  KFLAMKRL: 2
-  KFLBTS_0_A: 2
-  DWKRMSN: 1
-  KRFKLN: 1
-  KFLDIOPU: 2
-  KFWPLGTA: 2
-  LDIATA: 1
-  NLDIAPU: 0
-  TLDIAPN: 1
-  KFLDRXO: 2
-  KFLDHBN: 2
-  LDORXN: 1
-  LDPBN: 1
-  KFLDRAPP: 2
-  KFDLULS: 2
-  KFVPDKLD: 2
-  NDLDRAPU: 1
-  KFNLLNST: 2
-  NFSM: 1
-  NLLM: 1
-  NASNOTKL: 1
-  KFTSRL: 2
-  KFMLDMX: 2
-  KFPBRK: 2
-  KFPBRKNW: 2
-  KFPRG: 2
-  KFURL: 2
-  KFWDKMSN: 2
-  FKKVS: 2
-  DLAMTANS: 1
-  LAMFA: 2
-  DLBTS: 1
-  KFLDIMX: 2
-  KFLDRL: 2
-  KFLDRQ2: 2
-  LDRQ0DY: 1
-  LDRQ1DY: 1
-  LDRQ1ST: 1
-  KFFLLDE: 2
-  KFTARX: 2
-  KFTARXZK: 2
-  KFDMDADP: 2
-  KFDMDARO: 2
-  RLSALULL: 0
-  CLAATR: 0
-  CLAATR2: 0
-  CLAATS: 0
-  CLAATS2: 0
-  CLAHSH: 0
-  CLAHSH2: 0
-  CLAHSHE: 0
-  CLAHSHE2: 0
-  CLALSH: 0
-  CLALSH2: 0
-  CWDNMAX: 0
-  NWPMBBR: 0
-  VWPMBBR: 0
-  KUMSRL: 0
-  DPUPS: 0
-  KRDWA: 0
-  MDIMX: 0
-  VNMX: 0
-  CWMSRCAN: 0
-  TMNSMN: 0
-  CLRKA: 0
-  CLRHK: 0
-  AIMVM: 0
-  NMAXF: 0
-  KISRM: 0
-  DSLOFS: 0
-  MLOFS: 0
-  TEMIN: 0
-  TEMINVA: 0
-  DNMAXH: 0
-  ITNMXH: 0
-  NMAX: 0
-  NMAXOG: 0
-  TMOTNMX: 0
-  TNMXH: 0
-  CDATR: 0
-  CDATS: 0
-  CDHSH: 0
-  CDHSHE: 0
-  CDKAT: 0
-  CDLASH: 0
-  CDLATV: 0
-  CDLDP: 0
-  CDLSH: 0
-  CDLSHV: 0
-  CDSLS: 0
-  CDTES: 0
-  CWKONABG: 0
-  CWKONLS: 0
-  CWMDAPP: 0
-  CWDLSAHK: 0
-  CWLAMFAW: 0
-  DLAMFAW: 0
-  CATR: 0
-  FKHABMN: 0
-  KRALH: 0
-  KRANH: 0
-  LDEIAP: 0
-  LDHIA: 0
-  UMDYLDR: 0
-  EDLDRP: 0
-  SDLDRL: 0
-  TDLDRA: 0
-  TDLDRA2: 0
-  TULV1: 0
-  CLRHKA: 0
-  FKVA: 0
-  KVB: 0
-  MLMAX: 0
-  KRKTE: 0
-  ZKWLAFWL: 0
-  TABGBTS: 0
-  TABGSS: 0
-  TABGSS2: 0
-  FHOKH: 0
-  LDRQ0S: 0
-  VMAXNB: 0
+# Each tier maps an axis count to names: 0 scalar (the address alone counts),
+# 1 curve, 2 map. Tiers are finder priority by tuning stage, highest first.
+# Opinion, not measurement:
+#   D  stage 1: boost, timing, torque monitoring, knock, BTS and open loop fueling
+#   C  stage 2: injector and FPR changes, exhaust DTCs
+#   B  stage 3-: bigger turbos: base boost, wastegate spring, LDR PID scheduling, MAP sensor limit
+#   A  stage 3: MAF and intake, ARMD
+#   S  niceties and everything else
+tiers:
+  S:
+    0: [AIMVM, CDLDP, CDTES, CWDNMAX, CWMSRCAN, DNMAXH, ITNMXH, KISRM, KUMSRL,
+        NMAX, NMAXF, NMAXOG, NWPMBBR, TMOTNMX, TNMXH, VMAXNB, VNMX, VWPMBBR]
+    1: [KLDMASRL, NASNOTKL]
+    2: [KFTSRL]
+  A:
+    0: [KIFZGHG, MLHFM, MLMAX, MLOFS]
+    2: [KFDMDADP, KFDMDARO, KFKHFM, KFMLDMX, KFNW, KFNWWL, KFPBRK, KFPBRKNW,
+        KFPRG, KFURL]
+  B:
+    0: [DSLOFS, LDEIAP, LDRQ0S, UMDYLDR]
+    1: [LDRQ0DY, LDRQ1DY, LDRQ1ST, TLDIAPN, WDKUGDN]
+    2: [KFLDRQ2, KFMSNWDK, KFVPDKSD, KFVPDKSE, KFWDKMSN]
+  C:
+    0: [CATR, CDATR, CDATS, CDHSH, CDHSHE, CDKAT, CDLASH, CDLATV, CDLSH,
+        CDLSHV, CDSLS, CLAATR, CLAATR2, CLAATS, CLAATS2, CLAHSH, CLAHSH2,
+        CLAHSHE, CLAHSHE2, CLALSH, CLALSH2, CLRHK, CLRHKA, CLRKA, CWDLSAHK,
+        CWKONABG, CWKONLS, ESKONF, FHOKH, FKHABMN, FKVA, KRKTE, KVB, RLSALULL,
+        TABGSS, TABGSS2, TEMIN, TEMINVA]
+    1: [NFSM, NLLM, RLSALUN, TVUB]
+    2: [FKKVS, KFFWL_0_A, KFFWL_1_A, KFLF, KFMRES, KFMRESK, KFNLLNST]
+  D:
+    0: [CWLAMFAW, CWMDAPP, DLAMFAW, DPUPS, EDLDRP, KRALH, KRANH, KRDWA, LDHIA,
+        MDIMX, NLDIAPU, SDLDRL, SNM16OPUW, TABGBTS, TDLDRA, TDLDRA2, TMNSMN,
+        TULV1, ZKWLAFWL]
+    1: [DLAMTANS, DLBTS, DWKRMSN, FBSTABGM, FWFTBRTA, KRFKLN, LDIATA, LDORXN,
+        LDPBN, NDLDRAPU]
+    2: [KFDLULS, KFFLLDE, KFFWTBR, KFLAFWL, KFLAMKR, KFLAMKRL, KFLBTS_0_A,
+        KFLDHBN, KFLDIMX, KFLDIOPU, KFLDRAPP, KFLDRL, KFLDRXO, KFMDZOF_UM,
+        KFMIOP, KFMIRL, KFMIZUFIL, KFMIZUNS, KFMIZUOF, KFMPED_UM, KFTARX,
+        KFTARXZK, KFVPDKLD, KFVPLGU, KFWPLGTA, KFZW, KFZW2, KFZWOP, KFZWOP2,
+        KFZWWLNM, LAMFA]

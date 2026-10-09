@@ -236,6 +236,13 @@ mapsigs:
 	if MapAddrs(img, StandardDPP, doc.Maps) != nil {
 		t.Fatal("a second copy of the window stored a map")
 	}
+	list, err := ParseSigs([]byte("mapsigs:\n- {name: BASE, pattern: [AAAA00000000XXXX, D74000020000XXXX], at: 6, cols: 4}\n"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(list.Maps) != 2 || list.Maps[1].Pattern != "D74000020000XXXX" || list.Maps[1].Cols != 4 {
+		t.Fatalf("pattern list %+v", list.Maps)
+	}
 }
 
 func TestMapSigAlsoAndBitmask(t *testing.T) {

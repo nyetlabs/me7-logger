@@ -399,10 +399,7 @@ func run(dir string, images []string, defOf func(string) string, gen imageGen) (
 		return nil, err
 	}
 	wiki, axes := lists.wiki, lists.dims
-	ntier, err := loadNamesPriority(dir, wiki)
-	if err != nil {
-		return nil, err
-	}
+	ntier := lists.tier
 	layout, err := loadLayoutTiers(dir, blocks)
 	if err != nil {
 		return nil, err
@@ -682,7 +679,7 @@ func measurementNames() ([]string, error) {
 }
 
 // The name lists are names/<source>.yaml. s4wiki.yaml is scored on every
-// image and is the only list with tiers, in s4wiki-priority.yaml.
+// image and is the only list with tiers.
 const (
 	namesDir   = "names"
 	wikiList   = "s4wiki"
@@ -692,10 +689,12 @@ const (
 // nameLists is every names/*.yaml list. wiki is s4wiki.yaml. byBlock is the
 // other names of each layout block, in file order, without s4wiki names.
 // dims is the axis count of every name; s4wiki.yaml wins a conflict.
+// tier is the finder tier of each s4wiki name.
 type nameLists struct {
 	wiki    []string
 	byBlock map[string][]string
 	dims    map[string]int
+	tier    map[string]string
 }
 
 // forBlock is the names scored on an image of block.
@@ -710,13 +709,17 @@ func (l nameLists) forBlock(block string) []string {
 // layout block in block. A missing s4wiki.yaml returns no lists.
 func loadNames(dir string, blocks map[string][]string) (nameLists, error) {
 	out := nameLists{byBlock: map[string][]string{}, dims: map[string]int{}}
-	wiki, _, err := loadNameList(filepath.Join(dir, namesDir, wikiList+".yaml"))
+	wiki, _, tier, err := loadNameList(filepath.Join(dir, namesDir, wikiList+".yaml"))
 	if os.IsNotExist(err) {
 		return nameLists{}, nil
 	}
 	if err != nil {
 		return nameLists{}, err
 	}
+	if tier == nil {
+		return nameLists{}, fmt.Errorf("%s.yaml: want tiers", wikiList)
+	}
+	out.tier = tier
 	for _, n := range wiki {
 		out.wiki = append(out.wiki, n.name)
 		out.dims[n.name] = n.axes
@@ -727,12 +730,15 @@ func loadNames(dir string, blocks map[string][]string) (nameLists, error) {
 	}
 	for _, p := range paths {
 		base := filepath.Base(p)
-		if base == wikiList+".yaml" || base == absentFile || strings.HasSuffix(base, "-priority.yaml") {
+		if base == wikiList+".yaml" || base == absentFile {
 			continue
 		}
-		list, block, err := loadNameList(p)
+		list, block, tier, err := loadNameList(p)
 		if err != nil {
 			return nameLists{}, err
+		}
+		if tier != nil {
+			return nameLists{}, fmt.Errorf("%s: only %s.yaml has tiers", base, wikiList)
 		}
 		if _, ok := blocks[block]; !ok {
 			return nameLists{}, fmt.Errorf("%s: block %q is not in layouts.yaml", base, block)
@@ -753,47 +759,61 @@ type listName struct {
 	axes int
 }
 
-// loadNameList reads one list: names, a map of name to axis count, and block.
-func loadNameList(path string) ([]listName, string, error) {
+// loadNameList reads one list and its block. names maps an axis count (0, 1,
+// or 2) to names. tiers instead maps a tierOrder label to such a map, and
+// the tier of each name is returned.
+func loadNameList(path string) ([]listName, string, map[string]string, error) {
 	b, err := os.ReadFile(path)
 	if err != nil {
-		return nil, "", err
+		return nil, "", nil, err
 	}
 	base := filepath.Base(path)
 	var doc struct {
-		Block string    `yaml:"block"`
-		Names yaml.Node `yaml:"names"`
+		Block string                      `yaml:"block"`
+		Names map[int][]string            `yaml:"names"`
+		Tiers map[string]map[int][]string `yaml:"tiers"`
 	}
 	if err := yaml.Unmarshal(b, &doc); err != nil {
-		return nil, "", fmt.Errorf("%s: %w", base, err)
+		return nil, "", nil, fmt.Errorf("%s: %w", base, err)
 	}
-	if doc.Names.Kind != yaml.MappingNode {
-		return nil, "", fmt.Errorf("%s: want a map of axis counts", base)
+	groups := map[string]map[int][]string{"": doc.Names}
+	order := []string{""}
+	var tier map[string]string
+	if doc.Tiers != nil {
+		groups, order, tier = doc.Tiers, tierOrder, map[string]string{}
+		for t := range doc.Tiers {
+			if !slices.Contains(tierOrder, t) {
+				return nil, "", nil, fmt.Errorf("%s: tier %q is not one of %v", base, t, tierOrder)
+			}
+		}
 	}
-	out := make([]listName, 0, len(doc.Names.Content)/2)
+	var out []listName
 	seen := map[string]bool{}
-	for i := 0; i+1 < len(doc.Names.Content); i += 2 {
-		n := strings.TrimSpace(doc.Names.Content[i].Value)
-		var c int
-		if err := doc.Names.Content[i+1].Decode(&c); err != nil || c < 0 || c > 2 {
-			return nil, "", fmt.Errorf("%s: %s axis count", base, n)
+	for _, t := range order {
+		for c, names := range groups[t] {
+			if c < 0 || c > 2 {
+				return nil, "", nil, fmt.Errorf("%s: axis count %d", base, c)
+			}
+			for _, n := range names {
+				if seen[n] || n == "" {
+					return nil, "", nil, fmt.Errorf("%s: %q repeated", base, n)
+				}
+				seen[n] = true
+				out = append(out, listName{n, c})
+				if tier != nil {
+					tier[n] = t
+				}
+			}
 		}
-		if seen[n] || n == "" {
-			return nil, "", fmt.Errorf("%s: %s repeated", base, n)
-		}
-		seen[n] = true
-		out = append(out, listName{n, c})
 	}
-	return out, doc.Block, nil
+	slices.SortStableFunc(out, func(a, b listName) int {
+		return cmp.Or(slices.Index(order, tier[a.name])-slices.Index(order, tier[b.name]), strings.Compare(a.name, b.name))
+	})
+	return out, doc.Block, tier, nil
 }
 
-// tierOrder is the priority order of a *-priority.yaml file, highest first.
+// tierOrder is the priority order of a tiers map, highest first.
 var tierOrder = []string{"S", "A", "B", "C", "D"}
-
-// loadNamesPriority reads names/s4wiki-priority.yaml, the finder tier of each S4wiki name.
-func loadNamesPriority(dir string, wiki []string) (map[string]string, error) {
-	return loadTiers(filepath.Join(dir, namesDir, wikiList+"-priority.yaml"), nameSet(wiki))
-}
 
 // loadTiers reads a priority file: a tiers map from a tierOrder label to members.
 // Every key of want is in exactly one tier. A missing file returns nil.

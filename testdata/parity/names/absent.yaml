@@ -4,6 +4,10 @@
 # that block counts the name as hit for the tier grade. It still misses in the
 # s4wiki count.
 absent:
+  # Not in the 8D0907551G DAMOS export. The bytes the 8D0907551M hand XDF
+  # calls ESKONF are the FGR constants GAFGRO to TFGRUNUB there.
+  22m:
+    - ESKONF
   # No DAMOS export yet. No map_interp_table8_b call with M's arguments on T,
   # and the 8D0907551H hand XDF does not have it.
   22N:

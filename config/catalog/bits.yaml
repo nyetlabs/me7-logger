@@ -1,2188 +1,373 @@
-# Single-bit catalog rows. Sort by result type, then by bitmask from high to low.
-# rt is the value the selector compares. bitmask is the bit that compare loads.
-# A bit row and a value row keep different result-type and mask pairs.
+# Single-bit catalog rows. rt is result type/bitmask, the bit the selector
+# compare loads; a list is the same name at several. Bit and value rows use
+# different pairs. Fields are as in values.yaml.
 variables:
-- rt: '0x000D'
-  bitmask: '0x80'
-  name: fcmEnd
-  scale: count
-  comment: Anzahl Einträge im Fehlerspeicher
-- rt: '0x000D'
-  bitmask: '0x40'
-  name: tkatm
-  scale: cat_temp
-  comment: Katalysatortemperatur aus Modell
-- rt: '0x000D'
-  bitmask: '0x20'
-  name: B_koe
-  comment: Bedingung für Kompressoreinschalten
-- rt: '0x000D'
-  bitmask: '0x10'
-  name: B_ll
-  comment: Bedingung Leerlauf
-- rt: '0x000D'
-  bitmask: '0x08'
-  name: B_lr
-  comment: 'LREB: Bedingung Lambdaregelung (vor Kat); (Bank 1)'
-- rt: '0x000D'
-  bitmask: '0x04'
-  name: wdkba
-  unit: '% DK'
-  factor: 100/255
-  comment: Drosselklappenwinkel bezogen auf unteren Anschlag
-- rt: '0x000D'
-  bitmask: '0x02'
-  name: nmot
-  unit: rpm
-  factor: 40
-  comment: Motordrehzahl
-- rt: '0x000D'
-  bitmask: '0x01'
-  name: tmot
-  scale: temp
-  comment: Motor-Temperatur
-- rt: '0x0014'
-  bitmask: '0x10'
-  name: B_sl
-  comment: Bedingung Servo-Lenkung
-- rt: '0x0014'
-  bitmask: '0x08'
-  name: B_sksc
-  comment: Bedingung heizb. Heckscheibe eingeschaltet aus CAN-Botschaft Clima1
-- rt: '0x0014'
-  bitmask: '0x04'
-  name: B_nac
-  comment: Bedingung für erhöhte LL-Drehzahl bei Klimaanlage
-- rt: '0x0014'
-  bitmask: '0x02'
-  name: B_fs
-  comment: Bedingung Fahrstufe
-- rt: '0x0014'
-  bitmask: '0x01'
-  name: B_koe
-  comment: Bedingung für Kompressoreinschalten
-- rt: '0x002F'
-  bitmask: '0x04'
-  name: B_hsve
-  comment: Bedingung Endstufe Sondenheizung vor Kat angesteuert
-- rt: '0x002F'
-  bitmask: '0x02'
-  name: B_sbbvk
-  comment: Bedingung Sonde betriebsbereit vor Kat
-- rt: '0x002F'
-  bitmask: '0x01'
-  name: B_lr
-  comment: 'LREB: Bedingung Lambdaregelung (vor Kat); (Bank 1)'
-- rt: '0x0030'
-  bitmask: '0x04'
-  name: B_hshe
-  comment: Bedingung Endstufe Sondenheizung hinter Kat angesteuert
-- rt: '0x0030'
-  bitmask: '0x02'
-  name: B_sbbhk
-  comment: Bedingung Sonde betriebsbereit hinter Kat
-- rt: '0x0030'
-  bitmask: '0x01'
-  name: B_lrhk
-  comment: Bedingung Lambdaregelung hinter Kat
-- rt: '0x0031'
-  bitmask: '0x04'
-  name: B_hsve2
-  comment: Bedingung Endstufe Sondenheizung vor Kat angesteuert Bank2
-- rt: '0x0031'
-  bitmask: '0x02'
-  name: B_sbbvk2
-  comment: Bedingung Sonde betriebsbereit vor Kat Bank2
-- rt: '0x0031'
-  bitmask: '0x01'
-  name: B_lr2
-  comment: 'LREB: Bedingung Lambdaregelung (vor Kat); (Bank 2)'
-- rt: '0x0032'
-  bitmask: '0x04'
-  name: B_hshe2
-  comment: Bedingung Endstufe Sondenheizung hinter Kat angesteuert Bank2
-- rt: '0x0032'
-  bitmask: '0x02'
-  name: B_sbbhk2
-  comment: Bedingung Sonde betriebsbereit hinter Kat Bank2
-- rt: '0x0032'
-  bitmask: '0x01'
-  name: B_lrhk2
-  comment: Bedingung Lambdaregelung hinter Kat Bank2
-- rt: '0x004F'
-  bitmask: '0x20'
-  name: B_brlmx
-  comment: Bedingung LDR Begrenzung der Maximalfuellung
-- rt: '0x004F'
-  bitmask: '0x10'
-  name: B_ldobsp
-  comment: Bedingung LDR Overboost innerhalb Sperrzeit
-- rt: '0x004F'
-  bitmask: '0x08'
-  name: B_ldob
-  comment: 'Bedingung: Overboost aktiv'
-- rt: '0x004F'
-  bitmask: '0x04'
-  name: B_lds
-  comment: Flag für Bedingung LDR Steuerung
-- rt: '0x004F'
-  bitmask: '0x02'
-  name: B_ldr
-  comment: Flag für Bedingung LDR aktiv
-- rt: '0x004F'
-  bitmask: '0x01'
-  name: B_ldb
-  comment: Bedingung für Ladedruckregelbereitschaft
-- rt: '0x0057'
-  bitmask: '0x10'
-  name: B_ba
-  comment: Bedingung Anreicherung
-- rt: '0x0057'
-  bitmask: '0x08'
-  name: B_sa
-  comment: Bedingung Schubabschalten
-- rt: '0x0057'
-  bitmask: '0x04'
-  name: B_vl
-  comment: Bedingung Vollast
-- rt: '0x0057'
-  bitmask: '0x01'
-  name: B_ll
-  comment: Bedingung Leerlauf
-- rt: '0x007A'
-  bitmask: '0x01'
-  name: B_hsve
-  comment: Bedingung Heizung Sonde vor Kat ein
-- rt: '0x007B'
-  bitmask: '0x01'
-  name: B_hshe
-  comment: Bedingung Heizung Sonde hinter Kat ein
-- rt: '0x007C'
-  bitmask: '0x01'
-  name: B_hsve2
-  comment: Bedingung Heizung Sonde vor Kat ein Bank2
-- rt: '0x007D'
-  bitmask: '0x01'
-  name: B_hshe2
-  comment: Bedingung Heizung Sonde hinter Kat ein Bank2
-- rt: '0x0083'
-  bitmask: '0x01'
-  name: B_nac
-  comment: Bedingung für erhöhte LL-Drehzahl bei Klimaanlage
-- rt: '0x0084'
-  bitmask: '0x01'
-  name: B_koe
-  comment: Bedingung für Kompressoreinschalten
-- rt: '0x0089'
-  bitmask: '0x80'
-  name: Z_ks1
-  comment: 'Zyklusflag: Klopfsensor 1'
-- rt: '0x0089'
-  bitmask: '0x40'
-  name: Z_ks2
-  comment: 'Zyklusflag: Klopfsensor 2'
-- rt: '0x0089'
-  bitmask: '0x20'
-  name: Z_ks3
-  comment: 'Zyklusflag: Klopfsensor 3'
-- rt: '0x0089'
-  bitmask: '0x10'
-  name: Z_ks4
-  comment: 'Zyklusflag: Klopfsensor 4'
-- rt: '0x0089'
-  bitmask: '0x08'
-  name: Z_enws
-  comment: 'Zyklusflag: Nockenwellensteuerung (Einlaß,Bank1)'
-- rt: '0x008A'
-  bitmask: '0x80'
-  name: Z_lm
-  comment: "Zyklusflag:\tLMM/HLM/HFM"
-- rt: '0x008A'
-  bitmask: '0x40'
-  name: Z_dk
-  comment: "Zyklusflag:\tDK - Potentiometer"
-- rt: '0x008A'
-  bitmask: '0x20'
-  name: Z_tm
-  comment: "Zyklusflag:\tTMOT"
-- rt: '0x008A'
-  bitmask: '0x08'
-  name: Z_vfz
-  comment: 'Zyklusflag: Fahrzeug-Geschwindigkeit'
-- rt: '0x008A'
-  bitmask: '0x04'
-  name: Z_llr
-  comment: 'Zyklusflag: Diagnose Leerlaufregelung, Steller'
-- rt: '0x008A'
-  bitmask: '0x02'
-  name: Z_kuppl
-  comment: 'Zyklusflag: Kupplung betaetigt'
-- rt: '0x008A'
-  bitmask: '0x01'
-  name: Z_brems
-  comment: 'Zyklusflag: BREMS (Bremsschalter)'
-- rt: '0x008B'
-  bitmask: '0x80'
-  name: Z_rkat
-  comment: Zyklusflag:LR-Adaption additiv pro Zeit
-- rt: '0x008B'
-  bitmask: '0x40'
-  name: Z_rkaz
-  comment: Zyklusflag:LR-Adaption additiv pro Einspritzung
-- rt: '0x008B'
-  bitmask: '0x20'
-  name: Z_grbh
-  comment: 'Zyklusflag: GRA Bedienhebel'
-- rt: '0x008B'
-  bitmask: '0x10'
-  name: Z_ldra
-  comment: "Zyklusflag:\tLadedruckregelabweichung"
-- rt: '0x008B'
-  bitmask: '0x08'
-  name: Z_thm
-  comment: Zyklusflg Kühlwasser-Thermostat
-- rt: '0x008D'
-  bitmask: '0x01'
-  name: B_nws
-  comment: Bedingung Nockenwellensteuerung
-- rt: '0x008E'
-  bitmask: '0x80'
-  name: B_mil
-  comment: MIL-Ansteuerung
-- rt: '0x008E'
-  bitmask: '0x40'
-  name: bbdcy
-  comment: Byte für Bedingung B_dcy als Triggerevent in DCLA
-- rt: '0x008E'
-  bitmask: '0x20'
-  name: B_trip
-  comment: Flag für erfüllten 'trip'
-- rt: '0x008E'
-  bitmask: '0x10'
-  name: fcmEnd
-  scale: count
-  comment: Anzahl Einträge im Fehlerspeicher
-- rt: '0x008E'
-  bitmask: '0x02'
-  name: bbwuc
-  comment: Byte für Bedingung B_wuc als Triggerevent in DCLA
-- rt: '0x008E'
-  bitmask: '0x01'
-  name: B_nowuc
-  comment: Bedingung 'kein warm up cycle' erkannt
-- rt: '0x0090'
-  bitmask: '0x01'
-  name: B_su
-  comment: Bedingung SU-V eingeschaltet
-- rt: '0x0096'
-  bitmask: '0x01'
-  name: B_bevab
-  comment: Bedingung EV-Abschaltung auf Bank/Bank1
-- rt: '0x00AD'
-  bitmask: '0x20'
-  name: Z_hsh
-  comment: Zyklusflag:Lambdasonden-Heizung hinter Katalysator
-- rt: '0x00AD'
-  bitmask: '0x08'
-  name: Z_tes
-  comment: 'Zyklusflag: Tankentlüftungssystem'
-- rt: '0x00AD'
-  bitmask: '0x04'
-  name: Z_tesg
-  comment: 'Zyklusflag: Tankentlüftungssystem Grobleck'
-- rt: '0x00AD'
-  bitmask: '0x01'
-  name: Z_kat
-  comment: "Zyklusflag:\tKatalysator-Konvertierung"
-- rt: '0x00AE'
-  bitmask: '0x20'
-  name: E_hsh
-  comment: 'Errorflag: Lambdasonden-Heizung hinter Katalysator'
-- rt: '0x00AE'
-  bitmask: '0x08'
-  name: E_tes
-  comment: 'Errorflag: Tankentlüftungssystem'
-- rt: '0x00AE'
-  bitmask: '0x04'
-  name: E_tesg
-  comment: 'Errorflag: Tankentlüftungssystem Grobleck'
-- rt: '0x00AE'
-  bitmask: '0x01'
-  name: E_kat
-  comment: 'Errorflag: Katalysator-Konvertierung'
-- rt: '0x00AF'
-  bitmask: '0x20'
-  name: Z_sls
-  comment: 'Zyklusflag: Sekundärluft-System'
-- rt: '0x00AF'
-  bitmask: '0x08'
-  name: Z_lash
-  comment: Zyklusflag:Lambda-Sondenalterung hinter Kat.
-- rt: '0x00AF'
-  bitmask: '0x02'
-  name: Z_lsh
-  comment: 'Zyklusflag: Lambda-Sonde hinter Kat'
-- rt: '0x00AF'
-  bitmask: '0x01'
-  name: Z_lsv
-  comment: 'Zyklusflag: Lambda-Sonde vor Kat'
-- rt: '0x00B1'
-  bitmask: '0x20'
-  name: E_slv
-  comment: 'Errorflag: Sekundärluftventil'
-- rt: '0x00B1'
-  bitmask: '0x08'
-  name: E_lash
-  comment: 'Errorflag: Lambda-Sondenalterung hinter Katalysator'
-- rt: '0x00B1'
-  bitmask: '0x02'
-  name: E_lsh
-  comment: 'Errorflag: Lambda-Sonde hinter Kat'
-- rt: '0x00B1'
-  bitmask: '0x01'
-  name: E_lsv
-  comment: 'Errorflag: Lambda-Sonde vor Kat'
-- rt: '0x00B8'
-  bitmask: '0x01'
-  name: B_atr
-  comment: Bedingung Abgastemperaturregelung
-- rt: '0x00B9'
-  bitmask: '0x01'
-  name: B_atr2
-  comment: Bedingung Abgastemperaturregelung Bank 2
-- rt: '0x00BA'
-  bitmask: '0x01'
-  name: B_brlmx
-  comment: Bedingung LDR Begrenzung der Maximalfuellung
-- rt: '0x00BD'
-  bitmask: '0x01'
-  name: B_furena
-  comment: Bedingung Aktivierung des Füllungsreglers
-- rt: '0x00C1'
-  bitmask: '0x10'
-  name: B_acc
-  comment: 'Bedingung: ACC-Steuergerät vorhanden'
-- rt: '0x00C1'
-  bitmask: '0x08'
-  name: B_fgrte
-  comment: Bedingung FGR vom Tester freigegeben
-- rt: '0x00C1'
-  bitmask: '0x04'
-  name: B_kuppl
-  comment: Bedingung Kupplung betätigt
-- rt: '0x00C1'
-  bitmask: '0x02'
-  name: B_br
-  comment: Bedingung Bremstestschalter betätigt
-- rt: '0x00C1'
-  bitmask: '0x01'
-  name: B_bl
-  comment: Bedingung Bremslichtschalter betätigt
-- rt: '0x00C2'
-  bitmask: '0x80'
-  name: S_fgrhs
-  comment: Hauptschalter am FGR-Bedienhebel
-- rt: '0x00C2'
-  bitmask: '0x20'
-  name: B_fgrwac
-  comment: Bedingung FGR-Tipschalter Wiederaufnahme betätigt (vom CAN)
-- rt: '0x00C2'
-  bitmask: '0x10'
-  name: B_fgrsec
-  comment: Bedingung FGR-Tipschalter Setzen betätigt (vom CAN)
-- rt: '0x00C2'
-  bitmask: '0x08'
-  name: B_fgrtuc
-  comment: Bedingung FGR-Tipschalter Beschleunigen betätigt (vom CAN)
-- rt: '0x00C2'
-  bitmask: '0x04'
-  name: B_fgrtdc
-  comment: Bedingung FGR-Tipschalter Verzögern betätigt (vom CAN)
-- rt: '0x00C2'
-  bitmask: '0x02'
-  name: B_fgratc
-  comment: Bedingung FGR-Tipschalter Aus betätigt (vom CAN)
-- rt: '0x00C2'
-  bitmask: '0x01'
-  name: B_fgrhsc
-  comment: Bedingung FGR-Hauptschalter ein (vom CAN)
-- rt: '0x00CF'
-  bitmask: '0x80'
-  name: B_ldob
-  comment: 'Bedingung: Overboost aktiv'
-- rt: '0x00CF'
-  bitmask: '0x40'
-  name: B_frao
-  comment: Einschaltbedingung für Adaption von frao
-- rt: '0x00CF'
-  bitmask: '0x10'
-  name: B_lr
-  comment: 'LREB: Bedingung Lambdaregelung (vor Kat); (Bank 1)'
-- rt: '0x00CF'
-  bitmask: '0x04'
-  name: B_hsve
-  comment: Bedingung Endstufe Sondenheizung vor Kat angesteuert
-- rt: '0x00CF'
-  bitmask: '0x02'
-  name: B_kh
-  comment: Bedingung Kat-Heizung
-- rt: '0x00CF'
-  bitmask: '0x01'
-  name: B_ll
-  comment: Bedingung Leerlauf
-- rt: '0x00D4'
-  bitmask: '0x01'
-  name: B_lr
-  comment: 'LREB: Bedingung Lambdaregelung (vor Kat); (Bank 1)'
-- rt: '0x017C'
-  bitmask: '0x80'
-  name: B_lra
-  comment: Bedingung Gemischadaption freigegeben
-- rt: '0x017C'
-  bitmask: '0x40'
-  name: B_fraur
-  comment: Bedingung frau-Integrator außerhalb reduzierter Bereich
-- rt: '0x017C'
-  bitmask: '0x20'
-  name: B_rkatr
-  comment: Bedingung rkat-Integrator außerhalb reduzierten Bereich
-- rt: '0x017C'
-  bitmask: '0x10'
-  name: B_rkam
-  comment: Bedingung einer der beiden additiven Bereiche aktiv
-- rt: '0x017C'
-  bitmask: '0x08'
-  name: B_frao
-  comment: Einschaltbedingung für Adaption von frao
-- rt: '0x017C'
-  bitmask: '0x04'
-  name: B_frau
-  comment: Einschaltbedingung für Adaption von frau
-- rt: '0x017C'
-  bitmask: '0x02'
-  name: B_talval
-  comment: 'Bedingung : Bit Tank leer gültig'
-- rt: '0x017C'
-  bitmask: '0x01'
-  name: B_tal
-  comment: Bedingung Tank leer bzw. Reserve
-- rt: '0x017D'
-  bitmask: '0x80'
-  name: Z_rkat
-  comment: Zyklusflag:LR-Adaption additiv pro Zeit
-- rt: '0x017D'
-  bitmask: '0x40'
-  name: Z_frau
-  comment: Zyklusflag:LR-Adaption unterer multiplikativer Bereich
-- rt: '0x017D'
-  bitmask: '0x20'
-  name: E_rkat
-  comment: Errorflag DKVS (additive Korrektur pro Zeit)
-- rt: '0x017D'
-  bitmask: '0x10'
-  name: E_frau
-  comment: 'Errorflag: LR-Adaption unterer multiplikativer Bereich'
-- rt: '0x017D'
-  bitmask: '0x08'
-  name: B_dkvsf
-  comment: 'Bedingung: Freigabe des Fehlers'
-- rt: '0x017D'
-  bitmask: '0x04'
-  name: B_gaefra
-  comment: Bedingung Grundadaption (fra-Integrator) eingeschwungen
-- rt: '0x017D'
-  bitmask: '0x02'
-  name: B_gaeing
-  comment: Bedingung Grundadaption Bank 1 eingeschwungen
-- rt: '0x017D'
-  bitmask: '0x01'
-  name: B_gasp
-  comment: Bedingung Grundadaption gesperrt
-- rt: '0x017E'
-  bitmask: '0x80'
-  name: B_mdarv
-  comment: kritische Aussetzerrate vorhanden
-- rt: '0x017E'
-  bitmask: '0x40'
-  name: B_mdstop_m
-  comment: Monitor, Misfire Detection gesperrt
-- rt: '0x017E'
-  bitmask: '0x08'
-  name: E_md03
-  comment: 'Errorflag: Aussetzer Zündung 3'
-- rt: '0x017E'
-  bitmask: '0x04'
-  name: E_md02
-  comment: 'Errorflag: Aussetzer Zündung 2'
-- rt: '0x017E'
-  bitmask: '0x02'
-  name: E_md01
-  comment: 'Errorflag: Aussetzer Zündung 1'
-- rt: '0x017E'
-  bitmask: '0x01'
-  name: E_md00
-  comment: 'Errorflag: Aussetzer Zündung 0'
-- rt: '0x017F'
-  bitmask: '0x80'
-  name: B_forn_m
-  comment: Monitor, Bedingung Adaption im aktuellen Drehzahlbereich ready
-- rt: '0x017F'
-  bitmask: '0x40'
-  name: B_mdkat
-  comment: Katschädigende Aussetzerrate überschritten (zur Ausblendung anderer Funktionen)
-- rt: '0x017F'
-  bitmask: '0x08'
-  name: Z_md03
-  comment: 'Zyklusflag: Aussetzer Zündung 3'
-- rt: '0x017F'
-  bitmask: '0x04'
-  name: Z_md02
-  comment: 'Zyklusflag: Aussetzer Zündung 2'
-- rt: '0x017F'
-  bitmask: '0x02'
-  name: Z_md01
-  comment: 'Zyklusflag: Aussetzer Zündung 1'
-- rt: '0x017F'
-  bitmask: '0x01'
-  name: Z_md00
-  comment: 'Zyklusflag: Aussetzer Zündung 0'
-- rt: '0x0183'
-  bitmask: '0x01'
-  name: B_fofstp
-  comment: Bedingung fuel-off Adaption gestoppt
-- rt: '0x0184'
-  bitmask: '0x80'
-  name: B_lamlash
-  comment: Bedingung für Abmagern/Anfetten in %LAMKO
-- rt: '0x0184'
-  bitmask: '0x40'
-  name: B_lsahksp
-  comment: allgemeine Stop-Bedingungen für die DLSAHK
-- rt: '0x0184'
-  bitmask: '0x20'
-  name: B_teslash
-  comment: Bedingung Test ausführen für Überprüfung Sonde hinter KAT
-- rt: '0x0184'
-  bitmask: '0x10'
-  name: B_entest
-  comment: Bedingung Wartezeit abgeschlossen für Test-Überprüfung Sonde hinter KAT
-- rt: '0x0184'
-  bitmask: '0x08'
-  name: B_dlash
-  comment: Bedingung Freigabe Schwingungsprüfung hinter Kat.
-- rt: '0x0184'
-  bitmask: '0x04'
-  name: B_sbbhk
-  comment: Bedingung Sonde betriebsbereit hinter Kat
-- rt: '0x0184'
-  bitmask: '0x02'
-  name: B_ushkm
-  comment: Bedingung Sondenspannung hinter KAT "Mager" (Sollwert unterschritten)
-- rt: '0x0184'
-  bitmask: '0x01'
-  name: B_ushkf
-  comment: Bedingung Sondenspannung hinter Kat "Fett" (Sollwert überschritten)
-- rt: '0x0185'
-  bitmask: '0x80'
-  name: B_steigm
-  comment: Bedingung Steigung des Sondensignals messen hinter KAT
-- rt: '0x0185'
-  bitmask: '0x40'
-  name: B_ushsch
-  comment: Bed. Schwelle für Sonde h. KAT im Schub nicht unterschritten `statichisch`
-- rt: '0x0185'
-  bitmask: '0x20'
-  name: B_dushsch
-  comment: Bedingung Schwelle für Sonde hinter KAT im Schub nicht unterschritten
-- rt: '0x0185'
-  bitmask: '0x10'
-  name: B_mldyn
-  comment: Bedingung erforderliche Luftmasse im Schubbetrieb für Dynamikmessung erreicht
-- rt: '0x0185'
-  bitmask: '0x08'
-  name: Z_lash
-  comment: Zyklusflag:Lambda-Sondenalterung hinter Kat.
-- rt: '0x0185'
-  bitmask: '0x04'
-  name: E_lash
-  comment: 'Errorflag: Lambda-Sondenalterung hinter Katalysator'
-- rt: '0x0185'
-  bitmask: '0x02'
-  name: B_enlash
-  comment: Bedingung Test für Schwingungsprüfung abgeschlossen hinteer Kat
-- rt: '0x0185'
-  bitmask: '0x01'
-  name: B_lamverg
-  comment: Bedingung Vergleich Lambdasoll in %DLSAHK mit %LAMKO übereinstimmend
-- rt: '0x0186'
-  bitmask: '0x02'
-  name: B_ddylash
-  comment: Bedingung Sonde hinter KAT dynamisch langsam
-- rt: '0x0186'
-  bitmask: '0x01'
-  name: B_dylash
-  comment: Bedingung Sonde hinter KAT dynamisch langsam
-- rt: '0x0187'
-  bitmask: '0x08'
-  name: Z_hsh
-  comment: Zyklusflag:Lambdasonden-Heizung hinter Katalysator
-- rt: '0x0187'
-  bitmask: '0x04'
-  name: E_hsh
-  comment: 'Errorflag: Lambdasonden-Heizung hinter Katalysator'
-- rt: '0x0187'
-  bitmask: '0x02'
-  name: B_ehsh
-  comment: Bedingung Error HSH
-- rt: '0x0187'
-  bitmask: '0x01'
-  name: B_hsokh
-  comment: Bedingung Sondenheizung OK hinter Kat
-- rt: '0x0188'
-  bitmask: '0x40'
-  name: B_sbbvk
-  comment: Bedingung Sonde betriebsbereit vor Kat
-- rt: '0x0188'
-  bitmask: '0x20'
-  name: Z_hsv
-  comment: Zyklusflag:Lambdasonden-Heizung vor Katalysator
-- rt: '0x0188'
-  bitmask: '0x10'
-  name: E_hsv
-  comment: 'Errorflag: Lambdasonden-Heizung vor Katalysator'
-- rt: '0x0188'
-  bitmask: '0x08'
-  name: TYP_hsv
-  comment: 'Fehlertyp: Heizung Lambdasonde 1 vor Kat'
-- rt: '0x0188'
-  bitmask: '0x04'
-  name: B_ehlsu
-  comment: Bedingung Fehler Heizung LSU
-- rt: '0x0188'
-  bitmask: '0x02'
-  name: B_nphlsu
-  comment: Bedingung Signal LSU1 ist unplausibel
-- rt: '0x0188'
-  bitmask: '0x01'
-  name: B_elsu
-  comment: Bedingung Fehler oder Fehler-Vormerkung LSU (keine Betriebsbereitschaft)
-- rt: '0x0189'
-  bitmask: '0x80'
-  name: Z_lsh
-  comment: 'Zyklusflag: Lambda-Sonde hinter Kat'
-- rt: '0x0189'
-  bitmask: '0x40'
-  name: E_lsh
-  comment: 'Errorflag: Lambda-Sonde hinter Kat'
-- rt: '0x0189'
-  bitmask: '0x20'
-  name: B_sbbhk
-  comment: Bedingung Sonde betriebsbereit hinter Kat
-- rt: '0x0189'
-  bitmask: '0x10'
-  name: B_risigh
-  comment: Bedingung Signalunterbrechung Sondenmasse mit Ri-Diagnose hinter KAT
-- rt: '0x0189'
-  bitmask: '0x08'
-  name: B_trsah
-  comment: Bedingung Kabelbruch für Sonde hinter KAT
-- rt: '0x0189'
-  bitmask: '0x04'
-  name: B_adshs
-  comment: Bedingung Adernschluß "setzen" bei Lambdasonden hinter Kat
-- rt: '0x0189'
-  bitmask: '0x02'
-  name: B_uhsig
-  comment: Bedingung Sondenspannung hinter KAT im Spannungsband für Signalunterbrechung
-- rt: '0x0189'
-  bitmask: '0x01'
-  name: B_ttbmhh
-  comment: Bedingung theoretische Sondenbetriebsbereitschaft hinter KAT mit Heizung
-- rt: '0x018A'
-  bitmask: '0x40'
-  name: B_nplflsu
-  comment: Lambdasignal nicht plausibel
-- rt: '0x018A'
-  bitmask: '0x20'
-  name: B_lsuna
-  comment: LSU nicht aktiv, Bank1
-- rt: '0x018A'
-  bitmask: '0x10'
-  name: B_lsumx
-  comment: Maximalwert der LSU-Spannung überschritten (CJ110)
-- rt: '0x018A'
-  bitmask: '0x08'
-  name: B_sigflsu
-  comment: Übersprechen vom Heizertakt auf Lambdasignal
-- rt: '0x018A'
-  bitmask: '0x04'
-  name: B_maxflsu
-  comment: Lambdaoffset vor / hinter Kat zu groß, Bank1
-- rt: '0x018A'
-  bitmask: '0x02'
-  name: B_elaof
-  comment: Bedingung Error Lambda-Offset LSU
-- rt: '0x018A'
-  bitmask: '0x01'
-  name: B_lrhk
-  comment: Bedingung Lambdaregelung hinter Kat
-- rt: '0x018B'
-  bitmask: '0x20'
-  name: B_elsu
-  comment: Bedingung Fehler oder Fehler-Vormerkung LSU (keine Betriebsbereitschaft)
-- rt: '0x018B'
-  bitmask: '0x10'
-  name: Z_lsv
-  comment: 'Zyklusflag: Lambda-Sonde vor Kat'
-- rt: '0x018B'
-  bitmask: '0x08'
-  name: E_lsv
-  comment: 'Errorflag: Lambda-Sonde vor Kat'
-- rt: '0x018B'
-  bitmask: '0x04'
-  name: B_helsu
-  comment: Diagnose Heizerkopplung LSU erfolgt
-- rt: '0x018B'
-  bitmask: '0x02'
-  name: B_drlmx
-  comment: Laständerung unterhalb Schwellwert
-- rt: '0x018B'
-  bitmask: '0x01'
-  name: B_dylsuav
-  comment: Dynamiküberwachung LSU aktiv
-- rt: '0x018C'
-  bitmask: '0x80'
-  name: B_faslarq
-  comment: 'Bedingung: lokale Anforderung Testdurchlauf Sekundärluft starten'
-- rt: '0x018C'
-  bitmask: '0x40'
-  name: B_dfrmoff
-  comment: 'frm-Offset-Schwelle überschritten: zeigt Vorsteuerproblem'
-- rt: '0x018C'
-  bitmask: '0x20'
-  name: B_dsloab
-  comment: Diagnose Sekundärluftoffset, Meßabbruch
-- rt: '0x018C'
-  bitmask: '0x10'
-  name: B_dsltab
-  comment: Diagnose Ventilichtheit, Meßabbruch
-- rt: '0x018C'
-  bitmask: '0x08'
-  name: B_dslmab
-  comment: Diagnose Sekundärluftmasse, Meßabbruch
-- rt: '0x018C'
-  bitmask: '0x04'
-  name: B_dslerr
-  comment: Zusammenfassung Abbruchmerkmale Sekundärluftdiagnose
-- rt: '0x018C'
-  bitmask: '0x02'
-  name: B_dsl
-  comment: Bedingung Diagnoseanforderung
-- rt: '0x018C'
-  bitmask: '0x01'
-  name: B_dslmes
-  comment: 'Bedingung: Freigabe Meßfenster'
-- rt: '0x018D'
-  bitmask: '0x80'
-  name: Z_sls
-  comment: 'Zyklusflag: Sekundärluft-System'
-- rt: '0x018D'
-  bitmask: '0x40'
-  name: E_sls
-  comment: 'Errorflag: Sekundärluft-System'
-- rt: '0x018D'
-  bitmask: '0x20'
-  name: B_errofs
-  comment: 'Bedingung: zulässige Sekundärluftmassen-Offset überschritten'
-- rt: '0x018D'
-  bitmask: '0x10'
-  name: B_dsl5
-  comment: 'Diagnose Phase 5: Offset Sekundärluftmasse'
-- rt: '0x018D'
-  bitmask: '0x08'
-  name: B_dsl4
-  comment: 'Bedingung Phase 4: Sekundärluftmasse aus Adaption/Zusatzdiagnose'
-- rt: '0x018D'
-  bitmask: '0x04'
-  name: B_dsl3
-  comment: 'Diagnose Phase3: Offset Sekundärluftmasse'
-- rt: '0x018D'
-  bitmask: '0x02'
-  name: B_dsl2
-  comment: 'Diagnose Phase 2: Ventildichtheit'
-- rt: '0x018D'
-  bitmask: '0x01'
-  name: B_dsl1
-  comment: 'Diagnose Phase 1: Bestimmung Sekundärluftmasse'
-- rt: '0x018E'
-  bitmask: '0x80'
-  name: B_slas
-  comment: Anforderung Sekundärluftadaptionsphase setzen
-- rt: '0x018E'
-  bitmask: '0x40'
-  name: B_slar
-  comment: Anforderung Sekundärluftadaptionsphase zurücksetzen
-- rt: '0x018E'
-  bitmask: '0x20'
-  name: B_sla
-  comment: Anforderung Sekundärluftadaptionsphase
-- rt: '0x018E'
-  bitmask: '0x10'
-  name: B_dslo
-  comment: Diagnose Sekundärluftmassenoffset
-- rt: '0x018E'
-  bitmask: '0x08'
-  name: B_dslme
-  comment: Diagnose Sekundärluftmasse, Meßfreigabe
-- rt: '0x018E'
-  bitmask: '0x04'
-  name: B_dsloe
-  comment: Diagnose Sekundärluftoffset, Meßfreigabe
-- rt: '0x018E'
-  bitmask: '0x02'
-  name: B_mslmin
-  comment: Bedingung sehr geringe Sekundärluftmasse aus Meßphase
-- rt: '0x018E'
-  bitmask: '0x01'
-  name: TYP_sls
-  comment: 'Fehlertyp: Sekundärluftsystem'
-- rt: '0x018F'
-  bitmask: '0x80'
-  name: Z_tes
-  comment: 'Zyklusflag: Tankentlüftungssystem'
-- rt: '0x018F'
-  bitmask: '0x40'
-  name: E_tes
-  comment: 'Errorflag: Tankentlüftungssystem'
-- rt: '0x018F'
-  bitmask: '0x20'
-  name: B_teviol
-  comment: Bedingung TEV aus der Reaktion der Leerlaufregelung als i.O. erkannt
-- rt: '0x018F'
-  bitmask: '0x10'
-  name: B_tevnio
-  comment: Bedingung TEV in aktiver Prüfung als defekt erkannt
-- rt: '0x018F'
-  bitmask: '0x08'
-  name: B_dteendl
-  comment: Bedingung Diagnose TEV über Luftprüfung erfolgreich zu Ende
-- rt: '0x018F'
-  bitmask: '0x04'
-  name: B_dtelnm
-  comment: LL-Prüfung Diagnose TEV nicht möglich
-- rt: '0x018F'
-  bitmask: '0x02'
-  name: B_dtest
-  comment: Start für TEV-Ansteuerung
-- rt: '0x018F'
-  bitmask: '0x01'
-  name: B_dteaam
-  comment: Bedingung Aufsteuerprüfung für TEV Diagnose aktiv möglich
-- rt: '0x0190'
-  bitmask: '0x80'
-  name: Z_tes
-  comment: 'Zyklusflag: Tankentlüftungssystem'
-- rt: '0x0190'
-  bitmask: '0x40'
-  name: E_tes
-  comment: 'Errorflag: Tankentlüftungssystem'
-- rt: '0x0190'
-  bitmask: '0x20'
-  name: B_dteabu
-  comment: Bedingung Abbruch TE Diagnose ohne Prüfergebnis
-- rt: '0x0190'
-  bitmask: '0x10'
-  name: B_dtest
-  comment: Start für TEV-Ansteuerung
-- rt: '0x0190'
-  bitmask: '0x08'
-  name: B_tevior
-  comment: Bedingung TEV aus fr-Abweichung als i.O. erkannt.
-- rt: '0x0190'
-  bitmask: '0x04'
-  name: B_dternm
-  comment: Bedingung kein fr-Hub für Diagnose TEV vorhanden
-- rt: '0x0190'
-  bitmask: '0x02'
-  name: B_dteres
-  comment: Bedingung TEV Diagnose Reset
-- rt: '0x0190'
-  bitmask: '0x01'
-  name: B_dteaa
-  comment: Bedingung Aufsteuerprüfung für TEV Diagnose aktiv
-- rt: '0x0191'
-  bitmask: '0x80'
-  name: B_tevioi
-  comment: Bedingung TEV durch DLDP (Initialspülung) als i.O. erkannt.
-- rt: '0x0191'
-  bitmask: '0x40'
-  name: B_teviot
-  comment: Bedingung TEV durch DLDP (Abfallzeiterhöhung) als i.O. erkannt.
-- rt: '0x0191'
-  bitmask: '0x20'
-  name: B_dtelnm
-  comment: LL-Prüfung Diagnose TEV nicht möglich
-- rt: '0x0191'
-  bitmask: '0x10'
-  name: B_dternm
-  comment: Bedingung kein fr-Hub für Diagnose TEV vorhanden
-- rt: '0x0191'
-  bitmask: '0x08'
-  name: B_dtepm
-  comment: Bedingung passive TEV Diagnose möglich
-- rt: '0x0191'
-  bitmask: '0x04'
-  name: B_dtelbm
-  comment: Bedingung Bewertung des Lambda Reglers bei Diagnose TEV möglich
-- rt: '0x0191'
-  bitmask: '0x02'
-  name: B_dtephm
-  comment: Bedingung physikalische Freigabe DTEV
-- rt: '0x0191'
-  bitmask: '0x01'
-  name: B_dteenf
-  comment: Bedingung Diagnose TEV wegen System-Error nicht freigegeben
-- rt: '0x0192'
-  bitmask: '0x40'
-  name: B_dtelbm
-  comment: Bedingung Bewertung des Lambda Reglers bei Diagnose TEV möglich
-- rt: '0x0192'
-  bitmask: '0x20'
-  name: B_dteres
-  comment: Bedingung TEV Diagnose Reset
-- rt: '0x0192'
-  bitmask: '0x10'
-  name: B_dtenam
-  comment: Bedingung TEV Diagnose nur über Aufsteuerprüfung möglich
-- rt: '0x0192'
-  bitmask: '0x08'
-  name: B_dtelbr
-  comment: Bedingung Reset Flip-Flop Passiv-Prüfung DTEV möglich
-- rt: '0x0192'
-  bitmask: '0x04'
-  name: B_gap
-  comment: Bedingung Gemischadaptionsphase aktiv
-- rt: '0x0192'
-  bitmask: '0x02'
-  name: B_dtepm
-  comment: Bedingung passive TEV Diagnose möglich
-- rt: '0x0192'
-  bitmask: '0x01'
-  name: B_teviop
-  comment: Bedingung TEV in passiver Prüfung als i.O. erkannt.
-- rt: '0x0193'
-  bitmask: '0x80'
-  name: B_msloff
-  comment: Sekundärluftmasse ausgeräumt nach Sekundärluftphase
-- rt: '0x0193'
-  bitmask: '0x40'
-  name: B_mslon
-  comment: Sekundärluftmasse eingeschwungen nach Start der Sekundärluft
-- rt: '0x0193'
-  bitmask: '0x20'
-  name: B_dslset
-  comment: 'Bedingung: Setzen Sekundärluftadaption/Kurztest'
-- rt: '0x0193'
-  bitmask: '0x10'
-  name: B_slpena
-  comment: Bedingung Einschalten der Sekundärluftpumpe
-- rt: '0x0193'
-  bitmask: '0x08'
-  name: B_trkh
-  comment: Bedingung Katheizen, Thermoreaktor wirksam
-- rt: '0x0193'
-  bitmask: '0x04'
-  name: B_khll
-  comment: Bedingung Katheizen Leerlauf (Abbruchbedingung)
-- rt: '0x0193'
-  bitmask: '0x02'
-  name: B_khab
-  comment: Bedingung Katheizen Abbruch
-- rt: '0x0193'
-  bitmask: '0x01'
-  name: B_kh
-  comment: Bedingung Kat-Heizung
-- rt: '0x0194'
-  bitmask: '0x10'
-  name: B_slsinhi
-  comment: Bedingung sperrt Setzen von Bit B_sls
-- rt: '0x0194'
-  bitmask: '0x08'
-  name: B_slpofst
-  comment: Bedingung für Setzen Flip Flop  B_slpoff
-- rt: '0x0194'
-  bitmask: '0x04'
-  name: B_slkhof
-  comment: Bedingung Abschalten der Sekundärluftpumpe durch imlpr-Schwelle
-- rt: '0x0194'
-  bitmask: '0x02'
-  name: B_slpoff
-  comment: Sekundärluftpumpe abgeschaltet
-- rt: '0x0194'
-  bitmask: '0x01'
-  name: B_slsoff
-  comment: Sekundärlufteinblasung nach Ausräumen der Sekundärluft beendet
-- rt: '0x0195'
-  bitmask: '0x40'
-  name: B_fkpvdk
-  comment: Bedingung für die Freigabe des langsamen multiplikativen Füllungsabgleichs
-- rt: '0x0195'
-  bitmask: '0x20'
-  name: E_dk
-  comment: 'Errorflag: DK - Potentiometer'
-- rt: '0x0195'
-  bitmask: '0x10'
-  name: E_lm
-  comment: 'Errorflag: Hauptlastsensor'
-- rt: '0x0195'
-  bitmask: '0x08'
-  name: B_fkpvmn
-  comment: langsame Massenstromadaption fkpvdk im unteren Anschlag
-- rt: '0x0195'
-  bitmask: '0x04'
-  name: B_fkpvmx
-  comment: langsame Massenstromadaption fkpvdk im oberen Anschlag
-- rt: '0x0195'
-  bitmask: '0x02'
-  name: B_fkmsmn
-  comment: schnelle Massenstromadaption fkmsdks im unteren Anschlag
-- rt: '0x0195'
-  bitmask: '0x01'
-  name: B_fkmsmx
-  comment: schnelle Massenstromadaption fkmsdks im oberen Anschlag
-- rt: '0x0196'
-  bitmask: '0x80'
-  name: Z_llr
-  comment: 'Zyklusflag: Diagnose Leerlaufregelung, Steller'
-- rt: '0x0196'
-  bitmask: '0x40'
-  name: E_llr
-  comment: 'Errorflag: Leerlaufregelung'
-- rt: '0x0196'
-  bitmask: '0x20'
-  name: B_dllr
-  comment: 'Aktive diagnose: Leerlaufstellerdiagnose'
-- rt: '0x0196'
-  bitmask: '0x10'
-  name: B_dtes
-  comment: 'Aktive Diagnose: Tankentlüftungssystem'
-- rt: '0x0196'
-  bitmask: '0x08'
-  name: B_madfk
-  comment: Bedingung Momentenadaption Fahrstufe und Klimakompressor ein
-- rt: '0x0196'
-  bitmask: '0x04'
-  name: B_madfs
-  comment: Bedingung Momentenadaption Fahrstufe ein
-- rt: '0x0196'
-  bitmask: '0x02'
-  name: B_madko
-  comment: Bedingung Momentenadaption Klimakompressor ein
-- rt: '0x0196'
-  bitmask: '0x01'
-  name: B_madll
-  comment: Bedingung Momentenadaption ohne Last
-- rt: '0x0197'
-  bitmask: '0x08'
-  name: Z_lm
-  comment: "Zyklusflag:\tLMM/HLM/HFM"
-- rt: '0x0197'
-  bitmask: '0x04'
-  name: E_lm
-  comment: 'Errorflag: Hauptlastsensor'
-- rt: '0x0197'
-  bitmask: '0x02'
-  name: B_hfm
-  comment: Bedingung HFM messbereit
-- rt: '0x0197'
-  bitmask: '0x01'
-  name: B_ehfs
-  comment: Bedingung Ersatzwert Hauptfüllungssensor
-- rt: '0x0198'
-  bitmask: '0x80'
-  name: Z_dvev
-  comment: 'Zyklusflag: DV-E Fehler bei Verstärkerabgleich'
-- rt: '0x0198'
-  bitmask: '0x40'
-  name: Z_dvef
-  comment: 'Zyklusflag: DV-E Fehler bei Federprüfung'
-- rt: '0x0198'
-  bitmask: '0x20'
-  name: B_fprzab
-  comment: 'Bedingung: DV-E-Rückstellfederprüfung Abbruch, Feder schließt nicht'
-- rt: '0x0198'
-  bitmask: '0x10'
-  name: B_fprrdy
-  comment: DK-Rückstellfeder-Prüfung beendet
-- rt: '0x0198'
-  bitmask: '0x08'
-  name: B_fprzok
-  comment: 'Bedingung: DV-E-Rückstellfederprüfung i.O.'
-- rt: '0x0198'
-  bitmask: '0x04'
-  name: B_nlperf
-  comment: 'Dauer-RAM, Bedingung: NLP-Erfassung erfolgreich'
-- rt: '0x0198'
-  bitmask: '0x02'
-  name: B_lrnerf
-  comment: Lernerfolg Bit
-- rt: '0x0198'
-  bitmask: '0x01'
-  name: B_lrnws
-  comment: Lernwertspeicherung Bit
-- rt: '0x0199'
-  bitmask: '0x40'
-  name: B_mibeg
-  comment: Bedingung Momentenbegrenzung ist aktiv
-- rt: '0x0199'
-  bitmask: '0x20'
-  name: E_dveu
-  comment: 'Errorflag: DV-E Fehler beim UMA-Lernen'
-- rt: '0x0199'
-  bitmask: '0x10'
-  name: E_dven
-  comment: 'Errorflag: DV-E Fehler bei Prüfung Notluftposition'
-- rt: '0x0199'
-  bitmask: '0x08'
-  name: E_dvev
-  comment: 'Errorflag: DV-E Fehler bei Verstärkerabgleich'
-- rt: '0x0199'
-  bitmask: '0x04'
-  name: E_dvef
-  comment: 'Errorflag: DV-E Fehler bei Federprüfung'
-- rt: '0x0199'
-  bitmask: '0x02'
-  name: Z_dveu
-  comment: 'Zyklusflag: DV-E Fehler beim UMA-Lernen'
-- rt: '0x0199'
-  bitmask: '0x01'
-  name: Z_dven
-  comment: 'Zyklusflag: DV-E Fehler bei Prüfung Notluftposition'
-- rt: '0x019A'
-  bitmask: '0x80'
-  name: B_lamfas
-  comment: Verbot  für Lambda Fahrerwunsch Aktivierung
-- rt: '0x019A'
-  bitmask: '0x40'
-  name: B_lambts
-  comment: Lambda für Bauteileschutz ist aktiv
-- rt: '0x019A'
-  bitmask: '0x20'
-  name: B_lamnswl
-  comment: Lambda-Motor-Soll für Nachstart und Warmlauf aktiv
-- rt: '0x019A'
-  bitmask: '0x10'
-  name: B_lamka
-  comment: Lambda für Kat-Ausräumen aktiv
-- rt: '0x019A'
-  bitmask: '0x08'
-  name: B_fasla
-  comment: 'Bedingung: externe Anforderung an Sekundärluft aktiv'
-- rt: '0x019A'
-  bitmask: '0x04'
-  name: B_kh
-  comment: Bedingung Kat-Heizung
-- rt: '0x019A'
-  bitmask: '0x02'
-  name: B_lamlash
-  comment: Bedingung für Abmagern/Anfetten in %LAMKO
-- rt: '0x019A'
-  bitmask: '0x01'
-  name: B_falsh
-  comment: Bedingung Funktionsanforderung Lambda-Sonde hinter KAT
-- rt: '0x019B'
-  bitmask: '0x10'
-  name: B_tkatbts
-  comment: Bedingung Katalysatortemperatur für Bauteileschutz überschritten
-- rt: '0x019B'
-  bitmask: '0x08'
-  name: B_tabgbts
-  comment: Bedingung Abgastemperatur für Bauteileschutz überschritten
-- rt: '0x019B'
-  bitmask: '0x04'
-  name: B_lambts
-  comment: Lambda für Bauteileschutz ist aktiv
-- rt: '0x019B'
-  bitmask: '0x02'
-  name: B_lalgf
-  comment: Bedingung Laufgrenze "Lambda fett" aktiv
-- rt: '0x019B'
-  bitmask: '0x01'
-  name: B_bevab
-  comment: Bedingung EV-Abschaltung auf Bank/Bank1
-- rt: '0x01A7'
-  bitmask: '0x04'
-  name: B_ldsuas
-  comment: Bedingung Turbo Umluftsteuerung stationär aktiv
-- rt: '0x01A7'
-  bitmask: '0x02'
-  name: B_ldsuad
-  comment: Bedingung Turbo Umluftsteuerung dynamisch aktiv
-- rt: '0x01A7'
-  bitmask: '0x01'
-  name: B_ldsua
-  comment: Bedingung LDR Schubumluftventil aktiv (offen)
-- rt: '0x01C1'
-  bitmask: '0x01'
-  name: B_lustop
-  comment: Laufunruhe-Berechnung gesperrt
-- rt: '0x01C2'
-  bitmask: '0x01'
-  name: B_fonstp
-  comment: Bedingung fuel-on Adaption gestoppt
-- rt: '0x01C9'
-  bitmask: '0x02'
-  name: B_milabg
-  comment: Mil leuchtet Abgasrelevant
-- rt: '0x01C9'
-  bitmask: '0x01'
-  name: B_milkat
-  comment: Mil blinkt wegen Kat schädigende Aussetzer
-- rt: '0x01D2'
-  bitmask: '0x10'
-  name: TYP_scr
-  comment: ''
-- rt: '0x01D2'
-  bitmask: '0x08'
-  name: TYP_scr
-  comment: ''
-- rt: '0x01D2'
-  bitmask: '0x04'
-  name: TYP_scr
-  comment: ''
-- rt: '0x01D2'
-  bitmask: '0x02'
-  name: Z_scr
-  comment: 'Zyklusflag: CRAS-Signal'
-- rt: '0x01D2'
-  bitmask: '0x01'
-  name: E_scr
-  comment: 'Errorflag: CRAS-Signal'
-- rt: '0x01D3'
-  bitmask: '0x10'
-  name: B_epwmcs
-  comment: Bedingung PWM-Crash-Sensor-Signal ist fehlerhaft
-- rt: '0x01D3'
-  bitmask: '0x08'
-  name: B_crcan
-  comment: Bedingung Crash erkannt (aus plausibilisiertem CAN-Signal)
-- rt: '0x01D3'
-  bitmask: '0x04'
-  name: B_aircan
-  comment: Bedingung Crash vom Airbag-SG
-- rt: '0x01D3'
-  bitmask: '0x02'
-  name: B_airbz
-  comment: Bedingung Botschaftszähler der Airbag-Botschaft unplausibel
-- rt: '0x01D3'
-  bitmask: '0x01'
-  name: B_airbag
-  comment: Bedingung Airbag ausgelöst
-- rt: '0x01F0'
-  bitmask: '0x40'
-  name: B_krldy
-  comment: Bedingung Lastdynamik für Klopferkennung aktiv
-- rt: '0x01F0'
-  bitmask: '0x20'
-  name: B_krndy
-  comment: Bedingung Drehzahldynamik für Klopferkennung aktiv
-- rt: '0x01F0'
-  bitmask: '0x10'
-  name: B_synph
-  comment: Bedingung Synchronisation Phase
-- rt: '0x01F0'
-  bitmask: '0x08'
-  name: B_kr
-  comment: Bedingung Klopfregelung aktiv
-- rt: '0x01F0'
-  bitmask: '0x04'
-  name: Z_ks4
-  comment: 'Zyklusflag: Klopfsensor 4'
-- rt: '0x01F0'
-  bitmask: '0x02'
-  name: E_ks4
-  comment: 'Errorflag: Klopfsensor 4'
-- rt: '0x01F0'
-  bitmask: '0x01'
-  name: B_syserrk
-  comment: Bedingung für mind. 1 Fehler (E_abc) im System erkannt (unmaskiert)
-- rt: '0x01F1'
-  bitmask: '0x08'
-  name: B_sa
-  comment: Bedingung Schubabschalten
-- rt: '0x01F1'
-  bitmask: '0x04'
-  name: Z_vfz
-  comment: 'Zyklusflag: Fahrzeug-Geschwindigkeit'
-- rt: '0x01F1'
-  bitmask: '0x02'
-  name: E_vfz
-  comment: 'Errorflag: Fahrzeug-Geschwindigkeit'
-- rt: '0x01F1'
-  bitmask: '0x01'
-  name: B_syserrk
-  comment: Bedingung für mind. 1 Fehler (E_abc) im System erkannt (unmaskiert)
-- rt: '0x01F2'
-  bitmask: '0x20'
-  name: TYP_hsvsa
-  comment: ''
-- rt: '0x01F2'
-  bitmask: '0x10'
-  name: TYP_hsv
-  comment: 'Fehlertyp: Heizung Lambdasonde 1 vor Kat'
-- rt: '0x01F2'
-  bitmask: '0x08'
-  name: B_sbbvk
-  comment: Bedingung Sonde betriebsbereit vor Kat
-- rt: '0x01F2'
-  bitmask: '0x01'
-  name: B_syserrk
-  comment: Bedingung für mind. 1 Fehler (E_abc) im System erkannt (unmaskiert)
-- rt: '0x01F3'
-  bitmask: '0x20'
-  name: TYP_hsvsa2
-  comment: ''
-- rt: '0x01F3'
-  bitmask: '0x01'
-  name: B_syserrk
-  comment: Bedingung für mind. 1 Fehler (E_abc) im System erkannt (unmaskiert)
-- rt: '0x020B'
-  bitmask: '0x80'
-  name: B_ldp
-  comment: Bedingung LDP wird angesteuert erfüllt
-- rt: '0x020B'
-  bitmask: '0x40'
-  name: B_ldpi
-  comment: Bedingung Reed-Kontakt Leckdiagnosepumpe
-- rt: '0x020B'
-  bitmask: '0x20'
-  name: B_fev12
-  comment: Bedingung Reedkontakt öffnet in der Fast Pulse Phase
-- rt: '0x020B'
-  bitmask: '0x08'
-  name: B_dldp
-  comment: 'Aktive Diagnose: Leckdiagnosemodul'
-- rt: '0x020B'
-  bitmask: '0x04'
-  name: Z_tesg
-  comment: 'Zyklusflag: Tankentlüftungssystem Grobleck'
-- rt: '0x020B'
-  bitmask: '0x02'
-  name: E_ldpe
-  comment: 'Errorflag: Leckdiagnosepumpe Endstufe'
-- rt: '0x020B'
-  bitmask: '0x01'
-  name: B_syserrk
-  comment: Bedingung für mind. 1 Fehler (E_abc) im System erkannt (unmaskiert)
-- rt: '0x020D'
-  bitmask: '0x80'
-  name: TYP_nwkw
-  comment: ''
-- rt: '0x020D'
-  bitmask: '0x40'
-  name: TYP_nwkw
-  comment: ''
-- rt: '0x020D'
-  bitmask: '0x20'
-  name: B_phad
-  comment: Adaption Kurbel/Nockenwelle erfolgt
-- rt: '0x020D'
-  bitmask: '0x10'
-  name: B_nwflade
-  comment: Bedingung Flankenadaption Nockenwelle Einlaß angefordert
-- rt: '0x020D'
-  bitmask: '0x08'
-  name: B_spsa
-  comment: Bedingung Winkeladaption Kurbel- zu Nockenwelle zulässig
-- rt: '0x020D'
-  bitmask: '0x04'
-  name: Z_ph
-  comment: 'Zyklusflag: Phasensensor'
-- rt: '0x020D'
-  bitmask: '0x02'
-  name: E_ph
-  comment: 'Errorflag: Phasensensor'
-- rt: '0x020D'
-  bitmask: '0x01'
-  name: B_syserrk
-  comment: Bedingung für mind. 1 Fehler (E_abc) im System erkannt (unmaskiert)
-- rt: '0x020E'
-  bitmask: '0x80'
-  name: B_frmin
-  comment: Lambda-Regelung setzt Bit sobald FR am Anschlag FRMIN
-- rt: '0x020E'
-  bitmask: '0x40'
-  name: B_frmax
-  comment: Lambda-Regelung setzt Bit sobald FR am Anschlag FRMAX
-- rt: '0x020E'
-  bitmask: '0x20'
-  name: B_elsu
-  comment: Bedingung Fehler oder Fehler-Vormerkung LSU (keine Betriebsbereitschaft)
-- rt: '0x020E'
-  bitmask: '0x10'
-  name: B_dylsuav
-  comment: Dynamiküberwachung LSU aktiv
-- rt: '0x020E'
-  bitmask: '0x08'
-  name: B_falsu
-  comment: Bedingung Funktionsanforderung Lambda-Sonde vor KAT
-- rt: '0x020E'
-  bitmask: '0x04'
-  name: Z_lsv
-  comment: 'Zyklusflag: Lambda-Sonde vor Kat'
-- rt: '0x020E'
-  bitmask: '0x02'
-  name: E_lsv
-  comment: 'Errorflag: Lambda-Sonde vor Kat'
-- rt: '0x020E'
-  bitmask: '0x01'
-  name: B_syserrk
-  comment: Bedingung für mind. 1 Fehler (E_abc) im System erkannt (unmaskiert)
-- rt: '0x0210'
-  bitmask: '0x80'
-  name: B_frau
-  comment: Einschaltbedingung für Adaption von frau
-- rt: '0x0210'
-  bitmask: '0x40'
-  name: B_rkat
-  comment: Bedingung Lernbereich additive Korrektur pro Zeit aktiv
-- rt: '0x0210'
-  bitmask: '0x20'
-  name: B_lrar
-  comment: Bedingung reduzierte Korrekturbereiche in der LRA
-- rt: '0x0210'
-  bitmask: '0x10'
-  name: B_lra
-  comment: Bedingung Gemischadaption freigegeben
-- rt: '0x0210'
-  bitmask: '0x08'
-  name: Z_rkat
-  comment: Zyklusflag:LR-Adaption additiv pro Zeit
-- rt: '0x0210'
-  bitmask: '0x04'
-  name: Z_frau
-  comment: Zyklusflag:LR-Adaption unterer multiplikativer Bereich
-- rt: '0x0210'
-  bitmask: '0x02'
-  name: E_rkat
-  comment: Errorflag DKVS (additive Korrektur pro Zeit)
-- rt: '0x0210'
-  bitmask: '0x01'
-  name: B_syserrk
-  comment: Bedingung für mind. 1 Fehler (E_abc) im System erkannt (unmaskiert)
-- rt: '0x0212'
-  bitmask: '0x04'
-  name: Z_egfe
-  comment: 'Zyklusflag: Eingangsgrößen Füllungserfassung'
-- rt: '0x0212'
-  bitmask: '0x02'
-  name: E_lm
-  comment: 'Errorflag: Hauptlastsensor'
-- rt: '0x0212'
-  bitmask: '0x01'
-  name: B_syserrk
-  comment: Bedingung für mind. 1 Fehler (E_abc) im System erkannt (unmaskiert)
-- rt: '0x0213'
-  bitmask: '0x10'
-  name: B_atmtpk
-  comment: Bedingung Taupunkt hinter Kat ueberschritten
-- rt: '0x0213'
-  bitmask: '0x08'
-  name: B_rinh
-  comment: Bedingung Innenwiderstand Ri-Messung der Nernstsonde aktiv hinter Kat
-- rt: '0x0213'
-  bitmask: '0x04'
-  name: Z_hshe
-  comment: Zyklusflag:Lambdasonden-Heizung hinter Katalysator (Endstufe)
-- rt: '0x0213'
-  bitmask: '0x02'
-  name: E_hshe
-  comment: 'Errorflag: Lambdasonden-Heizung hinter Katalysator (Endstufe)'
-- rt: '0x0213'
-  bitmask: '0x01'
-  name: B_syserrk
-  comment: Bedingung für mind. 1 Fehler (E_abc) im System erkannt (unmaskiert)
-- rt: '0x0215'
-  bitmask: '0x80'
-  name: B_sigflsh
-  comment: Signalunterbrechung (Kabelbruch) Bei Sonde hinter KAT erkannt
-- rt: '0x0215'
-  bitmask: '0x40'
-  name: B_nplflsh
-  comment: Adernschluß bei Sonde hinter KAT erkannt
-- rt: '0x0215'
-  bitmask: '0x20'
-  name: B_risigh
-  comment: Bedingung Signalunterbrechung Sondenmasse mit Ri-Diagnose hinter KAT
-- rt: '0x0215'
-  bitmask: '0x10'
-  name: B_sbbhk
-  comment: Bedingung Sonde betriebsbereit hinter Kat
-- rt: '0x0215'
-  bitmask: '0x08'
-  name: B_falsh
-  comment: Bedingung Funktionsanforderung Lambda-Sonde hinter KAT
-- rt: '0x0215'
-  bitmask: '0x04'
-  name: Z_lsh
-  comment: 'Zyklusflag: Lambda-Sonde hinter Kat'
-- rt: '0x0215'
-  bitmask: '0x02'
-  name: E_lsh
-  comment: 'Errorflag: Lambda-Sonde hinter Kat'
-- rt: '0x0215'
-  bitmask: '0x01'
-  name: B_syserrk
-  comment: Bedingung für mind. 1 Fehler (E_abc) im System erkannt (unmaskiert)
-- rt: '0x0217'
-  bitmask: '0x80'
-  name: B_ushkf
-  comment: Bedingung Sondenspannung hinter Kat "Fett" (Sollwert überschritten)
-- rt: '0x0217'
-  bitmask: '0x40'
-  name: B_ushkm
-  comment: Bedingung Sondenspannung hinter KAT "Mager" (Sollwert unterschritten)
-- rt: '0x0217'
-  bitmask: '0x20'
-  name: B_trfash
-  comment: Bedingung Kurztrip einleiten für Schwingungsprüfung Sonde hinter KAT
-- rt: '0x0217'
-  bitmask: '0x10'
-  name: B_mlustest
-  comment: Bedingung ml ist innerhalb den Schwellen
-- rt: '0x0217'
-  bitmask: '0x08'
-  name: B_fash
-  comment: Bedingung Funktionsanforderung Schwingungsprüfung
-- rt: '0x0217'
-  bitmask: '0x04'
-  name: Z_lash
-  comment: Zyklusflag:Lambda-Sondenalterung hinter Kat.
-- rt: '0x0217'
-  bitmask: '0x02'
-  name: E_lash
-  comment: 'Errorflag: Lambda-Sondenalterung hinter Katalysator'
-- rt: '0x0217'
-  bitmask: '0x01'
-  name: B_syserrk
-  comment: Bedingung für mind. 1 Fehler (E_abc) im System erkannt (unmaskiert)
-- rt: '0x0219'
-  bitmask: '0x80'
-  name: B_vekat
-  comment: Fehlerverdacht bei Katdiagnose
-- rt: '0x0219'
-  bitmask: '0x40'
-  name: B_dktnr
-  comment: 'DKAT: n/rl-Bereich verlassen'
-- rt: '0x0219'
-  bitmask: '0x20'
-  name: B_dktsp
-  comment: physikalische Stoppbedingung
-- rt: '0x0219'
-  bitmask: '0x10'
-  name: B_dktsb
-  comment: Bankspezifische Stoppbedingung
-- rt: '0x0219'
-  bitmask: '0x08'
-  name: B_fakat
-  comment: Bedingung Funktionsanforderung Katalysatorüberwachung
-- rt: '0x0219'
-  bitmask: '0x04'
-  name: Z_kat
-  comment: "Zyklusflag:\tKatalysator-Konvertierung"
-- rt: '0x0219'
-  bitmask: '0x02'
-  name: E_kat
-  comment: 'Errorflag: Katalysator-Konvertierung'
-- rt: '0x0219'
-  bitmask: '0x01'
-  name: B_syserrk
-  comment: Bedingung für mind. 1 Fehler (E_abc) im System erkannt (unmaskiert)
-- rt: '0x021B'
-  bitmask: '0x80'
-  name: B_dfrmoff
-  comment: 'frm-Offset-Schwelle überschritten: zeigt Vorsteuerproblem'
-- rt: '0x021B'
-  bitmask: '0x40'
-  name: B_dslmes
-  comment: 'Bedingung: Freigabe Meßfenster'
-- rt: '0x021B'
-  bitmask: '0x20'
-  name: B_dslmab
-  comment: Diagnose Sekundärluftmasse, Meßabbruch
-- rt: '0x021B'
-  bitmask: '0x10'
-  name: B_mxslvpr
-  comment: 'Fehlerart lokal: Sekundärluftmasse bei Ventildichtheitsprüfung zu groß'
-- rt: '0x021B'
-  bitmask: '0x08'
-  name: B_mnslspr
-  comment: 'Fehlerart lokal: Sekundärluftmasse zu gering'
-- rt: '0x021B'
-  bitmask: '0x04'
-  name: Z_sls
-  comment: 'Zyklusflag: Sekundärluft-System'
-- rt: '0x021B'
-  bitmask: '0x02'
-  name: E_slv
-  comment: 'Errorflag: Sekundärluftventil'
-- rt: '0x021B'
-  bitmask: '0x01'
-  name: B_syserrk
-  comment: Bedingung für mind. 1 Fehler (E_abc) im System erkannt (unmaskiert)
-- rt: '0x021D'
-  bitmask: '0x80'
-  name: B_dteanfl
-  comment: abgelaufene Zeit ab die, das Tastverhälnis aus DTEV größer Schwelle
-- rt: '0x021D'
-  bitmask: '0x40'
-  name: B_dteabu
-  comment: Bedingung Abbruch TE Diagnose ohne Prüfergebnis
-- rt: '0x021D'
-  bitmask: '0x20'
-  name: B_dteaab
-  comment: Bedingung DTEV-Abbruch wegen Verlassen Aktivierungsbedingungen
-- rt: '0x021D'
-  bitmask: '0x10'
-  name: B_dternm
-  comment: Bedingung kein fr-Hub für Diagnose TEV vorhanden
-- rt: '0x021D'
-  bitmask: '0x08'
-  name: B_dtest
-  comment: Start für TEV-Ansteuerung
-- rt: '0x021D'
-  bitmask: '0x04'
-  name: Z_tes
-  comment: 'Zyklusflag: Tankentlüftungssystem'
-- rt: '0x021D'
-  bitmask: '0x02'
-  name: E_tes
-  comment: 'Errorflag: Tankentlüftungssystem'
-- rt: '0x021D'
-  bitmask: '0x01'
-  name: B_syserrk
-  comment: Bedingung für mind. 1 Fehler (E_abc) im System erkannt (unmaskiert)
-- rt: '0x021E'
-  bitmask: '0x80'
-  name: B_lr
-  comment: 'LREB: Bedingung Lambdaregelung (vor Kat); (Bank 1)'
-- rt: '0x021E'
-  bitmask: '0x10'
-  name: B_edkvs
-  comment: Bedingung Adaptionsfehlerschwellen aktuell überschritten
-- rt: '0x021E'
-  bitmask: '0x08'
-  name: B_fakvs
-  comment: Funktionsaufforderung Diagnose Kraftstoffsystem für Schnelltest
-- rt: '0x021E'
-  bitmask: '0x04'
-  name: Z_frst
-  comment: Zyklusmeldung Diagnose Kraftstoffversorgungssystem (Kurztest)
-- rt: '0x021E'
-  bitmask: '0x02'
-  name: E_frst
-  comment: 'Errorflag: Fehler aus Diagnose Kraftstoffversorgungssystem (Kurztest)'
-- rt: '0x021E'
-  bitmask: '0x01'
-  name: B_syserrk
-  comment: Bedingung für mind. 1 Fehler (E_abc) im System erkannt (unmaskiert)
-- rt: '0x0225'
-  bitmask: '0x02'
-  name: B_slsoab
-  comment: Bedingung SLS ohne Abbruchkriterium durchgeführt
-- rt: '0x0225'
-  bitmask: '0x01'
-  name: B_khoab
-  comment: Bedingung Katheizen ohne Abbruchkriterium durchgeführt
-- rt: '0x0258'
-  bitmask: '0x01'
-  name: B_br2k
-  comment: Bedingung Bremse betätigt 2-kanalig erkannt
-- rt: '0x026F'
-  bitmask: '0x80'
-  name: B_nws
-  comment: Bedingung Nockenwellensteuerung
-- rt: '0x026F'
-  bitmask: '0x40'
-  name: B_wnws0e
-  comment: Bedingung NW-Sollwertvorgabe ist 0
-- rt: '0x026F'
-  bitmask: '0x20'
-  name: B_phad
-  comment: Adaption Kurbel/Nockenwelle erfolgt
-- rt: '0x026F'
-  bitmask: '0x10'
-  name: B_bm
-  comment: Bedingung Bezugsmarke erkannt
-- rt: '0x026F'
-  bitmask: '0x08'
-  name: B_spsa
-  comment: Bedingung Winkeladaption Kurbel- zu Nockenwelle zulässig
-- rt: '0x026F'
-  bitmask: '0x04'
-  name: Z_nwkw
-  comment: 'Zyklusflag: Zuordnung Nockenwelle zu Kurbelwelle'
-- rt: '0x026F'
-  bitmask: '0x02'
-  name: E_nwkw
-  comment: 'Errorflag: Zuordnung Nockenwelle zu Kurbelwelle'
-- rt: '0x026F'
-  bitmask: '0x01'
-  name: B_syserrk
-  comment: Bedingung für mind. 1 Fehler (E_abc) im System erkannt (unmaskiert)
-- rt: '0x0296'
-  bitmask: '0x80'
-  name: B_bxf9
-  comment: 'Flip-Flop9: Maximalzeit nach Start für 0.5 mm - Diagnose überschritten'
-- rt: '0x0296'
-  bitmask: '0x40'
-  name: B_bxf8
-  comment: 'Flip-Flop8: Bergabfahrt während 0.5 mm - Diagnose erkannt'
-- rt: '0x0296'
-  bitmask: '0x20'
-  name: B_bxf7
-  comment: 'Flip-Flop7: Motortemperaturdifferenz im Start kleiner Minimalschwelle für 0.5 mm'
-- rt: '0x0296'
-  bitmask: '0x10'
-  name: B_bxf6
-  comment: 'Flip-Flop6: Ansauglufttemperatur größer Maximalschwelle für 0.5 mm - Diagnose'
-- rt: '0x0296'
-  bitmask: '0x08'
-  name: B_bxf5
-  comment: 'Flip-Flop5: Motortemperatur größer Maximalschwelle für 0.5 mm - Diagnose'
-- rt: '0x0296'
-  bitmask: '0x04'
-  name: B_bxf4
-  comment: 'Flip-Flop4: Laständerung größer Maximalschwelle für 0.5 mm - Diagnose'
-- rt: '0x0296'
-  bitmask: '0x02'
-  name: B_bxf3
-  comment: 'Flip-Flop3: Beschleunigung größer Maximalschwelle für 0.5 mm - Diagnose'
-- rt: '0x0296'
-  bitmask: '0x01'
-  name: B_bxf2
-  comment: 'Flip-Flop2: Untere vfz-Schwelle überschrittenh für 0.5 mm - Diagnose'
-- rt: '0x0297'
-  bitmask: '0x80'
-  name: B_bxf9
-  comment: 'Flip-Flop9: Maximalzeit nach Start für 0.5 mm - Diagnose überschritten'
-- rt: '0x0297'
-  bitmask: '0x40'
-  name: B_bxf8
-  comment: 'Flip-Flop8: Bergabfahrt während 0.5 mm - Diagnose erkannt'
-- rt: '0x0297'
-  bitmask: '0x20'
-  name: B_bxf7
-  comment: 'Flip-Flop7: Motortemperaturdifferenz im Start kleiner Minimalschwelle für 0.5 mm'
-- rt: '0x0297'
-  bitmask: '0x10'
-  name: B_bxf6
-  comment: 'Flip-Flop6: Ansauglufttemperatur größer Maximalschwelle für 0.5 mm - Diagnose'
-- rt: '0x0297'
-  bitmask: '0x08'
-  name: B_bxf5
-  comment: 'Flip-Flop5: Motortemperatur größer Maximalschwelle für 0.5 mm - Diagnose'
-- rt: '0x0297'
-  bitmask: '0x04'
-  name: B_bxf4
-  comment: 'Flip-Flop4: Laständerung größer Maximalschwelle für 0.5 mm - Diagnose'
-- rt: '0x0297'
-  bitmask: '0x02'
-  name: B_bxf3
-  comment: 'Flip-Flop3: Beschleunigung größer Maximalschwelle für 0.5 mm - Diagnose'
-- rt: '0x0297'
-  bitmask: '0x01'
-  name: B_bxf2
-  comment: 'Flip-Flop2: Untere vfz-Schwelle überschrittenh für 0.5 mm - Diagnose'
-- rt: '0x0298'
-  bitmask: '0x80'
-  name: B_bxf9
-  comment: 'Flip-Flop9: Maximalzeit nach Start für 0.5 mm - Diagnose überschritten'
-- rt: '0x0298'
-  bitmask: '0x40'
-  name: B_bxf8
-  comment: 'Flip-Flop8: Bergabfahrt während 0.5 mm - Diagnose erkannt'
-- rt: '0x0298'
-  bitmask: '0x20'
-  name: B_bxf7
-  comment: 'Flip-Flop7: Motortemperaturdifferenz im Start kleiner Minimalschwelle für 0.5 mm'
-- rt: '0x0298'
-  bitmask: '0x10'
-  name: B_bxf6
-  comment: 'Flip-Flop6: Ansauglufttemperatur größer Maximalschwelle für 0.5 mm - Diagnose'
-- rt: '0x0298'
-  bitmask: '0x08'
-  name: B_bxf5
-  comment: 'Flip-Flop5: Motortemperatur größer Maximalschwelle für 0.5 mm - Diagnose'
-- rt: '0x0298'
-  bitmask: '0x04'
-  name: B_bxf4
-  comment: 'Flip-Flop4: Laständerung größer Maximalschwelle für 0.5 mm - Diagnose'
-- rt: '0x0298'
-  bitmask: '0x02'
-  name: B_bxf3
-  comment: 'Flip-Flop3: Beschleunigung größer Maximalschwelle für 0.5 mm - Diagnose'
-- rt: '0x0298'
-  bitmask: '0x01'
-  name: B_bxf2
-  comment: 'Flip-Flop2: Untere vfz-Schwelle überschrittenh für 0.5 mm - Diagnose'
-- rt: '0x0299'
-  bitmask: '0x80'
-  name: B_fev12
-  comment: Bedingung Reedkontakt öffnet in der Fast Pulse Phase
-- rt: '0x0299'
-  bitmask: '0x40'
-  name: B_fev11
-  comment: Bedingung TEV nicht erfüllt
-- rt: '0x0299'
-  bitmask: '0x20'
-  name: B_fev10
-  comment: Bedingung kurze Lastüberschreitung rl über Maxwert
-- rt: '0x0299'
-  bitmask: '0x10'
-  name: B_fev9
-  comment: Bedingung lange Lastüberschreitung rl über Maxwert
-- rt: '0x0299'
-  bitmask: '0x08'
-  name: B_fev8
-  comment: Bedingung Bergabfahrt erkannt
-- rt: '0x0299'
-  bitmask: '0x04'
-  name: B_fev7
-  comment: Bedingung Fahrzeuggeschwindigkeit<Minimalwert erfüllt
-- rt: '0x0299'
-  bitmask: '0x02'
-  name: B_fev6
-  comment: Bedingung Höhe>Maximalwert erkannt
-- rt: '0x0299'
-  bitmask: '0x01'
-  name: B_fev5
-  comment: Bedingung Differenz zwischen Motorabstell- und Motorstarttemperatur erkannt
-- rt: '0x02A7'
-  bitmask: '0x80'
-  name: B_phade
-  comment: Adaption Kurbel/Einlaßnockenwelle erfolgt
-- rt: '0x02A7'
-  bitmask: '0x20'
-  name: B_nwrpose
-  comment: 'Bedingung: Ansteuerung der Nockenwellen-Referenzposition durch Steller (Einlass)'
-- rt: '0x02A7'
-  bitmask: '0x04'
-  name: Z_ph
-  comment: 'Zyklusflag: Phasensensor'
-- rt: '0x02A7'
-  bitmask: '0x02'
-  name: E_ph
-  comment: 'Errorflag: Phasensensor'
-- rt: '0x02A7'
-  bitmask: '0x01'
-  name: B_syserrk
-  comment: Bedingung für mind. 1 Fehler (E_abc) im System erkannt (unmaskiert)
-- rt: '0x02AB'
-  bitmask: '0x40'
-  name: Z_lash
-  comment: Zyklusflag:Lambda-Sondenalterung hinter Kat.
-- rt: '0x02AB'
-  bitmask: '0x20'
-  name: B_elaof
-  comment: Bedingung Error Lambda-Offset LSU
-- rt: '0x02AB'
-  bitmask: '0x10'
-  name: B_lrhk
-  comment: Bedingung Lambdaregelung hinter Kat
-- rt: '0x02AB'
-  bitmask: '0x08'
-  name: B_falsu
-  comment: Bedingung Funktionsanforderung Lambda-Sonde vor KAT
-- rt: '0x02AB'
-  bitmask: '0x04'
-  name: Z_lsv
-  comment: 'Zyklusflag: Lambda-Sonde vor Kat'
-- rt: '0x02AB'
-  bitmask: '0x02'
-  name: E_lsv
-  comment: 'Errorflag: Lambda-Sonde vor Kat'
-- rt: '0x02AB'
-  bitmask: '0x01'
-  name: B_syserrk
-  comment: Bedingung für mind. 1 Fehler (E_abc) im System erkannt (unmaskiert)
-- rt: '0x02AC'
-  bitmask: '0x80'
-  name: B_vekat
-  comment: Fehlerverdacht bei Katdiagnose
-- rt: '0x02AC'
-  bitmask: '0x40'
-  name: B_minflsu
-  comment: Dynamikfehler LSU, Bank1
-- rt: '0x02AC'
-  bitmask: '0x20'
-  name: B_drlmx
-  comment: Laständerung unterhalb Schwellwert
-- rt: '0x02AC'
-  bitmask: '0x10'
-  name: B_dylsuav
-  comment: Dynamiküberwachung LSU aktiv
-- rt: '0x02AC'
-  bitmask: '0x08'
-  name: B_falsu
-  comment: Bedingung Funktionsanforderung Lambda-Sonde vor KAT
-- rt: '0x02AC'
-  bitmask: '0x04'
-  name: Z_lsv
-  comment: 'Zyklusflag: Lambda-Sonde vor Kat'
-- rt: '0x02AC'
-  bitmask: '0x02'
-  name: E_lsv
-  comment: 'Errorflag: Lambda-Sonde vor Kat'
-- rt: '0x02AC'
-  bitmask: '0x01'
-  name: B_syserrk
-  comment: Bedingung für mind. 1 Fehler (E_abc) im System erkannt (unmaskiert)
-- rt: '0x02AD'
-  bitmask: '0x80'
-  name: B_lsumx
-  comment: Maximalwert der LSU-Spannung überschritten (CJ110)
-- rt: '0x02AD'
-  bitmask: '0x40'
-  name: B_sigflsu
-  comment: Übersprechen vom Heizertakt auf Lambdasignal
-- rt: '0x02AD'
-  bitmask: '0x20'
-  name: B_hsve
-  comment: Bedingung Endstufe Sondenheizung vor Kat angesteuert
-- rt: '0x02AD'
-  bitmask: '0x10'
-  name: B_heatf
-  comment: Freigabe Heizerkopplung LSU
-- rt: '0x02AD'
-  bitmask: '0x08'
-  name: B_helsu
-  comment: Diagnose Heizerkopplung LSU erfolgt
-- rt: '0x02AD'
-  bitmask: '0x04'
-  name: Z_lsv
-  comment: 'Zyklusflag: Lambda-Sonde vor Kat'
-- rt: '0x02AD'
-  bitmask: '0x02'
-  name: E_lsv
-  comment: 'Errorflag: Lambda-Sonde vor Kat'
-- rt: '0x02AD'
-  bitmask: '0x01'
-  name: B_syserrk
-  comment: Bedingung für mind. 1 Fehler (E_abc) im System erkannt (unmaskiert)
-- rt: '0x02AE'
-  bitmask: '0x80'
-  name: B_evloc
-  comment: 'Status: alle lokalen Einspritzventile werden angesteuert, = B_EVTOT bei einem SG'
-- rt: '0x02AE'
-  bitmask: '0x40'
-  name: B_atmtpa
-  comment: Bedingung Taupunkt vor Kat ueberschritten
-- rt: '0x02AE'
-  bitmask: '0x20'
-  name: B_lsumx
-  comment: Maximalwert der LSU-Spannung überschritten (CJ110)
-- rt: '0x02AE'
-  bitmask: '0x10'
-  name: B_luft
-  comment: LSU an Luft
-- rt: '0x02AE'
-  bitmask: '0x08'
-  name: B_lsuabgl
-  comment: Bedingung Abgleichleitung stetige Lambda-Sonde LSU unterbrochen
-- rt: '0x02AE'
-  bitmask: '0x04'
-  name: Z_lsv
-  comment: 'Zyklusflag: Lambda-Sonde vor Kat'
-- rt: '0x02AE'
-  bitmask: '0x02'
-  name: E_lsv
-  comment: 'Errorflag: Lambda-Sonde vor Kat'
-- rt: '0x02AE'
-  bitmask: '0x01'
-  name: B_syserrk
-  comment: Bedingung für mind. 1 Fehler (E_abc) im System erkannt (unmaskiert)
-- rt: '0x02AF'
-  bitmask: '0x80'
-  name: B_sbbvk
-  comment: Bedingung Sonde betriebsbereit vor Kat
-- rt: '0x02AF'
-  bitmask: '0x40'
-  name: B_nplflsu
-  comment: Lambdasignal nicht plausibel
-- rt: '0x02AF'
-  bitmask: '0x20'
-  name: B_lrasp
-  comment: Bedingung stop LRA wegen LSU-Fehler
-- rt: '0x02AF'
-  bitmask: '0x10'
-  name: B_elsu
-  comment: Bedingung Fehler oder Fehler-Vormerkung LSU (keine Betriebsbereitschaft)
-- rt: '0x02AF'
-  bitmask: '0x08'
-  name: B_plenvh
-  comment: Freigabe DLSU Plauspfad
-- rt: '0x02AF'
-  bitmask: '0x04'
-  name: Z_lsv
-  comment: 'Zyklusflag: Lambda-Sonde vor Kat'
-- rt: '0x02AF'
-  bitmask: '0x02'
-  name: E_lsv
-  comment: 'Errorflag: Lambda-Sonde vor Kat'
-- rt: '0x02AF'
-  bitmask: '0x01'
-  name: B_syserrk
-  comment: Bedingung für mind. 1 Fehler (E_abc) im System erkannt (unmaskiert)
-- rt: '0x02B0'
-  bitmask: '0x80'
-  name: B_lshswok
-  comment: Bedingung Sonde hinter KAT nach Schwingungsprüfung in Ordnung
-- rt: '0x02B0'
-  bitmask: '0x40'
-  name: B_lrhkp
-  comment: 'LRHK: Freigabebedingung P-Anteil Lambdaregelung hinter Kat'
-- rt: '0x02B0'
-  bitmask: '0x20'
-  name: B_plenvh
-  comment: Freigabe DLSU Plauspfad
-- rt: '0x02B0'
-  bitmask: '0x10'
-  name: B_lsumrb
-  comment: LSU Bank1 mager, nicht plausibel
-- rt: '0x02B0'
-  bitmask: '0x08'
-  name: B_lsumra
-  comment: LSU Bank1 mager, nicht plausibel
-- rt: '0x02B0'
-  bitmask: '0x04'
-  name: B_lsupmr
-  comment: Bedingung Lambdasondensignal plausibel mager
-- rt: '0x02B0'
-  bitmask: '0x02'
-  name: B_lshkpft
-  comment: Bedingung Lambdasondensignal hinter dem Kat. plausibel fett
-- rt: '0x02B0'
-  bitmask: '0x01'
-  name: B_frmax
-  comment: Lambda-Regelung setzt Bit sobald FR am Anschlag FRMAX
-- rt: '0x02B1'
-  bitmask: '0x80'
-  name: Z_lash
-  comment: Zyklusflag:Lambda-Sondenalterung hinter Kat.
-- rt: '0x02B1'
-  bitmask: '0x40'
-  name: Z_lsh
-  comment: 'Zyklusflag: Lambda-Sonde hinter Kat'
-- rt: '0x02B1'
-  bitmask: '0x20'
-  name: B_lsulone
-  comment: Bedingung Lambdasondensignal ist Lambda = 1
-- rt: '0x02B1'
-  bitmask: '0x10'
-  name: B_lsuftb
-  comment: LSU Bank1 fett, nicht plausibel
-- rt: '0x02B1'
-  bitmask: '0x08'
-  name: B_lsufta
-  comment: LSU Bank1 fett, nicht plausibel
-- rt: '0x02B1'
-  bitmask: '0x04'
-  name: B_lsupft
-  comment: Bedingung Lambdasondensignal plausibel fett
-- rt: '0x02B1'
-  bitmask: '0x02'
-  name: B_lshkpmr
-  comment: Bedingung Lambdasondensignal hinter dem Kat. plausibel mager
-- rt: '0x02B1'
-  bitmask: '0x01'
-  name: B_frmin
-  comment: Lambda-Regelung setzt Bit sobald FR am Anschlag FRMIN
-- rt: '0x02B2'
-  bitmask: '0x10'
-  name: B_lsuna
-  comment: LSU nicht aktiv, Bank1
-- rt: '0x02B2'
-  bitmask: '0x08'
-  name: B_npvshns
-  comment: 'Bedingung nicht plaus.: Gemisch vor dem Kat Lambda=1, hinter dem Kat nicht'
-- rt: '0x02B2'
-  bitmask: '0x04'
-  name: B_npsna
-  comment: 'Bedingung nicht plaus.: Sonde nicht aktiv'
-- rt: '0x02B2'
-  bitmask: '0x02'
-  name: TYP_lsv
-  comment: 'Fehlertyp: Lambdasonde 1 vor Kat'
-- rt: '0x02B2'
-  bitmask: '0x01'
-  name: TYP_hsv
-  comment: 'Fehlertyp: Heizung Lambdasonde 1 vor Kat'
-- rt: '0x02EF'
-  bitmask: '0x01'
-  name: B_kfzk
-  comment: Bedingung Kennfeld Klopfschutz
-- rt: '0x02F2'
-  bitmask: '0x10'
-  name: B_lrhk
-  comment: Bedingung Lambdaregelung hinter Kat
-- rt: '0x02F2'
-  bitmask: '0x08'
-  name: B_falrshk
-  comment: Bedingung Funktionsanforderung LRSHK
-- rt: '0x02F2'
-  bitmask: '0x04'
-  name: B_dlahieg
-  comment: I-Anteil der Führungsregelung eingeschwungen
-- rt: '0x02F2'
-  bitmask: '0x02'
-  name: B_elaof
-  comment: Bedingung Error Lambda-Offset LSU
-- rt: '0x02F2'
-  bitmask: '0x01'
-  name: B_syserrk
-  comment: Bedingung für mind. 1 Fehler (E_abc) im System erkannt (unmaskiert)
-- rt: '0x032B'
-  bitmask: '0x80'
-  name: B_mdarv
-  comment: kritische Aussetzerrate vorhanden
-- rt: '0x032B'
-  bitmask: '0x40'
-  name: B_mdstop_m
-  comment: Monitor, Misfire Detection gesperrt
-- rt: '0x10C2'
-  bitmask: '0x80'
-  name: S_fgrhs
-  comment: Hauptschalter am FGR-Bedienhebel
-- rt: '0x10C2'
-  bitmask: '0x08'
-  name: B_fgrtuc
-  comment: Bedingung FGR-Tipschalter Beschleunigen betätigt (vom CAN)
-- rt: '0x10C2'
-  bitmask: '0x04'
-  name: B_fgrtdc
-  comment: Bedingung FGR-Tipschalter Verzögern betätigt (vom CAN)
-- rt: '0x10C2'
-  bitmask: '0x02'
-  name: B_fgratc
-  comment: Bedingung FGR-Tipschalter Aus betätigt (vom CAN)
-- rt: '0x10C2'
-  bitmask: '0x01'
-  name: B_fgrhsc
-  comment: Bedingung FGR-Hauptschalter ein (vom CAN)
-- rt: '0x20C2'
-  bitmask: '0x08'
-  name: S_fgrwb
-  comment: Schalter Wiederaufnahme/Beschleunigen am FGR-Bedienhebel
-- rt: '0x20C2'
-  bitmask: '0x04'
-  name: S_fgrsv
-  comment: Schalter Setzen/Verzögern am FGR-Bedienhebel
-- rt: '0x20C2'
-  bitmask: '0x02'
-  name: S_fgrat
-  comment: Schalter Aus-Tip am FGR-Bedienhebelschalter
-- rt: '0x20C2'
-  bitmask: '0x01'
-  name: S_fgrhs
-  comment: Hauptschalter am FGR-Bedienhebel
+- {rt: [0x000D/0x80, 0x008E/0x10], name: fcmEnd, scale: count, comment: Anzahl Einträge im Fehlerspeicher}
+- {rt: 0x000D/0x40, name: tkatm, scale: cat_temp, comment: Katalysatortemperatur aus Modell}
+- {rt: [0x000D/0x20, 0x0014/0x01, 0x0084/0x01], name: B_koe, comment: Bedingung für Kompressoreinschalten}
+- {rt: [0x000D/0x10, 0x0057/0x01, 0x00CF/0x01], name: B_ll, comment: Bedingung Leerlauf}
+- {rt: [0x000D/0x08, 0x002F/0x01, 0x00CF/0x10, 0x00D4/0x01, 0x021E/0x80], name: B_lr, comment: 'LREB: Bedingung Lambdaregelung (vor Kat); (Bank 1)'}
+- {rt: 0x000D/0x04, name: wdkba, unit: '% DK', factor: 100/255, comment: Drosselklappenwinkel bezogen auf unteren Anschlag}
+- {rt: 0x000D/0x02, name: nmot, unit: rpm, factor: 40, comment: Motordrehzahl}
+- {rt: 0x000D/0x01, name: tmot, scale: temp, comment: Motor-Temperatur}
+- {rt: 0x0014/0x10, name: B_sl, comment: Bedingung Servo-Lenkung}
+- {rt: 0x0014/0x08, name: B_sksc, comment: Bedingung heizb. Heckscheibe eingeschaltet aus CAN-Botschaft Clima1}
+- {rt: [0x0014/0x04, 0x0083/0x01], name: B_nac, comment: Bedingung für erhöhte LL-Drehzahl bei Klimaanlage}
+- {rt: 0x0014/0x02, name: B_fs, comment: Bedingung Fahrstufe}
+- {rt: [0x002F/0x04, 0x00CF/0x04, 0x02AD/0x20], name: B_hsve, comment: Bedingung Endstufe Sondenheizung vor Kat angesteuert}
+- {rt: [0x002F/0x02, 0x0188/0x40, 0x01F2/0x08, 0x02AF/0x80], name: B_sbbvk, comment: Bedingung Sonde betriebsbereit vor Kat}
+- {rt: 0x0030/0x04, name: B_hshe, comment: Bedingung Endstufe Sondenheizung hinter Kat angesteuert}
+- {rt: [0x0030/0x02, 0x0184/0x04, 0x0189/0x20, 0x0215/0x10], name: B_sbbhk, comment: Bedingung Sonde betriebsbereit hinter Kat}
+- {rt: [0x0030/0x01, 0x018A/0x01, 0x02AB/0x10, 0x02F2/0x10], name: B_lrhk, comment: Bedingung Lambdaregelung hinter Kat}
+- {rt: 0x0031/0x04, name: B_hsve2, comment: Bedingung Endstufe Sondenheizung vor Kat angesteuert Bank2}
+- {rt: 0x0031/0x02, name: B_sbbvk2, comment: Bedingung Sonde betriebsbereit vor Kat Bank2}
+- {rt: 0x0031/0x01, name: B_lr2, comment: 'LREB: Bedingung Lambdaregelung (vor Kat); (Bank 2)'}
+- {rt: 0x0032/0x04, name: B_hshe2, comment: Bedingung Endstufe Sondenheizung hinter Kat angesteuert Bank2}
+- {rt: 0x0032/0x02, name: B_sbbhk2, comment: Bedingung Sonde betriebsbereit hinter Kat Bank2}
+- {rt: 0x0032/0x01, name: B_lrhk2, comment: Bedingung Lambdaregelung hinter Kat Bank2}
+- {rt: [0x004F/0x20, 0x00BA/0x01], name: B_brlmx, comment: Bedingung LDR Begrenzung der Maximalfuellung}
+- {rt: 0x004F/0x10, name: B_ldobsp, comment: Bedingung LDR Overboost innerhalb Sperrzeit}
+- {rt: [0x004F/0x08, 0x00CF/0x80], name: B_ldob, comment: 'Bedingung: Overboost aktiv'}
+- {rt: 0x004F/0x04, name: B_lds, comment: Flag für Bedingung LDR Steuerung}
+- {rt: 0x004F/0x02, name: B_ldr, comment: Flag für Bedingung LDR aktiv}
+- {rt: 0x004F/0x01, name: B_ldb, comment: Bedingung für Ladedruckregelbereitschaft}
+- {rt: 0x0057/0x10, name: B_ba, comment: Bedingung Anreicherung}
+- {rt: [0x0057/0x08, 0x01F1/0x08], name: B_sa, comment: Bedingung Schubabschalten}
+- {rt: 0x0057/0x04, name: B_vl, comment: Bedingung Vollast}
+- {rt: 0x007A/0x01, name: B_hsve, comment: Bedingung Heizung Sonde vor Kat ein}
+- {rt: 0x007B/0x01, name: B_hshe, comment: Bedingung Heizung Sonde hinter Kat ein}
+- {rt: 0x007C/0x01, name: B_hsve2, comment: Bedingung Heizung Sonde vor Kat ein Bank2}
+- {rt: 0x007D/0x01, name: B_hshe2, comment: Bedingung Heizung Sonde hinter Kat ein Bank2}
+- {rt: 0x0089/0x80, name: Z_ks1, comment: 'Zyklusflag: Klopfsensor 1'}
+- {rt: 0x0089/0x40, name: Z_ks2, comment: 'Zyklusflag: Klopfsensor 2'}
+- {rt: 0x0089/0x20, name: Z_ks3, comment: 'Zyklusflag: Klopfsensor 3'}
+- {rt: [0x0089/0x10, 0x01F0/0x04], name: Z_ks4, comment: 'Zyklusflag: Klopfsensor 4'}
+- {rt: 0x0089/0x08, name: Z_enws, comment: 'Zyklusflag: Nockenwellensteuerung (Einlaß,Bank1)'}
+- {rt: [0x008A/0x80, 0x0197/0x08], name: Z_lm, comment: "Zyklusflag:\tLMM/HLM/HFM"}
+- {rt: 0x008A/0x40, name: Z_dk, comment: "Zyklusflag:\tDK - Potentiometer"}
+- {rt: 0x008A/0x20, name: Z_tm, comment: "Zyklusflag:\tTMOT"}
+- {rt: [0x008A/0x08, 0x01F1/0x04], name: Z_vfz, comment: 'Zyklusflag: Fahrzeug-Geschwindigkeit'}
+- {rt: [0x008A/0x04, 0x0196/0x80], name: Z_llr, comment: 'Zyklusflag: Diagnose Leerlaufregelung, Steller'}
+- {rt: 0x008A/0x02, name: Z_kuppl, comment: 'Zyklusflag: Kupplung betaetigt'}
+- {rt: 0x008A/0x01, name: Z_brems, comment: 'Zyklusflag: BREMS (Bremsschalter)'}
+- {rt: [0x008B/0x80, 0x017D/0x80, 0x0210/0x08], name: Z_rkat, comment: 'Zyklusflag:LR-Adaption additiv pro Zeit'}
+- {rt: 0x008B/0x40, name: Z_rkaz, comment: 'Zyklusflag:LR-Adaption additiv pro Einspritzung'}
+- {rt: 0x008B/0x20, name: Z_grbh, comment: 'Zyklusflag: GRA Bedienhebel'}
+- {rt: 0x008B/0x10, name: Z_ldra, comment: "Zyklusflag:\tLadedruckregelabweichung"}
+- {rt: 0x008B/0x08, name: Z_thm, comment: Zyklusflg Kühlwasser-Thermostat}
+- {rt: [0x008D/0x01, 0x026F/0x80], name: B_nws, comment: Bedingung Nockenwellensteuerung}
+- {rt: 0x008E/0x80, name: B_mil, comment: MIL-Ansteuerung}
+- {rt: 0x008E/0x40, name: bbdcy, comment: Byte für Bedingung B_dcy als Triggerevent in DCLA}
+- {rt: 0x008E/0x20, name: B_trip, comment: Flag für erfüllten 'trip'}
+- {rt: 0x008E/0x02, name: bbwuc, comment: Byte für Bedingung B_wuc als Triggerevent in DCLA}
+- {rt: 0x008E/0x01, name: B_nowuc, comment: Bedingung 'kein warm up cycle' erkannt}
+- {rt: 0x0090/0x01, name: B_su, comment: Bedingung SU-V eingeschaltet}
+- {rt: [0x0096/0x01, 0x019B/0x01], name: B_bevab, comment: Bedingung EV-Abschaltung auf Bank/Bank1}
+- {rt: [0x00AD/0x20, 0x0187/0x08], name: Z_hsh, comment: 'Zyklusflag:Lambdasonden-Heizung hinter Katalysator'}
+- {rt: [0x00AD/0x08, 0x018F/0x80, 0x0190/0x80, 0x021D/0x04], name: Z_tes, comment: 'Zyklusflag: Tankentlüftungssystem'}
+- {rt: [0x00AD/0x04, 0x020B/0x04], name: Z_tesg, comment: 'Zyklusflag: Tankentlüftungssystem Grobleck'}
+- {rt: [0x00AD/0x01, 0x0219/0x04], name: Z_kat, comment: "Zyklusflag:\tKatalysator-Konvertierung"}
+- {rt: [0x00AE/0x20, 0x0187/0x04], name: E_hsh, comment: 'Errorflag: Lambdasonden-Heizung hinter Katalysator'}
+- {rt: [0x00AE/0x08, 0x018F/0x40, 0x0190/0x40, 0x021D/0x02], name: E_tes, comment: 'Errorflag: Tankentlüftungssystem'}
+- {rt: 0x00AE/0x04, name: E_tesg, comment: 'Errorflag: Tankentlüftungssystem Grobleck'}
+- {rt: [0x00AE/0x01, 0x0219/0x02], name: E_kat, comment: 'Errorflag: Katalysator-Konvertierung'}
+- {rt: [0x00AF/0x20, 0x018D/0x80, 0x021B/0x04], name: Z_sls, comment: 'Zyklusflag: Sekundärluft-System'}
+- {rt: [0x00AF/0x08, 0x0185/0x08, 0x0217/0x04, 0x02AB/0x40, 0x02B1/0x80], name: Z_lash, comment: 'Zyklusflag:Lambda-Sondenalterung hinter Kat.'}
+- {rt: [0x00AF/0x02, 0x0189/0x80, 0x0215/0x04, 0x02B1/0x40], name: Z_lsh, comment: 'Zyklusflag: Lambda-Sonde hinter Kat'}
+- {rt: [0x00AF/0x01, 0x018B/0x10, 0x020E/0x04, 0x02AB/0x04, 0x02AC/0x04, 0x02AD/0x04, 0x02AE/0x04, 0x02AF/0x04], name: Z_lsv, comment: 'Zyklusflag: Lambda-Sonde vor Kat'}
+- {rt: [0x00B1/0x20, 0x021B/0x02], name: E_slv, comment: 'Errorflag: Sekundärluftventil'}
+- {rt: [0x00B1/0x08, 0x0185/0x04, 0x0217/0x02], name: E_lash, comment: 'Errorflag: Lambda-Sondenalterung hinter Katalysator'}
+- {rt: [0x00B1/0x02, 0x0189/0x40, 0x0215/0x02], name: E_lsh, comment: 'Errorflag: Lambda-Sonde hinter Kat'}
+- {rt: [0x00B1/0x01, 0x018B/0x08, 0x020E/0x02, 0x02AB/0x02, 0x02AC/0x02, 0x02AD/0x02, 0x02AE/0x02, 0x02AF/0x02], name: E_lsv, comment: 'Errorflag: Lambda-Sonde vor Kat'}
+- {rt: 0x00B8/0x01, name: B_atr, comment: Bedingung Abgastemperaturregelung}
+- {rt: 0x00B9/0x01, name: B_atr2, comment: Bedingung Abgastemperaturregelung Bank 2}
+- {rt: 0x00BD/0x01, name: B_furena, comment: Bedingung Aktivierung des Füllungsreglers}
+- {rt: 0x00C1/0x10, name: B_acc, comment: 'Bedingung: ACC-Steuergerät vorhanden'}
+- {rt: 0x00C1/0x08, name: B_fgrte, comment: Bedingung FGR vom Tester freigegeben}
+- {rt: 0x00C1/0x04, name: B_kuppl, comment: Bedingung Kupplung betätigt}
+- {rt: 0x00C1/0x02, name: B_br, comment: Bedingung Bremstestschalter betätigt}
+- {rt: 0x00C1/0x01, name: B_bl, comment: Bedingung Bremslichtschalter betätigt}
+- {rt: [0x00C2/0x80, 0x10C2/0x80, 0x20C2/0x01], name: S_fgrhs, comment: Hauptschalter am FGR-Bedienhebel}
+- {rt: 0x00C2/0x20, name: B_fgrwac, comment: Bedingung FGR-Tipschalter Wiederaufnahme betätigt (vom CAN)}
+- {rt: 0x00C2/0x10, name: B_fgrsec, comment: Bedingung FGR-Tipschalter Setzen betätigt (vom CAN)}
+- {rt: [0x00C2/0x08, 0x10C2/0x08], name: B_fgrtuc, comment: Bedingung FGR-Tipschalter Beschleunigen betätigt (vom CAN)}
+- {rt: [0x00C2/0x04, 0x10C2/0x04], name: B_fgrtdc, comment: Bedingung FGR-Tipschalter Verzögern betätigt (vom CAN)}
+- {rt: [0x00C2/0x02, 0x10C2/0x02], name: B_fgratc, comment: Bedingung FGR-Tipschalter Aus betätigt (vom CAN)}
+- {rt: [0x00C2/0x01, 0x10C2/0x01], name: B_fgrhsc, comment: Bedingung FGR-Hauptschalter ein (vom CAN)}
+- {rt: [0x00CF/0x40, 0x017C/0x08], name: B_frao, comment: Einschaltbedingung für Adaption von frao}
+- {rt: [0x00CF/0x02, 0x0193/0x01, 0x019A/0x04], name: B_kh, comment: Bedingung Kat-Heizung}
+- {rt: [0x017C/0x80, 0x0210/0x10], name: B_lra, comment: Bedingung Gemischadaption freigegeben}
+- {rt: 0x017C/0x40, name: B_fraur, comment: Bedingung frau-Integrator außerhalb reduzierter Bereich}
+- {rt: 0x017C/0x20, name: B_rkatr, comment: Bedingung rkat-Integrator außerhalb reduzierten Bereich}
+- {rt: 0x017C/0x10, name: B_rkam, comment: Bedingung einer der beiden additiven Bereiche aktiv}
+- {rt: [0x017C/0x04, 0x0210/0x80], name: B_frau, comment: Einschaltbedingung für Adaption von frau}
+- {rt: 0x017C/0x02, name: B_talval, comment: 'Bedingung : Bit Tank leer gültig'}
+- {rt: 0x017C/0x01, name: B_tal, comment: Bedingung Tank leer bzw. Reserve}
+- {rt: [0x017D/0x40, 0x0210/0x04], name: Z_frau, comment: 'Zyklusflag:LR-Adaption unterer multiplikativer Bereich'}
+- {rt: [0x017D/0x20, 0x0210/0x02], name: E_rkat, comment: Errorflag DKVS (additive Korrektur pro Zeit)}
+- {rt: 0x017D/0x10, name: E_frau, comment: 'Errorflag: LR-Adaption unterer multiplikativer Bereich'}
+- {rt: 0x017D/0x08, name: B_dkvsf, comment: 'Bedingung: Freigabe des Fehlers'}
+- {rt: 0x017D/0x04, name: B_gaefra, comment: Bedingung Grundadaption (fra-Integrator) eingeschwungen}
+- {rt: 0x017D/0x02, name: B_gaeing, comment: Bedingung Grundadaption Bank 1 eingeschwungen}
+- {rt: 0x017D/0x01, name: B_gasp, comment: Bedingung Grundadaption gesperrt}
+- {rt: [0x017E/0x80, 0x032B/0x80], name: B_mdarv, comment: kritische Aussetzerrate vorhanden}
+- {rt: [0x017E/0x40, 0x032B/0x40], name: B_mdstop_m, comment: 'Monitor, Misfire Detection gesperrt'}
+- {rt: 0x017E/0x08, name: E_md03, comment: 'Errorflag: Aussetzer Zündung 3'}
+- {rt: 0x017E/0x04, name: E_md02, comment: 'Errorflag: Aussetzer Zündung 2'}
+- {rt: 0x017E/0x02, name: E_md01, comment: 'Errorflag: Aussetzer Zündung 1'}
+- {rt: 0x017E/0x01, name: E_md00, comment: 'Errorflag: Aussetzer Zündung 0'}
+- {rt: 0x017F/0x80, name: B_forn_m, comment: 'Monitor, Bedingung Adaption im aktuellen Drehzahlbereich ready'}
+- {rt: 0x017F/0x40, name: B_mdkat, comment: Katschädigende Aussetzerrate überschritten (zur Ausblendung anderer Funktionen)}
+- {rt: 0x017F/0x08, name: Z_md03, comment: 'Zyklusflag: Aussetzer Zündung 3'}
+- {rt: 0x017F/0x04, name: Z_md02, comment: 'Zyklusflag: Aussetzer Zündung 2'}
+- {rt: 0x017F/0x02, name: Z_md01, comment: 'Zyklusflag: Aussetzer Zündung 1'}
+- {rt: 0x017F/0x01, name: Z_md00, comment: 'Zyklusflag: Aussetzer Zündung 0'}
+- {rt: 0x0183/0x01, name: B_fofstp, comment: Bedingung fuel-off Adaption gestoppt}
+- {rt: [0x0184/0x80, 0x019A/0x02], name: B_lamlash, comment: Bedingung für Abmagern/Anfetten in %LAMKO}
+- {rt: 0x0184/0x40, name: B_lsahksp, comment: allgemeine Stop-Bedingungen für die DLSAHK}
+- {rt: 0x0184/0x20, name: B_teslash, comment: Bedingung Test ausführen für Überprüfung Sonde hinter KAT}
+- {rt: 0x0184/0x10, name: B_entest, comment: Bedingung Wartezeit abgeschlossen für Test-Überprüfung Sonde hinter KAT}
+- {rt: 0x0184/0x08, name: B_dlash, comment: Bedingung Freigabe Schwingungsprüfung hinter Kat.}
+- {rt: [0x0184/0x02, 0x0217/0x40], name: B_ushkm, comment: Bedingung Sondenspannung hinter KAT "Mager" (Sollwert unterschritten)}
+- {rt: [0x0184/0x01, 0x0217/0x80], name: B_ushkf, comment: Bedingung Sondenspannung hinter Kat "Fett" (Sollwert überschritten)}
+- {rt: 0x0185/0x80, name: B_steigm, comment: Bedingung Steigung des Sondensignals messen hinter KAT}
+- {rt: 0x0185/0x40, name: B_ushsch, comment: Bed. Schwelle für Sonde h. KAT im Schub nicht unterschritten `statichisch`}
+- {rt: 0x0185/0x20, name: B_dushsch, comment: Bedingung Schwelle für Sonde hinter KAT im Schub nicht unterschritten}
+- {rt: 0x0185/0x10, name: B_mldyn, comment: Bedingung erforderliche Luftmasse im Schubbetrieb für Dynamikmessung erreicht}
+- {rt: 0x0185/0x02, name: B_enlash, comment: Bedingung Test für Schwingungsprüfung abgeschlossen hinteer Kat}
+- {rt: 0x0185/0x01, name: B_lamverg, comment: Bedingung Vergleich Lambdasoll in %DLSAHK mit %LAMKO übereinstimmend}
+- {rt: 0x0186/0x02, name: B_ddylash, comment: Bedingung Sonde hinter KAT dynamisch langsam}
+- {rt: 0x0186/0x01, name: B_dylash, comment: Bedingung Sonde hinter KAT dynamisch langsam}
+- {rt: 0x0187/0x02, name: B_ehsh, comment: Bedingung Error HSH}
+- {rt: 0x0187/0x01, name: B_hsokh, comment: Bedingung Sondenheizung OK hinter Kat}
+- {rt: 0x0188/0x20, name: Z_hsv, comment: 'Zyklusflag:Lambdasonden-Heizung vor Katalysator'}
+- {rt: 0x0188/0x10, name: E_hsv, comment: 'Errorflag: Lambdasonden-Heizung vor Katalysator'}
+- {rt: [0x0188/0x08, 0x01F2/0x10, 0x02B2/0x01], name: TYP_hsv, comment: 'Fehlertyp: Heizung Lambdasonde 1 vor Kat'}
+- {rt: 0x0188/0x04, name: B_ehlsu, comment: Bedingung Fehler Heizung LSU}
+- {rt: 0x0188/0x02, name: B_nphlsu, comment: Bedingung Signal LSU1 ist unplausibel}
+- {rt: [0x0188/0x01, 0x018B/0x20, 0x020E/0x20, 0x02AF/0x10], name: B_elsu, comment: Bedingung Fehler oder Fehler-Vormerkung LSU (keine Betriebsbereitschaft)}
+- {rt: [0x0189/0x10, 0x0215/0x20], name: B_risigh, comment: Bedingung Signalunterbrechung Sondenmasse mit Ri-Diagnose hinter KAT}
+- {rt: 0x0189/0x08, name: B_trsah, comment: Bedingung Kabelbruch für Sonde hinter KAT}
+- {rt: 0x0189/0x04, name: B_adshs, comment: Bedingung Adernschluß "setzen" bei Lambdasonden hinter Kat}
+- {rt: 0x0189/0x02, name: B_uhsig, comment: Bedingung Sondenspannung hinter KAT im Spannungsband für Signalunterbrechung}
+- {rt: 0x0189/0x01, name: B_ttbmhh, comment: Bedingung theoretische Sondenbetriebsbereitschaft hinter KAT mit Heizung}
+- {rt: [0x018A/0x40, 0x02AF/0x40], name: B_nplflsu, comment: Lambdasignal nicht plausibel}
+- {rt: [0x018A/0x20, 0x02B2/0x10], name: B_lsuna, comment: 'LSU nicht aktiv, Bank1'}
+- {rt: [0x018A/0x10, 0x02AD/0x80, 0x02AE/0x20], name: B_lsumx, comment: Maximalwert der LSU-Spannung überschritten (CJ110)}
+- {rt: [0x018A/0x08, 0x02AD/0x40], name: B_sigflsu, comment: Übersprechen vom Heizertakt auf Lambdasignal}
+- {rt: 0x018A/0x04, name: B_maxflsu, comment: 'Lambdaoffset vor / hinter Kat zu groß, Bank1'}
+- {rt: [0x018A/0x02, 0x02AB/0x20, 0x02F2/0x02], name: B_elaof, comment: Bedingung Error Lambda-Offset LSU}
+- {rt: [0x018B/0x04, 0x02AD/0x08], name: B_helsu, comment: Diagnose Heizerkopplung LSU erfolgt}
+- {rt: [0x018B/0x02, 0x02AC/0x20], name: B_drlmx, comment: Laständerung unterhalb Schwellwert}
+- {rt: [0x018B/0x01, 0x020E/0x10, 0x02AC/0x10], name: B_dylsuav, comment: Dynamiküberwachung LSU aktiv}
+- {rt: 0x018C/0x80, name: B_faslarq, comment: 'Bedingung: lokale Anforderung Testdurchlauf Sekundärluft starten'}
+- {rt: [0x018C/0x40, 0x021B/0x80], name: B_dfrmoff, comment: 'frm-Offset-Schwelle überschritten: zeigt Vorsteuerproblem'}
+- {rt: 0x018C/0x20, name: B_dsloab, comment: 'Diagnose Sekundärluftoffset, Meßabbruch'}
+- {rt: 0x018C/0x10, name: B_dsltab, comment: 'Diagnose Ventilichtheit, Meßabbruch'}
+- {rt: [0x018C/0x08, 0x021B/0x20], name: B_dslmab, comment: 'Diagnose Sekundärluftmasse, Meßabbruch'}
+- {rt: 0x018C/0x04, name: B_dslerr, comment: Zusammenfassung Abbruchmerkmale Sekundärluftdiagnose}
+- {rt: 0x018C/0x02, name: B_dsl, comment: Bedingung Diagnoseanforderung}
+- {rt: [0x018C/0x01, 0x021B/0x40], name: B_dslmes, comment: 'Bedingung: Freigabe Meßfenster'}
+- {rt: 0x018D/0x40, name: E_sls, comment: 'Errorflag: Sekundärluft-System'}
+- {rt: 0x018D/0x20, name: B_errofs, comment: 'Bedingung: zulässige Sekundärluftmassen-Offset überschritten'}
+- {rt: 0x018D/0x10, name: B_dsl5, comment: 'Diagnose Phase 5: Offset Sekundärluftmasse'}
+- {rt: 0x018D/0x08, name: B_dsl4, comment: 'Bedingung Phase 4: Sekundärluftmasse aus Adaption/Zusatzdiagnose'}
+- {rt: 0x018D/0x04, name: B_dsl3, comment: 'Diagnose Phase3: Offset Sekundärluftmasse'}
+- {rt: 0x018D/0x02, name: B_dsl2, comment: 'Diagnose Phase 2: Ventildichtheit'}
+- {rt: 0x018D/0x01, name: B_dsl1, comment: 'Diagnose Phase 1: Bestimmung Sekundärluftmasse'}
+- {rt: 0x018E/0x80, name: B_slas, comment: Anforderung Sekundärluftadaptionsphase setzen}
+- {rt: 0x018E/0x40, name: B_slar, comment: Anforderung Sekundärluftadaptionsphase zurücksetzen}
+- {rt: 0x018E/0x20, name: B_sla, comment: Anforderung Sekundärluftadaptionsphase}
+- {rt: 0x018E/0x10, name: B_dslo, comment: Diagnose Sekundärluftmassenoffset}
+- {rt: 0x018E/0x08, name: B_dslme, comment: 'Diagnose Sekundärluftmasse, Meßfreigabe'}
+- {rt: 0x018E/0x04, name: B_dsloe, comment: 'Diagnose Sekundärluftoffset, Meßfreigabe'}
+- {rt: 0x018E/0x02, name: B_mslmin, comment: Bedingung sehr geringe Sekundärluftmasse aus Meßphase}
+- {rt: 0x018E/0x01, name: TYP_sls, comment: 'Fehlertyp: Sekundärluftsystem'}
+- {rt: 0x018F/0x20, name: B_teviol, comment: Bedingung TEV aus der Reaktion der Leerlaufregelung als i.O. erkannt}
+- {rt: 0x018F/0x10, name: B_tevnio, comment: Bedingung TEV in aktiver Prüfung als defekt erkannt}
+- {rt: 0x018F/0x08, name: B_dteendl, comment: Bedingung Diagnose TEV über Luftprüfung erfolgreich zu Ende}
+- {rt: [0x018F/0x04, 0x0191/0x20], name: B_dtelnm, comment: LL-Prüfung Diagnose TEV nicht möglich}
+- {rt: [0x018F/0x02, 0x0190/0x10, 0x021D/0x08], name: B_dtest, comment: Start für TEV-Ansteuerung}
+- {rt: 0x018F/0x01, name: B_dteaam, comment: Bedingung Aufsteuerprüfung für TEV Diagnose aktiv möglich}
+- {rt: [0x0190/0x20, 0x021D/0x40], name: B_dteabu, comment: Bedingung Abbruch TE Diagnose ohne Prüfergebnis}
+- {rt: 0x0190/0x08, name: B_tevior, comment: Bedingung TEV aus fr-Abweichung als i.O. erkannt.}
+- {rt: [0x0190/0x04, 0x0191/0x10, 0x021D/0x10], name: B_dternm, comment: Bedingung kein fr-Hub für Diagnose TEV vorhanden}
+- {rt: [0x0190/0x02, 0x0192/0x20], name: B_dteres, comment: Bedingung TEV Diagnose Reset}
+- {rt: 0x0190/0x01, name: B_dteaa, comment: Bedingung Aufsteuerprüfung für TEV Diagnose aktiv}
+- {rt: 0x0191/0x80, name: B_tevioi, comment: Bedingung TEV durch DLDP (Initialspülung) als i.O. erkannt.}
+- {rt: 0x0191/0x40, name: B_teviot, comment: Bedingung TEV durch DLDP (Abfallzeiterhöhung) als i.O. erkannt.}
+- {rt: [0x0191/0x08, 0x0192/0x02], name: B_dtepm, comment: Bedingung passive TEV Diagnose möglich}
+- {rt: [0x0191/0x04, 0x0192/0x40], name: B_dtelbm, comment: Bedingung Bewertung des Lambda Reglers bei Diagnose TEV möglich}
+- {rt: 0x0191/0x02, name: B_dtephm, comment: Bedingung physikalische Freigabe DTEV}
+- {rt: 0x0191/0x01, name: B_dteenf, comment: Bedingung Diagnose TEV wegen System-Error nicht freigegeben}
+- {rt: 0x0192/0x10, name: B_dtenam, comment: Bedingung TEV Diagnose nur über Aufsteuerprüfung möglich}
+- {rt: 0x0192/0x08, name: B_dtelbr, comment: Bedingung Reset Flip-Flop Passiv-Prüfung DTEV möglich}
+- {rt: 0x0192/0x04, name: B_gap, comment: Bedingung Gemischadaptionsphase aktiv}
+- {rt: 0x0192/0x01, name: B_teviop, comment: Bedingung TEV in passiver Prüfung als i.O. erkannt.}
+- {rt: 0x0193/0x80, name: B_msloff, comment: Sekundärluftmasse ausgeräumt nach Sekundärluftphase}
+- {rt: 0x0193/0x40, name: B_mslon, comment: Sekundärluftmasse eingeschwungen nach Start der Sekundärluft}
+- {rt: 0x0193/0x20, name: B_dslset, comment: 'Bedingung: Setzen Sekundärluftadaption/Kurztest'}
+- {rt: 0x0193/0x10, name: B_slpena, comment: Bedingung Einschalten der Sekundärluftpumpe}
+- {rt: 0x0193/0x08, name: B_trkh, comment: 'Bedingung Katheizen, Thermoreaktor wirksam'}
+- {rt: 0x0193/0x04, name: B_khll, comment: Bedingung Katheizen Leerlauf (Abbruchbedingung)}
+- {rt: 0x0193/0x02, name: B_khab, comment: Bedingung Katheizen Abbruch}
+- {rt: 0x0194/0x10, name: B_slsinhi, comment: Bedingung sperrt Setzen von Bit B_sls}
+- {rt: 0x0194/0x08, name: B_slpofst, comment: Bedingung für Setzen Flip Flop  B_slpoff}
+- {rt: 0x0194/0x04, name: B_slkhof, comment: Bedingung Abschalten der Sekundärluftpumpe durch imlpr-Schwelle}
+- {rt: 0x0194/0x02, name: B_slpoff, comment: Sekundärluftpumpe abgeschaltet}
+- {rt: 0x0194/0x01, name: B_slsoff, comment: Sekundärlufteinblasung nach Ausräumen der Sekundärluft beendet}
+- {rt: 0x0195/0x40, name: B_fkpvdk, comment: Bedingung für die Freigabe des langsamen multiplikativen Füllungsabgleichs}
+- {rt: 0x0195/0x20, name: E_dk, comment: 'Errorflag: DK - Potentiometer'}
+- {rt: [0x0195/0x10, 0x0197/0x04, 0x0212/0x02], name: E_lm, comment: 'Errorflag: Hauptlastsensor'}
+- {rt: 0x0195/0x08, name: B_fkpvmn, comment: langsame Massenstromadaption fkpvdk im unteren Anschlag}
+- {rt: 0x0195/0x04, name: B_fkpvmx, comment: langsame Massenstromadaption fkpvdk im oberen Anschlag}
+- {rt: 0x0195/0x02, name: B_fkmsmn, comment: schnelle Massenstromadaption fkmsdks im unteren Anschlag}
+- {rt: 0x0195/0x01, name: B_fkmsmx, comment: schnelle Massenstromadaption fkmsdks im oberen Anschlag}
+- {rt: 0x0196/0x40, name: E_llr, comment: 'Errorflag: Leerlaufregelung'}
+- {rt: 0x0196/0x20, name: B_dllr, comment: 'Aktive diagnose: Leerlaufstellerdiagnose'}
+- {rt: 0x0196/0x10, name: B_dtes, comment: 'Aktive Diagnose: Tankentlüftungssystem'}
+- {rt: 0x0196/0x08, name: B_madfk, comment: Bedingung Momentenadaption Fahrstufe und Klimakompressor ein}
+- {rt: 0x0196/0x04, name: B_madfs, comment: Bedingung Momentenadaption Fahrstufe ein}
+- {rt: 0x0196/0x02, name: B_madko, comment: Bedingung Momentenadaption Klimakompressor ein}
+- {rt: 0x0196/0x01, name: B_madll, comment: Bedingung Momentenadaption ohne Last}
+- {rt: 0x0197/0x02, name: B_hfm, comment: Bedingung HFM messbereit}
+- {rt: 0x0197/0x01, name: B_ehfs, comment: Bedingung Ersatzwert Hauptfüllungssensor}
+- {rt: 0x0198/0x80, name: Z_dvev, comment: 'Zyklusflag: DV-E Fehler bei Verstärkerabgleich'}
+- {rt: 0x0198/0x40, name: Z_dvef, comment: 'Zyklusflag: DV-E Fehler bei Federprüfung'}
+- {rt: 0x0198/0x20, name: B_fprzab, comment: 'Bedingung: DV-E-Rückstellfederprüfung Abbruch, Feder schließt nicht'}
+- {rt: 0x0198/0x10, name: B_fprrdy, comment: DK-Rückstellfeder-Prüfung beendet}
+- {rt: 0x0198/0x08, name: B_fprzok, comment: 'Bedingung: DV-E-Rückstellfederprüfung i.O.'}
+- {rt: 0x0198/0x04, name: B_nlperf, comment: 'Dauer-RAM, Bedingung: NLP-Erfassung erfolgreich'}
+- {rt: 0x0198/0x02, name: B_lrnerf, comment: Lernerfolg Bit}
+- {rt: 0x0198/0x01, name: B_lrnws, comment: Lernwertspeicherung Bit}
+- {rt: 0x0199/0x40, name: B_mibeg, comment: Bedingung Momentenbegrenzung ist aktiv}
+- {rt: 0x0199/0x20, name: E_dveu, comment: 'Errorflag: DV-E Fehler beim UMA-Lernen'}
+- {rt: 0x0199/0x10, name: E_dven, comment: 'Errorflag: DV-E Fehler bei Prüfung Notluftposition'}
+- {rt: 0x0199/0x08, name: E_dvev, comment: 'Errorflag: DV-E Fehler bei Verstärkerabgleich'}
+- {rt: 0x0199/0x04, name: E_dvef, comment: 'Errorflag: DV-E Fehler bei Federprüfung'}
+- {rt: 0x0199/0x02, name: Z_dveu, comment: 'Zyklusflag: DV-E Fehler beim UMA-Lernen'}
+- {rt: 0x0199/0x01, name: Z_dven, comment: 'Zyklusflag: DV-E Fehler bei Prüfung Notluftposition'}
+- {rt: 0x019A/0x80, name: B_lamfas, comment: Verbot  für Lambda Fahrerwunsch Aktivierung}
+- {rt: [0x019A/0x40, 0x019B/0x04], name: B_lambts, comment: Lambda für Bauteileschutz ist aktiv}
+- {rt: 0x019A/0x20, name: B_lamnswl, comment: Lambda-Motor-Soll für Nachstart und Warmlauf aktiv}
+- {rt: 0x019A/0x10, name: B_lamka, comment: Lambda für Kat-Ausräumen aktiv}
+- {rt: 0x019A/0x08, name: B_fasla, comment: 'Bedingung: externe Anforderung an Sekundärluft aktiv'}
+- {rt: [0x019A/0x01, 0x0215/0x08], name: B_falsh, comment: Bedingung Funktionsanforderung Lambda-Sonde hinter KAT}
+- {rt: 0x019B/0x10, name: B_tkatbts, comment: Bedingung Katalysatortemperatur für Bauteileschutz überschritten}
+- {rt: 0x019B/0x08, name: B_tabgbts, comment: Bedingung Abgastemperatur für Bauteileschutz überschritten}
+- {rt: 0x019B/0x02, name: B_lalgf, comment: Bedingung Laufgrenze "Lambda fett" aktiv}
+- {rt: 0x01A7/0x04, name: B_ldsuas, comment: Bedingung Turbo Umluftsteuerung stationär aktiv}
+- {rt: 0x01A7/0x02, name: B_ldsuad, comment: Bedingung Turbo Umluftsteuerung dynamisch aktiv}
+- {rt: 0x01A7/0x01, name: B_ldsua, comment: Bedingung LDR Schubumluftventil aktiv (offen)}
+- {rt: 0x01C1/0x01, name: B_lustop, comment: Laufunruhe-Berechnung gesperrt}
+- {rt: 0x01C2/0x01, name: B_fonstp, comment: Bedingung fuel-on Adaption gestoppt}
+- {rt: 0x01C9/0x02, name: B_milabg, comment: Mil leuchtet Abgasrelevant}
+- {rt: 0x01C9/0x01, name: B_milkat, comment: Mil blinkt wegen Kat schädigende Aussetzer}
+- {rt: [0x01D2/0x10, 0x01D2/0x08, 0x01D2/0x04], name: TYP_scr, comment: ''}
+- {rt: 0x01D2/0x02, name: Z_scr, comment: 'Zyklusflag: CRAS-Signal'}
+- {rt: 0x01D2/0x01, name: E_scr, comment: 'Errorflag: CRAS-Signal'}
+- {rt: 0x01D3/0x10, name: B_epwmcs, comment: Bedingung PWM-Crash-Sensor-Signal ist fehlerhaft}
+- {rt: 0x01D3/0x08, name: B_crcan, comment: Bedingung Crash erkannt (aus plausibilisiertem CAN-Signal)}
+- {rt: 0x01D3/0x04, name: B_aircan, comment: Bedingung Crash vom Airbag-SG}
+- {rt: 0x01D3/0x02, name: B_airbz, comment: Bedingung Botschaftszähler der Airbag-Botschaft unplausibel}
+- {rt: 0x01D3/0x01, name: B_airbag, comment: Bedingung Airbag ausgelöst}
+- {rt: 0x01F0/0x40, name: B_krldy, comment: Bedingung Lastdynamik für Klopferkennung aktiv}
+- {rt: 0x01F0/0x20, name: B_krndy, comment: Bedingung Drehzahldynamik für Klopferkennung aktiv}
+- {rt: 0x01F0/0x10, name: B_synph, comment: Bedingung Synchronisation Phase}
+- {rt: 0x01F0/0x08, name: B_kr, comment: Bedingung Klopfregelung aktiv}
+- {rt: 0x01F0/0x02, name: E_ks4, comment: 'Errorflag: Klopfsensor 4'}
+- {rt: [0x01F0/0x01, 0x01F1/0x01, 0x01F2/0x01, 0x01F3/0x01, 0x020B/0x01, 0x020D/0x01, 0x020E/0x01, 0x0210/0x01, 0x0212/0x01, 0x0213/0x01, 0x0215/0x01, 0x0217/0x01, 0x0219/0x01, 0x021B/0x01, 0x021D/0x01, 0x021E/0x01, 0x026F/0x01, 0x02A7/0x01, 0x02AB/0x01, 0x02AC/0x01, 0x02AD/0x01, 0x02AE/0x01, 0x02AF/0x01, 0x02F2/0x01], name: B_syserrk, comment: Bedingung für mind. 1 Fehler (E_abc) im System erkannt (unmaskiert)}
+- {rt: 0x01F1/0x02, name: E_vfz, comment: 'Errorflag: Fahrzeug-Geschwindigkeit'}
+- {rt: 0x01F2/0x20, name: TYP_hsvsa, comment: ''}
+- {rt: 0x01F3/0x20, name: TYP_hsvsa2, comment: ''}
+- {rt: 0x020B/0x80, name: B_ldp, comment: Bedingung LDP wird angesteuert erfüllt}
+- {rt: 0x020B/0x40, name: B_ldpi, comment: Bedingung Reed-Kontakt Leckdiagnosepumpe}
+- {rt: [0x020B/0x20, 0x0299/0x80], name: B_fev12, comment: Bedingung Reedkontakt öffnet in der Fast Pulse Phase}
+- {rt: 0x020B/0x08, name: B_dldp, comment: 'Aktive Diagnose: Leckdiagnosemodul'}
+- {rt: 0x020B/0x02, name: E_ldpe, comment: 'Errorflag: Leckdiagnosepumpe Endstufe'}
+- {rt: [0x020D/0x80, 0x020D/0x40], name: TYP_nwkw, comment: ''}
+- {rt: [0x020D/0x20, 0x026F/0x20], name: B_phad, comment: Adaption Kurbel/Nockenwelle erfolgt}
+- {rt: 0x020D/0x10, name: B_nwflade, comment: Bedingung Flankenadaption Nockenwelle Einlaß angefordert}
+- {rt: [0x020D/0x08, 0x026F/0x08], name: B_spsa, comment: Bedingung Winkeladaption Kurbel- zu Nockenwelle zulässig}
+- {rt: [0x020D/0x04, 0x02A7/0x04], name: Z_ph, comment: 'Zyklusflag: Phasensensor'}
+- {rt: [0x020D/0x02, 0x02A7/0x02], name: E_ph, comment: 'Errorflag: Phasensensor'}
+- {rt: [0x020E/0x80, 0x02B1/0x01], name: B_frmin, comment: Lambda-Regelung setzt Bit sobald FR am Anschlag FRMIN}
+- {rt: [0x020E/0x40, 0x02B0/0x01], name: B_frmax, comment: Lambda-Regelung setzt Bit sobald FR am Anschlag FRMAX}
+- {rt: [0x020E/0x08, 0x02AB/0x08, 0x02AC/0x08], name: B_falsu, comment: Bedingung Funktionsanforderung Lambda-Sonde vor KAT}
+- {rt: 0x0210/0x40, name: B_rkat, comment: Bedingung Lernbereich additive Korrektur pro Zeit aktiv}
+- {rt: 0x0210/0x20, name: B_lrar, comment: Bedingung reduzierte Korrekturbereiche in der LRA}
+- {rt: 0x0212/0x04, name: Z_egfe, comment: 'Zyklusflag: Eingangsgrößen Füllungserfassung'}
+- {rt: 0x0213/0x10, name: B_atmtpk, comment: Bedingung Taupunkt hinter Kat ueberschritten}
+- {rt: 0x0213/0x08, name: B_rinh, comment: Bedingung Innenwiderstand Ri-Messung der Nernstsonde aktiv hinter Kat}
+- {rt: 0x0213/0x04, name: Z_hshe, comment: 'Zyklusflag:Lambdasonden-Heizung hinter Katalysator (Endstufe)'}
+- {rt: 0x0213/0x02, name: E_hshe, comment: 'Errorflag: Lambdasonden-Heizung hinter Katalysator (Endstufe)'}
+- {rt: 0x0215/0x80, name: B_sigflsh, comment: Signalunterbrechung (Kabelbruch) Bei Sonde hinter KAT erkannt}
+- {rt: 0x0215/0x40, name: B_nplflsh, comment: Adernschluß bei Sonde hinter KAT erkannt}
+- {rt: 0x0217/0x20, name: B_trfash, comment: Bedingung Kurztrip einleiten für Schwingungsprüfung Sonde hinter KAT}
+- {rt: 0x0217/0x10, name: B_mlustest, comment: Bedingung ml ist innerhalb den Schwellen}
+- {rt: 0x0217/0x08, name: B_fash, comment: Bedingung Funktionsanforderung Schwingungsprüfung}
+- {rt: [0x0219/0x80, 0x02AC/0x80], name: B_vekat, comment: Fehlerverdacht bei Katdiagnose}
+- {rt: 0x0219/0x40, name: B_dktnr, comment: 'DKAT: n/rl-Bereich verlassen'}
+- {rt: 0x0219/0x20, name: B_dktsp, comment: physikalische Stoppbedingung}
+- {rt: 0x0219/0x10, name: B_dktsb, comment: Bankspezifische Stoppbedingung}
+- {rt: 0x0219/0x08, name: B_fakat, comment: Bedingung Funktionsanforderung Katalysatorüberwachung}
+- {rt: 0x021B/0x10, name: B_mxslvpr, comment: 'Fehlerart lokal: Sekundärluftmasse bei Ventildichtheitsprüfung zu groß'}
+- {rt: 0x021B/0x08, name: B_mnslspr, comment: 'Fehlerart lokal: Sekundärluftmasse zu gering'}
+- {rt: 0x021D/0x80, name: B_dteanfl, comment: 'abgelaufene Zeit ab die, das Tastverhälnis aus DTEV größer Schwelle'}
+- {rt: 0x021D/0x20, name: B_dteaab, comment: Bedingung DTEV-Abbruch wegen Verlassen Aktivierungsbedingungen}
+- {rt: 0x021E/0x10, name: B_edkvs, comment: Bedingung Adaptionsfehlerschwellen aktuell überschritten}
+- {rt: 0x021E/0x08, name: B_fakvs, comment: Funktionsaufforderung Diagnose Kraftstoffsystem für Schnelltest}
+- {rt: 0x021E/0x04, name: Z_frst, comment: Zyklusmeldung Diagnose Kraftstoffversorgungssystem (Kurztest)}
+- {rt: 0x021E/0x02, name: E_frst, comment: 'Errorflag: Fehler aus Diagnose Kraftstoffversorgungssystem (Kurztest)'}
+- {rt: 0x0225/0x02, name: B_slsoab, comment: Bedingung SLS ohne Abbruchkriterium durchgeführt}
+- {rt: 0x0225/0x01, name: B_khoab, comment: Bedingung Katheizen ohne Abbruchkriterium durchgeführt}
+- {rt: 0x0258/0x01, name: B_br2k, comment: Bedingung Bremse betätigt 2-kanalig erkannt}
+- {rt: 0x026F/0x40, name: B_wnws0e, comment: Bedingung NW-Sollwertvorgabe ist 0}
+- {rt: 0x026F/0x10, name: B_bm, comment: Bedingung Bezugsmarke erkannt}
+- {rt: 0x026F/0x04, name: Z_nwkw, comment: 'Zyklusflag: Zuordnung Nockenwelle zu Kurbelwelle'}
+- {rt: 0x026F/0x02, name: E_nwkw, comment: 'Errorflag: Zuordnung Nockenwelle zu Kurbelwelle'}
+- {rt: [0x0296/0x80, 0x0297/0x80, 0x0298/0x80], name: B_bxf9, comment: 'Flip-Flop9: Maximalzeit nach Start für 0.5 mm - Diagnose überschritten'}
+- {rt: [0x0296/0x40, 0x0297/0x40, 0x0298/0x40], name: B_bxf8, comment: 'Flip-Flop8: Bergabfahrt während 0.5 mm - Diagnose erkannt'}
+- {rt: [0x0296/0x20, 0x0297/0x20, 0x0298/0x20], name: B_bxf7, comment: 'Flip-Flop7: Motortemperaturdifferenz im Start kleiner Minimalschwelle für 0.5 mm'}
+- {rt: [0x0296/0x10, 0x0297/0x10, 0x0298/0x10], name: B_bxf6, comment: 'Flip-Flop6: Ansauglufttemperatur größer Maximalschwelle für 0.5 mm - Diagnose'}
+- {rt: [0x0296/0x08, 0x0297/0x08, 0x0298/0x08], name: B_bxf5, comment: 'Flip-Flop5: Motortemperatur größer Maximalschwelle für 0.5 mm - Diagnose'}
+- {rt: [0x0296/0x04, 0x0297/0x04, 0x0298/0x04], name: B_bxf4, comment: 'Flip-Flop4: Laständerung größer Maximalschwelle für 0.5 mm - Diagnose'}
+- {rt: [0x0296/0x02, 0x0297/0x02, 0x0298/0x02], name: B_bxf3, comment: 'Flip-Flop3: Beschleunigung größer Maximalschwelle für 0.5 mm - Diagnose'}
+- {rt: [0x0296/0x01, 0x0297/0x01, 0x0298/0x01], name: B_bxf2, comment: 'Flip-Flop2: Untere vfz-Schwelle überschrittenh für 0.5 mm - Diagnose'}
+- {rt: 0x0299/0x40, name: B_fev11, comment: Bedingung TEV nicht erfüllt}
+- {rt: 0x0299/0x20, name: B_fev10, comment: Bedingung kurze Lastüberschreitung rl über Maxwert}
+- {rt: 0x0299/0x10, name: B_fev9, comment: Bedingung lange Lastüberschreitung rl über Maxwert}
+- {rt: 0x0299/0x08, name: B_fev8, comment: Bedingung Bergabfahrt erkannt}
+- {rt: 0x0299/0x04, name: B_fev7, comment: Bedingung Fahrzeuggeschwindigkeit<Minimalwert erfüllt}
+- {rt: 0x0299/0x02, name: B_fev6, comment: Bedingung Höhe>Maximalwert erkannt}
+- {rt: 0x0299/0x01, name: B_fev5, comment: Bedingung Differenz zwischen Motorabstell- und Motorstarttemperatur erkannt}
+- {rt: 0x02A7/0x80, name: B_phade, comment: Adaption Kurbel/Einlaßnockenwelle erfolgt}
+- {rt: 0x02A7/0x20, name: B_nwrpose, comment: 'Bedingung: Ansteuerung der Nockenwellen-Referenzposition durch Steller (Einlass)'}
+- {rt: 0x02AC/0x40, name: B_minflsu, comment: 'Dynamikfehler LSU, Bank1'}
+- {rt: 0x02AD/0x10, name: B_heatf, comment: Freigabe Heizerkopplung LSU}
+- {rt: 0x02AE/0x80, name: B_evloc, comment: 'Status: alle lokalen Einspritzventile werden angesteuert, = B_EVTOT bei einem SG'}
+- {rt: 0x02AE/0x40, name: B_atmtpa, comment: Bedingung Taupunkt vor Kat ueberschritten}
+- {rt: 0x02AE/0x10, name: B_luft, comment: LSU an Luft}
+- {rt: 0x02AE/0x08, name: B_lsuabgl, comment: Bedingung Abgleichleitung stetige Lambda-Sonde LSU unterbrochen}
+- {rt: 0x02AF/0x20, name: B_lrasp, comment: Bedingung stop LRA wegen LSU-Fehler}
+- {rt: [0x02AF/0x08, 0x02B0/0x20], name: B_plenvh, comment: Freigabe DLSU Plauspfad}
+- {rt: 0x02B0/0x80, name: B_lshswok, comment: Bedingung Sonde hinter KAT nach Schwingungsprüfung in Ordnung}
+- {rt: 0x02B0/0x40, name: B_lrhkp, comment: 'LRHK: Freigabebedingung P-Anteil Lambdaregelung hinter Kat'}
+- {rt: 0x02B0/0x10, name: B_lsumrb, comment: 'LSU Bank1 mager, nicht plausibel'}
+- {rt: 0x02B0/0x08, name: B_lsumra, comment: 'LSU Bank1 mager, nicht plausibel'}
+- {rt: 0x02B0/0x04, name: B_lsupmr, comment: Bedingung Lambdasondensignal plausibel mager}
+- {rt: 0x02B0/0x02, name: B_lshkpft, comment: Bedingung Lambdasondensignal hinter dem Kat. plausibel fett}
+- {rt: 0x02B1/0x20, name: B_lsulone, comment: Bedingung Lambdasondensignal ist Lambda = 1}
+- {rt: 0x02B1/0x10, name: B_lsuftb, comment: 'LSU Bank1 fett, nicht plausibel'}
+- {rt: 0x02B1/0x08, name: B_lsufta, comment: 'LSU Bank1 fett, nicht plausibel'}
+- {rt: 0x02B1/0x04, name: B_lsupft, comment: Bedingung Lambdasondensignal plausibel fett}
+- {rt: 0x02B1/0x02, name: B_lshkpmr, comment: Bedingung Lambdasondensignal hinter dem Kat. plausibel mager}
+- {rt: 0x02B2/0x08, name: B_npvshns, comment: 'Bedingung nicht plaus.: Gemisch vor dem Kat Lambda=1, hinter dem Kat nicht'}
+- {rt: 0x02B2/0x04, name: B_npsna, comment: 'Bedingung nicht plaus.: Sonde nicht aktiv'}
+- {rt: 0x02B2/0x02, name: TYP_lsv, comment: 'Fehlertyp: Lambdasonde 1 vor Kat'}
+- {rt: 0x02EF/0x01, name: B_kfzk, comment: Bedingung Kennfeld Klopfschutz}
+- {rt: 0x02F2/0x08, name: B_falrshk, comment: Bedingung Funktionsanforderung LRSHK}
+- {rt: 0x02F2/0x04, name: B_dlahieg, comment: I-Anteil der Führungsregelung eingeschwungen}
+- {rt: 0x20C2/0x08, name: S_fgrwb, comment: Schalter Wiederaufnahme/Beschleunigen am FGR-Bedienhebel}
+- {rt: 0x20C2/0x04, name: S_fgrsv, comment: Schalter Setzen/Verzögern am FGR-Bedienhebel}
+- {rt: 0x20C2/0x02, name: S_fgrat, comment: Schalter Aus-Tip am FGR-Bedienhebelschalter}
