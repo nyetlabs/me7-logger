@@ -71,6 +71,8 @@ functions:
       # 4Z7 calls this body through segment 0. Two copies. The twin on 22m ends F2 F1.
       - needle_hex: "A9 4D C0 4D F0 1E C0 31 1B 1D 02 FC"
         unique: false
+      # 22N callers enter the first copy of the 20-byte body twelve bytes in.
+      - needle_hex: "0D 03 6D 02 E6 F4 00 80 F6 F4 DE 8A"
 
   # Second 8-bit table entry, same call. One hit on the images that have it.
   - name: map_interp_table8_b
@@ -135,6 +137,8 @@ functions:
       - needle_hex: "F6 8E A0 B4 F6 8E 98 B4 F7 8E 4A B2 F7 8E 4B B2 F7 8E 4D B2 F2 F4"
       # Called entry once the direct curve no longer begins with the bytes above.
       - needle_hex: "F3 F8 ?? ?? 47 F8 11 00 3D 0E D7 40"
+      # 22N entry that segment 0 calls reach.
+      - needle_hex: "9A 84 C2 F4 ?? ?? 5C 84 F6 F4 ?? ?? E7 F8 80 00 F7 F8"
 
   # 16-bit curve. Callers enter here, twelve bytes into a copy of the table8
   # prefix. The table8 needle labels the earlier byte, and nothing calls that byte.
@@ -161,6 +165,8 @@ functions:
   - name: ZWGRU_ign_zw
     needles:
       - needle_hex: "88 90 88 80 88 70 88 60 9A 58 03 00"
+      # 22N. The jump bit differs. The maps sit at the 22m distances.
+      - needle_hex: "88 90 88 80 88 70 88 60 9A 58 03 F0"
       # 23g ignition entry. The warm-up map sits in ZWGRU_ign_wl.
       - needle_hex: "88 90 88 70 88 60 28 02 F3 F8 50 8C 47 F8 FF 00"
       # 4Z7 ignition entry. One less push, and the F3 address differs per image.
@@ -221,6 +227,7 @@ functions:
     needles:
       - needle_hex: "88 90 88 80 88 70 88 60 28 04 E6 FC ?? ?? F2 FD 90 F9"
       - needle_hex: "88 90 88 80 88 70 88 60 28 04 E6 FC ?? ?? F2 FD 0E F9"
+      - needle_hex: "88 90 88 80 88 70 88 60 28 04 E6 FC ?? ?? F2 FD 92 F9"
 
   # 4Z7 entry. 0x28 is KFMIOP. 0x40 passes the KFZWOP body, which the 22m row names KFZWOP2.
   - name: MDBAS_kfzwop_b
@@ -234,12 +241,21 @@ functions:
       - needle_hex: "88 90 88 80 C2 F4 B3 F9"
       # 23g pushes one more register before the same call.
       - needle_hex: "88 90 88 80 88 70 C2 F4 ?? ?? 46 F4"
+      # 22N stores two bytes before that call.
+      - needle_hex: "88 90 88 80 88 70 F3 F8 ?? ?? F7 F8 ?? ?? C2 F4 ?? ?? 46 F4"
 
   - name: LDRPID_ldiopu
     needles:
       - needle_hex: "88 90 88 80 88 70 88 60 28 02 F2 F4 58 8F"
       # 23g opens the page with D7 instead of the F2 load above.
       - needle_hex: "88 90 88 80 88 70 88 60 28 02 D7 40 06 02 F3 F8"
+      # 22N reserves a larger frame. 28 ?? is ambiguous on 23g.
+      - needle_hex: "88 90 88 80 88 70 88 60 28 06 D7 40 06 02 F3 F8"
+
+  # 22N entry that passes KFWPLGTA. 22m reads that map in LDRPID_ldiopu.
+  - name: LDRPID_plsolr
+    needle_hex: "DB 00 F2 F4 ?? ?? 88 40 F2 F5 ?? ?? 88 50 E6 FC ?? ?? E6 FD 07 02 E6 FE ?? ?? E6 FF 04 02 DA 80"
+    back_up: -2
 
   # 23g entry that passes KFNLLNST. The prologue is this image's.
   - name: nllnst_entry

@@ -209,18 +209,28 @@ func Breakpoints(data []byte, addr uint32, bits int) (record.Axis, bool) {
 
 // axisSetup is the immediate in front of a store to ram.
 // page 0 means the header sits on DPP0. The call between the moves and the
-// store is DA. The long form reloads ram just before that call. C2, or F2 of
-// R13, may sit between MOV R12,#imm and that reload. Page 0 and an E6 FD page
-// immediate are what e6Before reads.
+// store is DA. The long form reloads ram just before that call. C2, F2 of
+// R13 or R14, or an F0 register move may sit between MOV R12,#imm and that
+// reload. Page 0 and an E6 FD page immediate are what e6Before reads. An
+// EXTP in front of the store, the reload, or the move pages that memory word
+// and is skipped.
 func axisSetup(data []byte, store int, ram uint16) (page, imm uint16, ok bool) {
+	store = skipExtp(data, store)
 	if store < 12 || data[store-4] != 0xDA {
 		return 0, 0, false
 	}
 	f2 := store - 8
 	if f2 >= 4 && data[f2] == 0xF2 && (data[f2+1] == 0xFE || data[f2+1] == 0xFF) &&
-		binary.LittleEndian.Uint16(data[f2+2:f2+4]) == ram && moveBefore(data, f2-4) {
-		if page, imm, ok = e6Before(data, f2-4); ok {
-			return page, imm, true
+		binary.LittleEndian.Uint16(data[f2+2:f2+4]) == ram {
+		if at := skipExtp(data, f2) - 4; moveBefore(data, at) {
+			if page, imm, ok = e6Before(data, skipExtp(data, at)); ok {
+				return page, imm, true
+			}
+		}
+		if at := skipExtp(data, f2) - 2; at >= 0 && data[at] == 0xF0 {
+			if page, imm, ok = e6Before(data, at); ok {
+				return page, imm, true
+			}
 		}
 	}
 	if data[f2] != 0xC2 && data[f2] != 0xF2 {
@@ -229,9 +239,17 @@ func axisSetup(data []byte, store int, ram uint16) (page, imm uint16, ok bool) {
 	return e6Before(data, f2)
 }
 
+// skipExtp is at, or the EXTP #pag,#1 in front of it.
+func skipExtp(data []byte, at int) int {
+	if at >= 4 && data[at-4] == 0xD7 && data[at-3] == 0x40 {
+		return at - 4
+	}
+	return at
+}
+
 // moveBefore is the instruction between the header immediate and the reload.
-// C2 is that move on the setups already read. F2 of R13 is the same move when
-// the input is a memory operand.
+// C2 is that move on the setups already read. F2 of R13 or R14 is the same
+// move when the input is a memory operand.
 func moveBefore(data []byte, at int) bool {
 	if at < 0 || at+2 > len(data) {
 		return false
@@ -239,7 +257,7 @@ func moveBefore(data []byte, at int) bool {
 	if data[at] == 0xC2 {
 		return true
 	}
-	return data[at] == 0xF2 && data[at+1] == 0xFD
+	return data[at] == 0xF2 && (data[at+1] == 0xFD || data[at+1] == 0xFE)
 }
 
 // e6Before reads MOV R12,#imm, and MOV R13,#imm when it is the next instruction.
@@ -315,8 +333,8 @@ func callsTo(data []byte, label int) []int {
 
 // mapArgs reads the argument moves in front of the call.
 // The frame starts at MOV R12,#imm and reaches the call using only moves of
-// R12-R15 (E6, F2, C2), a 4-byte F6 or F7, or a 2-byte F0 or C0. The nearest
-// such frame wins. hasR13 is set when MOV R13,#imm is in the frame. hasAxis
+// R12-R15 (E6, F2, C2), a 4-byte F6, F7, or EXTP #pag,#1, or a 2-byte F0 or
+// C0. The nearest such frame wins. hasR13 is set when MOV R13,#imm is in the frame. hasAxis
 // is set when MOV R14,#imm and MOV R15,#imm are both in the frame. A MOV of
 // R13, R14, or R15 from memory records that RAM word.
 func mapArgs(data []byte, call int) (r12, r13, r14, r15 uint16, hasR13, hasAxis bool, r13ram, r14ram, r15ram uint16, hasR13Ram, hasR14Ram, hasR15Ram bool, setup []uint16, ok bool) {
@@ -334,7 +352,7 @@ func mapArgs(data []byte, call int) (r12, r13, r14, r15 uint16, hasR13, hasAxis 
 		var hasR14, hasR15 bool
 		for pos := 0; pos+4 <= call-start; {
 			op := data[start+pos]
-			if op != 0xE6 && op != 0xF2 && op != 0xC2 && op != 0xF6 && op != 0xF7 {
+			if op != 0xE6 && op != 0xF2 && op != 0xC2 && op != 0xF6 && op != 0xF7 && op != 0xD7 {
 				break
 			}
 			word := binary.LittleEndian.Uint16(data[start+pos+2 : start+pos+4])
@@ -411,6 +429,11 @@ func argFrame(b []byte) bool {
 			pos += 4
 		case 0xF6, 0xF7:
 			if pos+4 > len(b) {
+				return false
+			}
+			pos += 4
+		case 0xD7:
+			if pos+4 > len(b) || b[pos+1] != 0x40 {
 				return false
 			}
 			pos += 4

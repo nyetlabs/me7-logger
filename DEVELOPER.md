@@ -40,7 +40,7 @@ How the address is taken from the hit:
 
 A name already stored stays as it is. A name that is not in the catalog is kept so a later row can embed it, and that name is not written.
 
-`mapsigs` in the same file locates a map the caller list does not name. `pattern` is one window and `XX` is the address word inside it. `at` is the distance from the hit to that word, 2 when omitted. A negative `at` reads the pointer in front of the hit. `add` is the byte distance from the decoded pointer to the body. `anchor` names a map this list already locates, and then `add` is the distance from that map. An anchor uses the base row's axis words when it does not name its own. `open` finds a copy first and limits `pattern` to the DB00 window around it. `first` keeps the first copy of `open` when several exist. `from` is the search floor. An `open` with no `from` starts at 0x820000. `single` keeps that pattern only when it occurs once in the window. `frame` reads the 6-byte segmented pointer at `at`. `far` reads the 4-byte form. `deref` reads that many further words, and `derefat` is added before the first of those reads. `dereffar` makes that read the 4-byte segmented pointer.
+`mapsigs` in the same file locates a map the caller list does not name. `pattern` is one window and `XX` is the address word inside it. `at` is the distance from the hit to that word, 2 when omitted. A negative `at` reads the pointer in front of the hit. `add` is the byte distance from the decoded pointer to the body. `anchor` names a map this list already locates, and then `add` is the distance from that map. An anchor uses the base row's axis words when it does not name its own. `open` finds a copy first and limits `pattern` to the DB00 window around it. `first` keeps the first copy of `open` when several exist. `from` is the search floor. An `open` with no `from` starts at 0x820000. `single` keeps that pattern only when it occurs once in the window. `frame` reads the 6-byte segmented pointer at `at`. `far` reads the 4-byte form. `deref` reads that many further words, and `derefat` is added before the first of those reads. `dereffar` makes that read the 4-byte segmented pointer. A hit on a body the caller list located without a name names that map. The hit's axes replace the caller's only when the hit decodes some.
 
 The axes come from one of these:
 
@@ -76,7 +76,7 @@ flowchart TD
 - **RAM** — load of R14, or of R13 when R13 is not an immediate.
 - **R12 setup** — the header that setup stored through R12.
 
-The setup is the header immediate in front of `MOV [ram], R4`. An R13 page immediate there overrides the DPP. With no page, the top bits of the header immediate select the DPP. An `F2` of R13 may sit between that immediate and the reload of the word.
+The setup is the header immediate in front of `MOV [ram], R4`. An R13 page immediate there overrides the DPP. With no page, the top bits of the header immediate select the DPP. An `F2` of R13 or R14, or an `F0` register move, may sit between that immediate and the reload of the word. An `EXTP #pag,#1` in front of the store, the reload, or the move is skipped, and one may also sit in the argument frame of the call.
 
 Once the column is known, these words are candidates for the row:
 
@@ -199,7 +199,7 @@ A `*-priority.yaml` file is a `tiers` map. The tiers are `S`, `A`, `B`, `C`, and
 
 `xdf/s4wiki/names-priority.yaml` puts every name on that list in one finder tier. It is opinion and does not change a score. Parity fails when a name is missing, repeated, or not on the list.
 
-A name hits when the locator stores one address and an axis. A count of 0 on that list is a scalar, so the address alone is the hit. Any other body with no axis is a miss. When `xdf/<image>.xdf` contains the name, the body address has to match one row of that file.
+A name hits when the locator stores one address and an axis. A count of 0 on that list is a scalar, so the address alone is the hit. Any other body with no axis is a miss. When `xdf/<image>.xdf` contains the name, the body address has to match one row of that file. A DAMOS export lists a map whose axes are stored in front of the body with no axis addresses, at the count header in front of the first axis. That row also matches.
 
 The number on the list is how many axes the table has, and those counts are the `axis` column. A count of 0 adds nothing. The denominator is 0 only when every map that hit has a count of 0. A count of 1 is a curve and 2 is a map. A hit on that column is the axis present on the map.
 

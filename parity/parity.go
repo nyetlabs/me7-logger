@@ -809,7 +809,9 @@ type refRow struct {
 }
 
 // referenceHit is true when this image has no XDF row of that name, or one row
-// has this body address. The axes are scored on their own.
+// has this body address. A DAMOS export lists a table whose axes are stored in
+// front of the body with no axis addresses, at the count header in front of
+// the first axis. The axes are scored on their own.
 func referenceHit(m record.Map, rows []refRow) bool {
 	if len(rows) == 0 {
 		return true
@@ -821,11 +823,35 @@ func referenceHit(m record.Map, rows []refRow) bool {
 			continue
 		}
 		seen = true
-		if row.addr == off {
+		if row.addr == off || len(row.axes) == 0 && countHeader(m) == row.addr {
 			return true
 		}
 	}
 	return !seen
+}
+
+// countHeader is the file offset of the counts in front of the first axis of
+// a map whose axes are stored in front of its body. 0 is none.
+func countHeader(m record.Map) uint32 {
+	var first *record.Axis
+	axes := 0
+	for _, a := range []*record.Axis{m.X, m.Y} {
+		if a == nil || a.Addr == 0 || a.Addr >= m.Addr {
+			continue
+		}
+		axes++
+		if first == nil || a.Addr < first.Addr {
+			first = a
+		}
+	}
+	if first == nil {
+		return 0
+	}
+	width := 1
+	if first.Bits == 16 {
+		width = 2
+	}
+	return opcode.FileOffset(first.Addr) - uint32(axes*width)
 }
 
 func matchECU(got []record.Item, want []record.Item) (int, int) {
