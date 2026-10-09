@@ -134,7 +134,7 @@ func LoadNeedles(path, userDir string) ([]needle.Needle, error) {
 }
 
 func configLabel(path, name string) string {
-	if path == "" || path == filepath.Join("config", name) {
+	if path == "" || path == filepath.Join(Dir(), name) {
 		return name
 	}
 	return path

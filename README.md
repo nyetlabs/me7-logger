@@ -84,15 +84,15 @@ sequenceDiagram
 flowchart LR
   shipped["config/<br/>shipped definitions"] --> merged[loaded config]
   user["config/user/*.yaml<br/>added or replaced rows"] --> merged
-  embedded["embedded copy<br/>when ./config is absent"] -.-> merged
+  embedded["embedded copy<br/>when config/ lacks the file"] -.-> merged
   merged --> tools[me7info, me7logger]
 ```
 
-Run from the directory that contains `config/`: an unpacked release, or a checkout after `make`. Each file documents its fields in its header. Rows in `config/user/` with the same name replace the shipped ones; `--user` or `ME7_USER` picks another directory.
+The programs read `config/` beside the executable, symlinks resolved, so a symlink in `/usr/local/bin` works: the unpacked release, or `build/` after `make`. Each file documents its fields in its header. Rows in `config/user/` with the same name replace the shipped ones; `--user` or `ME7_USER` picks another directory.
 
 ## Install
 
-Release archives for macOS, Linux and Windows (amd64; arm64 for macOS and Linux) are on the [releases page](https://github.com/nyetlabs/me7-logger/releases). Unpack one and run the programs from that directory.
+Release archives for macOS, Linux and Windows (amd64; arm64 for macOS and Linux) are on the [releases page](https://github.com/nyetlabs/me7-logger/releases). Unpack one and run the programs from it, or symlink them onto your `PATH`.
 
 From source, with Go installed:
 

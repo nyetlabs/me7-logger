@@ -12,6 +12,51 @@ import (
 	"go.nyet.org/me7-logger/needle"
 )
 
+// TestDirFor: config/ sits beside the executable's real path, so a symlink
+// elsewhere still finds it.
+func TestDirFor(t *testing.T) {
+	real := t.TempDir()
+	exe := filepath.Join(real, "me7info")
+	if err := os.WriteFile(exe, nil, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	link := filepath.Join(t.TempDir(), "me7info")
+	if err := os.Symlink(exe, link); err != nil {
+		t.Fatal(err)
+	}
+	want, err := filepath.EvalSymlinks(real)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := dirFor(func() (string, error) { return link, nil }); got != filepath.Join(want, "config") {
+		t.Errorf("symlinked exe: %s, want %s/config", got, want)
+	}
+	if got := dirFor(func() (string, error) { return "", os.ErrNotExist }); got != "config" {
+		t.Errorf("no exe path: %s, want config", got)
+	}
+	if got := dirFor(func() (string, error) { return filepath.Join(real, "gone"), nil }); got != "config" {
+		t.Errorf("missing exe: %s, want config", got)
+	}
+}
+
+// TestReadEmbedded: the default path with no file in Dir() is the embedded copy.
+func TestReadEmbedded(t *testing.T) {
+	if _, err := os.Stat(filepath.Join(Dir(), NamesFile)); err == nil {
+		t.Skip("config/ beside the test binary")
+	}
+	got, err := Read(Path("", NamesFile), NamesFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want, err := embedded.ReadFile(NamesFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(got, want) {
+		t.Error("default path did not read the embedded copy")
+	}
+}
+
 func TestShippedSignatures(t *testing.T) {
 	b, err := Read("", SigFile)
 	if err != nil {

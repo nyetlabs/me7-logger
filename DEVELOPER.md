@@ -52,7 +52,7 @@ Out of scope: `.kp`, OLS, DAMOS, WinOLS, ecuxplot, `mapdump`. Do not copy NefMot
 
 Each file in `config/` documents its fields in its header. `config/user/*.yaml` overlays them in filename order; a row of the same name replaces the shipped one, and `drop: true` removes a needle. `--user`/`ME7_USER` picks another directory. `config/examples/needles.yaml` is not loaded.
 
-Files load from `./config` when it exists, else the embedded copy. `--core`, `--names`, `--meas`, `--map`, `--alias` (or `ME7_*`) replace one file. A built binary does not see edits to the embedded files.
+Files load from `config/` beside the executable (symlinks resolved) when present, else the embedded copy. `make build` mirrors `config/` into `build/config/` with `rsync --delete`, leaving `build/config/user/` alone, so edits reach `build/me7info` on the next build. `go run` and `go test` binaries have no `config/` beside them and use the embedded copy. `--core`, `--names`, `--meas`, `--map`, `--alias` (or `ME7_*`) replace one file.
 
 `signatures.yaml` rows run top to bottom, and the first row that hits fills a name. Prepended axis counts become rows and columns only when they account for every byte up to the body; never invent a count of 1. Only named maps reach the XDF.
 

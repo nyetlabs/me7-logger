@@ -1,5 +1,6 @@
 // Package config loads the files shipped in config/.
-// A file next to the working directory overrides the copy embedded at build time.
+// A file in config/ beside the executable, symlinks resolved, overrides the
+// copy embedded at build time.
 // An explicit path that does not exist is an error.
 // config/user is an optional overlay; an empty user directory skips it.
 package config
@@ -14,6 +15,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 
 	"go.nyet.org/xdfkit/model"
 	"gopkg.in/yaml.v3"
@@ -58,18 +60,33 @@ func LoadCategories(path string) (*model.CategoryTable, error) {
 	return t, nil
 }
 
-// Path is config/<name>, or the environment variable when it is set.
+// Dir is config/ beside the executable, symlinks resolved.
+// It is "config" when the executable path cannot be read.
+var Dir = sync.OnceValue(func() string { return dirFor(os.Executable) })
+
+func dirFor(exe func() (string, error)) string {
+	p, err := exe()
+	if err == nil {
+		p, err = filepath.EvalSymlinks(p)
+	}
+	if err != nil {
+		return "config"
+	}
+	return filepath.Join(filepath.Dir(p), "config")
+}
+
+// Path is Dir()/<name>, or the environment variable when it is set.
 func Path(envKey, name string) string {
 	if p := os.Getenv(envKey); p != "" {
 		return p
 	}
-	return filepath.Join("config", name)
+	return filepath.Join(Dir(), name)
 }
 
-// Read returns file bytes. The default config/ path and an empty path use the
+// Read returns file bytes. The default Dir() path and an empty path use the
 // embedded file when nothing is on disk. Any other path must exist.
 func Read(path, name string) ([]byte, error) {
-	def := filepath.Join("config", name)
+	def := filepath.Join(Dir(), name)
 	if path == "" || path == def {
 		if path == "" {
 			path = def
@@ -94,14 +111,14 @@ func Read(path, name string) ([]byte, error) {
 	return b, nil
 }
 
-// LoadCatalog reads the result-type catalog. An empty path or config/catalog
+// LoadCatalog reads the result-type catalog. An empty path or Dir()/catalog
 // uses the shipped directory: disk when present, otherwise the embedded copy.
 // Files are read in name order. scales.yaml is the named scales, not a row
 // list. A later file replaces an earlier row with the same result type and
 // bitmask. A path that is one file is parsed alone, so anchors in that file
 // still apply.
 func LoadCatalog(path string, conv map[mapfile.ScaleKey]mapfile.Scale) (mapfile.Table, error) {
-	if path == "" || path == filepath.Join("config", MapDir) {
+	if path == "" || path == filepath.Join(Dir(), MapDir) {
 		return loadShippedCatalog(conv)
 	}
 	st, err := os.Stat(path)
@@ -119,7 +136,7 @@ func LoadCatalog(path string, conv map[mapfile.ScaleKey]mapfile.Scale) (mapfile.
 }
 
 func loadShippedCatalog(conv map[mapfile.ScaleKey]mapfile.Scale) (mapfile.Table, error) {
-	dir := filepath.Join("config", MapDir)
+	dir := filepath.Join(Dir(), MapDir)
 	if st, err := os.Stat(dir); err == nil && st.IsDir() {
 		return loadCatalogDir(dir, conv)
 	}

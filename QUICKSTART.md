@@ -1,6 +1,6 @@
 # Quickstart
 
-Run from the directory containing `config/` (a release archive, or a checkout after `make`).
+The programs read `config/` beside the executable, symlinks resolved: the unpacked release, or `build/` after `make`. A file missing there uses the built-in copy.
 
 ```bash
 me7info probe image.bin       # one line per needle; --maps counts XDF maps

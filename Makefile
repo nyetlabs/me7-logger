@@ -2,7 +2,7 @@
 #
 #   make                  test, then build both binaries
 #   make test             go test ./...; ME7Info parity must be 100% (image tests skip without corpus/)
-#   make build            build/me7info and build/me7logger
+#   make build            build/me7info, build/me7logger, and build/config (user/ is kept)
 #   make version          git describe (tags vX.Y.Z and vX.Y.Z-rcN)
 #   make parity           legacy ME7Info parity, plus coverage of the YAML lists, the tuner names, and the corpus definitions
 #   make package          dist archives for macos, linux, and windows
@@ -24,6 +24,10 @@ VERSION ?= $(patsubst v%,%,$(shell git describe --tags --match 'v[0-9]*' --dirty
 # Archive name uses macos; the Go port is darwin.
 PLATFORMS := darwin/amd64 darwin/arm64 linux/amd64 linux/arm64 windows/amd64
 
+# The binaries read config/ beside themselves. user/ is the reader's own, so
+# --delete leaves it alone.
+CONFIG_SYNC := rsync -a --delete --exclude '*.go' --exclude 'user/' --exclude '.DS_Store' config/
+
 all: test build
 
 test: check-pinned
@@ -33,12 +37,13 @@ build:
 	mkdir -p build
 	go build -ldflags "-X main.version=$(VERSION)" -o build/me7info ./cmd/me7info
 	go build -ldflags "-X main.version=$(VERSION)" -o build/me7logger ./cmd/me7logger
+	$(CONFIG_SYNC) build/config/
 
 version:
 	@echo $(VERSION)
 
 # Each archive is me7info, me7logger, README.md, QUICKSTART.md, DEVELOPER.md, LICENSE, and config/.
-# macOS and Linux are tar.gz. Windows is zip. Run from the unpacked directory.
+# macOS and Linux are tar.gz. Windows is zip.
 package:
 	@GOWORK=off go list -m -f '{{.Version}}' go.nyet.org/xdfkit | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-rc[0-9]+)?$$' || \
 		echo 'warning: xdfkit is pinned to a pseudo-version, not a tag' >&2
@@ -56,13 +61,11 @@ package:
 		name=me7-logger-$(VERSION)-$$os-$$arch; \
 		stage=dist/$$name; \
 		rm -rf "$$stage"; \
-		mkdir -p "$$stage/config/catalog" "$$stage/config/examples" "$$stage/config/user"; \
+		mkdir -p "$$stage/config/user"; \
 		CGO_ENABLED=0 GOOS=$$goos GOARCH=$$arch go build -ldflags "-X main.version=$(VERSION)" -o "$$stage/me7info$$ext" ./cmd/me7info; \
 		CGO_ENABLED=0 GOOS=$$goos GOARCH=$$arch go build -ldflags "-X main.version=$(VERSION)" -o "$$stage/me7logger$$ext" ./cmd/me7logger; \
 		cp README.md QUICKSTART.md DEVELOPER.md LICENSE "$$stage/"; \
-		cp config/*.yaml "$$stage/config/"; \
-		cp config/catalog/*.yaml "$$stage/config/catalog/"; \
-		cp config/examples/*.yaml "$$stage/config/examples/"; \
+		$(CONFIG_SYNC) "$$stage/config/"; \
 		awk 'NF && substr($$1,1,1) != "#" { exit } { print }' config/measurements.yaml > "$$stage/config/user/measurements.yaml"; \
 		printf '%s\n' 'measurements: []' >> "$$stage/config/user/measurements.yaml"; \
 		awk 'NF && substr($$1,1,1) != "#" { exit } { print }' config/maps.yaml > "$$stage/config/user/maps.yaml"; \

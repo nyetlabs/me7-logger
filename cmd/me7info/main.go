@@ -74,7 +74,7 @@ Commands:
 Run "me7info <command> -h" for that command's flags.
 
 Needle names, connect bytes, and per-part addresses are the YAML files
-in config/.
+in config/ beside this executable (symlinks resolved).
 `, version)
 }
 
