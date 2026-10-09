@@ -136,6 +136,10 @@ type mapSigDraft struct {
 	Deref    int    `yaml:"deref"`
 	DerefAt  int    `yaml:"derefat"`
 	DerefFar bool   `yaml:"dereffar"`
+	Also     []struct {
+		Name string `yaml:"name"`
+		Add  int    `yaml:"add"`
+	} `yaml:"also"`
 }
 
 type sigDraft struct {
@@ -334,6 +338,15 @@ func ParseSigs(b []byte) (SigDoc, error) {
 			return SigDoc{}, err
 		}
 		doc.Maps = append(doc.Maps, row)
+		for _, a := range d.Also {
+			if a.Name == "" {
+				return SigDoc{}, fmt.Errorf("mapsig %s: also needs a name", d.Name)
+			}
+			seen[a.Name] = struct{}{}
+			more := row
+			more.Name, more.Add = a.Name, a.Add
+			doc.Maps = append(doc.Maps, more)
+		}
 	}
 	tables := map[string]bool{}
 	for _, row := range doc.Maps {

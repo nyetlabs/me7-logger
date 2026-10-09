@@ -238,6 +238,33 @@ mapsigs:
 	}
 }
 
+func TestMapSigAlso(t *testing.T) {
+	body := []byte(`
+mapsigs:
+- name: BASE
+  pattern: "D74000020000XXXX"
+  at: 6
+  add: 1
+  also:
+  - name: NEXT
+    add: 3
+  - name: SAME
+`)
+	doc, err := ParseSigs(body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	img := make([]byte, 32)
+	copy(img, []byte{0xD7, 0x40, 0x00, 0x02, 0x00, 0x00, 0x10, 0x00})
+	have := map[string]uint32{}
+	for _, h := range MapAddrs(img, StandardDPP, doc.Maps) {
+		have[h.Name] = h.Addr
+	}
+	if have["BASE"] != 0x800011 || have["NEXT"] != 0x800013 || have["SAME"] != 0x800010 {
+		t.Fatalf("%v", have)
+	}
+}
+
 func TestMapSigLaterRowFillsAMiss(t *testing.T) {
 	body := []byte(`
 mapsigs:
