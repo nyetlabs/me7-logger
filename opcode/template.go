@@ -513,7 +513,7 @@ const (
 var headRules = []rule{
 	{end: true, seq: []alts{{"F3FCXXXX"}}, size: 1, prior: true, kind: kindWide},
 	{min: 2, end: true, seq: []alts{{"F2FXXXXX"}, {"7C8X"}, {"F1CX"}}, size: 2, prior: true},
-	{min: 3, end: true, seq: []alts{{"C2FCXXXX"}, {"DA8Xxxxx"}, {"F1C8"}}, size: 1, prior: true},
+	{min: 3, end: true, seq: []alts{{"C2FCXXXX"}, {"DA8XXXXX"}, {"F1C8"}}, size: 1, prior: true},
 	{min: 3, seq: []alts{{"E6F8XXXX", "E0X8"}, {"E7FEXXXX", "E1XE"}, {"F2F4XXXX"}}, load: 2, size: 2},
 	{min: 4, seq: []alts{{"9AXXXXXX"}, {"E009"}, {"0DXX"}, {"F2F4XXXX"}}, load: 3, size: 2},
 	{min: 3, seq: []alts{{"E7F8XXXX"}, {"F3FAXXXX"}, {"21A8"}}, load: 1, size: 1},
@@ -658,34 +658,15 @@ func extpPage(in c166) int {
 	return -1
 }
 
-// matchPat matches one stored instruction. parsePat accepts X, x, and ? as
-// nibble wildcards. The pattern length must be the instruction length.
+// matchPat matches one stored instruction. The pattern is needle.Compile
+// syntax, and its length must be the instruction length.
 func matchPat(in c166, pat string) bool {
-	if len(pat) == 0 || len(pat)%2 != 0 {
+	val, mask, ok := compilePat(pat)
+	n := len(val)
+	if !ok || n > 4 || in.n != n || len(in.raw) < n {
 		return false
 	}
-	n := len(pat) / 2
-	if n > 4 || in.n != n || len(in.raw) < n {
-		return false
-	}
-	val := make([]byte, 4)
-	mask := make([]byte, 4)
-	for i := 0; i < n; i++ {
-		hi, ok1 := patNibble(pat[i*2])
-		lo, ok2 := patNibble(pat[i*2+1])
-		if !ok1 || !ok2 {
-			return false
-		}
-		if hi >= 0 {
-			val[i] = byte(hi) << 4
-			mask[i] = 0xF0
-		}
-		if lo >= 0 {
-			val[i] |= byte(lo)
-			mask[i] |= 0x0F
-		}
-	}
-	if mask[0]&in.raw[0] != val[0] || mask[1]&in.raw[1] != val[1] {
+	if mask[0]&in.raw[0] != val[0] || n > 1 && mask[1]&in.raw[1] != val[1] {
 		return false
 	}
 	if n == 4 {
@@ -696,20 +677,4 @@ func matchPat(in c166, pat string) bool {
 		}
 	}
 	return true
-}
-
-// patNibble returns 0..15, or -2 for a wildcard. ok is false for any other byte.
-func patNibble(c byte) (int, bool) {
-	switch {
-	case c == '?' || c == 'x' || c == 'X':
-		return -2, true
-	case c >= '0' && c <= '9':
-		return int(c - '0'), true
-	case c >= 'A' && c <= 'F':
-		return int(c-'A') + 10, true
-	case c >= 'a' && c <= 'f':
-		return int(c-'a') + 10, true
-	default:
-		return 0, false
-	}
 }

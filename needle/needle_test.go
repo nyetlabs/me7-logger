@@ -7,8 +7,27 @@ import (
 	"testing"
 )
 
+func TestCompile(t *testing.T) {
+	pat, mask, err := Compile("A X5 [0C/0F]")
+	if err == nil {
+		t.Fatalf("odd pattern compiled: %x %x", pat, mask)
+	}
+	pat, mask, err = Compile("AX X5 [0C/0F]")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(pat) != "\xa0\x05\x0c" || string(mask) != "\xf0\x0f\x0f" {
+		t.Fatalf("%x %x", pat, mask)
+	}
+	for _, s := range []string{"AA ??", "AAxx", "[1C/0F]", "[0C/0F", ""} {
+		if _, _, err := Compile(s); err == nil {
+			t.Fatalf("%q compiled", s)
+		}
+	}
+}
+
 func TestMatchWildcardAndMask(t *testing.T) {
-	pat, mask, err := parsePattern("AA ?? BB")
+	pat, mask, err := Compile("AA XX BB")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -17,7 +36,7 @@ func TestMatchWildcardAndMask(t *testing.T) {
 	if got := n.Find(data); !sameInts(got, []int{0, 4}) {
 		t.Fatalf("wildcard hits %v", got)
 	}
-	pat, mask, err = parsePattern("aa80")
+	pat, mask, err = Compile("aa80")
 	if err != nil {
 		t.Fatal(err)
 	}

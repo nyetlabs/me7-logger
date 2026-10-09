@@ -4,7 +4,7 @@
 #
 # name        Bosch name.
 # comment     Description written with the measurement.
-# needle_hex  Bytes around the operand. "??" is one wildcard byte.
+# needle_hex  Bytes around the operand. "XX" is one wildcard byte.
 #             A list is one pattern per code layout. The patterns share
 #             back_up, and a hit on any of them counts.
 # back_up     Bytes from the hit back to the operand. Omitted means -4,
@@ -40,11 +40,11 @@
 measurements:
 - name: abs_ndfil_w
   comment: absolute value ndfil_w
-  needle_hex: "7D 79 9C A0 ?? ?? A8 A7"
+  needle_hex: "7D 79 9C A0 XX XX A8 A7"
 - name: abs_ndfil_w_ndfil_wk1
   comment: absolute value of ndfil_w - ndfil_wk1
   needle_hex:
-    - "7E 4F F6 F4 ?? ?? F2 F5"
+    - "7E 4F F6 F4 XX XX F2 F5"
     - "16 BE F6 F4 E4 A8"
 - name: "B_!cwarmd1_&_kuppl/gw"
   bitmask: '0x0200'
@@ -111,7 +111,7 @@ measurements:
 - name: B_clmdb
   bitmask: '0x0080'
   comment: 'Flag for clearence: ETC torque limitation is activ'
-  needle_hex: "28 02 84 00 ?? ?? 9A 52"
+  needle_hex: "28 02 84 00 XX XX 9A 52"
 - name: B_dash
   bitmask: '0x0040'
   comment: 'condition: limitation of negative torque gradient active'
@@ -130,10 +130,10 @@ measurements:
   back_up: -2
 - name: B_ehfm
   bitmask: '0x0020'
-  needle_hex: "24 7C 80 00 ?? ?? 87 00"
+  needle_hex: "24 7C 80 00 XX XX 87 00"
 - name: B_ehfm1
   bitmask: '0x0040'
-  needle_hex: "24 7C 80 00 ?? ?? 87 00"
+  needle_hex: "24 7C 80 00 XX XX 87 00"
 - name: B_fgr
   bitmask: '0x2000'
   comment: "condition: driver's set engine torque determined by cruise control"
@@ -161,7 +161,7 @@ measurements:
 - name: B_gwhs
   bitmask: '0x1000'
   comment: Condition gear change on manual transmission vehicle
-  needle_hex: "36 FD EA 00 ?? ?? F2 F4"
+  needle_hex: "36 FD EA 00 XX XX F2 F4"
 - name: B_hpnmot
   bitmask: '0x1000'
   comment: condition high-point speed oscillation
@@ -274,7 +274,7 @@ measurements:
 - name: B_ldipos
   size: 1
   bitmask: '0x02'
-  needle_hex: "5C A7 C2 F4 ?? ?? 68 44"
+  needle_hex: "5C A7 C2 F4 XX XX 68 44"
 - name: B_llrein
   bitmask: '0x0400'
   comment: Condition idle speed control is active
@@ -286,7 +286,7 @@ measurements:
 - name: B_lowra
   bitmask: '0x0002'
   comment: condition low range active
-  needle_hex: "04 FC E6 AE ?? ?? E8 AE"
+  needle_hex: "04 FC E6 AE XX XX E8 AE"
 - name: B_lsd
   bitmask: '0x0020'
   comment: 'condition: limitation of positive torque gradient active'
@@ -314,7 +314,7 @@ measurements:
 - name: B_mgbget
   bitmask: '0x0040'
   comment: 'Condition: torque gradient limiting active'
-  needle_hex: "04 FC E6 AE ?? ?? E8 AE"
+  needle_hex: "04 FC E6 AE XX XX E8 AE"
 - name: B_msr
   bitmask: '0x0002'
   comment: Condition MSR
@@ -326,7 +326,7 @@ measurements:
 - name: B_nozwe
   bitmask: '0x0080'
   comment: condition no ignition angle intervention of torque structure
-  needle_hex: "E6 FC E8 00 ?? ?? 8B F9"
+  needle_hex: "E6 FC E8 00 XX XX 8B F9"
 - name: B_stend
   bitmask: '0x0002'
   comment: condition end of start
@@ -338,7 +338,7 @@ measurements:
 - name: B_syn
   bitmask: '0x0100'
   comment: Synchro schedule
-  needle_hex: "E6 FC E8 00 ?? ?? 8B F9"
+  needle_hex: "E6 FC E8 00 XX XX 8B F9"
 - name: B_tmot_tmar
   bitmask: '0x0100'
   comment: "tmot > TMAR"
@@ -424,30 +424,30 @@ measurements:
   unit: t
   comment: current T4 register for nmod integrator
   needle_hex:
-    - "E0 A8 F6 F6 ?? ?? E6 F2"
+    - "E0 A8 F6 F6 XX XX E6 F2"
     - "E0 05 F6 F5 DE A8"
 - name: dmar_w
   unit: "%"
   signed: true
   conversion: twice
   comment: delta torque anti-jerk
-  needle_hex: "06 00 F6 F4 ?? ?? 0D 24"
+  needle_hex: "06 00 F6 F4 XX XX 0D 24"
 - name: dmaufn_out_w
   conversion: torque
   comment: delta torque rise after torque intervention
-  needle_hex: "7E 43 F6 F4 ?? ?? DB 00 26 F0"
+  needle_hex: "7E 43 F6 F4 XX XX DB 00 26 F0"
 - name: dmaufr_w
   signed: true
   conversion: twice
   comment: delta torque rise
-  needle_hex: "52 A9 22 F5 ?? ?? 9D 01"
+  needle_hex: "52 A9 22 F5 XX XX 9D 01"
 - name: dmllr_w
   unit: "%"
   signed: true
   conversion: twice
   comment: desired torque change from the idle speed control (PD-part)
   needle_hex:
-    - "02 A8 F6 F4 ?? ?? 0D 14"
+    - "02 A8 F6 F4 XX XX 0D 14"
     - "F2 A7 F2 FF F0 A7"
 # Raw byte. The usual 8-bit percent is 3/4.
 - name: dmrkh
@@ -455,71 +455,71 @@ measurements:
   unit: "%"
   factor: 1.0
   comment: torque reserve for catalyzer heating
-  needle_hex: "0D 04 F3 F8 ?? ?? 49 80"
+  needle_hex: "0D 04 F3 F8 XX XX 49 80"
 # Raw word. The usual percent word is 100/65536.
 - name: dmrkh_w
   unit: "%"
   factor: 1
   comment: torque reserve for catalyzer heating
-  needle_hex: "7C 85 F6 F4 ?? ?? 0D 0C"
+  needle_hex: "7C 85 F6 F4 XX XX 0D 0C"
 - name: dmrkt_w
   unit: "%"
   comment: Torque reserve during quicktest
-  needle_hex: "2D 1A F2 F4 ?? ?? 3D 17"
+  needle_hex: "2D 1A F2 F4 XX XX 3D 17"
 - name: dmrllr_w
   unit: "%"
   conversion: twice
   comment: torque reserve for idle speed control
-  needle_hex: "0D 02 F2 F4 ?? ?? F0 94 42 F9"
+  needle_hex: "0D 02 F2 F4 XX XX F0 94 42 F9"
 - name: dmzms_w
   signed: true
   conversion: torque
   comment: difference between internal nominal engine torque and permissible nominal torque
   needle_hex:
-    - "00 80 F6 F5 ?? ?? 9A 52"
+    - "00 80 F6 F5 XX XX 9A 52"
     - "00 80 F2 FE 44 A9"
 - name: dzwb
   size: 1
   conversion: retard
-  needle_hex: "AD 8C F3 F8 ?? ?? 49 80"
+  needle_hex: "AD 8C F3 F8 XX XX 49 80"
 - name: dzws
   size: 1
   conversion: retard
   comment: difference ignition timing (between zwopt and zwsol)
-  needle_hex: "E4 1A F7 FA ?? ?? F3 F8"
+  needle_hex: "E4 1A F7 FA XX XX F3 F8"
 - name: etalab
   size: 1
   conversion: half
   comment: lambda efficiency without intervention based on optimal torque during lambda=1?
-  needle_hex: "B5 8C C2 F4 ?? ?? 0B 74"
+  needle_hex: "B5 8C C2 F4 XX XX 0B 74"
 - name: etazaist
   size: 1
   conversion: half
   comment: actual cylinder masking effectiveness
-  needle_hex: "03 F8 C4 10 ?? ?? A9 8C"
+  needle_hex: "03 F8 C4 10 XX XX A9 8C"
 - name: etazwb
   size: 1
   conversion: half
   comment: ignition angle efficiency of basic ignition angle
-  needle_hex: "6C A9 C2 F5 ?? ?? F0 25"
+  needle_hex: "6C A9 C2 F5 XX XX F0 25"
 - name: etazws
   size: 1
   conversion: half
   comment: nominal ignition angle effectiveness
-  needle_hex: "96 8D F3 F8 ?? ?? 49 80"
+  needle_hex: "96 8D F3 F8 XX XX 49 80"
 - name: fdar
   size: 1
   conversion: amp
   comment: amplification factor for anti-jerk intervention
   needle_hex:
-    - "A2 A8 C2 F5 ?? ?? 6D 06"
+    - "A2 A8 C2 F5 XX XX 6D 06"
     - "BD 11 F3 F8 A0 8C"
 - name: fdars
   size: 1
   conversion: amp
   comment: "amplification factor anti-jerk at AT, WK closed for steady state"
   needle_hex:
-    - "03 00 F7 8E ?? ?? 0D 2B"
+    - "03 00 F7 8E XX XX 0D 2B"
     - "0D 1A F3 F8 A1 8C"
 # Gain, scale 1/16. A timer byte is usually 1/100.
 - name: flrar
@@ -527,179 +527,179 @@ measurements:
   factor: 1/16
   comment: amplification factor for modelling of external load
   needle_hex:
-    - "AA A8 C2 F5 ?? ?? F0 25"
+    - "AA A8 C2 F5 XX XX F0 25"
     - "97 8C F7 8E A2 8C"
 # Gain, scale 19/256. A speed word is usually 1/4.
 - name: kifz_MDH_w
   factor: 19/256
   comment: kifz MDH register for nmod integrator
   needle_hex:
-    - "1B 42 F6 06 ?? ?? F2 F3 0C FE F2 F2 9A A8"
+    - "1B 42 F6 06 XX XX F2 F3 0C FE F2 F2 9A A8"
     - "6A 88 F2 F4 E2 A8"
 # Gain, scale 19/256. A speed word is usually 1/4.
 - name: kifz_w
   factor: 19/256
   comment: amplification of vehicle model
   needle_hex:
-    - "03 00 F6 8E ?? ?? 0D 30"
+    - "03 00 F6 8E XX XX 0D 30"
     - "57 88 F6 8E 9A A8"
 # Unit t is the T4 timer register.
 - name: lastT4_w
   unit: t
   comment: previous T4 register for nmod integrator
   needle_hex:
-    - "DE A8 F6 F4 ?? ?? F6 F6"
+    - "DE A8 F6 F4 XX XX F6 F6"
     - "D2 A8 F6 8E E0 A8"
 # Signed percent, scale 1/200. A percent word is usually 100/65536.
 - name: ldimxr_w
   unit: "%"
   signed: true
   factor: 1/200
-  needle_hex: "42 A7 02 F4 ?? ?? 5D 03"
+  needle_hex: "42 A7 02 F4 XX XX 5D 03"
 - name: mdbes_w
   unit: "%"
   comment: Acceleration torque
   needle_hex:
-    - "38 50 F6 F5 ?? ?? F3 F8 78 F8"
+    - "38 50 F6 F5 XX XX F3 F8 78 F8"
     - "9A A8 F6 8E 9C A8"
 - name: mdzw_max_w
   conversion: torque
   comment: "max(mizsol_w, mizwmn_w, misol_w)"
-  needle_hex: "11 80 F2 F4 ?? ?? 42 F4"
+  needle_hex: "11 80 F2 F4 XX XX 42 F4"
 - name: mibas_w
   conversion: torque
   comment: indicated basic torque
   needle_hex:
-    - "EC A9 42 F4 ?? ?? 9D 05"
+    - "EC A9 42 F4 XX XX 9D 05"
     - "66 A9 F6 8E 68 A9 0D 25"
 - name: mibeg_w
   unit: "%"
   comment: limit torque
   needle_hex:
-    - "F8 A9 F6 FC ?? ?? F2 F4"
+    - "F8 A9 F6 FC XX XX F2 F4"
     - "34 A9 F6 8E 46 A9"
 - name: mibgr_w
   unit: "%"
   comment: Indicated desired torque for gear-dependent limiting of the clutch torque
   needle_hex:
-    - "0A A9 42 F4 ?? ?? 9D 03"
+    - "0A A9 42 F4 XX XX 9D 03"
     - "08 00 F2 FE 0C AA"
 - name: miextv_w
   unit: "%"
   comment: external torque demand from stalling protection
   needle_hex:
-    - "7E 91 F6 F4 ?? ?? F3 F8"
+    - "7E 91 F6 F4 XX XX F3 F8"
     - "00 80 F2 FE 48 A9"
 - name: miistoar_w
   unit: "%"
   comment: Istmoment ohne Antiruckel-Anteil
   needle_hex:
-    - "F4 A8 F2 F5 ?? ?? 1B 54"
+    - "F4 A8 F2 F5 XX XX 1B 54"
     - "0E FE F2 F4 18 AA"
 - name: milres_w
   unit: "%"
   comment: torque request for air path including all torque reserves
   needle_hex:
-    - "E8 AB 42 F5 ?? ?? 3D 04"
+    - "E8 AB 42 F5 XX XX 3D 04"
     - "0E FE F6 F5 60 A9"
 - name: milsol_w
   unit: "%"
   comment: torque request for air path capped by miszull?
   needle_hex:
-    - "7A 91 42 F5 ?? ?? 8D 02"
+    - "7A 91 42 F5 XX XX 8D 02"
     - "62 A9 F6 8E 64 A9 0D 25"
 - name: milsolv_w
   unit: "%"
   comment: torque request for air path?
-  needle_hex: "F0 49 F6 F4 ?? ?? 8A 52"
+  needle_hex: "F0 49 F6 F4 XX XX 8A 52"
 - name: mimax_w
   unit: "%"
   alias: TorqueLimit
   comment: maximum attainable indicated torque
-  needle_hex: "0D F8 F2 F4 ?? ?? 7C 84"
+  needle_hex: "0D F8 F2 F4 XX XX 7C 84"
 - name: mimsr_w
   unit: "%"
   comment: desired indicated torque from MSR
   needle_hex:
-    - "46 A9 42 F4 ?? ?? 8D 03"
+    - "46 A9 42 F4 XX XX 8D 03"
     - "F4 A9 F6 F4 CA A9"
 - name: minmx_w
   unit: "%"
   comment: indicated nominal torque for NMAX limiting
   needle_hex:
-    - "0C AA 42 FC ?? ?? FD 02"
+    - "0C AA 42 FC XX XX FD 02"
     - "AC A9 F2 FF AA A9"
 - name: miopt_w
   unit: "%"
   comment: optimum indicated torque
   needle_hex:
-    - "4E A9 F2 F4 ?? ?? C2 F5"
+    - "4E A9 F2 F4 XX XX C2 F5"
     - "9A A9 F6 F2 6C A9"
 - name: misolv_w
   unit: "%"
   alias: TorqueBeforeLimitation
   comment: indicated resultant nominal torque before torque limitation
   needle_hex:
-    - "0A A9 42 F4 ?? ?? 3D 15"
+    - "0A A9 42 F4 XX XX 3D 15"
     - "0C FE F6 07 4E A9 F2 F4"
 - name: miszull_w
   unit: "%"
   comment: maximum permissible indicated torque for air path?
   needle_hex:
-    - "EE A9 F6 F4 ?? ?? F6 F4"
+    - "EE A9 F6 F4 XX XX F6 F4"
     - "E0 14 02 F4 EA A9"
 - name: mitebg_milres_flag
   size: 1
   bitmask: '0x0001'
   comment: CWTEZW=odd and mitebg_w = milres_w
-  needle_hex: "FE 00 65 F8 ?? ?? 8A 2B"
+  needle_hex: "FE 00 65 F8 XX XX 8A 2B"
 - name: mitebg_w
   unit: "%"
   comment: torque value for minimum charge canister purge
-  needle_hex: "5C A9 F2 F4 ?? ?? 42 F4"
+  needle_hex: "5C A9 F2 F4 XX XX 42 F4"
 - name: mivmx_w
   unit: "%"
   comment: indicated nominal torque for VMAX control
-  needle_hex: "2D 05 42 FC ?? ?? FD 02"
+  needle_hex: "2D 05 42 FC XX XX FD 02"
 - name: mizsol_div_redist_0_w
   conversion: torque
   comment: mizsol divisor when redist = 0
-  needle_hex: "F4 A9 82 00 ?? ?? 82 00"
+  needle_hex: "F4 A9 82 00 XX XX 82 00"
 - name: mizsol_div_redist_ne_0_w
   conversion: torque
   comment: "mizsol divisor when redist <> 0"
-  needle_hex: "92 8B 2D 10 F2 F4 ?? ?? A8 20"
+  needle_hex: "92 8B 2D 10 F2 F4 XX XX A8 20"
   back_up: -6
 - name: mizsol_w
   conversion: torque
   comment: indicated resultant nominal torque for ignition angle intervention
   needle_hex:
-    - "BC F9 F6 F5 ?? ?? F2 F2"
+    - "BC F9 F6 F5 XX XX F2 F2"
     - "14 A9 F6 8E 52 A9"
 - name: mizsolv_w
   unit: "%"
   alias: TorqueForTimingIntervention
   comment: ind. torque for an ignition timing intervention before torque limiting
   needle_hex:
-    - "BC F9 F6 F2 ?? ?? D7 40"
+    - "BC F9 F6 F2 XX XX D7 40"
     - "02 00 F2 F3 50 A9"
 - name: mizwmn_w
   conversion: torque
   comment: indicated engine torque at the latest spark angle
-  needle_hex: "0E F8 F2 F4 ?? ?? 7C 84"
+  needle_hex: "0E F8 F2 F4 XX XX 7C 84"
 - name: mkar_w
   unit: "%"
   signed: true
   conversion: twice
   comment: calculated clutch torque for anti-jerk function
   needle_hex:
-    - "A8 45 F2 F4 ?? ?? 22 F4"
+    - "A8 45 F2 F4 XX XX 22 F4"
     - "5E 5C F7 8E 9E A8"
 - name: mlast_w
   unit: "%"
   comment: Estimated load moment
   needle_hex:
-    - "C6 3C 22 F5 ?? ?? 5D 03"
+    - "C6 3C 22 F5 XX XX 5D 03"
     - "72 A8 F3 F8 A0 A8"
 # Speed threshold stored as a percent: 40 per count, same as an rpm byte.
 - name: nasnottm
@@ -707,157 +707,157 @@ measurements:
   unit: "%"
   factor: 40.0
   comment: Speed threshold due to stalling protection as a function of tmot
-  needle_hex: "78 F8 43 F8 ?? ?? 9D 11"
+  needle_hex: "78 F8 43 F8 XX XX 9D 11"
 # Raw byte. A timer byte is usually 1/100.
 - name: ndar_init_switch
   size: 1
   factor: 1
-  needle_hex: "4E 69 25 8F ?? ?? F3 F8"
+  needle_hex: "4E 69 25 8F XX XX F3 F8"
 - name: ndar_w
   signed: true
   comment: Difference RPM for torque control
   needle_hex:
-    - "A1 8C F2 F5 ?? ?? 48 40"
+    - "A1 8C F2 F5 XX XX 48 40"
     - "46 69 F6 F5 A2 A8"
 - name: ndfil_B1_high_w
   signed: true
   comment: "ndfil * B1 MDH register"
   needle_hex:
-    - "CA A8 F6 8E ?? ?? F6 8E"
+    - "CA A8 F6 8E XX XX F6 8E"
     - "D0 71 F6 F4 CC A8"
 - name: ndfil_B1_low_w
   signed: true
   comment: "ndfil * B1 MDL register"
   needle_hex:
-    - "C8 A8 F6 8E ?? ?? F6 8E"
+    - "C8 A8 F6 8E XX XX F6 8E"
     - "5C 85 F6 F5 CA A8"
 - name: ndfil_B2_high_w
   signed: true
   comment: "ndfil * B2 MDH register"
-  needle_hex: "CE A8 F6 8E ?? ?? F6 8E"
+  needle_hex: "CE A8 F6 8E XX XX F6 8E"
 - name: ndfil_B2_low_w
   signed: true
   comment: "ndfil * B2 MDL register"
   needle_hex:
-    - "CC A8 F6 8E ?? ?? F6 8E"
+    - "CC A8 F6 8E XX XX F6 8E"
     - "69 88 F6 8E CE A8"
 - name: ndfil_high_w
   signed: true
   comment: "ndiff * B1 high + ndfil * B2 high"
   needle_hex:
-    - "D6 A8 F6 8E ?? ?? 9A 4E"
+    - "D6 A8 F6 8E XX XX 9A 4E"
     - "FF FF F6 F2 D8 A8"
 - name: ndfil_low_w
   signed: true
   comment: "ndfil * B1 low + nfil * B2 low"
   needle_hex:
-    - "D4 A8 F6 8E ?? ?? F6 8E"
+    - "D4 A8 F6 8E XX XX F6 8E"
     - "FF FF F6 F5 D6 A8"
 - name: ndfil_w
   signed: true
   comment: filtered engine speed difference
   needle_hex:
-    - "68 22 85 00 ?? ?? 85 00"
+    - "68 22 85 00 XX XX 85 00"
     - "92 F9 22 FC A6 A8"
 - name: ndfil_wk1
   signed: true
   comment: filtered engine speed difference K1
   needle_hex:
-    - "A6 A8 F6 8E ?? ?? F6 8E"
+    - "A6 A8 F6 8E XX XX F6 8E"
     - "E0 05 02 F4 B6 A8"
 - name: ndfil_wk2
   signed: true
   comment: filtered engine speed difference K2
   needle_hex:
-    - "B6 A8 F6 8E ?? ?? F6 8E"
+    - "B6 A8 F6 8E XX XX F6 8E"
     - "B6 A8 12 F5 B8 A8"
 - name: ndiff_A0_high_w
   signed: true
   comment: "ndiff * A0 MDH register"
   needle_hex:
-    - "BE A8 F6 F5 ?? ?? F2 F4"
+    - "BE A8 F6 F5 XX XX F2 F4"
     - "68 88 F2 F4 C0 A8"
 - name: ndiff_A0_low_w
   signed: true
   comment: "ndiff * A0 MDL register"
   needle_hex:
-    - "C0 A8 F2 F4 ?? ?? F2 F5"
+    - "C0 A8 F2 F4 XX XX F2 F5"
     - "B8 A8 25 8F BE A8"
 - name: ndiff_A1_high_w
   signed: true
   comment: "ndiff * A1 MDH register"
   needle_hex:
-    - "C2 A8 F6 8E ?? ?? F6 8E"
+    - "C2 A8 F6 8E XX XX F6 8E"
     - "0D 1B F2 F4 C4 A8"
 - name: ndiff_A1_low_w
   signed: true
   comment: "ndiff * A1 MDL register"
   needle_hex:
-    - "C4 A8 F2 F4 ?? ?? F2 F5"
+    - "C4 A8 F2 F4 XX XX F2 F5"
     - "E0 A8 F2 F4 C2 A8"
 - name: ndiff_A2_high_w
   signed: true
   comment: "ndiff * A2 MDH register"
   needle_hex:
-    - "C6 A8 F6 8E ?? ?? F6 8E"
+    - "C6 A8 F6 8E XX XX F6 8E"
     - "D0 71 F6 F4 C8 A8"
 - name: ndiff_A2_low_w
   signed: true
   comment: "ndiff * A2 MDL register"
   needle_hex:
-    - "C4 A8 F6 8E ?? ?? F6 8E"
+    - "C4 A8 F6 8E XX XX F6 8E"
     - "D0 71 F6 F4 C6 A8"
 - name: ndiff_high_w
   signed: true
   comment: "ndiff * A1 high + ndiff * A2 high"
   needle_hex:
-    - "D2 A8 F6 8E ?? ?? F6 8E"
+    - "D2 A8 F6 8E XX XX F6 8E"
     - "D6 A8 F6 F5 D4 A8"
 - name: ndiff_low_w
   signed: true
   comment: "ndiff * A1 low + ndiff * A2 low"
   needle_hex:
-    - "D0 A8 F6 8E ?? ?? F6 8E"
+    - "D0 A8 F6 8E XX XX F6 8E"
     - "CE A8 F6 8E D2 A8"
 - name: ndiff_w
   signed: true
   comment: engine speed difference for ISC amplification
   needle_hex:
-    - "0F 4F F2 F4 ?? ?? 42 F4"
+    - "0F 4F F2 F4 XX XX 42 F4"
     - "CE A8 F2 FE AA A8"
 - name: ndiff_wk1
   signed: true
   comment: engine speed difference K1
   needle_hex:
-    - "B8 A8 F6 8E ?? ?? F6 8E"
+    - "B8 A8 F6 8E XX XX F6 8E"
     - "BC A8 F2 FF BA A8"
 - name: ndiff_wk2
   signed: true
   comment: engine speed difference K2
   needle_hex:
-    - "BA A8 F6 F5 ?? ?? F2 F2"
+    - "BA A8 F6 F5 XX XX F2 F2"
     - "B0 A8 F2 FE BC A8"
 - name: ndiffog_w
   comment: Threshold engine speed difference for reset of AR during braking
   needle_hex:
-    - "AA A8 42 F4 ?? ?? BD 0A"
+    - "AA A8 42 F4 XX XX BD 0A"
     - "64 88 F6 8E A8 A8"
 # Raw word. A speed word is usually 1/4.
 - name: nmod_int_reset_w
   factor: 1
   comment: integrator reset from B_iniar
   needle_hex:
-    - "AE A8 F6 8E ?? ?? 0D 01"
+    - "AE A8 F6 8E XX XX 0D 01"
     - "F4 F9 F6 8E DA A8"
 - name: nmod_w
   comment: engine speed from model
   needle_hex:
-    - "DC A8 F6 F2 ?? ?? 6E 4F"
+    - "DC A8 F6 F2 XX XX 6E 4F"
     - "FC 6F F2 F4 AE A8"
 - name: nmodiv_w
   comment: calculated RPM from speed
   needle_hex:
-    - "07 A0 F2 F4 ?? ?? F6 F4 DC A8"
+    - "07 A0 F2 F4 XX XX F6 F4 DC A8"
     - "FD 00 65 F8 AC A8"
 # Taken from the result-type selector. Factor 40 matches the catalog rpm row.
 - name: nmot
@@ -867,122 +867,122 @@ measurements:
 - name: nmot_last2_w
   comment: nmot value two previous cycles for armd-kupgw
   needle_hex:
-    - "B0 A8 42 F5 ?? ?? ED 08"
+    - "B0 A8 42 F5 XX XX ED 08"
     - "4A 43 02 F4 B2 A8"
 - name: nmot_last_w
   comment: nmot value previous cycle for armd-kupgw
   needle_hex:
-    - "7A F8 42 F4 ?? ?? FD 07"
+    - "7A F8 42 F4 XX XX FD 07"
     - "5C 8C F2 FD B0 A8"
 - name: nmoti_w
   comment: calculated RPM from speed for transition
   needle_hex:
-    - "AC A8 F6 F4 ?? ?? F6 F4"
+    - "AC A8 F6 F4 XX XX F6 F4"
     - "FF FF F6 F3 DC A8"
 - name: nvquot_w
   comment: Quotient engine speed nmot / speed vfzg
   needle_hex:
-    - "CC 00 42 F4 ?? ?? 8D 02 BF 4E"
+    - "CC 00 42 F4 XX XX 8D 02 BF 4E"
     - "50 04 F6 F4 8E 9F"
 # Scale 100/256.
 - name: out_DMARMX_w
   factor: 100/256
   comment: upper threshold steady torque intervention of anti-jerk
   needle_hex:
-    - "17 30 42 F7 ?? ?? 9D 05"
+    - "17 30 42 F7 XX XX 9D 05"
     - "0D 0A F2 F4 EC A8"
 - name: out_KFDMDADP_w
   conversion: torque
   comment: upper threshold for torque-intervention during dashpot
   needle_hex:
-    - "0B 70 42 F6 ?? ?? FD 18"
+    - "0B 70 42 F6 XX XX FD 18"
     - "7C 20 F7 F8 EA A8"
 - name: out_KFDMDARO_w
   conversion: torque
   comment: Upper threshold for torque intervention
-  needle_hex: "0D 10 42 F6 ?? ?? FD 0D"
+  needle_hex: "0D 10 42 F6 XX XX FD 0D"
 - name: out_KFDMDAROS_w
   conversion: torque
   comment: upper threshold for torque-intervention steady state
   needle_hex:
-    - "F0 74 42 F7 ?? ?? FD 05 F3 F8 51 13"
+    - "F0 74 42 F7 XX XX FD 05 F3 F8 51 13"
     - "7D 20 F7 F8 E8 A8"
 - name: psmx_w
   unit: mbar
   needle_hex:
-    - "FF FF F6 F2 ?? ?? F2 F4 E8 A2"
+    - "FF FF F6 F2 XX XX F2 F4 E8 A2"
     - "DB 00 F7 8E 88 A1"
 # Raw byte. A timer byte is usually 1/100.
 - name: resetB_argf
   size: 1
   factor: 1
   comment: B_argf reset from flip-flop
-  needle_hex: "F7 F8 0A 8A ?? ?? 41 AD"
+  needle_hex: "F7 F8 0A 8A XX XX 41 AD"
 # Load, scale 6/256. A percent word is usually 100/65536.
 - name: rlmin_w
   unit: "%"
   factor: 6/256
   comment: minimum permissible rl
-  needle_hex: "0D 0C 42 F8 ?? ?? ED 06"
+  needle_hex: "0D 0C 42 F8 XX XX ED 06"
 # Raw word. A speed word is usually 1/4.
 - name: SGA06MDUB_w
   factor: 1
   comment: condition end of start
-  needle_hex: "3D 03 F6 8E ?? ?? DB 00"
+  needle_hex: "3D 03 F6 8E XX XX DB 00"
 - name: SMK08MDSW_w
   conversion: torque
   comment: antisurge torque dependent basic point (number =8)
-  needle_hex: "9E A8 F2 FF ?? ?? DA 80"
+  needle_hex: "9E A8 F2 FF XX XX DA 80"
 - name: THDMB_debounce
   size: 1
   unit: s
   comment: "dwell time, healing for fault path for permanent torque limitation"
-  needle_hex: "19 00 F3 F8 ?? ?? 49 80"
+  needle_hex: "19 00 F3 F8 XX XX 49 80"
 - name: timerTAREIN
   size: 1
   comment: lockup time for anti-jerk function
   needle_hex:
-    - "4D 13 F7 F8 ?? ?? F3 FA"
+    - "4D 13 F7 F8 XX XX F3 FA"
     - "0E FE F6 F5 A6 8C"
 - name: timerTMLAST
   size: 1
   comment: blocking time until the initialization of the AR is triggered at deceleration
-  needle_hex: "4F 13 F7 F8 ?? ?? DB 00"
+  needle_hex: "4F 13 F7 F8 XX XX DB 00"
 - name: timerTVARS
   size: 1
   comment: delay time until antisurge is inactive again
   needle_hex:
-    - "B6 A8 F3 F8 ?? ?? 49 80"
+    - "B6 A8 F3 F8 XX XX 49 80"
     - "0D 0A F2 F4 EE A8"
 - name: timerTVARSS
   size: 1
   comment: delay time for AR inactive again while steady state
-  needle_hex: "2E 4F F3 F8 ?? ?? 49 80"
+  needle_hex: "2E 4F F3 F8 XX XX 49 80"
 - name: timerTVKUPAR
   size: 1
   comment: delay time for clutch anti-jerk
-  needle_hex: "08 80 F3 F8 ?? ?? 3D 05"
+  needle_hex: "08 80 F3 F8 XX XX 3D 05"
 - name: timerTVKUPHS
   size: 1
   comment: delay time for clutch switch during shifting in higher gear
   needle_hex:
-    - "0D 02 F7 8E ?? ?? 9A 4E"
+    - "0D 02 F7 8E XX XX 9A 4E"
     - "0C FE F6 07 A4 8C"
 - name: timerTVKUPRS
   size: 1
   comment: delay time for clutch switch during shifting in lower gear
-  needle_hex: "5B 13 43 FA ?? ?? ED 02"
+  needle_hex: "5B 13 43 FA XX XX ED 02"
 - name: timerTZSPINI
   size: 1
   comment: Resting time for filter initialisation
   needle_hex:
-    - "4F 89 F3 F8 ?? ?? 49 80"
+    - "4F 89 F3 F8 XX XX 49 80"
     - "7C 9D 42 F4 B4 A8"
 - name: TMVER_debounce_w
   unit: s
   comment: 'Debounce time: ETC torque limitation is activ for a longer time'
   needle_hex:
-    - "EC 22 F6 F3 ?? ?? F3 F8"
+    - "EC 22 F6 F3 XX XX F3 F8"
     - "52 A9 F6 8E 54 A9"
 - name: TVMIBEG_debounce
   size: 1
@@ -990,7 +990,7 @@ measurements:
   factor: 1/100
   comment: debounce time for activation of ignition intervention during torque limitation
   needle_hex:
-    - "B4 13 F7 F8 ?? ?? 8A 52"
+    - "B4 13 F7 F8 XX XX 8A 52"
     - "12 A9 F6 8E 56 A9"
 # Ignition retard: unsigned, scale -3/4. A crank-angle byte is usually signed +3/4.
 - name: wkrdy
@@ -998,17 +998,17 @@ measurements:
   conversion: retard
   signed: false
   needle_hex:
-    - "38 A6 F7 F8 ?? ?? F3 F8"
+    - "38 A6 F7 F8 XX XX F3 F8"
     - "58 87 F3 FA B4 F9"
 # Unsigned crank angle. A °KW byte is usually signed.
 - name: zaldy
   size: 1
   unit: "°KW"
   signed: false
-  needle_hex: "C7 10 F7 F8 ?? ?? F2 F4"
+  needle_hex: "C7 10 F7 F8 XX XX F2 F4"
 # Unsigned crank angle. A °KW byte is usually signed.
 - name: zwbas
   size: 1
   unit: "°KW"
   signed: false
-  needle_hex: "E0 DF DF DF ?? ??"
+  needle_hex: "E0 DF DF DF XX XX"

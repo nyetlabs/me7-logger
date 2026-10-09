@@ -196,7 +196,7 @@ func scopedHit(img []byte, end uint32, row MapSig, have map[string]uint32, slot 
 	if !ok {
 		return 0
 	}
-	n := len(pat) / 2
+	n := patLen(pat)
 	if n == 0 {
 		return 0
 	}

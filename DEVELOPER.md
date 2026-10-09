@@ -18,7 +18,7 @@ This tree is MIT ([LICENSE](LICENSE)). Do not copy NefMoto `Communication/`. The
 
 `config/signatures.yaml` is embedded with the other config files. `generate` runs the rows after the selector and after `opcode/sign.go`, so a row can embed a name an earlier row already stored. New rows go in this file.
 
-A pattern can splice in an address that is already known:
+A pattern is two hex digits per byte, as compiled by `needle.Compile` for both this file and the needle files. `X` is a nibble wildcard, and `[VV/MM]` is one byte whose bits under mask `MM` equal `VV`. A pattern can splice in an address that is already known:
 
 - `{name:MID}` is that address in ME7Info's EXTP form.
 - `{slot:N}` is `callsSlot(N)`. The word comes from the `calls` table after the bootrom version is chosen by counting calls.
@@ -125,11 +125,11 @@ A row with `needle_hex` replaces that name, or adds it:
 ```yaml
 functions:
   - name: my_caller
-    needle_hex: "DA ?? ?? ?? DB 00"
+    needle_hex: "DA XX XX XX DB 00"
     unique: true
 ```
 
-`??` is one wildcard byte. Spaces are optional. Only word-aligned hits count. An omitted `unique` is true, so more than one hit is reported and skipped. An omitted `back_up` on a needle row is 0, so the label is the hit. A negative `back_up` moves the label forward. `back_up: [min, max]` needs an even span and `entry_after`. `entry_after` is a list of byte strings, and one of them must precede the label.
+`XX` is one wildcard byte, using the pattern syntax of `config/signatures.yaml`. Spaces are optional. Only word-aligned hits count. An omitted `unique` is true, so more than one hit is reported and skipped. An omitted `back_up` on a needle row is 0, so the label is the hit. A negative `back_up` moves the label forward. `back_up: [min, max]` needs an even span and `entry_after`. `entry_after` is a list of byte strings, and one of them must precede the label.
 
 A row that omits `needle_hex` updates only the fields it lists, on a needle that already exists:
 

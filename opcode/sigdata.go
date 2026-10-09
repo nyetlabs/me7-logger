@@ -289,8 +289,8 @@ func ParseSigs(b []byte) (SigDoc, error) {
 		if d.Rows > 0 && ybits == 0 {
 			ybits = 8
 		}
-		if d.Table && (len(d.Pattern)%2 != 0 || len(d.Pattern) < 2) {
-			return SigDoc{}, fmt.Errorf("mapsig %s: a breakpoint table pattern is an even byte string", d.Name)
+		if d.Table && patLen(d.Pattern) == 0 {
+			return SigDoc{}, fmt.Errorf("mapsig %s: a breakpoint table pattern is a byte string", d.Name)
 		}
 		if d.Frame && d.Far {
 			return SigDoc{}, fmt.Errorf("mapsig %s: frame and far are different pointers", d.Name)
@@ -299,10 +299,10 @@ func ParseSigs(b []byte) (SigDoc, error) {
 			return SigDoc{}, fmt.Errorf("mapsig %s: deref is not negative", d.Name)
 		}
 		if !d.Table && d.Pattern != "" && !strings.Contains(d.Pattern, "{") {
-			if len(d.Pattern)%2 != 0 {
-				return SigDoc{}, fmt.Errorf("mapsig %s: pattern is an even byte string", d.Name)
+			n := patLen(d.Pattern)
+			if n == 0 {
+				return SigDoc{}, fmt.Errorf("mapsig %s: pattern is a byte string", d.Name)
 			}
-			n := len(d.Pattern) / 2
 			// A negative at reads the pointer in front of the hit.
 			if at >= 0 && !d.Frame && !d.Far && at+2 > n {
 				return SigDoc{}, fmt.Errorf("mapsig %s: at must sit on a word inside the pattern", d.Name)
@@ -528,7 +528,7 @@ func applyPats(img []byte, dpp [4]uint16, lo, hi uint32, row Sig, have map[strin
 		if h == 0 {
 			continue
 		}
-		storeSig(img, dpp, h, len(pat)/2, row, add, hits)
+		storeSig(img, dpp, h, patLen(pat), row, add, hits)
 		if _, ok := have[row.Name]; ok {
 			return
 		}
@@ -555,7 +555,7 @@ func walkSteps(img []byte, lo, hi uint32, steps []SigStep, have map[string]uint3
 		if h == 0 {
 			return 0, 0
 		}
-		n = len(pat) / 2
+		n = patLen(pat)
 	}
 	return h, n
 }

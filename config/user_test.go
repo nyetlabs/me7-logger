@@ -21,12 +21,12 @@ conversions:
 measurements:
   - name: dzwb
     factor: -0.5
-    needle_hex: "39 A0 F7 FA ?? ?? 49 A0 DD 02"
+    needle_hex: "39 A0 F7 FA XX XX 49 A0 DD 02"
     back_up: -8
   - name: user_rpm
     size: 1
     unit: rpm
-    needle_hex: "AA 55 ?? ??"
+    needle_hex: "AA 55 XX XX"
     back_up: -2
     unique: true
   - name: user_custom

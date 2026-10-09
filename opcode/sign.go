@@ -3,6 +3,8 @@ package opcode
 import (
 	"encoding/binary"
 	"fmt"
+
+	"go.nyet.org/me7-logger/needle"
 )
 
 // Named is one variable the dedicated signature pass located.
@@ -63,17 +65,17 @@ func Signatures(img []byte, dpp [4]uint16, known map[string]uint32) []Named {
 	// altLayout uses the suffix 7C8XF0XXF7FXxxxx. This port is the altLayout == 0 path.
 	relSuffix(img, dpp, start, end, have, add, "wped", 1, "F6FX", "wped_w", "7C8X", 2, true)
 	if have["wped"] == 0 {
-		relSuffix(img, dpp, start, end, have, add, "wped", 1, "F2FX", "wped_w", "7C8XF7FXxxxx", 2, true)
+		relSuffix(img, dpp, start, end, have, add, "wped", 1, "F2FX", "wped_w", "7C8XF7FXXXXX", 2, true)
 	}
 	relSuffix(img, dpp, start, end, have, add, "pssol_w", 2, "F2FX", "pvdkdsl_w", "F2FXXXXX5CEX", 1, true)
-	relSuffix(img, dpp, start, end, have, add, "vpsspls_w", 2, "F6FX", "pssol_w", "F2FXxxxx5CFX", 1, true)
+	relSuffix(img, dpp, start, end, have, add, "vpsspls_w", 2, "F6FX", "pssol_w", "F2FXXXXX5CFX", 1, true)
 	vpss(img, dpp, start, end, have, add, "vpsspu_w", "pu_w")
 	vpss(img, dpp, start, end, have, add, "vpssplg_w", "plgrus_w")
-	relPrefix(img, dpp, start, end, have, add, "rlroh_w", 2, "DB00F2FXxxxxF2FXxxxx", "22FX", "rl_w", 6, true)
-	relPrefix(img, dpp, start, end, have, add, "fpvdk_w", 2, "F6FXxxxx7C8X", "F7FX", "fpvdk", 0, false)
-	relPrefix(img, dpp, start, end, have, add, "ftvdk", 1, "C2FXxxxx5C8X", "F2FX", "fpvdk_w", 0, false)
-	relSuffix(img, dpp, start, end, have, add, "zwnws", 1, "", "", "DA00xxxxF1E8F7FXxxxx", 2, false)
-	if h := findPat(img, start, end, "F2FXxxxx66FXFF03F6FXXXXXECFX", true); h != 0 {
+	relPrefix(img, dpp, start, end, have, add, "rlroh_w", 2, "DB00F2FXXXXXF2FXXXXX", "22FX", "rl_w", 6, true)
+	relPrefix(img, dpp, start, end, have, add, "fpvdk_w", 2, "F6FXXXXX7C8X", "F7FX", "fpvdk", 0, false)
+	relPrefix(img, dpp, start, end, have, add, "ftvdk", 1, "C2FXXXXX5C8X", "F2FX", "fpvdk_w", 0, false)
+	relSuffix(img, dpp, start, end, have, add, "zwnws", 1, "", "", "DA00XXXXF1E8F7FXXXXX", 2, false)
+	if h := findPat(img, start, end, "F2FXXXXX66FXFF03F6FXXXXXECFX", true); h != 0 {
 		add("uhfm_w", PtrAt(img, h+10, dpp), 2)
 	}
 	fnwue(img, dpp, start, end, add)
@@ -102,10 +104,10 @@ func zwistChain(img []byte, dpp [4]uint16, start, end uint32, have map[string]ui
 		}
 	}
 	// zwoutar's pattern sits below the usual 0x804000 search floor.
-	h := findPat(img, FlashBase, end, "E6FDxxxxE6FC6000998D", true)
+	h := findPat(img, FlashBase, end, "E6FDXXXXE6FC6000998D", true)
 	off := uint32(2)
 	if h == 0 {
-		h = findPat(img, start, end, "E6FC6000E6FDxxxx998D", true)
+		h = findPat(img, start, end, "E6FC6000E6FDXXXX998D", true)
 		off = 6
 	}
 	if h != 0 {
@@ -127,11 +129,11 @@ func redistEvz(img []byte, dpp [4]uint16, start, end uint32, have map[string]uin
 	if !ok {
 		return
 	}
-	if h := findPat(img, lo, hi, "C2F4xxxxF0545C25", false); h != 0 {
+	if h := findPat(img, lo, hi, "C2F4XXXXF0545C25", false); h != 0 {
 		add("redist", PtrAt(img, h+2, dpp), 1)
 	}
 	if addr := have["zwist"]; addr != 0 {
-		if h := findPat(img, lo, hi, embedAddr(addr, "F3FA")+"F3FXxxxx21XX", false); h != 0 {
+		if h := findPat(img, lo, hi, embedAddr(addr, "F3FA")+"F3FXXXXX21XX", false); h != 0 {
 			add("zwopt", PtrAt(img, h+6, dpp), 1)
 		}
 		if have["zwopt"] == 0 {
@@ -142,7 +144,7 @@ func redistEvz(img []byte, dpp [4]uint16, start, end uint32, have map[string]uin
 	if addr == 0 {
 		return
 	}
-	pat := "C2FXxxxxC0XX60XX2D02" + embedAddr(addr, "258F")
+	pat := "C2FXXXXXC0XX60XX2D02" + embedAddr(addr, "258F")
 	if h := findPat(img, start, end, pat, true); h != 0 {
 		add("evz_austot", PtrAt(img, h+2, dpp), 1)
 	}
@@ -157,7 +159,7 @@ func vpss(img []byte, dpp [4]uint16, start, end uint32, have map[string]uint32, 
 		return
 	}
 	a, b := embedAddr(pssol, "F2FX"), embedAddr(addr, "F2FX")
-	h := findPat(img, start, end, a+"E00XF0XX5CEX5CEX7C2X70XX"+b+"DAxxxxxx", true)
+	h := findPat(img, start, end, a+"E00XF0XX5CEX5CEX7C2X70XX"+b+"DAXXXXXX", true)
 	if h == 0 {
 		h = findPat(img, start, end, b+a+"5CEX"+a+"7C2XF6FX0CFEF6FX0EFE7BXX", true)
 	}
@@ -181,7 +183,7 @@ func f6From(img []byte, dpp [4]uint16, hit uint32) uint32 {
 			page = int(ins[i].mem)
 			continue
 		}
-		if i < 0xc || !matchPat(ins[i], "F6FXxxxx") {
+		if i < 0xc || !matchPat(ins[i], "F6FXXXXX") {
 			continue
 		}
 		return Physical(dpp, ins[i].mem, p)
@@ -203,7 +205,7 @@ func zwmnVars(img []byte, dpp [4]uint16, end uint32, have map[string]uint32, add
 		return
 	}
 	const from = uint32(0x820000)
-	sig := "E6FCxxxxE6FDxxxxF2FExxxxF2FFxxxx" + call + embedAddr(zwmnms, "F7F8")
+	sig := "E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXX" + call + embedAddr(zwmnms, "F7F8")
 	h := findPat(img, from, end, sig, true)
 	if h == 0 {
 		return
@@ -217,7 +219,7 @@ func zwmnVars(img []byte, dpp [4]uint16, end uint32, have map[string]uint32, add
 	if hi == 0 {
 		return
 	}
-	h = findPat(img, lo, hi, "F3FXxxxx"+embedAddr(zwopt, "F3FX")+"21XX", false)
+	h = findPat(img, lo, hi, "F3FXXXXX"+embedAddr(zwopt, "F3FX")+"21XX", false)
 	if h == 0 {
 		return
 	}
@@ -226,7 +228,7 @@ func zwmnVars(img []byte, dpp [4]uint16, end uint32, have map[string]uint32, add
 	if spae == 0 {
 		return
 	}
-	h = findPat(img, from, end, "F3FXxxxx"+embedAddr(spae, "43FX")+"DDXX", true)
+	h = findPat(img, from, end, "F3FXXXXX"+embedAddr(spae, "43FX")+"DDXX", true)
 	if h != 0 {
 		add("zwsol", PtrAt(img, h+2, dpp), 1)
 	}
@@ -310,7 +312,7 @@ func miistWindow(img []byte, start, end, addr uint32) (uint32, uint32, bool) {
 // wkr array, and the one after that is zkrvf. zzylkr and wkraa embed wkra_0.
 // The wkr and wkraa counts are the cylinder count.
 func wkraChain(img []byte, dpp [4]uint16, start, end uint32, have map[string]uint32, add func(string, uint32, int)) {
-	h := findPat(img, start, end, "46F4A000CDFxDAxxxxxx", true)
+	h := findPat(img, start, end, "46F4A000CDFXDAXXXXXX", true)
 	if h == 0 {
 		return
 	}
@@ -322,7 +324,7 @@ func wkraChain(img []byte, dpp [4]uint16, start, end uint32, have map[string]uin
 	ins := walkInsns(img, base, base+0x50)
 	var at []int
 	for i := range ins {
-		if matchPat(ins[i], "E48Xxxxx") {
+		if matchPat(ins[i], "E48XXXXX") {
 			at = append(at, i)
 		}
 	}
@@ -343,7 +345,7 @@ func wkraChain(img []byte, dpp [4]uint16, start, end uint32, have map[string]uin
 	if wk == 0 {
 		return
 	}
-	h = findPat(img, start, end, embedAddr(wk, "F4A4")+"C2F4xxxxE4A4xxxx", true)
+	h = findPat(img, start, end, embedAddr(wk, "F4A4")+"C2F4XXXXE4A4XXXX", true)
 	if h == 0 {
 		return
 	}
@@ -398,7 +400,7 @@ func pvdksFamily(img []byte, dpp [4]uint16, start, end uint32, have map[string]u
 	if addr == 0 {
 		return
 	}
-	pat := "F6FXxxxx" + embedAddr(addr, "F6FX") + "F6FXxxxxF6FXxxxx7C8XF7FXxxxx"
+	pat := "F6FXXXXX" + embedAddr(addr, "F6FX") + "F6FXXXXXF6FXXXXX7C8XF7FXXXXX"
 	h := findPat(img, start, end, pat, true)
 	if h == 0 {
 		return
@@ -414,13 +416,13 @@ func pvdkPair(img []byte, dpp [4]uint16, start, end uint32, have map[string]uint
 	if addr == 0 {
 		return
 	}
-	if h := findPat(img, start, end, "F6FXxxxx"+embedAddr(addr, "F6FX")+"7C8XF7FXxxxx", false); h != 0 {
+	if h := findPat(img, start, end, "F6FXXXXX"+embedAddr(addr, "F6FX")+"7C8XF7FXXXXX", false); h != 0 {
 		got := prefixPick(walkInsns(img, h-4, h+4), "D740XXXX", dpp)
 		if got != 0 && got != have["pvdkdsl_w"] {
 			add("pvdkdsu_w", got, 2)
 		}
 	}
-	h := findPat(img, start, end, "F6FXxxxx7C8XF7FXxxxx"+embedAddr(addr, "F2FX"), false)
+	h := findPat(img, start, end, "F6FXXXXX7C8XF7FXXXXX"+embedAddr(addr, "F2FX"), false)
 	if h == 0 {
 		return
 	}
@@ -436,7 +438,7 @@ func lamfa(img []byte, dpp [4]uint16, start, end uint32, have map[string]uint32,
 		return
 	}
 	emb := embedAddr(addr, "F6FX")
-	tail := "E6FX0010F6FXxxxxE6FX0010F6FXxxxxE6FX0010F6FXxxxxE6FX0010F6FXxxxxE6FX0010F6FXxxxx"
+	tail := "E6FX0010F6FXXXXXE6FX0010F6FXXXXXE6FX0010F6FXXXXXE6FX0010F6FXXXXXE6FX0010F6FXXXXX"
 	if h := findPat(img, start, end, "E6FX0010"+emb+tail, true); h != 0 {
 		add("lamfaws_w", PtrAt(img, h+0xe, dpp), 2)
 		add("lamfawkr_w", PtrAt(img, h+0x16, dpp), 2)
@@ -445,7 +447,7 @@ func lamfa(img []byte, dpp [4]uint16, start, end uint32, have map[string]uint32,
 		add("lamrlmn_w", PtrAt(img, h+0x2e, dpp), 2)
 		return
 	}
-	ext := "E6FX0010D740E100F6FXxxxx"
+	ext := "E6FX0010D740E100F6FXXXXX"
 	h := findPat(img, start, end, "E6FX0010"+emb+ext+ext+ext+ext+ext, true)
 	if h == 0 {
 		return
@@ -603,15 +605,15 @@ func fnwue(img []byte, dpp [4]uint16, start, end uint32, add func(string, uint32
 	h := findPat(img, start, end, "E6FXFFFF7C8XD740E100F7FXXXXXD740E100F78EXXXX", true)
 	if h != 0 {
 		h += 0xc
-	} else if h = findPat(img, start, end, "F2FX0EFE0D02E6FXFFFF7C8XD740E100F7FXxxxxF2FXxxxx", true); h != 0 {
+	} else if h = findPat(img, start, end, "F2FX0EFE0D02E6FXFFFF7C8XD740E100F7FXXXXXF2FXXXXX", true); h != 0 {
 		h += 0x12
-	} else if h = findPat(img, start, end, "F2FX0EFE0D02E6FXFFFF7C8XF7FXxxxxF2FXxxxx", true); h != 0 {
+	} else if h = findPat(img, start, end, "F2FX0EFE0D02E6FXFFFF7C8XF7FXXXXXF2FXXXXX", true); h != 0 {
 		h += 0xe
 	} else if h = findPat(img, start, end, "E6FXFFFF7C8XF7FXXXXXF78EXXXX", true); h != 0 {
 		h += 8
-	} else if h = findPat(img, start, end, "E6FXFFFFF0XX46FXFF00CD03E7FXFF000D01F0XXF7FXxxxx", true); h != 0 {
+	} else if h = findPat(img, start, end, "E6FXFFFFF0XX46FXFF00CD03E7FXFF000D01F0XXF7FXXXXX", true); h != 0 {
 		h += 0x16
-	} else if h = findPat(img, start, end, "E6FXFFFF46FXFF009D04F0XXF7FXxxxx", true); h != 0 {
+	} else if h = findPat(img, start, end, "E6FXFFFF46FXFF009D04F0XXF7FXXXXX", true); h != 0 {
 		h += 0xe
 	} else {
 		return
@@ -716,26 +718,14 @@ func matchBytes(b, pat, mask []byte) bool {
 	return true
 }
 
+// compilePat is needle.Compile. ok is false when the pattern does not compile.
 func compilePat(s string) (pat, mask []byte, ok bool) {
-	if len(s) == 0 || len(s)%2 != 0 {
-		return nil, nil, false
-	}
-	pat = make([]byte, len(s)/2)
-	mask = make([]byte, len(s)/2)
-	for i := 0; i < len(s); i += 2 {
-		hi, ok1 := patNibble(s[i])
-		lo, ok2 := patNibble(s[i+1])
-		if !ok1 || !ok2 {
-			return nil, nil, false
-		}
-		if hi >= 0 {
-			pat[i/2] |= byte(hi) << 4
-			mask[i/2] |= 0xF0
-		}
-		if lo >= 0 {
-			pat[i/2] |= byte(lo)
-			mask[i/2] |= 0x0F
-		}
-	}
-	return pat, mask, true
+	pat, mask, err := needle.Compile(s)
+	return pat, mask, err == nil
+}
+
+// patLen is the byte length of a compiled pattern, 0 when it does not compile.
+func patLen(s string) int {
+	pat, _, _ := compilePat(s)
+	return len(pat)
 }
