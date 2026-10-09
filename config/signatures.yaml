@@ -1095,6 +1095,10 @@ mapsigs:
 - name: DLAMFAW
   pattern: "D7400602C2F3XXXX5C534023"
   at: 6
+# The 4Z7 R read of CATR, on 4D1907558. The row below hits another bit test
+# there.
+- name: CATR
+  pattern: "C2F4XXXX68412D026F880D016E884A884361"
 - name: CATR
   pattern: "D7400602F3F8XXXX69812D02"
   at: 6
