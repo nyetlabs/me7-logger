@@ -1,6 +1,7 @@
 package parity
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"slices"
@@ -50,6 +51,38 @@ func TestParseXDF(t *testing.T) {
 	}
 	if len(got) != 2 || got[0].Name != "KRKTE" || got[0].Addr != 0x10 || got[1].Name != "LAMFA" || got[1].Addr != 0x20 {
 		t.Fatalf("%+v", got)
+	}
+}
+
+func TestParseXDFTitleName(t *testing.T) {
+	const doc = `<?xml version="1.0"?>
+<XDFFORMAT>
+<XDFCONSTANT><title>Codewort für DLSU (CWDLSU)</title><EMBEDDEDDATA mmedaddress="0x10" /></XDFCONSTANT>
+<XDFCONSTANT><title>(TC6LDPC5)</title><EMBEDDEDDATA mmedaddress="0x11" /></XDFCONSTANT>
+<XDFCONSTANT><title>%s</title><EMBEDDEDDATA mmedaddress="0x12" /></XDFCONSTANT>
+</XDFFORMAT>`
+	for _, tc := range []struct{ third, want string }{
+		{"Software Version", "CWDLSU TC6LDPC5 Software Version"},
+		{"Axis: RPM (PID)", "CWDLSU TC6LDPC5 PID"},
+	} {
+		got, err := ParseXDF(fmt.Appendf(nil, doc, tc.third))
+		if err != nil {
+			t.Fatal(err)
+		}
+		var names []string
+		for _, m := range got {
+			names = append(names, m.Name)
+		}
+		if s := strings.Join(names, " "); s != tc.want {
+			t.Errorf("%q: got %q, want %q", tc.third, s, tc.want)
+		}
+	}
+	got, err := ParseXDF([]byte(`<XDFFORMAT>
+<XDFCONSTANT><title>KRKTE</title><EMBEDDEDDATA mmedaddress="0x10" /></XDFCONSTANT>
+<XDFCONSTANT><title>Axis: RPM (PID)</title><EMBEDDEDDATA mmedaddress="0x11" /></XDFCONSTANT>
+</XDFFORMAT>`))
+	if err != nil || got[1].Name != "Axis: RPM (PID)" {
+		t.Fatalf("minority file renamed: %+v %v", got, err)
 	}
 }
 
@@ -202,13 +235,18 @@ func TestRunLayout(t *testing.T) {
 		}
 	}
 	ecu := "[Measurements]\nnmot,{},0xF878,1,0,rpm,0,0,40,0,speed\nrl,{},0x380100,2,0,%,0,0,0.01,0,load\n"
-	xdf := "<?xml version=\"1.0\"?><XDFFORMAT><XDFCONSTANT><title>KRKTE</title><EMBEDDEDDATA mmedaddress=\"0x10\" /></XDFCONSTANT><XDFCONSTANT><title>EXTRA</title><EMBEDDEDDATA mmedaddress=\"0x20\" /></XDFCONSTANT></XDFFORMAT>"
 	write("a.bin", "")
 	write("b.bin", "")
 	write("ecu/me7info/a.ecu", ecu)
 	write("ecu/me7info/b.ecu", "")
-	write("xdf/s4wiki/names.yaml", "names:\n  KFZW: 2\n  LAMFA: 2\n")
-	write("xdf/a.xdf", xdf)
+	write("names/s4wiki.yaml", "names:\n  KFZW: 2\n  LAMFA: 2\n")
+	write("defs/a.json", modelJSON(damosMaps+1))
+	defOf := func(stem string) string {
+		if stem == "a" {
+			return filepath.Join(dir, "defs/a.json")
+		}
+		return ""
+	}
 	gen := func(name string, _ []byte) ([]record.Item, []record.Map, error) {
 		switch name {
 		case "a.bin":
@@ -222,7 +260,7 @@ func TestRunLayout(t *testing.T) {
 			return nil, nil, nil
 		}
 	}
-	got, err := run(dir, []string{filepath.Join(dir, "a.bin"), filepath.Join(dir, "b.bin")}, gen)
+	got, err := run(dir, []string{filepath.Join(dir, "a.bin"), filepath.Join(dir, "b.bin")}, defOf, gen)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -241,7 +279,7 @@ func TestRunLayout(t *testing.T) {
 	if got.S4Wiki[0].String() != "50.0% (1/2)" || got.S4Wiki[1].String() != "0.0% (0/2)" {
 		t.Fatalf("s4wiki %+v", got.S4Wiki)
 	}
-	if len(got.XDF) != 1 || got.XDF[0].Name != "a.bin" || got.XDF[0].String() != "0.0% (0/2)" || got.XDF[0].Axis.Total != 0 {
+	if len(got.XDF) != 1 || got.XDF[0].Name != "a.bin" || got.XDF[0].String() != "0.0% (0/501)" || got.XDF[0].Axis.Total != 0 {
 		t.Fatalf("xdf %+v", got.XDF)
 	}
 }
@@ -271,21 +309,94 @@ func TestReportText(t *testing.T) {
 			},
 			{Name: "bb.bin", Fraction: Fraction{0, 2}},
 		},
-		XDF: []Image{{Name: "a.bin", Fraction: Fraction{0, 3}, Axis: Fraction{1, 4}}},
+		XDF:      []Image{{Name: "a.bin", Fraction: Fraction{0, 3}, Axis: Fraction{1, 4}}},
+		Hand:     []Image{{Name: "bb.bin", Fraction: Fraction{2, 3}, Axis: Fraction{0, 0}}},
+		Disagree: []Disagreement{{Image: "bb.bin", Name: "KFZW", Ours: 0x12, XDF: []uint32{0x13, 0x20}}},
 	}
 	got := rep.Text()
 	want := "" +
 		"ecu me7info   vs ecu-specific     vs corpus       extras\n" +
 		"  a          1/2 (+3)   50.0%  2/10   20.0%  1/4   25.0%\n" +
 		"\n" +
-		"xdf s4wiki                tier         axis   confidence\n" +
+		"names                     tier         axis   confidence\n" +
 		"  a          1/2   50.0%  S     1/2   50.0%  1/1  100.0%\n" +
 		"  bb         0/2    0.0%        0/0    0.0%             \n" +
 		"\n" +
-		"xdf                              axis\n" +
-		"  a          0/3    0.0%  1/4   25.0%\n"
+		"xdf damos                        axis\n" +
+		"  a          0/3    0.0%  1/4   25.0%\n" +
+		"\n" +
+		"xdf hand                         axis\n" +
+		"  bb         2/3   66.7%  0/0    0.0%\n" +
+		"\n" +
+		"hand xdf disagrees\n" +
+		"  bb  KFZW  ours 0x12  xdf 0x13,0x20\n"
 	if got != want {
 		t.Fatalf("got\n%s\nwant\n%s", got, want)
+	}
+}
+
+func TestDisagreements(t *testing.T) {
+	rows := []refRow{{name: "KFZW", addr: 0x20}, {name: "LAMFA", addr: 0x30}}
+	scored := map[string]record.Map{
+		"KFZW":  {Name: "KFZW", Addr: needleBase + 0x10},
+		"LAMFA": {Name: "LAMFA", Addr: needleBase + 0x30},
+		"KRKTE": {Name: "KRKTE", Addr: needleBase + 0x40},
+	}
+	got := disagreements("a.bin", []string{"KFZW", "KRKTE", "LAMFA"}, scored, rows)
+	if len(got) != 1 || got[0].Name != "KFZW" || got[0].Ours != 0x10 || !slices.Equal(got[0].XDF, []uint32{0x20}) {
+		t.Fatalf("%+v", got)
+	}
+}
+
+// modelJSON is a model JSON of KRKTE at 0x10 and n-1 other constants.
+func modelJSON(n int) string {
+	objs := []string{`{"id":"KRKTE","shape":"value","address":"0x10"}`}
+	for i := 1; i < n; i++ {
+		objs = append(objs, fmt.Sprintf(`{"id":"EXTRA%d","shape":"value","address":"0x%X"}`, i, 0x20+i))
+	}
+	return `{"objects":[` + strings.Join(objs, ",") + `]}`
+}
+
+func TestLoadOracleKind(t *testing.T) {
+	dir := t.TempDir()
+	for name, n := range map[string]int{"hand": damosMaps, "damos": damosMaps + 1} {
+		p := filepath.Join(dir, name+".json")
+		if err := os.WriteFile(p, []byte(modelJSON(n)), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		if _, _, rows, kind, err := loadOracle(p); err != nil || kind != name || len(rows) != n {
+			t.Fatalf("%s: %d %q %v", name, len(rows), kind, err)
+		}
+	}
+	if _, _, _, kind, err := loadOracle(""); err != nil || kind != "" {
+		t.Fatalf("none: %q %v", kind, err)
+	}
+}
+
+func TestParseModel(t *testing.T) {
+	b := []byte(`{"objects":[
+{"id":"KFLDRQ2 (AR 27C02)","shape":"2d","address":"0x40","rows":4,"cols":6,
+ "x":{"source":"image","stored":"absolute","address":"0x20","data":{"bits":16}},
+ "y":{"source":"image","stored":"subtract","address":"0x30","data":{"bits":8}}},
+{"id":"","description":"Kennlinie (KFX)","shape":"1d","address":"0x60","rows":1,"cols":3,
+ "x":{"source":"editable","address":"0x58","data":{"bits":8}}},
+{"id":"","description":"Codewort (CWDLSU)","shape":"value","address":"0x10"},
+{"id":"","description":"Faktor (FKAT)","shape":"1d","address":"0x50","rows":1,"cols":3,
+ "x":{"source":"ordinal"}}]}`)
+	maps, axes, rows, err := parseModel(b)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(maps) != 4 || maps[0] != (Map{Name: "KFLDRQ2", Addr: 0x40}) || maps[1] != (Map{Name: "KFX", Addr: 0x60}) ||
+		maps[2] != (Map{Name: "CWDLSU", Addr: 0x10}) || maps[3] != (Map{Name: "FKAT", Addr: 0x50}) {
+		t.Fatalf("maps %+v", maps)
+	}
+	if len(axes) != 2 || axes[0] != (Axis{Name: "KFLDRQ2", ID: "x", Addr: 0x20, Count: 6, Bits: 16}) ||
+		axes[1] != (Axis{Name: "KFLDRQ2", ID: "y", Addr: 0x30, Count: 4, Bits: 8}) {
+		t.Fatalf("axes %+v", axes)
+	}
+	if len(rows[0].axes) != 2 || len(rows[1].axes) != 0 || rows[2].axes != nil || len(rows[3].axes) != 0 {
+		t.Fatalf("rows %+v", rows)
 	}
 }
 
@@ -297,10 +408,51 @@ func TestNameGrade(t *testing.T) {
 	}{
 		{"sabcd", "S"}, {"abcd", "A"}, {"bcd", "B"}, {"cd", "C"}, {"d", "D"}, {"sabc", "-"}, {"sabd", "D"},
 	} {
-		got := nameGrade(tierOf, func(n string) bool { return strings.Contains(tc.hit, n) })
+		got := nameGrade(tierOf, nil, func(n string) bool { return strings.Contains(tc.hit, n) })
 		if got != tc.want {
 			t.Errorf("hit %q: %s, want %s", tc.hit, got, tc.want)
 		}
+	}
+	for hit, want := range map[string]string{"sabcdx": "S+", "sabcd": "S", "abcdx": "A"} {
+		if got := nameGrade(tierOf, []string{"x"}, func(n string) bool { return strings.Contains(hit, n) }); got != want {
+			t.Errorf("rest, hit %q: %s, want %s", hit, got, want)
+		}
+	}
+}
+
+func TestLoadNames(t *testing.T) {
+	dir := t.TempDir()
+	write := func(name, body string) {
+		t.Helper()
+		path := filepath.Join(dir, name)
+		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	blocks := map[string][]string{"b1": {"1"}, "b2": {"2"}}
+	write("names/s4wiki.yaml", "names:\n  KFZW: 2\n  MLHFM: 0\n")
+	write("names/s4wiki-priority.yaml", "tiers:\n  D: [KFZW, MLHFM]\n")
+	write("names/absent.yaml", "absent: {}\n")
+	write("names/cb.yaml", "block: b1\nnames:\n  MLHFM: 1\n  KRKTE: 0\n  LAMFA: 2\n")
+	l, err := loadNames(dir, blocks)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := l.forBlock("b1"); !slices.Equal(got, []string{"KFZW", "MLHFM", "KRKTE", "LAMFA"}) {
+		t.Fatalf("b1 %v", got)
+	}
+	if got := l.forBlock("b2"); !slices.Equal(got, l.wiki) {
+		t.Fatalf("b2 %v", got)
+	}
+	if l.dims["MLHFM"] != 0 || l.dims["LAMFA"] != 2 {
+		t.Fatalf("dims %v", l.dims)
+	}
+	write("names/cb.yaml", "block: nope\nnames:\n  KRKTE: 0\n")
+	if _, err := loadNames(dir, blocks); err == nil {
+		t.Fatal("unknown block accepted")
 	}
 }
 
@@ -310,10 +462,15 @@ func TestConfidenceSkipFile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	wiki, _, err := loadWiki(dir)
+	blocks, err := loadBlocks(dir)
 	if err != nil {
 		t.Fatal(err)
 	}
+	lists, err := loadNames(dir, blocks)
+	if err != nil {
+		t.Fatal(err)
+	}
+	wiki := lists.wiki
 	have := map[string]struct{}{}
 	for _, n := range wiki {
 		have[n] = struct{}{}
@@ -330,16 +487,20 @@ func TestConfidenceSkipFile(t *testing.T) {
 
 func TestNamesPriorityFile(t *testing.T) {
 	dir := filepath.Join("..", "testdata", "parity")
-	_, axes, err := loadWiki(dir)
+	blocks, err := loadBlocks(dir)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := loadNamesPriority(dir, axes); err != nil {
+	lists, err := loadNames(dir, blocks)
+	if err != nil {
 		t.Fatal(err)
 	}
-	delete(axes, "KFZW")
-	if _, err := loadNamesPriority(dir, axes); err == nil {
-		t.Fatal("want an error for a name outside names.yaml")
+	if _, err := loadNamesPriority(dir, lists.wiki); err != nil {
+		t.Fatal(err)
+	}
+	wiki := slices.DeleteFunc(slices.Clone(lists.wiki), func(n string) bool { return n == "KFZW" })
+	if _, err := loadNamesPriority(dir, wiki); err == nil {
+		t.Fatal("want an error for a name outside s4wiki.yaml")
 	}
 }
 

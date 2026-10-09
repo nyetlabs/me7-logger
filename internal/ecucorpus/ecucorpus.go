@@ -17,10 +17,11 @@ import (
 // ErrUnavailable is the error Load wraps when dir has no corpus.tsv.
 var ErrUnavailable = errors.New("corpus not available")
 
-// Corpus is an opened corpus: its directory and the names in its manifest.
+// Corpus is an opened corpus: its directory and the names in its manifest,
+// each with its def column.
 type Corpus struct {
-	Dir   string
-	names map[string]struct{}
+	Dir  string
+	defs map[string]string
 }
 
 // Dir is XDFKIT_CORPUS, else corpus under root.
@@ -42,29 +43,44 @@ func Load(dir string) (*Corpus, error) {
 		return nil, err
 	}
 	lines := strings.Split(strings.TrimSuffix(string(b), "\n"), "\n")
-	col := -1
+	col, defCol := -1, -1
 	for i, h := range strings.Split(lines[0], "\t") {
-		if h == "name" {
+		switch h {
+		case "name":
 			col = i
+		case "def":
+			defCol = i
 		}
 	}
 	if col < 0 {
 		return nil, fmt.Errorf("%s: no name column", path)
 	}
-	c := &Corpus{Dir: dir, names: map[string]struct{}{}}
+	c := &Corpus{Dir: dir, defs: map[string]string{}}
 	for n, line := range lines[1:] {
 		f := strings.Split(line, "\t")
 		if len(f) <= col {
 			return nil, fmt.Errorf("%s:%d: no name", path, n+2)
 		}
-		c.names[f[col]] = struct{}{}
+		c.defs[f[col]] = ""
+		if defCol >= 0 && defCol < len(f) && f[defCol] != "-" {
+			c.defs[f[col]] = f[defCol]
+		}
 	}
 	return c, nil
 }
 
+// Def returns the path of a manifest name's definition, defs/<name>.json, or
+// "" when it has none.
+func (c *Corpus) Def(name string) string {
+	if d := c.defs[name]; d != "" {
+		return filepath.Join(c.Dir, d)
+	}
+	return ""
+}
+
 // Path returns images/<name>.bin for a manifest name.
 func (c *Corpus) Path(name string) (string, error) {
-	if _, ok := c.names[name]; !ok {
+	if _, ok := c.defs[name]; !ok {
 		return "", fmt.Errorf("%s: not in %s", name, filepath.Join(c.Dir, "corpus.tsv"))
 	}
 	return filepath.Join(c.Dir, "images", name+".bin"), nil

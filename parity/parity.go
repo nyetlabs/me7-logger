@@ -6,6 +6,7 @@ package parity
 
 import (
 	"cmp"
+	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"os"
@@ -35,12 +36,26 @@ import (
 // Axis and Confidence are set on an S4Wiki row. Axis is the axes on the
 // maps that scored, and a hit matches that image's XDF. Confidence is the
 // body-byte result for the names that row scored.
-// Axis on an XDF row is every axis in that file.
+// Axis on an XDF or Hand row is every axis in that file.
+// XDF rows score DAMOS sourced corpus definitions. Hand rows score hand made
+// ones, which are oracles, not targets.
+// Disagree lists s4wiki names located at an address a hand made definition
+// does not have. Those names still hit.
 type Report struct {
-	ME7Info []Image
-	Extras  []Image
-	S4Wiki  []Image
-	XDF     []Image
+	ME7Info  []Image
+	Extras   []Image
+	S4Wiki   []Image
+	XDF      []Image
+	Hand     []Image
+	Disagree []Disagreement
+}
+
+// Disagreement is one s4wiki name whose located body is not at any of the
+// hand made XDF's addresses for that name. Addresses are file offsets.
+type Disagreement struct {
+	Image, Name string
+	Ours        uint32
+	XDF         []uint32
 }
 
 // Image is one binary scored against one oracle.
@@ -119,7 +134,7 @@ func (r *Report) Text() string {
 		if len(lines) > 0 {
 			lines = append(lines, line{})
 		}
-		lines = append(lines, line{label: "xdf s4wiki", head: true, wiki: true})
+		lines = append(lines, line{label: "names", head: true, wiki: true})
 		for _, im := range r.S4Wiki {
 			lines = append(lines, line{
 				label: "  " + stemName(im.Name), frac: im.Fraction, tier: im.Tier,
@@ -131,8 +146,17 @@ func (r *Report) Text() string {
 		if len(lines) > 0 {
 			lines = append(lines, line{})
 		}
-		lines = append(lines, line{label: "xdf", head: true, xdf: true})
+		lines = append(lines, line{label: "xdf damos", head: true, xdf: true})
 		for _, im := range r.XDF {
+			lines = append(lines, line{label: "  " + stemName(im.Name), frac: im.Fraction, axis: im.Axis, xdf: true})
+		}
+	}
+	if len(r.Hand) > 0 {
+		if len(lines) > 0 {
+			lines = append(lines, line{})
+		}
+		lines = append(lines, line{label: "xdf hand", head: true, xdf: true})
+		for _, im := range r.Hand {
 			lines = append(lines, line{label: "  " + stemName(im.Name), frac: im.Fraction, axis: im.Axis, xdf: true})
 		}
 	}
@@ -272,6 +296,16 @@ func (r *Report) Text() string {
 			fmt.Fprintf(&b, "%-*s  %*s  %6s\n", nameW, ln.label, countW, counts[i], ln.frac.percent())
 		}
 	}
+	if len(r.Disagree) > 0 {
+		b.WriteString("\nhand xdf disagrees\n")
+		for _, d := range r.Disagree {
+			xs := make([]string, len(d.XDF))
+			for i, a := range d.XDF {
+				xs[i] = fmt.Sprintf("0x%X", a)
+			}
+			fmt.Fprintf(&b, "  %s  %s  ours 0x%X  xdf %s\n", stemName(d.Image), d.Name, d.Ours, strings.Join(xs, ","))
+		}
+	}
 	return b.String()
 }
 
@@ -295,14 +329,16 @@ type imageGen func(name string, img []byte) ([]record.Item, []record.Map, error)
 
 // Run generates each image and scores it.
 // The images are the corpus names in images.yaml. Legacy rows are ecu/me7info/<image>.ecu.
-// S4wiki names are xdf/s4wiki/names.yaml, one list for every image.
-// An address oracle is xdf/<image>.xdf when that file exists.
+// The names scored are names/s4wiki.yaml on every image, plus each other
+// names/*.yaml list on the images of its layout block.
+// An address oracle is the image's corpus definition, when the manifest names
+// one. Only a DAMOS one can turn a name hit into a miss.
 func Run(dir string, c *ecucorpus.Corpus) (*Report, error) {
 	images, err := c.List(filepath.Join(dir, "images.yaml"))
 	if err != nil {
 		return nil, err
 	}
-	return run(dir, images, generateImage)
+	return run(dir, images, c.Def, generateImage)
 }
 
 func generateImage(name string, img []byte) ([]record.Item, []record.Map, error) {
@@ -315,7 +351,8 @@ func generateImage(name string, img []byte) ([]record.Item, []record.Map, error)
 	return res.File.Items, res.Maps, nil
 }
 
-func run(dir string, images []string, gen imageGen) (*Report, error) {
+// defOf returns the path of an image's definition, by stem, or "" for none.
+func run(dir string, images []string, defOf func(string) string, gen imageGen) (*Report, error) {
 	cat, err := catalogNames()
 	if err != nil {
 		return nil, err
@@ -326,15 +363,16 @@ func run(dir string, images []string, gen imageGen) (*Report, error) {
 	}
 	catSet := nameSet(cat)
 	measSet := nameSet(meas)
-	wiki, axes, err := loadWiki(dir)
-	if err != nil {
-		return nil, err
-	}
-	ntier, err := loadNamesPriority(dir, axes)
-	if err != nil {
-		return nil, err
-	}
 	blocks, err := loadBlocks(dir)
+	if err != nil {
+		return nil, err
+	}
+	lists, err := loadNames(dir, blocks)
+	if err != nil {
+		return nil, err
+	}
+	wiki, axes := lists.wiki, lists.dims
+	ntier, err := loadNamesPriority(dir, wiki)
 	if err != nil {
 		return nil, err
 	}
@@ -342,7 +380,7 @@ func run(dir string, images []string, gen imageGen) (*Report, error) {
 	if err != nil {
 		return nil, err
 	}
-	absent, err := loadAbsent(dir, blocks, ntier)
+	absent, err := loadAbsent(dir, blocks, axes)
 	if err != nil {
 		return nil, err
 	}
@@ -380,16 +418,25 @@ func run(dir string, images []string, gen imageGen) (*Report, error) {
 				Corpus: cover(cat, [][]string{names}),
 			})
 		}
-		xmaps, xaxes, oracle, hasOracle, err := loadOracle(dir, stem)
+		xmaps, xaxes, xrows, kind, err := loadOracle(defOf(stem))
 		if err != nil {
 			return nil, err
 		}
+		var oracle []refRow
+		if kind == damosXDF {
+			oracle = xrows
+		}
 		if len(wiki) > 0 {
-			scored := wikiMaps(wiki, axes, maps, oracle)
-			gone := absent[block[layoutID(img)]]
+			blk := block[layoutID(img)]
+			want := lists.forBlock(blk)
+			scored := wikiMaps(want, axes, maps, oracle)
+			if kind == handXDF {
+				rep.Disagree = append(rep.Disagree, disagreements(base, want, scored, xrows)...)
+			}
+			gone := absent[blk]
 			rep.S4Wiki = append(rep.S4Wiki, Image{
-				Name: base, Fraction: countScored(wiki, scored),
-				Tier: nameGrade(ntier, func(n string) bool {
+				Name: base, Fraction: countScored(want, scored),
+				Tier: nameGrade(ntier, lists.byBlock[blk], func(n string) bool {
 					_, ok := scored[n]
 					return ok || gone[n]
 				}),
@@ -397,12 +444,15 @@ func run(dir string, images []string, gen imageGen) (*Report, error) {
 			})
 			held = append(held, kept{base: base, stem: stem, img: img, maps: maps, oracle: oracle})
 		}
-		if hasOracle {
+		if kind != "" {
 			h, n := matchMaps(locatedMaps(maps), xmaps)
 			ah, an := matchAxes(locatedAxes(maps), xaxes)
-			rep.XDF = append(rep.XDF, Image{
-				Name: base, Fraction: Fraction{h, n}, Axis: Fraction{ah, an},
-			})
+			im := Image{Name: base, Fraction: Fraction{h, n}, Axis: Fraction{ah, an}}
+			if kind == damosXDF {
+				rep.XDF = append(rep.XDF, im)
+			} else {
+				rep.Hand = append(rep.Hand, im)
+			}
 		}
 	}
 	if len(wiki) > 0 && len(held) > 0 {
@@ -415,7 +465,7 @@ func run(dir string, images []string, gen imageGen) (*Report, error) {
 			return nil, err
 		}
 		for n := range skip {
-			if _, ok := axes[n]; !ok {
+			if !slices.Contains(wiki, n) {
 				return nil, fmt.Errorf("confidence skip: %s is not an s4wiki name", n)
 			}
 		}
@@ -438,9 +488,15 @@ func run(dir string, images []string, gen imageGen) (*Report, error) {
 			rep.S4Wiki[i].Confidence = scoreConfidence(confWiki, axes, h.img, h.maps, h.oracle, peers)
 		}
 	}
-	for _, ims := range [][]Image{rep.ME7Info, rep.Extras, rep.S4Wiki, rep.XDF} {
+	for _, ims := range [][]Image{rep.ME7Info, rep.Extras, rep.S4Wiki, rep.XDF, rep.Hand} {
 		sortImages(ims, tierOf)
 	}
+	slices.SortStableFunc(rep.Disagree, func(a, b Disagreement) int {
+		if c := cmp.Compare(tierRank(tierOf[a.Image]), tierRank(tierOf[b.Image])); c != 0 {
+			return c
+		}
+		return cmp.Or(strings.Compare(a.Image, b.Image), strings.Compare(a.Name, b.Name))
+	})
 	return rep, nil
 }
 
@@ -506,19 +562,55 @@ func nameSet(names []string) map[string]struct{} {
 	return out
 }
 
-func loadOracle(dir, stem string) (maps []Map, axes []Axis, rows []refRow, ok bool, err error) {
-	raw, err := os.ReadFile(filepath.Join(dir, "xdf", stem+".xdf"))
-	if os.IsNotExist(err) {
-		return nil, nil, nil, false, nil
+// The oracle kinds.
+const (
+	damosXDF = "damos"
+	handXDF  = "hand"
+)
+
+// damosMaps is the map count above which a definition is DAMOS or A2L
+// sourced, even when it came through a KP.
+const damosMaps = 500
+
+// loadOracle reads the image's corpus definition at path and returns its
+// kind, or "" when path is "".
+func loadOracle(path string) (maps []Map, axes []Axis, rows []refRow, kind string, err error) {
+	if path == "" {
+		return nil, nil, nil, "", nil
 	}
+	b, err := os.ReadFile(path)
 	if err != nil {
-		return nil, nil, nil, false, err
+		return nil, nil, nil, "", err
 	}
-	maps, axes, rows, err = parseXDF(raw)
+	maps, axes, rows, err = parseModel(b)
 	if err != nil {
-		return nil, nil, nil, false, fmt.Errorf("%s.xdf: %w", stem, err)
+		return nil, nil, nil, "", fmt.Errorf("%s: %w", path, err)
 	}
-	return maps, axes, rows, true, nil
+	kind = handXDF
+	if len(rows) > damosMaps {
+		kind = damosXDF
+	}
+	return maps, axes, rows, kind, nil
+}
+
+// disagreements lists the scored names whose body is not at a hand made XDF
+// row of that name.
+func disagreements(image string, wiki []string, scored map[string]record.Map, rows []refRow) []Disagreement {
+	var out []Disagreement
+	for _, n := range wiki {
+		m, ok := scored[n]
+		if !ok || referenceHit(m, rows) {
+			continue
+		}
+		d := Disagreement{Image: image, Name: n, Ours: opcode.FileOffset(m.Addr)}
+		for _, r := range rows {
+			if r.name == n && !slices.Contains(d.XDF, r.addr) {
+				d.XDF = append(d.XDF, r.addr)
+			}
+		}
+		out = append(out, d)
+	}
+	return out
 }
 
 func catalogNames() ([]string, error) {
@@ -560,46 +652,118 @@ func measurementNames() ([]string, error) {
 	return out, nil
 }
 
-func loadWiki(dir string) ([]string, map[string]int, error) {
-	b, err := os.ReadFile(filepath.Join(dir, "xdf", "s4wiki", "names.yaml"))
+// The name lists are names/<source>.yaml. s4wiki.yaml is scored on every
+// image and is the only list with tiers, in s4wiki-priority.yaml.
+const (
+	namesDir   = "names"
+	wikiList   = "s4wiki"
+	absentFile = "absent.yaml"
+)
+
+// nameLists is every names/*.yaml list. wiki is s4wiki.yaml. byBlock is the
+// other names of each layout block, in file order, without s4wiki names.
+// dims is the axis count of every name; s4wiki.yaml wins a conflict.
+type nameLists struct {
+	wiki    []string
+	byBlock map[string][]string
+	dims    map[string]int
+}
+
+// forBlock is the names scored on an image of block.
+func (l nameLists) forBlock(block string) []string {
+	if len(l.byBlock[block]) == 0 {
+		return l.wiki
+	}
+	return append(slices.Clip(l.wiki), l.byBlock[block]...)
+}
+
+// loadNames reads names/*.yaml. A list other than s4wiki.yaml names a
+// layout block in block. A missing s4wiki.yaml returns no lists.
+func loadNames(dir string, blocks map[string][]string) (nameLists, error) {
+	out := nameLists{byBlock: map[string][]string{}, dims: map[string]int{}}
+	wiki, _, err := loadNameList(filepath.Join(dir, namesDir, wikiList+".yaml"))
 	if os.IsNotExist(err) {
-		return nil, nil, nil
+		return nameLists{}, nil
 	}
 	if err != nil {
-		return nil, nil, err
+		return nameLists{}, err
 	}
+	for _, n := range wiki {
+		out.wiki = append(out.wiki, n.name)
+		out.dims[n.name] = n.axes
+	}
+	paths, err := filepath.Glob(filepath.Join(dir, namesDir, "*.yaml"))
+	if err != nil {
+		return nameLists{}, err
+	}
+	for _, p := range paths {
+		base := filepath.Base(p)
+		if base == wikiList+".yaml" || base == absentFile || strings.HasSuffix(base, "-priority.yaml") {
+			continue
+		}
+		list, block, err := loadNameList(p)
+		if err != nil {
+			return nameLists{}, err
+		}
+		if _, ok := blocks[block]; !ok {
+			return nameLists{}, fmt.Errorf("%s: block %q is not in layouts.yaml", base, block)
+		}
+		for _, n := range list {
+			if _, ok := out.dims[n.name]; ok {
+				continue
+			}
+			out.dims[n.name] = n.axes
+			out.byBlock[block] = append(out.byBlock[block], n.name)
+		}
+	}
+	return out, nil
+}
+
+type listName struct {
+	name string
+	axes int
+}
+
+// loadNameList reads one list: names, a map of name to axis count, and block.
+func loadNameList(path string) ([]listName, string, error) {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return nil, "", err
+	}
+	base := filepath.Base(path)
 	var doc struct {
+		Block string    `yaml:"block"`
 		Names yaml.Node `yaml:"names"`
 	}
 	if err := yaml.Unmarshal(b, &doc); err != nil {
-		return nil, nil, fmt.Errorf("s4wiki names: %w", err)
+		return nil, "", fmt.Errorf("%s: %w", base, err)
 	}
 	if doc.Names.Kind != yaml.MappingNode {
-		return nil, nil, fmt.Errorf("s4wiki names: want a map of axis counts")
+		return nil, "", fmt.Errorf("%s: want a map of axis counts", base)
 	}
-	out := make([]string, 0, len(doc.Names.Content)/2)
-	axes := map[string]int{}
+	out := make([]listName, 0, len(doc.Names.Content)/2)
+	seen := map[string]bool{}
 	for i := 0; i+1 < len(doc.Names.Content); i += 2 {
 		n := strings.TrimSpace(doc.Names.Content[i].Value)
 		var c int
 		if err := doc.Names.Content[i+1].Decode(&c); err != nil || c < 0 || c > 2 {
-			return nil, nil, fmt.Errorf("s4wiki names: %s axis count", n)
+			return nil, "", fmt.Errorf("%s: %s axis count", base, n)
 		}
-		if _, ok := axes[n]; ok || n == "" {
-			return nil, nil, fmt.Errorf("s4wiki names: %s repeated", n)
+		if seen[n] || n == "" {
+			return nil, "", fmt.Errorf("%s: %s repeated", base, n)
 		}
-		axes[n] = c
-		out = append(out, n)
+		seen[n] = true
+		out = append(out, listName{n, c})
 	}
-	return out, axes, nil
+	return out, doc.Block, nil
 }
 
 // tierOrder is the priority order of a *-priority.yaml file, highest first.
 var tierOrder = []string{"S", "A", "B", "C", "D"}
 
-// loadNamesPriority reads xdf/s4wiki/names-priority.yaml, the finder tier of each S4wiki name.
-func loadNamesPriority(dir string, axes map[string]int) (map[string]string, error) {
-	return loadTiers(filepath.Join(dir, "xdf", "s4wiki", "names-priority.yaml"), axes)
+// loadNamesPriority reads names/s4wiki-priority.yaml, the finder tier of each S4wiki name.
+func loadNamesPriority(dir string, wiki []string) (map[string]string, error) {
+	return loadTiers(filepath.Join(dir, namesDir, wikiList+"-priority.yaml"), nameSet(wiki))
 }
 
 // loadTiers reads a priority file: a tiers map from a tierOrder label to members.
@@ -697,10 +861,10 @@ func blockOf(blocks map[string][]string) map[string]string {
 	return out
 }
 
-// loadAbsent reads xdf/s4wiki/absent.yaml: the s4wiki names each layout
-// block does not have. A missing file returns nil.
-func loadAbsent(dir string, blocks map[string][]string, names map[string]string) (map[string]map[string]bool, error) {
-	b, err := os.ReadFile(filepath.Join(dir, "xdf", "s4wiki", "absent.yaml"))
+// loadAbsent reads names/absent.yaml: the listed names each layout block
+// does not have. A missing file returns nil.
+func loadAbsent(dir string, blocks map[string][]string, names map[string]int) (map[string]map[string]bool, error) {
+	b, err := os.ReadFile(filepath.Join(dir, namesDir, absentFile))
 	if os.IsNotExist(err) {
 		return nil, nil
 	}
@@ -721,7 +885,7 @@ func loadAbsent(dir string, blocks map[string][]string, names map[string]string)
 		out[block] = map[string]bool{}
 		for _, n := range list {
 			if _, ok := names[n]; !ok {
-				return nil, fmt.Errorf("absent.yaml: %s is not an s4wiki name", n)
+				return nil, fmt.Errorf("absent.yaml: %s is not in a name list", n)
 			}
 			out[block][n] = true
 		}
@@ -729,9 +893,14 @@ func loadAbsent(dir string, blocks map[string][]string, names map[string]string)
 	return out, nil
 }
 
+// beyondS is the grade of an image that has S and every untiered name of
+// its block's lists.
+const beyondS = "S+"
+
 // nameGrade is the highest name tier complete, counted up from D, or "-"
 // when D is not. A tier is complete when each of its names is hit or absent.
-func nameGrade(tierOf map[string]string, hit func(string) bool) string {
+// rest is the untiered names, one level above S.
+func nameGrade(tierOf map[string]string, rest []string, hit func(string) bool) string {
 	done := map[string]bool{}
 	for _, t := range tierOrder {
 		done[t] = true
@@ -744,6 +913,9 @@ func nameGrade(tierOf map[string]string, hit func(string) bool) string {
 	grade := "-"
 	for i := len(tierOrder) - 1; i >= 0 && done[tierOrder[i]]; i-- {
 		grade = tierOrder[i]
+	}
+	if grade == tierOrder[0] && len(rest) > 0 && !slices.ContainsFunc(rest, func(n string) bool { return !hit(n) }) {
+		grade = beyondS
 	}
 	return grade
 }
@@ -1099,6 +1271,14 @@ func parseXDF(b []byte) ([]Map, []Axis, []refRow, error) {
 	if err := xml.Unmarshal(b, &doc); err != nil {
 		return nil, nil, nil, err
 	}
+	var titles []string
+	for _, c := range doc.Constants {
+		titles = append(titles, c.Title)
+	}
+	for _, t := range doc.Tables {
+		titles = append(titles, t.Title)
+	}
+	nameOf := titleNamer(titles)
 	var maps []Map
 	var axes []Axis
 	var rows []refRow
@@ -1107,10 +1287,12 @@ func parseXDF(b []byte) ([]Map, []Axis, []refRow, error) {
 		if err != nil {
 			return nil, nil, nil, fmt.Errorf("%s: %w", c.Title, err)
 		}
+		c.Title = nameOf(c.Title)
 		maps = append(maps, Map{Name: c.Title, Addr: addr})
 		rows = append(rows, refRow{name: c.Title, addr: addr})
 	}
 	for _, t := range doc.Tables {
+		t.Title = nameOf(t.Title)
 		var addr uint32
 		var found bool
 		ax := map[string]axisSig{}
@@ -1143,6 +1325,108 @@ func parseXDF(b []byte) ([]Map, []Axis, []refRow, error) {
 		rows = append(rows, refRow{name: t.Title, addr: addr, axes: ax})
 	}
 	return maps, axes, rows, nil
+}
+
+// modelDoc is the part of an xdfkit model JSON (corpus defs/) that locates
+// maps.
+type modelDoc struct {
+	Objects []struct {
+		ID          string     `json:"id"`
+		Description string     `json:"description"`
+		Shape       string     `json:"shape"`
+		Address     string     `json:"address"`
+		Rows        int        `json:"rows"`
+		Cols        int        `json:"cols"`
+		X           *modelAxis `json:"x"`
+		Y           *modelAxis `json:"y"`
+	} `json:"objects"`
+}
+
+type modelAxis struct {
+	Source  string `json:"source"`
+	Stored  string `json:"stored"`
+	Address string `json:"address"`
+	Data    *struct {
+		Bits int `json:"bits"`
+	} `json:"data"`
+}
+
+// located is true when the axis is read from the image at an address. That
+// includes a "subtract" axis, which xdfkit writes to XDF as labels.
+func (a *modelAxis) located() bool {
+	return a != nil && a.Source == "image" && a.Address != "" && a.Data != nil
+}
+
+// parseModel reads a model JSON. The title is the first word of the id, else
+// the description, as in the XDF xdfkit writes from it.
+func parseModel(b []byte) ([]Map, []Axis, []refRow, error) {
+	var doc modelDoc
+	if err := json.Unmarshal(b, &doc); err != nil {
+		return nil, nil, nil, err
+	}
+	titles := make([]string, len(doc.Objects))
+	for i, o := range doc.Objects {
+		titles[i], _, _ = strings.Cut(strings.TrimSpace(o.ID), " ")
+		if titles[i] == "" {
+			titles[i] = strings.TrimSpace(o.Description)
+		}
+	}
+	nameOf := titleNamer(titles)
+	var maps []Map
+	var axes []Axis
+	var rows []refRow
+	for i, o := range doc.Objects {
+		name := nameOf(titles[i])
+		addr, err := parseAddr(o.Address)
+		if err != nil {
+			return nil, nil, nil, fmt.Errorf("%s: %w", name, err)
+		}
+		row := refRow{name: name, addr: addr}
+		if o.Shape != "value" {
+			row.axes = map[string]axisSig{}
+			for _, a := range []struct {
+				id    string
+				ax    *modelAxis
+				count int
+			}{{"x", o.X, o.Cols}, {"y", o.Y, o.Rows}} {
+				if !a.ax.located() {
+					continue
+				}
+				at, err := parseAddr(a.ax.Address)
+				if err != nil {
+					return nil, nil, nil, fmt.Errorf("%s %s: %w", name, a.id, err)
+				}
+				axes = append(axes, Axis{Name: name, ID: a.id, Addr: at, Count: a.count, Bits: a.ax.Data.Bits})
+				row.axes[a.id] = axisSig{id: a.id, addr: at, count: a.count, bits: a.ax.Data.Bits}
+			}
+		}
+		maps = append(maps, Map{Name: name, Addr: addr})
+		rows = append(rows, row)
+	}
+	return maps, axes, rows, nil
+}
+
+var titleName = regexp.MustCompile(`\(([A-Z][A-Z0-9_]*)\)\s*$`)
+
+// titleNamer maps a title to its name. A file whose titles are mostly a
+// description followed by the Bosch name in parentheses is named by the
+// parentheses. Any other file keeps its titles.
+func titleNamer(titles []string) func(string) string {
+	n := 0
+	for _, s := range titles {
+		if titleName.MatchString(s) {
+			n++
+		}
+	}
+	if 2*n <= len(titles) {
+		return func(s string) string { return s }
+	}
+	return func(s string) string {
+		if m := titleName.FindStringSubmatch(s); m != nil {
+			return m[1]
+		}
+		return s
+	}
 }
 
 func parseAddr(s string) (uint32, error) {

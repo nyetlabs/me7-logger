@@ -11,7 +11,7 @@ func TestLoad(t *testing.T) {
 	if _, err := Load(dir); err == nil {
 		t.Fatal("want an error without corpus.tsv")
 	}
-	tsv := "name\tsha256\na-0001\t00\n"
+	tsv := "name\tsha256\tdef\na-0001\t00\tdefs/a-0001.json\nc-0001\t00\t-\n"
 	if err := os.WriteFile(filepath.Join(dir, "corpus.tsv"), []byte(tsv), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -29,5 +29,11 @@ func TestLoad(t *testing.T) {
 	}
 	if _, err := c.Path("b-0001"); err == nil {
 		t.Fatal("want an error for a name outside the manifest")
+	}
+	if got := c.Def("a-0001"); got != filepath.Join(dir, "defs", "a-0001.json") {
+		t.Fatal(got)
+	}
+	if got := c.Def("c-0001"); got != "" {
+		t.Fatal(got)
 	}
 }

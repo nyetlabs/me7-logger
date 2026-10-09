@@ -1,6 +1,6 @@
 # The parity images, by name in the ecu-corpus manifest (corpus/corpus.tsv).
 # Each is read from corpus/images/<image>.bin. Goldens use the same name:
-# ecu/me7info/<image>.ecu and xdf/<image>.xdf.
+# ecu/me7info/<image>.ecu. The address oracle is the image's corpus def.
 - 006410010A0-0000
 - 06A906032HF-0006
 - 06A906032HS-0008
@@ -24,4 +24,5 @@
 - 8D0907551Q-0001
 - 8D0907551T-0003
 - 8E0909518AK-0004
+# names/8N0906018CB.yaml is from a prerelease calibration, not CB-0003.
 - 8N0906018CB-0003

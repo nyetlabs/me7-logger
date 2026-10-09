@@ -94,7 +94,7 @@ func TestFNamesTheMovedCalls(t *testing.T) {
 
 func wikiNames(t *testing.T) []string {
 	t.Helper()
-	b, err := os.ReadFile("../testdata/parity/xdf/s4wiki/names.yaml")
+	b, err := os.ReadFile("../testdata/parity/names/s4wiki.yaml")
 	if err != nil {
 		t.Fatal(err)
 	}

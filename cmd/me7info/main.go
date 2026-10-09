@@ -80,7 +80,8 @@ Legacy ME7Info parity is the only hard mark, scored one image at a time.
 The catalog column is coverage. The measurement list is the extras
 column on each ECU row.
 
-The S4wiki name list is the same on every image:
+The names section scores names/s4wiki.yaml on every image, and each
+other names/*.yaml list on the images of its layout block:
   - A hit is one address and its axes. An axis count of 0 is a scalar,
     so the address alone is the hit. One axis is a curve, two a map.
   - When that image's XDF contains the name, the body address must
@@ -91,8 +92,12 @@ The S4wiki name list is the same on every image:
   - The confidence column is the body bytes of the names that hit. Its
     denominator is that matched set, not the tuner list.
 
-An XDF, when present, is the address oracle for that image. Its x and y
-axes that have an address are the axis column of that section.
+The image's corpus definition (corpus.tsv def), when present, is its
+address oracle. One of more than 500 maps is DAMOS sourced, else hand
+made. Only a DAMOS one turns a name hit into a miss. A hand made one that
+places a name elsewhere is listed under "hand xdf disagrees" for review,
+since hand made files can be wrong. Its x and y axes that have an address
+are the axis column of that section.
 `
 
 // defs are the definition file flags shared by generate and probe.
