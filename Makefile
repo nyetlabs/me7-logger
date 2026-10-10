@@ -22,7 +22,7 @@ SHELL := /bin/bash
 
 VERSION ?= $(patsubst v%,%,$(shell git describe --tags --match 'v[0-9]*' --dirty --always 2>/dev/null))
 
-.PHONY: all test build version parity package install uninstall corpus corpus-bump work xdfkit-bump check-pinned clean help
+.PHONY: all test build version parity package install uninstall bump corpus corpus-bump work xdfkit-bump check-pinned clean help
 
 # Archive name uses macos; the Go port is darwin.
 PLATFORMS := darwin/amd64 darwin/arm64 linux/amd64 linux/arm64 windows/amd64
@@ -91,6 +91,8 @@ package:
 
 parity: build
 	./build/me7info parity --data testdata/parity
+
+bump: xdfkit-bump corpus-bump
 
 # --checkout overrides update = none in .gitmodules.
 corpus:
