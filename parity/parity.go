@@ -37,7 +37,7 @@ import (
 // body-byte result for the names that row scored.
 // Axis on an XDF or Hand row is every axis in that file.
 // XDF rows score DAMOS sourced corpus definitions. Hand rows score hand made
-// ones, which are oracles, not targets.
+// ones, which are oracles, not targets. Origin located is not an oracle.
 // Disagree lists tuner names located at an address a hand made definition
 // does not have. Those names still hit.
 type Report struct {
@@ -593,8 +593,9 @@ const (
 )
 
 // loadOracle reads the image's corpus definition at path and returns its
-// kind, or "" when path is "". Its provenance origin (xdfkit docs/corpus.md)
-// damos or a2l is damosXDF; hand, or none, is handXDF.
+// kind, or "" when path is "" or the origin is located. Its provenance
+// origin (xdfkit docs/corpus.md) damos or a2l is damosXDF; hand, or none,
+// is handXDF. located is a program's placement, so it is not scored.
 func loadOracle(path string) (maps []Map, axes []Axis, rows []refRow, kind string, err error) {
 	if path == "" {
 		return nil, nil, nil, "", nil
@@ -612,6 +613,8 @@ func loadOracle(path string) (maps []Map, axes []Axis, rows []refRow, kind strin
 		kind = damosXDF
 	case "hand", "":
 		kind = handXDF
+	case "located":
+		return nil, nil, nil, "", nil
 	default:
 		return nil, nil, nil, "", fmt.Errorf("%s: unknown origin %q", path, origin)
 	}

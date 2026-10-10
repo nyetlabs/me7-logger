@@ -112,7 +112,7 @@ is DAMOS sourced; with none, it is hand made. Only
 a DAMOS one turns a name hit into a miss. A hand made one that places a
 name elsewhere is listed under "hand xdf disagrees" for review, since hand
 made files can be wrong. Its x and y axes that have an address are the axis
-column of that section.
+column of that section. Origin located is not an oracle.
 
 The names column scores the tuner list. The other names lists of an
 image's layout block are scored in the block column.

@@ -309,12 +309,18 @@ func modelJSON(origin string, n int) string {
 
 func TestLoadOracleKind(t *testing.T) {
 	dir := t.TempDir()
-	for origin, want := range map[string]string{"damos": damosXDF, "a2l": damosXDF, "hand": handXDF, "": handXDF, "kp": "", "located": ""} {
+	for origin, want := range map[string]string{"damos": damosXDF, "a2l": damosXDF, "hand": handXDF, "": handXDF, "kp": "", "located": "skip"} {
 		p := filepath.Join(dir, "o"+origin+".json")
 		if err := os.WriteFile(p, []byte(modelJSON(origin, 2)), 0o644); err != nil {
 			t.Fatal(err)
 		}
 		_, _, rows, kind, err := loadOracle(p)
+		if want == "skip" {
+			if err != nil || kind != "" {
+				t.Fatalf("%q: %q %v", origin, kind, err)
+			}
+			continue
+		}
 		if want == "" {
 			if err == nil {
 				t.Fatalf("%q: want an error", origin)
