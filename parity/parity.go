@@ -460,9 +460,9 @@ func run(dir string, images []string, defOf func(string) string, gen imageGen) (
 			rep.Tuner = append(rep.Tuner, Image{
 				Name: base, Fraction: countScored(tuner, scored),
 				Block: countScored(lists.byBlock[blk], scored),
-				Tier: nameGrade(ntier, lists.byBlock[blk], func(n string) bool {
-					_, ok := scored[n]
-					return ok || gone[n]
+				Tier: nameGrade(ntier, lists.byBlock[blk], lists.any, func(n string) (bool, bool) {
+					_, located := scored[n]
+					return located || gone[n], located
 				}),
 				Axis: scoreAxes(scored, axes),
 			})
@@ -688,12 +688,14 @@ const (
 // nameLists is every names/*.yaml list. tuner is tuner.yaml. byBlock is the
 // other names of each layout block, in file order, without tuner names.
 // dims is the axis count of every name; tuner.yaml wins a conflict.
-// tier is the finder tier of each tuner name.
+// tier is the finder tier of each tuner name. any is the families in
+// tuner.yaml: one tier slot, met by any member.
 type nameLists struct {
 	tuner   []string
 	byBlock map[string][]string
 	dims    map[string]int
 	tier    map[string]string
+	any     []family
 }
 
 // forBlock is the names scored on an image of block.
@@ -708,7 +710,7 @@ func (l nameLists) forBlock(block string) []string {
 // layout block in block. A missing tuner.yaml returns no lists.
 func loadNames(dir string, blocks map[string][]string) (nameLists, error) {
 	out := nameLists{byBlock: map[string][]string{}, dims: map[string]int{}}
-	tuner, _, tier, err := loadNameList(filepath.Join(dir, namesDir, tunerList+".yaml"))
+	tuner, _, tier, families, err := loadNameList(filepath.Join(dir, namesDir, tunerList+".yaml"))
 	if os.IsNotExist(err) {
 		return nameLists{}, nil
 	}
@@ -719,6 +721,7 @@ func loadNames(dir string, blocks map[string][]string) (nameLists, error) {
 		return nameLists{}, fmt.Errorf("%s.yaml: want tiers", tunerList)
 	}
 	out.tier = tier
+	out.any = families
 	for _, n := range tuner {
 		out.tuner = append(out.tuner, n.name)
 		out.dims[n.name] = n.axes
@@ -732,12 +735,15 @@ func loadNames(dir string, blocks map[string][]string) (nameLists, error) {
 		if base == tunerList+".yaml" || base == absentFile {
 			continue
 		}
-		list, block, tier, err := loadNameList(p)
+		list, block, tier, families, err := loadNameList(p)
 		if err != nil {
 			return nameLists{}, err
 		}
 		if tier != nil {
 			return nameLists{}, fmt.Errorf("%s: only %s.yaml has tiers", base, tunerList)
+		}
+		if len(families) > 0 {
+			return nameLists{}, fmt.Errorf("%s: only %s.yaml has any", base, tunerList)
 		}
 		if _, ok := blocks[block]; !ok {
 			return nameLists{}, fmt.Errorf("%s: block %q is not in layouts.yaml", base, block)
@@ -758,22 +764,33 @@ type listName struct {
 	axes int
 }
 
+// family is one tier slot. It is met when one name is located.
+type family struct {
+	tier  string
+	names []string
+}
+
 // loadNameList reads one list and its block. names maps an axis count (0, 1,
 // or 2) to names. tiers instead maps a tierOrder label to such a map, and
-// the tier of each name is returned.
-func loadNameList(path string) ([]listName, string, map[string]string, error) {
+// the tier of each name is returned. any is the families, each one slot.
+func loadNameList(path string) ([]listName, string, map[string]string, []family, error) {
 	b, err := os.ReadFile(path)
 	if err != nil {
-		return nil, "", nil, err
+		return nil, "", nil, nil, err
 	}
 	base := filepath.Base(path)
 	var doc struct {
 		Block string                      `yaml:"block"`
 		Names map[int][]string            `yaml:"names"`
 		Tiers map[string]map[int][]string `yaml:"tiers"`
+		Any   []struct {
+			Tier  string   `yaml:"tier"`
+			Axes  int      `yaml:"axes"`
+			Names []string `yaml:"names"`
+		} `yaml:"any"`
 	}
 	if err := yaml.Unmarshal(b, &doc); err != nil {
-		return nil, "", nil, fmt.Errorf("%s: %w", base, err)
+		return nil, "", nil, nil, fmt.Errorf("%s: %w", base, err)
 	}
 	groups := map[string]map[int][]string{"": doc.Names}
 	order := []string{""}
@@ -782,33 +799,54 @@ func loadNameList(path string) ([]listName, string, map[string]string, error) {
 		groups, order, tier = doc.Tiers, tierOrder, map[string]string{}
 		for t := range doc.Tiers {
 			if !slices.Contains(tierOrder, t) {
-				return nil, "", nil, fmt.Errorf("%s: tier %q is not one of %v", base, t, tierOrder)
+				return nil, "", nil, nil, fmt.Errorf("%s: tier %q is not one of %v", base, t, tierOrder)
 			}
 		}
 	}
 	var out []listName
 	seen := map[string]bool{}
+	add := func(n, t string, c int) error {
+		if seen[n] || n == "" {
+			return fmt.Errorf("%s: %q repeated", base, n)
+		}
+		if c < 0 || c > 2 {
+			return fmt.Errorf("%s: axis count %d", base, c)
+		}
+		seen[n] = true
+		out = append(out, listName{n, c})
+		if tier != nil {
+			tier[n] = t
+		}
+		return nil
+	}
 	for _, t := range order {
 		for c, names := range groups[t] {
-			if c < 0 || c > 2 {
-				return nil, "", nil, fmt.Errorf("%s: axis count %d", base, c)
-			}
 			for _, n := range names {
-				if seen[n] || n == "" {
-					return nil, "", nil, fmt.Errorf("%s: %q repeated", base, n)
-				}
-				seen[n] = true
-				out = append(out, listName{n, c})
-				if tier != nil {
-					tier[n] = t
+				if err := add(n, t, c); err != nil {
+					return nil, "", nil, nil, err
 				}
 			}
 		}
 	}
+	var families []family
+	for _, g := range doc.Any {
+		if !slices.Contains(tierOrder, g.Tier) {
+			return nil, "", nil, nil, fmt.Errorf("%s: tier %q is not one of %v", base, g.Tier, tierOrder)
+		}
+		if len(g.Names) < 2 {
+			return nil, "", nil, nil, fmt.Errorf("%s: any group needs two names", base)
+		}
+		for _, n := range g.Names {
+			if err := add(n, g.Tier, g.Axes); err != nil {
+				return nil, "", nil, nil, err
+			}
+		}
+		families = append(families, family{g.Tier, g.Names})
+	}
 	slices.SortStableFunc(out, func(a, b listName) int {
 		return cmp.Or(slices.Index(order, tier[a.name])-slices.Index(order, tier[b.name]), strings.Compare(a.name, b.name))
 	})
-	return out, doc.Block, tier, nil
+	return out, doc.Block, tier, families, nil
 }
 
 // tierOrder is the priority order of a tiers map, highest first.
@@ -947,25 +985,58 @@ const beyondS = "S+"
 
 // nameGrade is the highest name tier complete, counted up from D, or "-"
 // when D is not. A tier is complete when each of its names is hit or absent.
-// rest is the untiered names, one level above S.
-func nameGrade(tierOf map[string]string, rest []string, hit func(string) bool) string {
+// A family is one name: one member located, or every member absent.
+// rest is the untiered names, one level above S. hit reports (counts, located).
+func nameGrade(tierOf map[string]string, rest []string, families []family, hit func(string) (bool, bool)) string {
+	inFamily := map[string]bool{}
+	for _, f := range families {
+		for _, n := range f.names {
+			inFamily[n] = true
+		}
+	}
 	done := map[string]bool{}
 	for _, t := range tierOrder {
 		done[t] = true
 	}
 	for n, t := range tierOf {
-		if !hit(n) {
+		if inFamily[n] {
+			continue
+		}
+		if counts, _ := hit(n); !counts {
 			done[t] = false
+		}
+	}
+	for _, f := range families {
+		if !familyMet(f, hit) {
+			done[f.tier] = false
 		}
 	}
 	grade := "-"
 	for i := len(tierOrder) - 1; i >= 0 && done[tierOrder[i]]; i-- {
 		grade = tierOrder[i]
 	}
-	if grade == tierOrder[0] && len(rest) > 0 && !slices.ContainsFunc(rest, func(n string) bool { return !hit(n) }) {
+	if grade == tierOrder[0] && len(rest) > 0 && !slices.ContainsFunc(rest, func(n string) bool {
+		counts, _ := hit(n)
+		return !counts
+	}) {
 		grade = beyondS
 	}
 	return grade
+}
+
+// familyMet is true when one member is located, or every member is absent.
+func familyMet(f family, hit func(string) (bool, bool)) bool {
+	allAbsent := len(f.names) > 0
+	for _, n := range f.names {
+		counts, located := hit(n)
+		if located {
+			return true
+		}
+		if !counts {
+			allAbsent = false
+		}
+	}
+	return allAbsent
 }
 
 // tierRank is the index of label in tierOrder. No tier sorts last.

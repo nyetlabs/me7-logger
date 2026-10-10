@@ -365,14 +365,36 @@ func TestNameGrade(t *testing.T) {
 	}{
 		{"sabcd", "S"}, {"abcd", "A"}, {"bcd", "B"}, {"cd", "C"}, {"d", "D"}, {"sabc", "-"}, {"sabd", "D"},
 	} {
-		got := nameGrade(tierOf, nil, func(n string) bool { return strings.Contains(tc.hit, n) })
+		got := nameGrade(tierOf, nil, nil, func(n string) (bool, bool) {
+			ok := strings.Contains(tc.hit, n)
+			return ok, ok
+		})
 		if got != tc.want {
 			t.Errorf("hit %q: %s, want %s", tc.hit, got, tc.want)
 		}
 	}
 	for hit, want := range map[string]string{"sabcdx": "S+", "sabcd": "S", "abcdx": "A"} {
-		if got := nameGrade(tierOf, []string{"x"}, func(n string) bool { return strings.Contains(hit, n) }); got != want {
+		if got := nameGrade(tierOf, []string{"x"}, nil, func(n string) (bool, bool) {
+			ok := strings.Contains(hit, n)
+			return ok, ok
+		}); got != want {
 			t.Errorf("rest, hit %q: %s, want %s", hit, got, want)
+		}
+	}
+	famOf := map[string]string{"d": "D", "v": "D", "c": "C", "b": "B", "a": "A", "s": "S"}
+	fam := []family{{tier: "D", names: []string{"d", "v"}}}
+	grade := func(located, absent string) string {
+		return nameGrade(famOf, nil, fam, func(n string) (bool, bool) {
+			loc := strings.Contains(located, n)
+			abs := strings.Contains(absent, n)
+			return loc || abs, loc
+		})
+	}
+	for _, tc := range []struct{ loc, abs, want string }{
+		{"dv", "", "D"}, {"d", "", "D"}, {"v", "", "D"}, {"", "dv", "D"}, {"", "d", "-"}, {"", "", "-"},
+	} {
+		if got := grade(tc.loc, tc.abs); got != tc.want {
+			t.Errorf("family loc %q abs %q: %s, want %s", tc.loc, tc.abs, got, tc.want)
 		}
 	}
 }

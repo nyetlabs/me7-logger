@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"os"
@@ -9,6 +11,7 @@ import (
 
 	"github.com/spf13/pflag"
 
+	"go.nyet.org/xdfkit/canon"
 	"go.nyet.org/xdfkit/model"
 	kitxdf "go.nyet.org/xdfkit/xdf"
 
@@ -18,6 +21,7 @@ import (
 	"go.nyet.org/me7-logger/internal/ecucorpus"
 	"go.nyet.org/me7-logger/opcode"
 	"go.nyet.org/me7-logger/parity"
+	"go.nyet.org/me7-logger/place"
 	"go.nyet.org/me7-logger/record"
 	"go.nyet.org/me7-logger/xdf"
 )
@@ -38,6 +42,8 @@ func main() {
 		err = cmdProbe(os.Args[2:])
 	case "parity":
 		err = cmdParity(os.Args[2:])
+	case "place":
+		err = cmdPlace(os.Args[2:])
 	case "-v", "--version":
 		fmt.Println(version)
 	case "-h", "--help", "help":
@@ -62,6 +68,7 @@ Usage:
   me7info generate [flags] <image.bin>
   me7info probe [flags] <image.bin>
   me7info parity [flags]
+  me7info place [flags] <ref.json> <ref.bin> <dst.bin>
   me7info -v, --version
   me7info -h, --help
 
@@ -71,6 +78,9 @@ Commands:
   probe     Report the DPP block and needle hits. --maps also counts the
             calibration maps generate would write to the XDF.
   parity    Score each corpus image against legacy ME7Info output.
+  place     Copy a map catalog onto another image. An object whose bytes
+            match is kept. One code pointer, found once, moves it. Anything
+            else is left out. The report is on stderr.
 
 Run "me7info <command> -h" for that command's flags.
 
@@ -323,6 +333,57 @@ func cmdProbe(args []string) error {
 		fmt.Println("xdf: not a breakpoint curve:", c)
 	}
 	return nil
+}
+
+func cmdPlace(args []string) error {
+	fs := cli.NewFlagSet("me7info", "place", "[flags] <ref.json> <ref.bin> <dst.bin>", "")
+	out := fs.StringP("output", "o", "-", "model output `<file>`, - for stdout")
+	if err := fs.Parse(args); err != nil {
+		return err
+	}
+	if fs.NArg() != 3 {
+		return fmt.Errorf("place wants a model and two images")
+	}
+	raw, err := os.ReadFile(fs.Arg(0))
+	if err != nil {
+		return err
+	}
+	var refModel model.Model
+	if err := canon.Unmarshal(raw, &refModel); err != nil {
+		return err
+	}
+	ref, err := os.ReadFile(fs.Arg(1))
+	if err != nil {
+		return err
+	}
+	dst, err := os.ReadFile(fs.Arg(2))
+	if err != nil {
+		return err
+	}
+	placed, rep, err := place.Place(&refModel, ref, dst)
+	if err != nil {
+		return err
+	}
+	sum := sha256.Sum256(dst)
+	placed.Provenance = &model.Provenance{
+		Format: "image", Origin: "located",
+		File: filepath.Base(fs.Arg(2)), SHA256: hex.EncodeToString(sum[:]),
+	}
+	if err := placed.Check(); err != nil {
+		return err
+	}
+	text, err := canon.MarshalStamped(placed, "me7info place")
+	if err != nil {
+		return err
+	}
+	if *out == "-" {
+		if _, err := os.Stdout.Write(text); err != nil {
+			return err
+		}
+	} else if err := os.WriteFile(*out, text, 0o644); err != nil {
+		return err
+	}
+	return rep.Format(os.Stderr)
 }
 
 func resolveUser(fs *pflag.FlagSet, dir string) (string, error) {

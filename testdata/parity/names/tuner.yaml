@@ -2,28 +2,41 @@
 # https://s4wiki.com/wiki/Tuning. config/categories.json files each one.
 # Each tier maps an axis count to names: 0 scalar (the address alone counts),
 # 1 curve, 2 map. Tiers are finder priority by tuning stage, highest first.
-# Opinion, not measurement:
-#   D  stage 1: boost, timing, torque monitoring, knock, BTS and open loop fueling
-#   C  stage 2: injector and FPR changes, exhaust DTCs
-#   B  stage 3-: bigger turbos: base boost, wastegate spring, LDR PID scheduling, MAP sensor limit
+# Opinion, not measurement. Boost split follows https://s4wiki.com/wiki/Tuning:
+# LDRXN is the primary specified-load limit. KFMIRL stays in D with it.
+#   D  stage 1: requested boost (LDRXN, KFLDHBN), the DPUPS throttle cut,
+#      I limit, timing, torque monitoring, knock, BTS and open loop fueling
+#   C  stage 2: injector and FPR changes, exhaust DTCs, KFTARX
+#   B  stage 3-: bigger turbos, and the underboost window
+#      (EDLDRP, SDLDRL, TDLDRA, NDLDRAPU)
 #   A  stage 3: MAF and intake, ARMD
-#   S  niceties and everything else
+#   S  niceties, and boost codes left stock: overboost limp
+#      (KFDLULS, TULV1, LDORXN, KFLDRXO), the P1557 leak check
+#      (KFVPDKLD, TDLDRA2), LDRXNZK, KFTARXZK, and the _UM maps
+# An any entry is one slot in that tier. The first name is the plain map.
+# The slot is met when that name or any later form is located. A block that
+# has none of them lists every form in absent.yaml. The tuner count still
+# scores each form.
+any:
+  - {tier: D, axes: 2, names: [KFZW2, KFZW2_0_A, KFZW2_1_A]}
+  - {tier: C, axes: 1, names: [NFSM, NFS2M, NFS2M_0_A, NFS2M_1_A]}
+  - {tier: C, axes: 1, names: [NLLM, NLLM_0_A, NLLM_1_A, NLLM_2_A, NLLM_3_A]}
+  - {tier: S, axes: 1, names: [NLL2M, NLL2M_0_A, NLL2M_1_A, NLL2M_2_A, NLL2M_3_A]}
 tiers:
   S:
     0: [AIMVM, CDLDP, CDTES, CWDNMAX, CWMSRCAN, DNMAXH, ITNMXH, KISRM, KUMSRL,
-        NMAX, NMAXF, NMAXOG, NWPMBBR, TMOTNMX, TNMXH, VMAXNB, VNMX, VWPMBBR,
-        WFRL, ZKLAMFAW]
-    1: [KLDMASRL, LDRXN, LDRXNZK, NASNOTKL, NFS2M, NFS2M_0_A, NFS2M_1_A, NLL2M,
-        NLL2M_0_A, NLL2M_1_A, NLL2M_2_A, NLL2M_3_A, NLLM_0_A, NLLM_1_A,
-        NLLM_2_A, NLLM_3_A]
-    2: [FZWWLRLN, KFFWLW, KFPED, KFPEDR, KFTSRL, KFZW2_0_A, KFZW2_1_A]
+        NMAX, NMAXF, NMAXOG, NWPMBBR, TDLDRA2, TMOTNMX, TNMXH, TULV1, VMAXNB,
+        VNMX, VWPMBBR, WFRL, ZKLAMFAW]
+    1: [KLDMASRL, LDORXN, LDRXNZK, NASNOTKL]
+    2: [FZWWLRLN, KFDLULS, KFFWLW, KFLDRXO, KFMDZOF_UM, KFMI_UM, KFMPED_UM,
+        KFPED, KFPEDR, KFTARXZK, KFTSRL, KFVPDKLD]
   A:
     0: [KIFZGHG, MLHFM, MLMAX, MLOFS]
     2: [KFDMDADP, KFDMDARO, KFKHFM, KFMLDMX, KFNW, KFNWWL, KFPBRK, KFPBRKNW,
         KFPRG, KFURL]
   B:
-    0: [DSLOFS, LDEIAP, LDRQ0S, UMDYLDR]
-    1: [LDRQ0DY, LDRQ1DY, LDRQ1ST, TLDIAPN, WDKUGDN]
+    0: [DSLOFS, EDLDRP, LDEIAP, LDRQ0S, SDLDRL, TDLDRA, UMDYLDR]
+    1: [LDRQ0DY, LDRQ1DY, LDRQ1ST, NDLDRAPU, TLDIAPN, WDKUGDN]
     2: [KFLDRQ1, KFLDRQ2, KFMSNWDK, KFVPDKSD, KFVPDKSE, KFWDKMSN]
   C:
     0: [CATR, CDATR, CDATS, CDHSH, CDHSHE, CDKAT, CDLASH, CDLATV, CDLSH,
@@ -31,16 +44,14 @@ tiers:
         CLAHSHE, CLAHSHE2, CLALSH, CLALSH2, CLRHK, CLRHKA, CLRKA, CWDLSAHK,
         CWKONABG, CWKONLS, ESKONF, FHOKH, FKHABMN, FKVA, KRKTE, KVB, RLSALULL,
         TABGSS, TABGSS2, TEMIN, TEMINVA]
-    1: [NFSM, NLLM, RLSALUN, TVUB]
-    2: [FKKVS, KFFWL_0_A, KFFWL_1_A, KFLF, KFMRES, KFMRESK, KFNLLNST]
+    1: [RLSALUN, TVUB]
+    2: [FKKVS, KFFWL_0_A, KFFWL_1_A, KFLF, KFMRES, KFMRESK, KFNLLNST, KFTARX]
   D:
-    0: [CWLAMFAW, CWMDAPP, DLAMFAW, DPUPS, EDLDRP, KRALH, KRANH, KRDWA, LDHIA,
-        MDIMX, NLDIAPU, SDLDRL, SNM16OPUW, TABGBTS, TDLDRA, TDLDRA2, TMNSMN,
-        TULV1, ZKWLAFWL]
-    1: [DLAMTANS, DLBTS, DWKRMSN, FBSTABGM, FWFTBRTA, KRFKLN, LDIATA, LDORXN,
-        LDPBN, NDLDRAPU]
-    2: [KFDLULS, KFFLLDE, KFFWTBR, KFLAFWL, KFLAMKR, KFLAMKRL, KFLBTS_0_A,
-        KFLDHBN, KFLDIMX, KFLDIOPU, KFLDRAPP, KFLDRL, KFLDRXO, KFMDZOF_UM,
-        KFMIOP, KFMIRL, KFMIZUFIL, KFMIZUNS, KFMIZUOF, KFMI_UM, KFMPED_UM,
-        KFTARX, KFTARXZK, KFVPDKLD, KFVPLGU, KFWPLGTA, KFZW, KFZW2, KFZWOP,
-        KFZWOP2, KFZWWLNM, LAMFA]
+    0: [CWLAMFAW, CWMDAPP, DLAMFAW, DPUPS, KRALH, KRANH, KRDWA, LDHIA, MDIMX,
+        NLDIAPU, SNM16OPUW, TABGBTS, TMNSMN, ZKWLAFWL]
+    1: [DLAMTANS, DLBTS, DWKRMSN, FBSTABGM, FWFTBRTA, KRFKLN, LDIATA, LDPBN,
+        LDRXN]
+    2: [KFFLLDE, KFFWTBR, KFLAFWL, KFLAMKR, KFLAMKRL, KFLBTS_0_A, KFLDHBN,
+        KFLDIMX, KFLDIOPU, KFLDRAPP, KFLDRL, KFMIOP, KFMIRL, KFMIZUFIL,
+        KFMIZUNS, KFMIZUOF, KFVPLGU, KFWPLGTA,
+        KFZW, KFZWOP, KFZWOP2, KFZWWLNM, LAMFA]

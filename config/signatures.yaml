@@ -726,7 +726,7 @@ mapsigs:
 - {name: NLDIAPU, pattern: 0100E6FCXXXXE6FDXXXXD740E100C2FEXX08, at: 4, frame: true, add: 3, cols: 2}
 - {name: TVUB, pattern: E6FEXXXXC2FF9D89, cols: 5}
 - {name: KFFWTBR, pattern: 8870E6FCXXXXE6FDXXXXC2FEB3F9, at: 4, frame: true, add: 20, cols: 8, rows: 10}
-- {name: KFLDIOPU, pattern: E6FCXXXXE6FDXXXXE6FECD00E6FF0402DA82, frame: true, cols: 8, rows: 8}
+- {name: KFLDIOPU, pattern: [E6FCXXXXE6FDXXXXE6FECD00E6FF0402DA82, E6FCXXXXE6FDXXXXE6FECD00E6FF0402DA83], frame: true, cols: 8, rows: 8}
 - {name: KFLDRXO, pattern: [5300E6FCXXXXE6FDXXXXC2FE9CF8, 5300E6FCXXXXE6FDXXXXC2FEA2F8], at: 4, frame: true, add: 14, cols: 4, rows: 8}
 - {name: KFLDRXO, pattern: 3600E6FCXXXXE6FDXXXXC2FE9EF8, at: 4, frame: true, add: 14, cols: 4, rows: 8}
 - {name: KFMIZUFIL, pattern: E10CE6FCXXXXE6FD8E00, at: 4, cols: 8, rows: 8}
@@ -801,3 +801,26 @@ mapsigs:
 - {name: KFLDRXO, pattern: 7CA7D740060243F8XXXX9D040981, at: 8, add: 34, rows: 8, cols: 4}
 - {name: TABGSS, pattern: D7400602F2F6XXXX7C162064, at: 6}
 - {name: VMAXNB, pattern: D7400702F2F4XXXX48C06D05, at: 6}
+# scanLamfa. The pointer is the byte counts: 15 one-byte nmot points, a pad, six mrfa_w words.
+- {name: LAMFA, open: '{mrfa_w:F2F4}8840{nmot:C2F5}8850E6FXXXXXE6F5XXXX88X088X0', pattern: C2FCXXXXE6FDXXXXE6FEXXXXD740XX02C2FFXXXXDA8XXXXX, at: 2, add: 30, rows: 15, cols: 6, ybits: 8, xbits: 16}
+# scanKfzw, when the call goes to the segment 0 table. The F2 words are the axis RAM on this image.
+- {name: KFZW, open: '{zwgru:F7F8}08XX', pattern: 3D0FE6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDA00242B, at: 4, xat: 16, yat: 12}
+- {name: KFZW2, open: '{zwgru:F7F8}08XX', pattern: 47FXFF003DXXE6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDAXXXXXX, at: 8, xat: 20, yat: 16}
+# scanLdr after CWLDIMX. The F2 words beside the call are the axis RAM.
+- {name: KFLDIMX, pattern: E6FCXXXXE6FDXXXXE6FEF816E6FF0A02DA83, frame: true, xat: -4, yat: -18}
+- {name: LDIATA, pattern: E6FCXXXXE6FDXXXXF2FE0C8DDA83, frame: true, xat: 10}
+- {name: KFLDRL, pattern: E6FCXXXXE6FDXXXXE6FE0A17E6FF0A02DA83, frame: true, xat: -4, yat: -18}
+# scanLamfa, the same mrfa_w window as LAMFA. CWLAMFAW is the 66 FX compare.
+# KFLAMKRL is the one quad. DLAMTANS is the curve whose count sits five bytes before the body.
+- {name: CWLAMFAW, open: '{mrfa_w:F2F4}8840{nmot:C2F5}8850E6FXXXXXE6F5XXXX88X088X0', pattern: C2FXXXXX66FXXX002DXX, at: 2}
+- {name: KFLAMKRL, pattern: E6FCD515E6FD0602E6FE7C02E6FF0602DA83, frame: true}
+- {name: DLAMTANS, pattern: C2FCBE2CE6FDBF2CE6FE0902DA83, at: 2, add: 5, cols: 4}
+# scanLbts, the lambts_w window that takes the DA 8X branch. TABGBTS is the 42 F4 compare.
+- {name: TABGBTS, pattern: 42F4A230FD04E118, at: 2}
+# scanKfzwop, fnwue present so the first slot-17 call is KFZWOP2 and the next is KFZWOP.
+# KFMIOP's other axis is an F6 F4 store, which xat cannot name.
+- {name: KFMIOP, pattern: F6F462A8E6FC5C67E6FDBC68F2FEF28CF0F4DA82, at: 6, xat: 14}
+- {name: KFZWOP2, pattern: E6FCDC1CE6FDBC68F2FEF28CF2FF62A8DA00242B, xat: 10, yat: 14}
+- {name: KFZWOP, pattern: E6FC2C1CE6FDBC68F2FEF28CF2FF62A8DA00242B, xat: 10, yat: 14}
+# scanLdrxn, the calls that are not the C2F4 5C84 form. The frame is the E6FC immediate.
+- {name: LDRXN, pattern: [E6FCXXXXE6FDXXXXF2FEXXXXDA8XXXXXF094C2F4, E6FCXXXXE6FDXXXXF2FEXXXXDA8XXXXXF094F6F9, E6FCXXXXE6FDXXXXF2FEXXXXDA8XXXXXF6F4XXXX0D27], at: 2, frame: true, add: 34, cols: 16, xbits: 16}
