@@ -105,6 +105,7 @@ other names/*.yaml list on the images of its layout block:
     adds nothing. It is 0 only when every map that hit is a scalar.
   - The confidence column is the body bytes of the names that hit. Its
     denominator is that matched set, not the tuner list.
+  - A star after the tier means the image has no corpus definition.
 
 The image's corpus definition (corpus.tsv def), when present, is its
 address oracle. Its provenance origin (damos, a2l, hand) says whether it

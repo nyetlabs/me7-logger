@@ -8,8 +8,8 @@ tiers:
     - 1.8T
     - 1.8T-CM
   B:
-    - 4Z7
     - 4Z7-like
+    - 4Z7
   C:
     - 23g
   D:

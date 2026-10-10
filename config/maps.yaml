@@ -221,7 +221,7 @@ maps:
   interp: map_interp_table8_page
 - name: RLSALUN
   caller: ASE_rlsalun
-  at: ['0x840', '0x8BA']
+  at: ['0x840', '0x8BA', '0xA50']
   interp: map_interp_curve8_direct
 - name: WDKUGDN
   caller: BGMSZS_wdkugdn

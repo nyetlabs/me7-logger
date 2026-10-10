@@ -186,7 +186,7 @@ func TestShippedMaps(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(calls) != 110 {
+	if len(calls) != 111 {
 		t.Fatalf("maps %d", len(calls))
 	}
 	ns, err := LoadNeedles("", "")

@@ -63,7 +63,8 @@ type Disagreement struct {
 // Both are set only on ME7Info rows. Tier, Axis, and Confidence are set on
 // Tuner rows. Tier is the nameGrade of the image. On a Tuner row, Fraction
 // is the tuner names and Block is the other names lists of the image's
-// layout block.
+// layout block. NoDef marks a Tuner row whose image has no corpus
+// definition; Text prints it as a star after the tier.
 // Every list is sorted by the layout block tier of its image in
 // layouts-priority.yaml, then by name.
 type Image struct {
@@ -72,6 +73,7 @@ type Image struct {
 	Beyond     int
 	Corpus     Fraction
 	Tier       string
+	NoDef      bool
 	Axis       Fraction
 	Confidence Fraction
 	Block      Fraction
@@ -139,8 +141,12 @@ func (r *Report) Text() string {
 		}
 		lines = append(lines, line{label: "names", head: true, tuner: true})
 		for _, im := range r.Tuner {
+			tier := im.Tier
+			if im.NoDef {
+				tier += "*"
+			}
 			lines = append(lines, line{
-				label: "  " + stemName(im.Name), frac: im.Fraction, tier: im.Tier,
+				label: "  " + stemName(im.Name), frac: im.Fraction, tier: tier,
 				axis: im.Axis, conf: im.Confidence, block: im.Block, tuner: true,
 			})
 		}
@@ -441,7 +447,8 @@ func run(dir string, images []string, defOf func(string) string, gen imageGen) (
 				Corpus: cover(cat, [][]string{names}),
 			})
 		}
-		xmaps, xaxes, xrows, kind, err := loadOracle(defOf(stem))
+		def := defOf(stem)
+		xmaps, xaxes, xrows, kind, err := loadOracle(def)
 		if err != nil {
 			return nil, err
 		}
@@ -464,7 +471,8 @@ func run(dir string, images []string, defOf func(string) string, gen imageGen) (
 					_, located := scored[n]
 					return located || gone[n], located
 				}),
-				Axis: scoreAxes(scored, axes),
+				NoDef: def == "",
+				Axis:  scoreAxes(scored, axes),
 			})
 			held = append(held, kept{base: base, stem: stem, img: img, maps: maps, oracle: oracle})
 		}

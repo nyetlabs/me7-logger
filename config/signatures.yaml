@@ -97,6 +97,7 @@ signatures:
 - {name: ldtvr_w, size: 2, from: '0x800200', pattern: 'E6FCXXXXE6FDXXXXF2FEXXXX{ldtvr_ptr:F2FF}DAXXXXXX{ldtvr_ptr:F6F4}', single: true, at: 10}
 - {name: ldtvr_w, size: 2, from: '0x820000', pattern: 0D02F048F059F6F4XXXXE6FCXXXXE6FD, single: true, at: 8}
 - {name: ldtvr_w, size: 2, from: '0x820000', pattern: FD03E6F4FF7F0D01F048D740E100F6F4XXXXE6FCXXXXE6FDXXXXF0E4, single: true, at: 16}
+- {name: ldtvr_w, size: 2, from: '0x820000', pattern: FD03E6F4FF7F0D01F048F6F4XXXXE6FCXXXXE6FDXXXXF0E4, single: true, at: 12}
 - {name: plsolr_w, size: 2, from: '0x820000', pattern: 20479D01E004D740E100F6F4XXXXE6FCXXXXE6FDXXXXF0E4, single: true, at: 12}
 # scanLdr tries this uniqueWindow before the F3FX fallback.
 - {name: lde_ptr, size: 1, from: '0x820000', open: '9AXXXXXX{plsol:C2FX}{pvdkds:C2FX}20XX', pattern: E6FCXXXXE6FDXXXXE6FEXXXXE6FFXXXXDA8XXXXX, at: -10}
@@ -198,7 +199,7 @@ signatures:
 - {name: tevfakge_w, size: 2, from: '0x804000', pattern: F2F46AA2F6F4XXXX4840, single: true, at: 6}
 - {name: uhfm_w, size: 2, from: '0x804000', pattern: 66F1FF03F6F1XXXXF2F4, single: true, at: 6}
 # The mov r12 immediate is 04 01, or 26 01 on the 512K 06A file.
-- {name: wkrmdy_w, size: 2, from: '0x804000', pattern: [E6FC0401F2FDXXXXF2FE, E6FC2601F2FDXXXXF2FE], single: true, at: 6}
+- {name: wkrmdy_w, size: 2, from: '0x804000', pattern: 'E6FC[04/DD]01F2FDXXXXF2FE', single: true, at: 6}
 - {name: wkrmstat_w, size: 2, from: '0x804000', pattern: [E6FCF200F2FDXXXXF2FE, E6FC1401F2FDXXXXF2FE], single: true, at: 6}
 - {name: zwoutar_0, size: 1, from: '0x800200', pattern: E6FC6000E6FDXXXX998D, single: true, at: 6, also: [{name: zwoutar_1, size: 1, add: 1}, {name: zwoutar_2, size: 1, add: 2}, {name: zwoutar_3, size: 1, add: 3}]}
 # fkhfm on F22ig, loaded through DPP2.
@@ -321,11 +322,11 @@ mapsigs:
 # as R4 and R5 first.
 - {name: KFFWL_0_A, pattern: [F2F4XXXX8840F2F5XXXX8850C2F2XXXX5C22D4C2XXXXD4D2XXXXE6FEXXXXE6FFXXXXDA82, F2F4XXXX8840F2F5XXXX8850C2F2XXXX5C22D4C2XXXXD4D2XXXXE6FEXXXXE6FFXXXXDA80XXXX0804F7F8XXXXE6FCXXXXE6FD0602], at: 20, deref: 1, dereffar: true, rows: 12, cols: 12, xat: 2, yat: 8}
 - {name: KFFWL_1_A, pattern: [F2F4XXXX8840F2F5XXXX8850C2F2XXXX5C22D4C2XXXXD4D2XXXXE6FEXXXXE6FFXXXXDA82, F2F4XXXX8840F2F5XXXX8850C2F2XXXX5C22D4C2XXXXD4D2XXXXE6FEXXXXE6FFXXXXDA80XXXX0804F7F8XXXXE6FCXXXXE6FD0602], at: 20, deref: 1, derefat: 4, dereffar: true, rows: 12, cols: 12, xat: 2, yat: 8}
-- {name: KFLBTS_0_A, pattern: [F2FFXXXXDA82XXXXD740XXXXF6F4XXXXD740XXXXF2F5XXXX88508840C2F2XXXX5C22D4C2XXXXD4D2XXXXE6FEXXXXE6FFXXXXDA82, F2FFXXXXDA80XXXXD740XXXXF6F4XXXXD740XXXXF2F5XXXX88508840C2F2XXXX5C22D4C2XXXXD4D2XXXXE6FEXXXXE6FFXXXXDA80], at: 36, deref: 1, dereffar: true, rows: 12, cols: 16, ybits: 16, xat: 22, yat: 2}
+- {name: KFLBTS_0_A, pattern: 'F2FFXXXXDA[80/FD]XXXXD740XXXXF6F4XXXXD740XXXXF2F5XXXX88508840C2F2XXXX5C22D4C2XXXXD4D2XXXXE6FEXXXXE6FFXXXXDA[80/FD]', at: 36, deref: 1, dereffar: true, rows: 12, cols: 16, ybits: 16, xat: 22, yat: 2}
 - {name: KFFWL_0_A, pattern: D7400602C2F4XXXX68412D06C0E45C14C2F5XX0F, at: 6, add: 1, rows: 12, cols: 12, xat: -124, yat: -118}
 - {name: KFDLULS, pattern: C2F4XXXXF6F496A70D0B, add: 21}
 - {name: KFNLLNST, pattern: 8850E6FCXXXXE6FDXXXXE6FE0203E6FF, at: 4, frame: true}
-- {name: KFNLLNST, pattern: C2F4XXXX66F420002D28, add: 23, rows: 6, cols: 6, xat: -208, yat: -202}
+- {name: KFNLLNST, pattern: C2F4XXXX66F420002D28C2F4XXXX66F4X0002DXX, add: 23, rows: 6, cols: 6, xat: -208, yat: -202}
 - {name: DLAMTANS, pattern: 5C548840C2F4XX8B8840E6F4XXXXE6F5, at: 12, frame: true, cols: 4}
 - {name: DLBTS, pattern: 42F4XXXXFD07D740XX02F2F4, add: 25, cols: 8}
 - {name: CLAATR, pattern: C2F4XXXX68412D09E6F4, add: 58, also: [{name: CLAATR2, add: 59}, {name: CLAATS, add: 62}]}
@@ -372,10 +373,10 @@ mapsigs:
 - {name: KFMRES, pattern: [0D0CE6FCXXXXE6FD8831, 0D0BE6FCXXXXE6FD0230], at: 4}
 - {name: KFMRESK, pattern: 9D0DE6FCXXXXE6FD, at: 4}
 - {name: KFZWOP, pattern: [22A5E6FCXXXX, 1EA5E6FCXXXX], at: 4}
-- {name: KFZWOP2, pattern: [F1E8E6FCXXXXE6FD5E69, F1E8E6FCXXXXE6FD5469], at: 4}
+- {name: KFZWOP2, pattern: 'F1E8E6FCXXXXE6FD[54/F5]69', at: 4}
 - {name: KLDMASRL, pattern: E6FDXXXXE6FE7C1B}
 - {name: KFZW, pattern: [3D0FE6FCXXXXE6FD, 3D0FE6FCXXXXE6FD1A31], at: 4}
-- {name: KFZW2, pattern: [3D10E6FCXXXXE6FD9C32, 3D10E6FCXXXXE6FD1A31], at: 4}
+- {name: KFZW2, pattern: '3D10E6FCXXXXE6FD[18/79]3X', at: 4}
 - {name: KFZWWLNM, pattern: E6FCXXXXE6FD2E01}
 - {name: MLHFM, pattern: 8850E6FCXXXXE6FD0902E6FE6C32, at: 4, add: 4}
 - {name: KFMSNWDK, pattern: C2A0XXXXE116, add: 11}
@@ -398,7 +399,7 @@ mapsigs:
 - {name: LDIATA, pattern: F3F8XXXXD7400602F3FCB91F, add: 1, also: [{name: LDHIA}]}
 - {name: TLDIAPN, pattern: 43F8XXXX9D040981F7F806A3, add: 1}
 - {name: KFLDRXO, pattern: 43FAXXXXFD039F4D, add: 15}
-- {name: LDORXN, pattern: [43F8XXXX9D040981F7F810A3, 43F8XXXX9D040981F7F80CA3], add: 1, also: [{name: LDPBN, add: 9}]}
+- {name: LDORXN, pattern: '43F8XXXX9D040981F7F8[00/E3]A3', add: 1, also: [{name: LDPBN, add: 9}]}
 - {name: KFLDRAPP, pattern: [F3F8XXXXD740E100F7F82609, F3F8XXXXD740E100F7F82709], add: 19}
 - {name: KFDLULS, pattern: 42A3D7400602C2F4XXXX, at: 8, add: 19}
 - {name: KFVPDKLD, pattern: [42A3D7400602C2F4XXXX, 98A6D7400602C2F4XXXX], at: 8, add: 107, rows: 10, cols: 12}
@@ -444,9 +445,9 @@ mapsigs:
 - {name: CWKONABG, pattern: C2F4XXXX68413A8888364A880167}
 - {name: CWKONLS, pattern: C2F4XXXX68413A8888364A880262}
 - {name: CWDLSAHK, pattern: [C2F5XXXX66F510002D1B, F3FAXXXX69A12D02XXXX0D089AXX06XXF2F4XXXX8AF40290258FXX8A]}
-- {name: CATR, pattern: [C2F4XXXX68412D026F880D016E884A883F60, C2F4XXXX68412D026F880D016E884A883F61]}
+- {name: CATR, pattern: C2F4XXXX68412D026F880D016E884A883F6X}
 - {name: UMDYLDR, pattern: 43F8XXXXBD01}
-- {name: EDLDRP, pattern: [43F8XXXXAD16, 43F8XXXXAD0E]}
+- {name: EDLDRP, pattern: '43F8XXXXAD[06/E7]'}
 - {name: TDLDRA, pattern: 43F8XXXX9D040981F7F837A3, also: [{name: TDLDRA2, add: 1}]}
 - {name: TULV1, pattern: 43F8XXXX9D040981F7F836A3}
 - {name: CLRHKA, pattern: [C2F4XXXX68413D07D740E100F3F85A08, C2F4XXXX68413D07D740E100F3F85B08]}
@@ -532,7 +533,7 @@ mapsigs:
 - {name: KFFWTBR, pattern: [C2F4XXXX6842EA20F2F1, C2F4XXXX6842EA20A07F], add: 110, rows: 10, cols: 8}
 - {name: KFLDRAPP, pattern: 13B0E6FCXXXXE6FDXXXXC2FE9AF8C2FF9D89, at: 4, frame: true, add: 18, rows: 8, cols: 8}
 # 4Z7 AA copies of 4Z7 S rows.
-- {name: KFLDRXO, pattern: [43FAXXXXFD03AF4D, 43FAXXXXFD03CF4D], add: 15}
+- {name: KFLDRXO, pattern: '43FAXXXXFD03[8F/9F]4D', add: 15}
 - {name: KFTARX, pattern: [0D15F2F416A38840F2F5BC898850E6FCXXXXE6FD, 0D15F2F41AA38840F2F5028A8850E6FCXXXXE6FD], at: 16, add: 98304}
 - {name: KFVPDKLD, pattern: 3EA3D7400602C2F4XXXX, at: 8, add: 107, rows: 10, cols: 12}
 - {name: KRALH, pattern: F3F8XXXXD740E100F3FA1B09}
@@ -544,7 +545,7 @@ mapsigs:
 - {name: FKKVS, pattern: [C2FFXXXXDA82F86706F00C00F6F47C9E, C2FFXXXXDA804A4D06F00C00F6F4929E], add: 49, rows: 16, cols: 16, xbits: 16}
 - {name: TVUB, pattern: [E6FEXXXXC2FF1386, E6FEXXXXC2FF2F86], cols: 5}
 - {name: KFTARXZK, pattern: [1690F2F416A38840F2F5BC898850E6FCXXXXE6FD, 1680F2F41AA38840F2F5028A8850E6FCXXXXE6FD], at: 16, add: 98304}
-- {name: KFZWOP2, pattern: [F1E8E6FCXXXXE6FD5869, F1E8E6FCXXXXE6FD7A6A], at: 4}
+- {name: KFZWOP2, pattern: 'F1E8E6FCXXXXE6FD[58/DD]6X', at: 4}
 # 4Z7 T copies of 4Z7 S rows.
 - {name: CATR, pattern: C2F4XXXX68412D026F880D016E884A884060}
 - {name: CDHSHE, pattern: C2F4XXXX68412D05E6F4400074F42289}
@@ -591,7 +592,7 @@ mapsigs:
 - {name: CWLAMFAW, pattern: [380BD7400602C2F5XXXX, FA9FD7400602C2F5XXXX], at: 8}
 - {name: DLAMFAW, pattern: 1490E6FCXXXXE6FD, at: 4, frame: true}
 - {name: DLAMTANS, pattern: 8840C2F40F8A8840E6F4XXXX, at: 10, frame: true, cols: 4}
-- {name: DPUPS, pattern: [CC8A43F8XXXXFD03, E88A43F8XXXXFD03], at: 4}
+- {name: DPUPS, pattern: '[C8/DB]8A43F8XXXXFD03', at: 4}
 - {name: DPUPS, pattern: [EAF943F8XXXXFD03, 978A43F8XXXXFD03], at: 4}
 - {name: DPUPS, pattern: DC9EC2F3XXXX66F3, at: 4}
 - {name: DWKRMSN, pattern: [5A61D740E100F7F8BF08E6FCXXXX, 8A61D740E100F7F8BE08E6FCXXXX], at: 12, frame: true}
@@ -601,7 +602,7 @@ mapsigs:
 - {name: EDLDRP, pattern: A2A3D740E100C2F4CE08D7400602C2F5XXXX, at: 16}
 - {name: EDLDRP, pattern: 2D18D7400602C2F4XXXX5C84, at: 8}
 - {name: EDLDRP, pattern: C2F4F78A68422D1BD7400602C2F4XXXX5C84, at: 14}
-- {name: FKKVS, pattern: A4A08840C2F59EF88850E6F4XXXX, at: 12, frame: true}
+- {name: FKKVS, pattern: A4A08840C2F59EF88850E6F4XXXX, at: 12, frame: true, rows: 16, cols: 16, xbits: 16, ybits: 8}
 - {name: KFFLLDE, pattern: [8820E6FCXXXXE6FDXXXXE6FE6A1E, 8820E6FCXXXXE6FDXXXXE6FEB231], at: 4, frame: true}
 - {name: KFFLLDE, pattern: [8820E6FCXXXXE6FDXXXXE6FE2436, 8820E6FCXXXXE6FDXXXXE6FE6E37], at: 4, frame: true}
 - {name: KFFLLDE, pattern: 8820E6FCXXXXE6FDXXXXE6FEB020, at: 4, frame: true}
@@ -619,15 +620,15 @@ mapsigs:
 - {name: KFMIZUFIL, pattern: [E6FCXXXXE6FD8E00F2FECE8C, E6FCXXXXE6FD8D00F2FEB28C]}
 - {name: KFMIZUFIL, pattern: 0D0BE6FCXXXXE6FD8D00F2FE988C, at: 4}
 - {name: KFMIZUNS, pattern: 0CA0E6FCXXXXE6FD8D00, at: 4}
-- {name: KFMIZUOF, pattern: [FEA5E6FCXXXXE6FD8E00, D2A5E6FCXXXXE6FD8D00], at: 4}
-- {name: KFMIZUOF, pattern: [C6A6E6FCXXXXE6FD8E00, E2A6E6FCXXXXE6FD8E00], at: 4}
+- {name: KFMIZUOF, pattern: '[D2/D3]A5E6FCXXXXE6FD8X00', at: 4}
+- {name: KFMIZUOF, pattern: '[C2/DB]A6E6FCXXXXE6FD8E00', at: 4}
 - {name: KFMIZUOF, pattern: FCA6E6FCXXXXE6FD8D00, at: 4}
 - {name: KFMRES, pattern: [D48A43F8XXXXBD0A, 0D0BE6FCXXXXE6FDBE2F], at: 4}
 - {name: KFMRES, pattern: 0D0BE6FCXXXXE6FD1A34, at: 4}
 - {name: KFMRESK, pattern: [AD149D0CE6FCXXXX, A4149D0CE6FCXXXX], at: 6}
 - {name: KFMRESK, pattern: 06189D0CE6FCXXXX, at: 6}
 - {name: KFNLLNST, pattern: [7E098850E6FCXXXX, 8C098850E6FCXXXXE6FDXXXXE6FEC502], at: 6, frame: true}
-- {name: KFNLLNST, pattern: E6FCXXXXE6FDXXXXE6FEAB02E6FF0602, frame: true}
+- {name: KFNLLNST, pattern: E6FCXXXXE6FDXXXXE6FEAB02E6FF0602, frame: true, rows: 6, cols: 6, xat: -4, yat: -14}
 - {name: KFTARX, pattern: [0D12F2F4B28C8840F2F5928C8850E6FCXXXX, 0D13F2F468A48840F2F5B88C8850E6FCXXXX], at: 16, frame: true}
 - {name: KFTARX, pattern: 0D13F2F482A48840F2F5C48C8850E6FCXXXX, at: 16, frame: true}
 - {name: KFTARX, pattern: F0980D289A531330F2F482A38840F2F5768C8850E6FCXXXXE6FD0702E6FEE018E6FF0602DA8238630804F0840D12F2F482A38840F2F5768C8850E6FCXXXX, at: 60, frame: true}
@@ -639,9 +640,9 @@ mapsigs:
 - {name: KFTARXZK, pattern: 1350F2F480A48840F2F5668C8850E6FCXXXX, at: 16, frame: true}
 - {name: KFWPLGTA, pattern: [E6FCXXXXE6FDXXXXE6FE6001, E6FCXXXXE6FDXXXXE6FE5F01], frame: true}
 - {name: KFWPLGTA, pattern: [E6FCXXXXE6FDXXXXE6FE4301, E6FCXXXXE6FDXXXXE6FE3C01], frame: true}
-- {name: KFZW, pattern: [3D0FE6FCXXXXE6FDC230, 3D0FE6FCXXXXE6FDD630], at: 4}
+- {name: KFZW, pattern: '3D0FE6FCXXXXE6FD[C2/EB]30', at: 4}
 - {name: KFZW, pattern: [3D0FE6FCXXXXE6FD8631, 3D0FE6FCXXXXE6FD3235], at: 4}
-- {name: KFZW2, pattern: [3D10E6FCXXXXE6FDD630, 3D10E6FCXXXXE6FD8631], at: 4}
+- {name: KFZW2, pattern: '3D10E6FCXXXXE6FD[86/AF][30/FE]', at: 4}
 - {name: KFZW2, pattern: [3D10E6FCXXXXE6FDC230, 3D10E6FCXXXXE6FD3235], at: 4}
 - {name: KFZWOP, pattern: [0200E6FCXXXXE6FDD06A, 0200E6FCXXXXE6FD3A67], at: 4}
 - {name: KFZWOP, pattern: [0200E6FCXXXXE6FD1269, 0200E6FCXXXXE6FDF469], at: 4}
@@ -649,27 +650,27 @@ mapsigs:
 - {name: KFZWOP2, pattern: [B2A5E6FCXXXXE6FDD06A, 84A5E6FCXXXXE6FD3A67], at: 4}
 - {name: KFZWOP2, pattern: [7AA6E6FCXXXXE6FD1269, 96A6E6FCXXXXE6FDF469], at: 4}
 - {name: KFZWOP2, pattern: ACA6E6FCXXXXE6FD306D, at: 4}
-- {name: KRALH, pattern: [D6A10D12D7400602F3F8XXXX, 26A30D12D7400602F3F8XXXX], at: 10}
+- {name: KRALH, pattern: 'X6[A1/FD]0D12D7400602F3F8XXXX', at: 10}
 - {name: KRALH, pattern: [43F8XXXX9D11F3FA8B8A49A1, C2F5XXXX2045C2F5B3F94054CD05]}
 - {name: KRANH, pattern: [E717D7400602C2F5XXXX, 5B18D7400602C2F5XXXX], at: 8}
 - {name: KRANH, pattern: [9D18D7400602C2F5XXXX, A819D7400602C2F5XXXX], at: 8}
 - {name: KRANH, pattern: 8A61F7F87A8AE6FCXXXX, at: 8, frame: true}
-- {name: KRFKLN, pattern: [9B8A9A3A0DF0E6FCXXXX, 878A9A3A0D90E6FCXXXX], at: 8, frame: true}
+- {name: KRFKLN, pattern: '[83/E3]8A9A3A0DX0E6FCXXXX', at: 8, frame: true}
 - {name: KRFKLN, pattern: [B78A9A390DC0E6FCXXXX, C08A9A390D80E6FCXXXX], at: 8, frame: true}
 - {name: KRFKLN, pattern: 668A9A390D50E6FCXXXX, at: 8, frame: true}
-- {name: LAMFA, pattern: [24A68840C2F59CF88850E6F4XXXX, 40A68840C2F5A2F88850E6F4XXXX], at: 12, frame: true, rows: 15, cols: 6, xbits: 16}
+- {name: LAMFA, pattern: '[00/9B]A68840C2F5XXF88850E6F4XXXX', at: 12, frame: true, rows: 15, cols: 6, xbits: 16}
 - {name: LAMFA, pattern: 56A68840C2F59EF88850E6F4XXXX, at: 12, frame: true, rows: 15, cols: 6, xbits: 16}
-- {name: LDHIA, pattern: [C2FEXXXXD7400602C2FF1919, C2FEXXXXD7400602C2FF8D19]}
+- {name: LDHIA, pattern: 'C2FEXXXXD7400602C2FF[09/6B]19'}
 - {name: LDHIA, pattern: [C2FEXXXXD7400602C2FFD019, C2FEXXXXD7400602C2FF4E1C]}
 - {name: LDIATA, pattern: E6FCXXXXE6FDXXXXF2FE968CDA82, frame: true, also: [{name: LDHIA, add: -1}]}
 - {name: LDIATA, pattern: [E6FCXXXXE6FDXXXXF2FEB28CDA82, E6FCXXXXE6FDXXXXF2FED68CDA82], frame: true}
 - {name: LDIATA, pattern: D0848840E6FCXXXXE6FDXXXXF2FEE28CDA82, at: 6, frame: true}
 - {name: LDIATA, pattern: E6FCXXXXE6FDXXXXF2FE848CDA83, frame: true}
 - {name: LDORXN, pattern: [8E0BC4400A00E6FCXXXX, 080CC4400C00E6FCXXXX], at: 8, frame: true}
-- {name: LDORXN, pattern: [2D0DE6FCXXXXE6FD0602F2FEAC8C, 2D0DE6FCXXXXE6FD0602F2FEB88C], at: 4, frame: true}
+- {name: LDORXN, pattern: '2D0DE6FCXXXXE6FD0602F2FE[A8/EB]8C', at: 4, frame: true}
 - {name: LDORXN, pattern: F2F87A0BE6FCXXXXE6FDXXXXF2FE6A8C, at: 6, frame: true}
-- {name: LDPBN, pattern: [8E0BE6FCXXXXE6FDXXXXF2FE, 080CE6FCXXXXE6FD], at: 4, frame: true}
-- {name: LDPBN, pattern: [7C148840E6FCXXXXE6FD0602F2FEAC8C, 7C148840E6FCXXXXE6FD0602F2FEB88C], at: 6, frame: true}
+- {name: LDPBN, pattern: [8E0BE6FCXXXXE6FDXXXXF2FE, 080CE6FCXXXXE6FD0602F2FE5A8C], at: 4, frame: true}
+- {name: LDPBN, pattern: '7C148840E6FCXXXXE6FD0602F2FE[A8/EB]8C', at: 6, frame: true}
 - {name: LDPBN, pattern: F6F47A0BE6FCXXXXE6FDXXXXF2FE6A8C, at: 6, frame: true}
 - {name: MDIMX, pattern: C2F4XXXX5C7440849D03}
 - {name: MDIMX, pattern: [9A260F00F3F8XXXX, 00FF3D05C2F5XXXX5C85C450], at: 6}
@@ -696,7 +697,7 @@ mapsigs:
 - {name: TULV1, pattern: B3A4C08DD7400602C2FEXXXX, at: 10}
 - {name: TULV1, pattern: B9A4D7400602C2FEXXXX, at: 8}
 - {name: TULV1, pattern: [C2FEXXXXDA83EE43F7F8AEA3, 43F8XXXX9D040981F7F8XXXX0D0BA8400AF40101B840A8501AF5010FB8500D02F78EXXXXE6FCXXXXE6FD0602C2FE]}
-- {name: TVUB, pattern: E6FEXXXXC2FF6089}
+- {name: TVUB, pattern: E6FEXXXXC2FF6089, cols: 5}
 - {name: ZKWLAFWL, pattern: 9A4E4630D7400602C2FCXXXX, at: 10}
 - {name: ZKWLAFWL, pattern: [43FAXXXX8D1AAE31, C2FCXXXX5C8CE6FD0080F0E4F2FF3EA1]}
 - {name: CLAATR, pattern: 43F8XXXXED28F3FA, add: 6, also: [{name: CLAATR2, add: 7}, {name: CLAATS, add: 10}, {name: CLAATS2, add: 11}]}
@@ -704,29 +705,29 @@ mapsigs:
 - {name: CWKONABG, pattern: C2F4XXXX68423D0D9A53, add: 6}
 - {name: FBSTABGM, pattern: ['E6FCXXXXE6FDXXXXD740E100F2FE[6C/EC]0B', E6FCXXXXE6FDXXXXD740E100F2FE360B], frame: true, add: 10, cols: 4, xbits: 16}
 - {name: KFLF, pattern: 7408DB008890C2F49E8806F480018840E6FCXXXX, at: 18, frame: true, add: 30}
-- {name: NDLDRAPU, pattern: [0400D740E100F6F4240CE6FCXXXX, 0400D740E100F6F4000CE6FCXXXX], at: 12, frame: true, add: 3, cols: 2}
-- {name: NLDIAPU, pattern: [B980E6FCXXXXE6FDXXXXD740E100C2FE6108, B980E6FCXXXXE6FDXXXXD740E100C2FE6508], at: 4, frame: true, add: 3}
+- {name: NDLDRAPU, pattern: '0400D740E100F6F4[00/DB]0CE6FCXXXX', at: 12, frame: true, add: 3, cols: 2}
+- {name: NLDIAPU, pattern: 'B980E6FCXXXXE6FDXXXXD740E100C2FE[61/FB]08', at: 4, frame: true, add: 3}
 - {name: DLAMTANS, pattern: 5C548840C2F4XX8A8840E6F4XXXX, at: 12, frame: true, cols: 4}
 - {name: FBSTABGM, pattern: [30A0D740E100F6F4080BE6FCXXXX, 58A0D740E100F6F4F80AE6FCXXXX], at: 12, frame: true, add: 10, cols: 4, xbits: 16}
 - {name: FKKVS, pattern: 449F8840C2F59CF88850E6F4XXXX, at: 12, frame: true, rows: 16, cols: 16, xbits: 16}
 - {name: FWFTBRTA, pattern: F7F86608E6FCXXXX, at: 6, frame: true, add: 15, cols: 14}
-- {name: FWFTBRTA, pattern: [318AD740E100F7F86A08E6FCXXXX, 5F8AD740E100F7F86808E6FCXXXX], at: 12, frame: true, add: 15, cols: 14}
+- {name: FWFTBRTA, pattern: 'XX8AD740E100F7F8[68/FD]08E6FCXXXX', at: 12, frame: true, add: 15, cols: 14}
 - {name: FWFTBRTA, pattern: 678AD740E100F7F86C08E6FCXXXX, at: 12, frame: true, add: 15, cols: 14}
 - {name: FWFTBRTA, pattern: F7F87008E6FCXXXX, at: 6, frame: true, add: 15, cols: 14}
 - {name: KFDLULS, pattern: F079E6FCXXXXE6FDXXXXC2FE9XF8, at: 4, frame: true, add: 18, cols: 8, rows: 8}
 - {name: KFFWTBR, pattern: XX0ADB00889088808870E6FCXXXX, at: 12, frame: true, add: 20, cols: 8, rows: 10}
-- {name: KFLDRXO, pattern: [CEB98AF55300E6FCXXXX, D8B98AF55300E6FCXXXX], at: 8, frame: true, add: 14, cols: 4, rows: 8}
+- {name: KFLDRXO, pattern: '[C8/E9]B98AF55300E6FCXXXX', at: 8, frame: true, add: 14, cols: 4, rows: 8}
 - {name: KFLF, pattern: 8840E6FCXXXXE6FDXXXXC2FE9CF8C2FFB3F9, at: 4, frame: true, add: 30, rows: 12, cols: 16}
 - {name: KFMIRL, pattern: [E49EE6FCXXXXF2FD, 0C9FE6FCXXXXF2FD], at: 4, add: 68, cols: 16, rows: 16, xbits: 16, ybits: 16}
 - {name: KFMIRL, pattern: C09FE6FCXXXXF2FD, at: 4, add: 68, cols: 16, rows: 16, xbits: 16, ybits: 16}
 - {name: KFVPDKLD, pattern: [E10CE6FCXXXXE6FDXXXXC2FE9XF8, 9CA4E6FCXXXXE6FDXXXXC2FE9CF8], at: 4, frame: true, add: 24, cols: 12, rows: 10}
 - {name: KFVPDKLD, pattern: B6A4E6FCXXXXE6FDXXXXC2FEA2F8, at: 4, frame: true, add: 24, cols: 12, rows: 10}
-- {name: LAMFA, pattern: [900EE6FE0702D7400702C2FFXXXX, 800DE6FE0702D7400702C2FFXXXX], at: 12, add: 29, cols: 6, rows: 15, xbits: 16}
+- {name: LAMFA, pattern: '[80/EF][0C/FC]E6FE0702D7400702C2FFXXXX', at: 12, add: 29, cols: 6, rows: 15, xbits: 16}
 - {name: NDLDRAPU, pattern: 1600E6FCXXXXE6FDXXXXD740E100C2FEXX08, at: 4, frame: true, add: 3, cols: 2}
 - {name: NLDIAPU, pattern: 0100E6FCXXXXE6FDXXXXD740E100C2FEXX08, at: 4, frame: true, add: 3, cols: 2}
 - {name: TVUB, pattern: E6FEXXXXC2FF9D89, cols: 5}
 - {name: KFFWTBR, pattern: 8870E6FCXXXXE6FDXXXXC2FEB3F9, at: 4, frame: true, add: 20, cols: 8, rows: 10}
-- {name: KFLDIOPU, pattern: [E6FCXXXXE6FDXXXXE6FECD00E6FF0402DA82, E6FCXXXXE6FDXXXXE6FECD00E6FF0402DA83], frame: true, cols: 8, rows: 8}
+- {name: KFLDIOPU, pattern: E6FCXXXXE6FDXXXXE6FECD00E6FF0402DA8X, frame: true, cols: 8, rows: 8}
 - {name: KFLDRXO, pattern: [5300E6FCXXXXE6FDXXXXC2FE9CF8, 5300E6FCXXXXE6FDXXXXC2FEA2F8], at: 4, frame: true, add: 14, cols: 4, rows: 8}
 - {name: KFLDRXO, pattern: 3600E6FCXXXXE6FDXXXXC2FE9EF8, at: 4, frame: true, add: 14, cols: 4, rows: 8}
 - {name: KFMIZUFIL, pattern: E10CE6FCXXXXE6FD8E00, at: 4, cols: 8, rows: 8}
@@ -797,7 +798,7 @@ mapsigs:
 - {name: KFDLULS, pattern: [C2F4XXXXF6F49AA80D0B, C2F4XXXXF6F4B6A70D0B], add: 21}
 - {name: CLAHSHE, pattern: 800020678000XXXX8000D861, at: 6}
 - {name: CLAHSHE2, pattern: 380E800020678000XXXX8000D861, at: 8, add: 1}
-- {name: KISRM, pattern: [F6F4EEA1F2F7XXXXC2FC730D, F6F45AA1F2F7XXXXC2FC5A0D], at: 6}
+- {name: KISRM, pattern: 'F6F4XXA1F2F7XXXXC2FC[52/D6]0D', at: 6}
 - {name: KFLDRXO, pattern: 7CA7D740060243F8XXXX9D040981, at: 8, add: 34, rows: 8, cols: 4}
 - {name: TABGSS, pattern: D7400602F2F6XXXX7C162064, at: 6}
 - {name: VMAXNB, pattern: D7400702F2F4XXXX48C06D05, at: 6}
@@ -824,3 +825,66 @@ mapsigs:
 - {name: KFZWOP, pattern: E6FC2C1CE6FDBC68F2FEF28CF2FF62A8DA00242B, xat: 10, yat: 14}
 # scanLdrxn, the calls that are not the C2F4 5C84 form. The frame is the E6FC immediate.
 - {name: LDRXN, pattern: [E6FCXXXXE6FDXXXXF2FEXXXXDA8XXXXXF094C2F4, E6FCXXXXE6FDXXXXF2FEXXXXDA8XXXXXF094F6F9, E6FCXXXXE6FDXXXXF2FEXXXXDA8XXXXXF6F4XXXX0D27], at: 2, frame: true, add: 34, cols: 16, xbits: 16}
+# HF and HS idle splits. The D4C5 word is the far-pointer table, and the F2 word is the temperature axis.
+- {name: NLLM_0_A, pattern: D4C5D05ED4D5D25ED740E100F2FE7209DA823461F7F81EA4, at: 2, deref: 1, dereffar: true, xat: 14, cols: 6}
+- {name: NLLM_1_A, pattern: D4C5D05ED4D5D25ED740E100F2FE7209DA823461F7F81EA4, at: 2, deref: 1, derefat: 4, dereffar: true, xat: 14, cols: 6}
+- {name: NLLM_2_A, pattern: D4C5D05ED4D5D25ED740E100F2FE7209DA823461F7F81EA4, at: 2, deref: 1, derefat: 8, dereffar: true, xat: 14, cols: 6}
+- {name: NLLM_3_A, pattern: D4C5D05ED4D5D25ED740E100F2FE7209DA823461F7F81EA4, at: 2, deref: 1, derefat: 12, dereffar: true, xat: 14, cols: 6}
+# LP idle splits. Same D4C5 table load, different pointer words.
+- {name: NLLM_0_A, pattern: D4C50A5FD4D50C5FD740E100F2FE8009DA82DC61F7F8E6A4, at: 2, deref: 1, dereffar: true, xat: 14, cols: 6}
+- {name: NLLM_1_A, pattern: D4C50A5FD4D50C5FD740E100F2FE8009DA82DC61F7F8E6A4, at: 2, deref: 1, derefat: 4, dereffar: true, xat: 14, cols: 6}
+- {name: NLLM_2_A, pattern: D4C50A5FD4D50C5FD740E100F2FE8009DA82DC61F7F8E6A4, at: 2, deref: 1, derefat: 8, dereffar: true, xat: 14, cols: 6}
+- {name: NLLM_3_A, pattern: D4C50A5FD4D50C5FD740E100F2FE8009DA82DC61F7F8E6A4, at: 2, deref: 1, derefat: 12, dereffar: true, xat: 14, cols: 6}
+# NL and CB use the same table load. The first of the pair is NLLM, matching HF and LP.
+- {name: NLLM_0_A, pattern: D4C5EC5FD4D5EE5FD740E100F2FE8609DA826E62F7F802A5, at: 2, deref: 1, dereffar: true, xat: 14, cols: 6}
+- {name: NLLM_1_A, pattern: D4C5EC5FD4D5EE5FD740E100F2FE8609DA826E62F7F802A5, at: 2, deref: 1, derefat: 4, dereffar: true, xat: 14, cols: 6}
+- {name: NLLM_2_A, pattern: D4C5EC5FD4D5EE5FD740E100F2FE8609DA826E62F7F802A5, at: 2, deref: 1, derefat: 8, dereffar: true, xat: 14, cols: 6}
+- {name: NLLM_3_A, pattern: D4C5EC5FD4D5EE5FD740E100F2FE8609DA826E62F7F802A5, at: 2, deref: 1, derefat: 12, dereffar: true, xat: 14, cols: 6}
+- {name: NLLM_0_A, pattern: D4C5885ED4D58A5ED740E100F2FE7009DA826461F7F804A4, at: 2, deref: 1, dereffar: true, xat: 14, cols: 6}
+- {name: NLLM_1_A, pattern: D4C5885ED4D58A5ED740E100F2FE7009DA826461F7F804A4, at: 2, deref: 1, derefat: 4, dereffar: true, xat: 14, cols: 6}
+- {name: NLLM_2_A, pattern: D4C5885ED4D58A5ED740E100F2FE7009DA826461F7F804A4, at: 2, deref: 1, derefat: 8, dereffar: true, xat: 14, cols: 6}
+- {name: NLLM_3_A, pattern: D4C5885ED4D58A5ED740E100F2FE7009DA826461F7F804A4, at: 2, deref: 1, derefat: 12, dereffar: true, xat: 14, cols: 6}
+# CM code flags. The immediate is the base of the cluster and CLAATR is four bytes later.
+- {name: CLAATR, pattern: F4800A00C084F4A4D008E4A0, at: 8, add: 4, also: [{name: CLAATR2, add: 5}, {name: CLAATS, add: 8}, {name: CLAATS2, add: 9}, {name: CLAHSH, add: 64}, {name: CLAHSH2, add: 65}, {name: CLAHSHE, add: 66}, {name: CLALSH, add: 95}]}
+# CM idle setpoint. The frame is NFS2M and the F2 word is its temperature axis.
+- {name: NFS2M, pattern: E6FC7A1EE6FD0602D740E100F2FEBC09DA83, at: 2, frame: true, xat: 14, cols: 6}
+# Same KFLF call as the 7408 form. The first two bytes and the C2F4 immediate differ.
+- {name: KFLF, pattern: 7F08DB008890C2F4A58806F480018840E6FCXXXX, at: 18, frame: true, add: 30}
+- {name: KFLF, pattern: 7808DB008890C2F49F8806F480018840E6FCXXXX, at: 18, frame: true, add: 30}
+- {name: KFLF, pattern: 7608DB008890C2F49C8806F480018840E6FCXXXX, at: 18, frame: true, add: 30}
+# LQ copies of the LP rows. The immediates differ and each pattern occurs once.
+- {name: KFMIOP, pattern: F0F4E6FCXXXXE6FD4E69, at: 4}
+- {name: KFZW, pattern: 3D0FE6FCXXXXE6FD5631, at: 4}
+- {name: KFZWOP, pattern: 0200E6FCXXXXE6FD4E69, at: 4}
+- {name: KFTARX, pattern: 0D13F2F464A48840F2F5BA8C8850E6FCXXXX, at: 16, frame: true}
+- {name: LDPBN, pattern: 7C148840E6FCXXXXE6FD0602F2FEAE8C, at: 6, frame: true}
+- {name: NLDIAPU, pattern: B980E6FCXXXXE6FDXXXXD740E100C2FE6208, at: 4, frame: true, add: 3}
+- {name: LDHIA, pattern: C2FEXXXXD7400602C2FF7F19}
+- {name: KRALH, pattern: C2F548182045C2F5B9F94054CD05}
+- {name: KFFLLDE, pattern: 8820E6FCXXXXE6FDXXXXE6FE0A37, at: 4, frame: true}
+- {name: KFMIZUOF, pattern: C4A6E6FCXXXXE6FD8E00, at: 4}
+- {name: KFZWOP2, pattern: 78A6E6FCXXXXE6FD4E69, at: 4}
+- {name: LDIATA, pattern: E6FCXXXXE6FDXXXXF2FED88CDA82, frame: true}
+- {name: FWFTBRTA, pattern: D2F9D740E100F7F86908E6FCXXXX, at: 12, frame: true, add: 15, cols: 14}
+- {name: KFLDIMX, pattern: 38A48840F2F5BE8C8850E6FCXXXX, at: 12, frame: true}
+- {name: KFLDRL, pattern: 3AA48840F2F5BE8C8850E6FCXXXX, at: 12, frame: true}
+- {name: KRFKLN, pattern: B78A9A390D80E6FCXXXX, at: 8, frame: true}
+- {name: DLAMTANS, pattern: 5C548840C2F4D2F98840E6F4XXXX, at: 12, frame: true, cols: 4}
+- {name: KFMIRL, pattern: AC9FE6FCXXXXF2FD, at: 4, add: 68, cols: 16, rows: 16, xbits: 16, ybits: 16}
+- {name: TABGBTS, pattern: 42F4XXXXFD04E11875F8578A}
+- {name: DWKRMSN, pattern: D740E100F7F8CC08E6FC0818, at: 10, frame: true}
+- {name: KRANH, pattern: 4C18D7400602C2F5XXXX, at: 8}
+- {name: FBSTABGM, pattern: F094E6FCXXXXE6FD0702D740E100F2FE2A0B, at: 4, frame: true, add: 10, cols: 4, xbits: 16}
+- {name: KFLDRAPP, pattern: 13B0E6FCXXXXE6FDXXXXC2FEA2F8C2FFBC89, at: 4, frame: true, add: 18, rows: 8, cols: 8}
+# DH copies. Each new pattern is the sibling row with that image's immediates.
+- {name: LDIATA, pattern: E6FCXXXXE6FDXXXXF2FEE48CDA83, frame: true, xat: 10}
+- {name: KFLDRL, pattern: E6FCXXXXE6FDXXXXE6FE6A39E6FF0902DA83, frame: true, xat: -4, yat: -18}
+- {name: KFLAMKRL, pattern: E6FCB112E6FD0602E6FE6A02E6FF0602DA83, frame: true}
+- {name: KFMIOP, pattern: F6F4A4A7E6FC7871E6FDD872F2FECC8CF0F4DA82, at: 6, xat: 14}
+- {name: DWKRMSN, pattern: C2F4XXXX68412D1BF2F4609A, add: 1}
+- {name: KFFLLDE, pattern: 8820E6FCXXXXE6FDXXXXE6FE4C3F, at: 4, frame: true}
+- {name: LDHIA, pattern: C2FEXXXXD7400602C2FF451D}
+- {name: NLDIAPU, pattern: B980E6FCXXXXE6FDXXXXD740E100C2FE7008, at: 4, frame: true, add: 3}
+- {name: FWFTBRTA, pattern: 5B8AD740E100F7F87708E6FCXXXX, at: 12, frame: true, add: 15, cols: 14}
+- {name: KRALH, pattern: C2F5XXXX2045C2F5B7F94054CD05}
+- {name: KFFWTBR, pattern: 8870E6FCXXXXE6FDXXXXC2FEB7F9, at: 4, frame: true, add: 20, cols: 8, rows: 10}
