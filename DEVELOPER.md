@@ -34,11 +34,13 @@ flowchart LR
   par -->|definition errors| src
 ```
 
-Stage new originals in the gitignored `testdata/parity/incoming/`. Definitions are fixed and published in the corpus with xdfkit. Corpus edits, `categories.json` included, are committed and pushed in the full clone `../ecu-corpus`, then pulled with `make corpus-bump`; `corpus/` is a read-only shallow submodule (xdfkit `docs/corpus.md`). ME7Info's `.ecu` output for each image is the only hard 100% oracle.
+Stage new originals in the gitignored `testdata/parity/incoming/`. Definitions are fixed and published in the corpus with xdfkit. A model from `me7info place` can be committed there with origin `located`. Corpus edits, `categories.json` included, are committed and pushed in the full clone `../ecu-corpus`, then pulled with `make corpus-bump`; `corpus/` is a read-only shallow submodule (xdfkit `docs/corpus.md`). ME7Info's `.ecu` output for each image is the only hard 100% oracle.
 
 ## Design
 
-`me7info` (`generate`, `probe`, `parity`, `place`) and `me7logger` (`log`) share one Go module. Both locate items in the image as `record.Item` and `record.Map`. The `.ecu` writer reads those. `xdf.Model` converts the maps to an xdfkit model (file offsets, raw values, provenance origin `located`), and xdfkit files it with `Tuner` or `Categorize` and writes the XDF. `parity` reads the corpus definitions with xdfkit `canon` and `model`. me7-logger imports xdfkit; xdfkit never imports me7-logger.
+`me7info` (`generate`, `probe`, `parity`, `place`) and `me7logger` (`log`) share one Go module. `generate` and `me7logger` locate items in the image as `record.Item` and `record.Map`. The `.ecu` writer reads those. `xdf.Model` converts the maps to an xdfkit model (file offsets, raw values, provenance origin `located`), and xdfkit files it with `Tuner` or `Categorize` and writes the XDF. `parity` reads the corpus definitions with xdfkit `canon` and `model`. me7-logger imports xdfkit; xdfkit never imports me7-logger.
+
+`me7info place ref.json ref.bin dst.bin` writes a model for the destination image (`-o`, or stdout). A body that still matches is kept. One code pointer, found once, moves the object. Anything else is omitted. Provenance is format `image`, origin `located`. The report on stderr is the kept, moved, and omitted counts.
 
 The generator is a masked byte search plus a few opcodes (selector, case bounds, `EXTP`), not a disassembler. A Bosch name located by bytes is a row in `config/signatures.yaml`, never a literal in Go. A row should match a code layout, not one image; check it across the corpus.
 
@@ -76,7 +78,7 @@ Images are in the private [ecu-corpus](https://github.com/nyetlabs/ecu-corpus) s
 
 `make parity` prints the report from shipped config only. `make test` fails only when an image is below 100% against its legacy `ecu/me7info/<image>.ecu`; every other score is coverage.
 
-A name hits when it has an address and its listed axes. Each image's definition is its corpus model JSON. Fix definitions in the corpus, not here. `provenance.origin` `damos`/`a2l` is the reference, and a different address is a miss. `hand` or unset is an oracle only: disagreements still hit and are listed under `hand xdf disagrees`. `located` is skipped.
+A name hits when it has an address and its listed axes. Each image's definition is its corpus model JSON. Fix definitions in the corpus, not here. `provenance.origin` `damos`/`a2l` is the reference, and a different address is a miss. `hand` or unset is an oracle only: disagreements still hit and are listed under `hand xdf disagrees`. `located` is read and left out of both sections.
 
 The tier grade is the highest tier in `names/tuner.yaml` where every name hits or is in `names/absent.yaml`. An `any` family is one name: one member located, or every member absent. `confidence` is high for bodies under 16 cells or matching a peer in `datasets.yaml` within two cells or 3%, and low for zero bodies unless every peer is zero.
 

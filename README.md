@@ -4,10 +4,12 @@ Tools for Bosch ME7 engine control units, in Go, for macOS, Linux and Windows.
 
 | Program | Does | Reads | Writes |
 |---|---|---|---|
-| `me7info` | Locates measurements and calibration maps in a flash image | `image.bin` | ME7Logger `.ecu`, TunerPro `.xdf` |
+| `me7info` | Locates measurements and calibration maps in a flash image, and copies a map catalog onto another image | `image.bin`, a reference catalog | ME7Logger `.ecu`, TunerPro `.xdf`, model JSON |
 | `me7logger` | Samples ECU RAM over the K-line diagnostic port | `image.bin`, `session.cfg` | CSV |
 
 Neither program writes flash or EEPROM. `me7info` never opens a serial port.
+
+`me7info place ref.json ref.bin dst.bin` writes a model JSON for the second image. A body that still matches is kept. One code pointer, found once, moves the object. Anything else is left out. The model's origin is `located`.
 
 ## Workflow
 
