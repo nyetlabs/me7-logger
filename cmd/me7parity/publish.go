@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 
 	"go.nyet.org/xdfkit/canon"
@@ -22,16 +21,18 @@ Prints every parity image. Confidence has to pass for every image:
 high bodies are more than half the tuner names that scored, and a zero
 denominator is not eligible.
 
-With no corpus definition, or when the existing JSON is already origin
-located, the name grade must be D, C, B, A, S, or S+. Origin hand does
-not wait for that grade. It is eligible when the located model is a
-strict superset: every hand object is at the same address, and at least
-one more name is present. Shared objects keep the hand conversion,
+A star after the tier is an empty corpus definition, or origin hand.
+With no definition, the name grade must be D, C, B, A, S, or S+.
+Origin hand does not wait for that grade. Origin hand or located is
+eligible when the located model is a strict superset: every current
+name is at the same address, and at least one more name is present.
+The delta is that added count. An identical name set is not eligible
+and is not written. Shared objects keep the previous conversion,
 units, and description. Origin damos, a2l, or unset is never replaced.
 
---write stores that model at defs/NAME.json (provenance.origin located)
-and sets the row's def column. It does not commit, push, bump, or
-upload. The corpus is CORPUS, else ../ecu-corpus when that checkout
+--write stores an eligible model at defs/NAME.json (provenance.origin
+located) and sets the row's def column. It does not commit, push, bump,
+or upload. The corpus is CORPUS, else ../ecu-corpus when that checkout
 exists, else corpus/.
 `
 
@@ -95,12 +96,17 @@ func cmdPublish(args []string) error {
 		if item.reason == "" {
 			item.reason = gateReason(im.Tier, im.Confidence, item.def != "", item.origin)
 		}
-		if item.reason == "" && item.origin == "hand" {
+		delta := "-"
+		if item.reason == "" && (item.origin == "hand" || item.origin == "located") {
 			loc, err := located(d, prepare, c, name)
 			if err != nil {
 				return err
 			}
-			item.reason = handCover(prev, loc)
+			reason, added := handCover(prev, loc)
+			item.reason = reason
+			if reason == "" || reason == "identical" {
+				delta = fmt.Sprintf("+%d", added)
+			}
 			if item.reason == "" {
 				item.merged = mergeKept(prev, loc)
 			}
@@ -110,8 +116,12 @@ func cmdPublish(args []string) error {
 			status = "eligible"
 			eligible = append(eligible, item)
 		}
+		tier := item.tier
+		if im.NoDef {
+			tier += "*"
+		}
 		lines = append(lines, pubLine{
-			name: name, status: status, tier: item.tier,
+			name: name, status: status, tier: tier, delta: delta,
 			hit: im.Confidence.Hit, total: im.Confidence.Total,
 		})
 	}
@@ -129,18 +139,8 @@ func cmdPublish(args []string) error {
 			if err := writePublished(dst, item.merged); err != nil {
 				return err
 			}
-		case item.origin == "located":
-			prev, err := readModel(item.def)
-			if err != nil {
-				return err
-			}
-			loc, err := located(d, prepare, c, item.name)
-			if err != nil {
-				return err
-			}
-			if err := writePublished(dst, mergeKept(prev, loc)); err != nil {
-				return err
-			}
+		case item.def != "":
+			return fmt.Errorf("%s: eligible without a merged model", item.name)
 		default:
 			imgPath, err := c.Path(item.name)
 			if err != nil {
@@ -179,25 +179,31 @@ type pubItem struct {
 }
 
 type pubLine struct {
-	name, status, tier string
-	hit, total         int
+	name, status, tier, delta string
+	hit, total                int
 }
 
 func printPublish(lines []pubLine) {
-	nameW, statusW, hitW := 0, 0, 0
-	for _, ln := range lines {
+	nameW, statusW, deltaW := len("name"), len("status"), len("delta")
+	confW := len("confidence")
+	confs := make([]string, len(lines))
+	for i, ln := range lines {
 		nameW = max(nameW, len(ln.name))
 		statusW = max(statusW, len(ln.status))
-		hitW = max(hitW, len(strconv.Itoa(ln.hit)))
+		deltaW = max(deltaW, len(ln.delta))
+		confs[i] = fmt.Sprintf("%d/%d", ln.hit, ln.total)
+		confW = max(confW, len(confs[i]))
 	}
-	for _, ln := range lines {
-		fmt.Printf("%-*s  %-*s  %-4s  %*d/%d\n",
-			nameW, ln.name, statusW, ln.status, ln.tier, hitW, ln.hit, ln.total)
+	fmt.Printf("%-*s  %-*s  %-4s  %-*s  %*s\n",
+		nameW, "name", statusW, "status", "tier", deltaW, "delta", confW, "confidence")
+	for i, ln := range lines {
+		fmt.Printf("%-*s  %-*s  %-4s  %-*s  %*s\n",
+			nameW, ln.name, statusW, ln.status, ln.tier, deltaW, ln.delta, confW, confs[i])
 	}
 }
 
 // gateReason is empty when the image may be published, or when origin
-// hand still has to pass handCover. Confidence is required first.
+// hand or located still has to pass handCover. Confidence is required first.
 // Grade "-" passes only for hand. damos, a2l, and an unset origin do not.
 func gateReason(tier string, conf parity.Fraction, hasDef bool, origin string) string {
 	if conf.Total == 0 || conf.Hit*2 <= conf.Total {
@@ -222,10 +228,11 @@ func gateReason(tier string, conf parity.Fraction, hasDef bool, origin string) s
 	return "grade " + tier
 }
 
-// handCover is empty when located strictly covers prev. A hand name
-// the locator does not have is short. The same name at another address
-// disagrees. An equal set of names is not written.
-func handCover(prev, located *model.Model) string {
+// handCover is empty when located strictly covers prev, and the count
+// is how many names are new. A name the locator does not have is short.
+// The same name at another address disagrees. An equal set of names is
+// identical and is not written.
+func handCover(prev, located *model.Model) (string, int) {
 	have := map[string][]model.Addr{}
 	for _, o := range located.Objects {
 		k := objKey(o)
@@ -243,7 +250,7 @@ func handCover(prev, located *model.Model) string {
 		prevKey[k] = struct{}{}
 		addrs := have[k]
 		if len(addrs) == 0 {
-			return "hand short " + k
+			return "hand short " + k, 0
 		}
 		match := false
 		for _, a := range addrs {
@@ -253,19 +260,29 @@ func handCover(prev, located *model.Model) string {
 			}
 		}
 		if !match {
-			return "hand disagrees " + k
+			return "hand disagrees " + k, 0
 		}
 	}
+	added := 0
+	seen := map[string]struct{}{}
 	for _, o := range located.Objects {
 		k := objKey(o)
 		if k == "" {
 			continue
 		}
-		if _, ok := prevKey[k]; !ok {
-			return ""
+		if _, ok := prevKey[k]; ok {
+			continue
 		}
+		if _, ok := seen[k]; ok {
+			continue
+		}
+		seen[k] = struct{}{}
+		added++
 	}
-	return "hand equal"
+	if added == 0 {
+		return "identical", 0
+	}
+	return "", added
 }
 
 // mergeKept is the located model, with any object the previous file

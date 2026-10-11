@@ -63,8 +63,8 @@ type Disagreement struct {
 // Both are set only on ME7Info rows. Tier, Axis, and Confidence are set on
 // Tuner rows. Tier is the nameGrade of the image. On a Tuner row, Fraction
 // is the tuner names and Block is the other names lists of the image's
-// layout block. NoDef marks a Tuner row whose image has no corpus
-// definition; Text prints it as a star after the tier.
+// layout block. NoDef marks a Tuner row with no corpus definition, or
+// one whose origin is hand. Text prints it as a star after the tier.
 // Every list is sorted by the layout block tier of its image in
 // layouts-priority.yaml, then by name.
 type Image struct {
@@ -448,7 +448,7 @@ func run(dir string, images []string, defOf func(string) string, gen imageGen) (
 			})
 		}
 		def := defOf(stem)
-		xmaps, xaxes, xrows, kind, err := loadOracle(def)
+		xmaps, xaxes, xrows, kind, origin, err := loadOracle(def)
 		if err != nil {
 			return nil, err
 		}
@@ -471,7 +471,7 @@ func run(dir string, images []string, defOf func(string) string, gen imageGen) (
 					_, located := scored[n]
 					return located || gone[n], located
 				}),
-				NoDef: def == "",
+				NoDef: def == "" || origin == "hand",
 				Axis:  scoreAxes(scored, axes),
 			})
 			held = append(held, kept{base: base, stem: stem, img: img, maps: maps, oracle: oracle})
@@ -604,17 +604,17 @@ const (
 // kind, or "" when path is "" or the origin is located. Its provenance
 // origin (xdfkit docs/corpus.md) damos or a2l is damosXDF; hand, or none,
 // is handXDF. located is a program's placement, so it is not scored.
-func loadOracle(path string) (maps []Map, axes []Axis, rows []refRow, kind string, err error) {
+func loadOracle(path string) (maps []Map, axes []Axis, rows []refRow, kind, origin string, err error) {
 	if path == "" {
-		return nil, nil, nil, "", nil
+		return nil, nil, nil, "", "", nil
 	}
 	b, err := os.ReadFile(path)
 	if err != nil {
-		return nil, nil, nil, "", err
+		return nil, nil, nil, "", "", err
 	}
-	maps, axes, rows, origin, err := parseModel(b)
+	maps, axes, rows, origin, err = parseModel(b)
 	if err != nil {
-		return nil, nil, nil, "", fmt.Errorf("%s: %w", path, err)
+		return nil, nil, nil, "", "", fmt.Errorf("%s: %w", path, err)
 	}
 	switch origin {
 	case "damos", "a2l":
@@ -622,11 +622,11 @@ func loadOracle(path string) (maps []Map, axes []Axis, rows []refRow, kind strin
 	case "hand", "":
 		kind = handXDF
 	case "located":
-		return nil, nil, nil, "", nil
+		return nil, nil, nil, "", origin, nil
 	default:
-		return nil, nil, nil, "", fmt.Errorf("%s: unknown origin %q", path, origin)
+		return nil, nil, nil, "", origin, fmt.Errorf("%s: unknown origin %q", path, origin)
 	}
-	return maps, axes, rows, kind, nil
+	return maps, axes, rows, kind, origin, nil
 }
 
 // disagreements lists the scored names whose body is not at a hand made XDF

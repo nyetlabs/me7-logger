@@ -34,7 +34,7 @@ flowchart LR
   par -->|definition errors| src
 ```
 
-Stage new originals under `testdata/parity/incoming/` (gitignored except its README). `me7parity onboard` runs ME7Info.exe, scores the `.ecu`, and adds an image when every ME7Info row is 100%. `me7parity publish` lists every parity image. Confidence has to pass for all of them. With no corpus definition, or when the JSON is already origin `located`, the name grade must be D or better. Origin `hand` does not wait for that grade: `--write` replaces it when the located model is a strict superset, and the shared objects keep the hand conversion, units, and description. Origin `damos` and `a2l` are not replaced. The corpus is `../ecu-corpus` when that checkout exists, otherwise `corpus/` (`CORPUS=` overrides). It does not commit. KP, XDF, and DAMOS still go through xdfkit `publish/import-incoming.sh`. Corpus edits, `categories.json` included, are committed and pushed in `../ecu-corpus`, then pulled with `make corpus-bump`; `corpus/` is a read-only shallow submodule (xdfkit `docs/corpus.md`). ME7Info's `.ecu` output for each image is the only hard 100% oracle.
+Stage new originals under `testdata/parity/incoming/` (gitignored except its README). `me7parity onboard` runs ME7Info.exe, scores the `.ecu`, and adds an image when every ME7Info row is 100%. `me7parity publish` lists every parity image. Confidence has to pass for all of them. A star after the tier is an empty definition or origin `hand`. With no definition, the name grade must be D or better. Origin `hand` does not wait for that grade. `eligible` is a strict improvement: every current name at the same address and at least one new name, or an empty definition that passed the grade. `identical` is the matching name set and is not written. `--write` replaces origin `hand` or `located` only when the row is eligible, and the shared objects keep the previous conversion, units, and description. Origin `damos` and `a2l` are not replaced. The corpus is `../ecu-corpus` when that checkout exists, otherwise `corpus/` (`CORPUS=` overrides). It does not commit. KP, XDF, and DAMOS still go through xdfkit `publish/import-incoming.sh`. Corpus edits, `categories.json` included, are committed and pushed in `../ecu-corpus`, then pulled with `make corpus-bump`; `corpus/` is a read-only shallow submodule (xdfkit `docs/corpus.md`). ME7Info's `.ecu` output for each image is the only hard 100% oracle.
 
 ## Design
 
@@ -76,11 +76,11 @@ KWP `$23` reads at 10400 baud, up to 254 contiguous bytes per request, 55 ms apa
 
 Images are in the private [ecu-corpus](https://github.com/nyetlabs/ecu-corpus) submodule (`make corpus`, `make corpus-bump`); oracles are in `testdata/parity`, whose files document themselves. `XDFKIT_CORPUS` points elsewhere; `XDFKIT_REQUIRE_CORPUS=1` fails on a missing corpus.
 
-`make parity` prints the report from shipped config only. `make test` fails only when an image is below 100% against its legacy `ecu/me7info/<image>.ecu`; every other score is coverage.
+`me7parity --data testdata/parity` prints the report from shipped config only. `make test` fails only when an image is below 100% against its legacy `ecu/me7info/<image>.ecu`; every other score is coverage.
 
 A name hits when it has an address and its listed axes. Each image's definition is its corpus model JSON. Fix definitions in the corpus, not here. `provenance.origin` `damos`/`a2l` is the reference, and a different address is a miss. `hand` or unset is an oracle only: disagreements still hit and are listed under `hand xdf disagrees`. `located` is read and left out of both sections.
 
-The tier grade is the highest tier in `names/tuner.yaml` where every name hits or is in `names/absent.yaml`. An `any` family is one name: one member located, or every member absent. `confidence` is high for bodies under 16 cells or matching a peer in `datasets.yaml` within two cells or 3%, and low for zero bodies unless every peer is zero.
+The tier grade is the highest tier in `names/tuner.yaml` where every name hits or is in `names/absent.yaml`. A star after the tier is an empty corpus definition or origin `hand`. An `any` family is one name: one member located, or every member absent. `confidence` is high for bodies under 16 cells or matching a peer in `datasets.yaml` within two cells or 3%, and low for zero bodies unless every peer is zero.
 
 ## Version
 

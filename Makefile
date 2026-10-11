@@ -4,7 +4,6 @@
 #   make test             go test ./...; ME7Info parity must be 100% (image tests skip without corpus/)
 #   make build            build/me7info, build/me7logger, build/me7parity, and build/config (user/ is kept)
 #   make version          git describe (tags vX.Y.Z and vX.Y.Z-rcN)
-#   make parity           legacy ME7Info parity, plus coverage of the YAML lists, the tuner names, and the corpus definitions
 #   make package          dist archives for macos, linux, and windows
 #   make install          after make build: me7info, me7logger, and config/ in PREFIX/lib/me7-logger, links in PREFIX/bin
 #                         (PREFIX=/usr/local; DESTDIR stages a package). me7parity is not installed.
@@ -22,7 +21,7 @@ SHELL := /bin/bash
 
 VERSION ?= $(patsubst v%,%,$(shell git describe --tags --match 'v[0-9]*' --dirty --always 2>/dev/null))
 
-.PHONY: all test build version parity package install uninstall bump corpus corpus-bump work xdfkit-bump check-pinned clean help
+.PHONY: all test build version package install uninstall bump corpus corpus-bump work xdfkit-bump check-pinned clean help
 
 # Archive name uses macos; the Go port is darwin.
 PLATFORMS := darwin/amd64 darwin/arm64 linux/amd64 linux/arm64 windows/amd64
@@ -90,9 +89,6 @@ package:
 		rm -rf "$$stage"; \
 	done
 
-parity: build
-	./build/me7parity --data testdata/parity
-
 bump: xdfkit-bump corpus-bump
 
 # --checkout overrides update = none in .gitmodules.
@@ -143,4 +139,4 @@ clean:
 	rm -rf build dist
 
 help:
-	@sed -n '2,18p' Makefile
+	@sed -n '2,17p' Makefile

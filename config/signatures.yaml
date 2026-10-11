@@ -459,12 +459,12 @@ mapsigs:
 - {name: KFLDRQ2, pattern: E6FCXXXXE6FD0902E6FE6F00, add: 81920}
 - {name: KFLDHBN, anchor: KFTARX, add: -64, rows: 8, cols: 8}
 - {name: KFKHFM, pattern: CD0DF3F4XXXXF7F471F8F3F4D40A, at: 4, add: 77, rows: 14, cols: 14}
-- {name: SNM16OPUW, pattern: 768DE6FCXXXXF2FD02F8, at: 4, add: 3}
+- {name: SNM16OPUW, pattern: XX8DE6FCXXXXF2FD02F8F2FE968D, at: 4, add: 3}
 - {name: KFMSNWDK, pattern: 80DFF2F3F8F842F368A09D10E003F062F073F2F4XXXX, at: 20, add: 88, rows: 16, cols: 6, ybits: 16, xbits: 16}
-- {name: KFMIRL, pattern: 0E37E6FCXXXXF2FD44A6, at: 4, add: 96, rows: 16, cols: 16, ybits: 16, xbits: 16}
+- {name: KFMIRL, pattern: XX37E6FCXXXXF2FDXXA6DA00D071, at: 4, add: 96, rows: 16, cols: 16, ybits: 16, xbits: 16}
 - {name: TVUB, pattern: 4EA2DB008860C2F409F98840C2F400F88840E6F4XXXX, at: 20, add: 96, cols: 5}
 - {name: FBSTABGM, pattern: 070242F4XXXX3D04E08574F540A3, at: 4, add: 58, cols: 4, xbits: 16}
-- {name: FWFTBRTA, pattern: 0602C2F4XXXXF6F460A0DB00E6FCA80B, at: 4, add: 94, cols: 14}
+- {name: FWFTBRTA, pattern: 0602C2F4XXXXF6F460A0DB00E6FCXXXX, at: 4, add: 94, cols: 14}
 - {name: KFFWTBR, pattern: 0602C2F6B00A5C86E007, at: 4, add: 84, rows: 10, cols: 8}
 - {name: NLDIAPU, pattern: 0602F3F8XXXXD7400602F3FC7D19, at: 4, add: 13, also: [{name: LDHIA}]}
 - {name: KFLDRXO, pattern: 060243F8XXXXBD019F4D, at: 4, add: 25, rows: 8, cols: 4}
@@ -744,7 +744,7 @@ mapsigs:
 - {name: bp_nmot, pattern: 100A141E28323C46, table: true}
 - {name: NFSM, pattern: 060243F8BA1C9D05, at: 4, add: 1, cols: 6, xtable: bp_tmot}
 - {name: NLLM, pattern: 060243F8C11C9D05, at: 4, add: 30, cols: 6, xtable: bp_tmot}
-- {name: DWKRMSN, pattern: 0602C2F472176841, at: 4, add: 1, cols: 16, xtable: bp_nmot}
+- {name: DWKRMSN, pattern: 0602C2F4XXXX68412D1BF2F48E9B42F4XXXX, at: 4, add: 1, cols: 16, xtable: bp_nmot}
 - {name: KRFKLN, pattern: FD04E11A75FA00A50D12D7400602F3F8B817D740, at: 16, add: 17, cols: 16, xtable: bp_nmot}
 # 22N copy of RLSALULL. The tail matches the row above; these front bytes differ.
 - {name: NWPMBBR, pattern: F3F87AF843F8XXXX8D0AF3FA, at: 6}
@@ -958,3 +958,21 @@ mapsigs:
 - {name: KFLBTS_0_A, pattern: E6FC2F18E6FD0602E6FEAF19E6FF0602DA835C440804C084, frame: true}
 # Same 10-byte header as DH. The F2 word is E61B.
 - {name: FBSTABGM, pattern: E6FCA22DE6FD0902D740E100F2FEE61B, frame: true, add: 10, cols: 4, xbits: 16}
+# 23g. F already stores KFZW from the caller. K and Q use DA00 B878.
+- {name: KFZW, pattern: 3D0FE6FCXXXXE6FDXXXXF2FE988DF2FFXXXXDA00B878, at: 4, xat: 16, yat: 12}
+# 23g KFFLLDE. The E6 FC word and the DA80 slot differ on K and Q.
+- {name: KFFLLDE, pattern: F2F5888D8850E6FCXXXXE6FD0702E6FEXXXXE6FF0402DA80XXXX0804, at: 8, frame: true, xat: 2}
+# 23g K and Q. F stores KRFKLN from the row above. The A5 page and the F3 word differ.
+- {name: KRFKLN, pattern: FD04E11A75FA06A50D12D7400602F3F8CA18D740, at: 16, add: 17, cols: 16, xtable: bp_nmot}
+# 23g K and Q. The 42 F4 word after 74 F5 is 3CA3.
+- {name: FBSTABGM, pattern: 070242F4XXXX3D04E08574F53CA3, at: 4, add: 58, cols: 4, xbits: 16}
+# 23g. The caller names LDPBN on F. K and Q use this call.
+- {name: LDPBN, pattern: E6FCXXXXE6FD0602F2FE868DDA80XXXXF0945C89, frame: true, xat: 10}
+# 23g K and Q. The prefix is 7455 and the second C2 word is 8118.
+- {name: KRALH, pattern: 7455C2F4A0F7E0154C54D7400602C2F48118, at: 16, add: 68}
+# 23g K and Q. The F7 word is 76A6. F keeps 70A6 on the row above.
+- {name: KFLDHBN, pattern: 060243F8XXXX9D040981F7F876A60D01BE4F, at: 4, add: 54, rows: 8, cols: 8}
+# 23g K and Q. The F2 word is EA0A and the two 42 F4 words are E60B and E40B.
+- {name: TABGBTS, pattern: EA0AD740070242F4E60BDD05D740070242F4E40BAD029F, at: 8, add: 94}
+# 23g K and Q. The jump-table words moved by 17F8. DPUPS is 29 bytes after the middle word.
+- {name: KUMSRL, pattern: 6224EA24842468255225, at: 4, add: 3, also: [{name: DPUPS, add: 29}]}

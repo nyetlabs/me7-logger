@@ -71,3 +71,9 @@ absent:
     - DLBTS
     - KFVPLGU
     - SNM16OPUW
+  # Not in the 8D0907551F DAMOS export. That export has KFDLBTS, ZDLBTS,
+  # and TABGBTS, and it does not have these three.
+  23g:
+    - DLBTS
+    - KFLBTS_0_A
+    - KFVPLGU

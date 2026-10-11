@@ -95,8 +95,8 @@ func TestHandCover(t *testing.T) {
 		pubObj("KFZW", 0x100, 1, ""),
 		pubObj("LAMFA", 0x200, 1, ""),
 	)
-	if got := handCover(hand, covered); got != "" {
-		t.Fatalf("superset: %s", got)
+	if got, n := handCover(hand, covered); got != "" || n != 1 {
+		t.Fatalf("superset: %s +%d", got, n)
 	}
 	merged := mergeKept(hand, covered)
 	if len(merged.Objects) != 2 {
@@ -110,17 +110,17 @@ func TestHandCover(t *testing.T) {
 		t.Fatalf("new %+v", merged.Objects[1].Value)
 	}
 	moved := modelOf(pubObj("KFZW", 0x300, 1, ""), pubObj("LAMFA", 0x200, 1, ""))
-	if got := handCover(hand, moved); got != "hand disagrees KFZW" {
+	if got, _ := handCover(hand, moved); got != "hand disagrees KFZW" {
 		t.Fatalf("moved: %s", got)
 	}
 	short := modelOf(pubObj("LAMFA", 0x200, 1, ""))
 	two := modelOf(pubObj("KFZW", 0x100, 0.75, "grad KW"), pubObj("LAMFA", 0x180, 1, "%%"))
-	if got := handCover(two, short); got != "hand short KFZW" {
+	if got, _ := handCover(two, short); got != "hand short KFZW" {
 		t.Fatalf("short: %s", got)
 	}
 	same := modelOf(pubObj("KFZW", 0x100, 1, ""))
-	if got := handCover(hand, same); got != "hand equal" {
-		t.Fatalf("equal: %s", got)
+	if got, n := handCover(hand, same); got != "identical" || n != 0 {
+		t.Fatalf("identical: %s +%d", got, n)
 	}
 	shifted := mergeKept(hand, modelOf(pubObj("KFZW", 0x300, 1, "raw")))
 	if shifted.Objects[0].Value.Conversion.Factor != 1 || shifted.Objects[0].Value.Units != "raw" {

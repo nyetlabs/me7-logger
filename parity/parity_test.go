@@ -256,7 +256,7 @@ func TestReportText(t *testing.T) {
 				Name: "a.bin", Fraction: Fraction{1, 2}, Tier: "S",
 				Axis: Fraction{1, 2}, Confidence: Fraction{1, 1}, Block: Fraction{3, 40},
 			},
-			{Name: "bb.bin", Fraction: Fraction{0, 2}},
+			{Name: "bb.bin", Fraction: Fraction{0, 2}, NoDef: true},
 		},
 		XDF:      []Image{{Name: "a.bin", Fraction: Fraction{0, 3}, Axis: Fraction{1, 4}}},
 		Hand:     []Image{{Name: "bb.bin", Fraction: Fraction{2, 3}, Axis: Fraction{0, 0}}},
@@ -269,7 +269,7 @@ func TestReportText(t *testing.T) {
 		"\n" +
 		"names                     tier         axis   confidence         block\n" +
 		"  a          1/2   50.0%  S     1/2   50.0%  1/1  100.0%  3/40    7.5%\n" +
-		"  bb         0/2    0.0%        0/0    0.0%                           \n" +
+		"  bb         0/2    0.0%  *     0/0    0.0%                           \n" +
 		"\n" +
 		"xdf damos                        axis\n" +
 		"  a          0/3    0.0%  1/4   25.0%\n" +
@@ -314,10 +314,10 @@ func TestLoadOracleKind(t *testing.T) {
 		if err := os.WriteFile(p, []byte(modelJSON(origin, 2)), 0o644); err != nil {
 			t.Fatal(err)
 		}
-		_, _, rows, kind, err := loadOracle(p)
+		_, _, rows, kind, gotOrigin, err := loadOracle(p)
 		if want == "skip" {
-			if err != nil || kind != "" {
-				t.Fatalf("%q: %q %v", origin, kind, err)
+			if err != nil || kind != "" || gotOrigin != origin {
+				t.Fatalf("%q: %q %q %v", origin, kind, gotOrigin, err)
 			}
 			continue
 		}
@@ -327,12 +327,12 @@ func TestLoadOracleKind(t *testing.T) {
 			}
 			continue
 		}
-		if err != nil || kind != want || len(rows) != 2 {
-			t.Fatalf("%q: %d %q %v", origin, len(rows), kind, err)
+		if err != nil || kind != want || gotOrigin != origin || len(rows) != 2 {
+			t.Fatalf("%q: %d %q %q %v", origin, len(rows), kind, gotOrigin, err)
 		}
 	}
-	if _, _, _, kind, err := loadOracle(""); err != nil || kind != "" {
-		t.Fatalf("none: %q %v", kind, err)
+	if _, _, _, kind, origin, err := loadOracle(""); err != nil || kind != "" || origin != "" {
+		t.Fatalf("none: %q %q %v", kind, origin, err)
 	}
 }
 

@@ -170,6 +170,8 @@ functions:
       - needle_hex: "88 90 88 80 88 70 88 60 9A 58 03 F0"
       # 23g ignition entry. The warm-up map sits in ZWGRU_ign_wl.
       - needle_hex: "88 90 88 70 88 60 28 02 F3 F8 50 8C 47 F8 FF 00"
+      # K and Q. The F3 address is 538C. The calls sit at the F distances.
+      - needle_hex: "88 90 88 70 88 60 28 02 F3 F8 53 8C 47 F8 FF 00"
       # 4Z7 ignition entry. One less push, and the F3 address differs per image.
       - needle_hex: "88 90 88 80 28 02 F3 F8 XX XX 47 F8 FF 00"
 
@@ -198,6 +200,8 @@ functions:
     needle_hex:
       - "88 90 88 80 88 60 28 04 9A 55 0C XX"
       - "88 90 88 80 88 60 28 04 9A 56 0C 50"
+      # K and Q. The byte after 0C is C0. The calls sit at the F distances.
+      - "88 90 88 80 88 60 28 04 9A 56 0C C0"
 
   # Callers for the other tuner maps. config/maps.yaml names each map at a
   # fixed distance from the label. "XX" is an R12 or R13 immediate: that
