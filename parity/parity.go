@@ -430,7 +430,7 @@ func run(dir string, images []string, defOf func(string) string, gen imageGen) (
 		}
 		base := filepath.Base(path)
 		stem := strings.TrimSuffix(base, ".bin")
-		tierOf[base] = layout[layoutID(img)]
+		tierOf[base] = layout[LayoutID(img)]
 		items, maps, err := gen(base, img)
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", base, err)
@@ -457,7 +457,7 @@ func run(dir string, images []string, defOf func(string) string, gen imageGen) (
 			oracle = xrows
 		}
 		if len(tuner) > 0 {
-			blk := block[layoutID(img)]
+			blk := block[LayoutID(img)]
 			want := lists.forBlock(blk)
 			scored := tunerMaps(want, axes, maps, oracle)
 			if kind == handXDF {
@@ -905,9 +905,9 @@ func loadTiers[V any](path string, want map[string]V) (map[string]string, error)
 
 var epkRE = regexp.MustCompile(`[0-9]+/[0-9]+/ME7[!-~]*`)
 
-// layoutID is the id layouts.yaml lists an image by: the Bosch software
+// LayoutID is the id layouts.yaml lists an image by: the Bosch software
 // number, or the EPK string when the image carries none.
-func layoutID(img []byte) string {
+func LayoutID(img []byte) string {
 	if sw := ident.Find(img).SWNumber; sw != "" {
 		return sw
 	}

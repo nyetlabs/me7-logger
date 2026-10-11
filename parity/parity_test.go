@@ -517,7 +517,7 @@ func TestLayoutBlocks(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		id := layoutID(img)
+		id := LayoutID(img)
 		if id == "" {
 			t.Fatalf("%s: no software number or EPK", filepath.Base(b))
 		}

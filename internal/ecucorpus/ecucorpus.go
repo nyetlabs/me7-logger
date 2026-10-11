@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"gopkg.in/yaml.v3"
@@ -69,6 +70,16 @@ func Load(dir string) (*Corpus, error) {
 	return c, nil
 }
 
+// Names returns the manifest names, sorted.
+func (c *Corpus) Names() []string {
+	out := make([]string, 0, len(c.defs))
+	for n := range c.defs {
+		out = append(out, n)
+	}
+	sort.Strings(out)
+	return out
+}
+
 // Def returns the path of a manifest name's definition, defs/<name>.json, or
 // "" when it has none.
 func (c *Corpus) Def(name string) string {
@@ -119,7 +130,7 @@ type TB interface {
 // skips, or fails when XDFKIT_REQUIRE_CORPUS is set (CI).
 func Open(t TB) *Corpus {
 	t.Helper()
-	root, err := moduleRoot()
+	root, err := ModuleRoot()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -133,7 +144,8 @@ func Open(t TB) *Corpus {
 	return c
 }
 
-func moduleRoot() (string, error) {
+// ModuleRoot is the directory of the nearest go.mod above the working directory.
+func ModuleRoot() (string, error) {
 	dir, err := os.Getwd()
 	if err != nil {
 		return "", err

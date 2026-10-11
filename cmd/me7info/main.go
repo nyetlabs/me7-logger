@@ -44,6 +44,10 @@ func main() {
 		err = cmdParity(os.Args[2:])
 	case "place":
 		err = cmdPlace(os.Args[2:])
+	case "onboard":
+		err = cmdOnboard(os.Args[2:])
+	case "publish":
+		err = cmdPublish(os.Args[2:])
 	case "-v", "--version":
 		fmt.Println(version)
 	case "-h", "--help", "help":
@@ -69,6 +73,8 @@ Usage:
   me7info probe [flags] <image.bin>
   me7info parity [flags]
   me7info place [flags] <ref.json> <ref.bin> <dst.bin>
+  me7info onboard [candidates|run|triage|promote]
+  me7info publish [flags]
   me7info -v, --version
   me7info -h, --help
 
@@ -82,6 +88,9 @@ Commands:
   place     Copy a map catalog onto another image. An object whose bytes
             match is kept. One code pointer, found once, moves it. Anything
             else is left out. The report is on stderr.
+  onboard   Bring a corpus image into the parity set.
+  publish   List located models the corpus gate accepts. --write updates
+            ecu-corpus and does not commit.
 
 Run "me7info <command> -h" for that command's flags.
 
@@ -208,7 +217,7 @@ func cmdGenerate(args []string) error {
 		return err
 	}
 	if *modelPath != "" {
-		if err := writeModel(*modelPath, imgPath, img, res.Maps, cats); err != nil {
+		if _, err := writeModel(*modelPath, imgPath, img, res.Maps, cats, "me7info generate"); err != nil {
 			return err
 		}
 	}
@@ -232,24 +241,24 @@ func xdfModel(imgPath string, img []byte, maps []record.Map, cats *model.Categor
 	return m, conflicts, nil
 }
 
-func writeModel(path, imgPath string, img []byte, maps []record.Map, cats *model.CategoryTable) error {
+func writeModel(path, imgPath string, img []byte, maps []record.Map, cats *model.CategoryTable, stamp string) (bool, error) {
 	m, _, err := xdfModel(imgPath, img, maps, cats, false)
 	if err != nil || len(m.Objects) == 0 {
-		return err
+		return false, err
 	}
-	b, err := canon.MarshalStamped(m, "me7info generate")
+	b, err := canon.MarshalStamped(m, stamp)
 	if err != nil {
-		return err
+		return false, err
 	}
 	if path == "-" {
 		_, err = os.Stdout.Write(b)
-		return err
+		return err == nil, err
 	}
 	if err := os.WriteFile(path, b, 0o644); err != nil {
-		return err
+		return false, err
 	}
 	fmt.Fprintf(os.Stderr, "wrote %s\n", path)
-	return nil
+	return true, nil
 }
 
 func writeXDF(path, imgPath string, img []byte, maps []record.Map, cats *model.CategoryTable, tuner bool) error {
