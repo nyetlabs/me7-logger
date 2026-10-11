@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"go.nyet.org/xdfkit/canon"
@@ -26,9 +27,17 @@ With no definition, the name grade must be D, C, B, A, S, or S+.
 Origin hand does not wait for that grade. Origin hand or located is
 eligible when the located model is a strict superset: every current
 name is at the same address, and at least one more name is present.
-The delta is that added count. An identical name set is not eligible
-and is not written. Shared objects keep the previous conversion,
-units, and description. Origin damos, a2l, or unset is never replaced.
+The delta is that added count. A matching name set whose description
+or comment would change is also eligible, and its delta is ~N, the
+number of those maps. An unchanged name set is not eligible and is
+not written. Shared objects keep the previous conversion, units, and
+layout. The description is the name table and the comment is the
+needle that located the map. Origin damos, a2l, or unset is never
+replaced. A key obj-N whose id is blank is a placeholder, not a name.
+Status keys means those keys are cleared and the origin stays. A row
+that is short for another reason still ends with key N. A definition
+that is not a parity image is listed the same way. The delta is key N.
+--write does that even when the row is not otherwise eligible.
 
 --write stores an eligible model at defs/NAME.json (provenance.origin
 located) and sets the row's def column. It does not commit, push, bump,
@@ -85,6 +94,7 @@ func cmdPublish(args []string) error {
 			item.tier = "-"
 		}
 		var prev *model.Model
+		nKey := 0
 		if item.def != "" {
 			prev, err = readModel(item.def)
 			if err != nil {
@@ -92,6 +102,7 @@ func cmdPublish(args []string) error {
 			} else if prev.Provenance != nil {
 				item.origin = prev.Provenance.Origin
 			}
+			nKey = placeholderCount(prev)
 		}
 		if item.reason == "" {
 			item.reason = gateReason(im.Tier, im.Confidence, item.def != "", item.origin)
@@ -104,16 +115,47 @@ func cmdPublish(args []string) error {
 			}
 			reason, added := handCover(prev, loc)
 			item.reason = reason
+			if reason == "" || reason == "identical" {
+				item.merged, err = mergeKept(prev, loc)
+				if err != nil {
+					return err
+				}
+			}
+			if item.merged != nil {
+				clearPlaceholders(item.merged)
+			}
 			if reason == "" {
 				delta = fmt.Sprintf("+%d", added)
+			} else if reason == "identical" {
+				if n := corrections(prev, item.merged); n > 0 {
+					item.reason = ""
+					delta = fmt.Sprintf("~%d", n)
+				}
 			}
-			if item.reason == "" {
-				item.merged = mergeKept(prev, loc)
+		}
+		if nKey > 0 && item.reason != "" && item.reason != "def unreadable" {
+			item.merged = clearedCopy(prev)
+			item.keepOrigin = true
+			if item.reason == "identical" || strings.HasPrefix(item.reason, "origin ") {
+				item.reason = "keys"
+			} else {
+				item.reason = fmt.Sprintf("%s, key %d", item.reason, nKey)
+			}
+			if delta == "-" {
+				delta = fmt.Sprintf("key %d", nKey)
+			}
+		} else if nKey > 0 && item.reason == "" {
+			if delta == "-" {
+				delta = fmt.Sprintf("key %d", nKey)
+			} else {
+				delta += fmt.Sprintf(" key %d", nKey)
 			}
 		}
 		status := item.reason
 		if status == "" {
 			status = "eligible"
+			eligible = append(eligible, item)
+		} else if item.keepOrigin {
 			eligible = append(eligible, item)
 		}
 		tier := item.tier
@@ -125,6 +167,14 @@ func cmdPublish(args []string) error {
 			hit: im.Confidence.Hit, total: im.Confidence.Total,
 		})
 	}
+	extra, err := placeholderDefs(dir, lines)
+	if err != nil {
+		return err
+	}
+	for _, item := range extra.items {
+		eligible = append(eligible, item)
+	}
+	lines = append(lines, extra.lines...)
 	printPublish(lines)
 	if !*write {
 		return nil
@@ -136,7 +186,7 @@ func cmdPublish(args []string) error {
 		}
 		switch {
 		case item.merged != nil:
-			if err := writePublished(dst, item.merged); err != nil {
+			if err := writePublished(dst, item.merged, item.keepOrigin); err != nil {
 				return err
 			}
 		case item.def != "":
@@ -176,6 +226,7 @@ func cmdPublish(args []string) error {
 type pubItem struct {
 	name, tier, origin, reason, def string
 	merged                          *model.Model
+	keepOrigin                      bool
 }
 
 type pubLine struct {
@@ -191,7 +242,11 @@ func printPublish(lines []pubLine) {
 		nameW = max(nameW, len(ln.name))
 		statusW = max(statusW, len(ln.status))
 		deltaW = max(deltaW, len(ln.delta))
-		confs[i] = fmt.Sprintf("%d/%d", ln.hit, ln.total)
+		if ln.total < 0 {
+			confs[i] = "-"
+		} else {
+			confs[i] = fmt.Sprintf("%d/%d", ln.hit, ln.total)
+		}
 		confW = max(confW, len(confs[i]))
 	}
 	fmt.Printf("%-*s  %-*s  %-4s  %-*s  %*s\n",
@@ -231,7 +286,8 @@ func gateReason(tier string, conf parity.Fraction, hasDef bool, origin string) s
 // handCover is empty when located strictly covers prev, and the count
 // is how many names are new. A name the locator does not have is short.
 // The same name at another address disagrees. An equal set of names is
-// identical and is not written.
+// identical. Publish still writes that set when a description or comment
+// would change.
 func handCover(prev, located *model.Model) (string, int) {
 	have := map[string][]model.Addr{}
 	for _, o := range located.Objects {
@@ -285,43 +341,145 @@ func handCover(prev, located *model.Model) (string, int) {
 	return "", added
 }
 
-// mergeKept is the located model, with any object the previous file
-// already had at that address kept whole so its conversion survives.
-func mergeKept(prev, located *model.Model) *model.Model {
+// corrections is how many previous objects change description or comment
+// in merged. Address is part of the match, so a moved name is not counted.
+func corrections(prev, merged *model.Model) int {
+	if prev == nil || merged == nil {
+		return 0
+	}
 	type at struct {
 		key  string
 		addr model.Addr
 	}
-	old := map[at]*model.Object{}
+	next := map[at]*model.Object{}
+	for _, o := range merged.Objects {
+		k := objKey(o)
+		if k == "" {
+			continue
+		}
+		next[at{k, o.Address}] = o
+	}
+	n := 0
 	for _, o := range prev.Objects {
 		k := objKey(o)
 		if k == "" {
 			continue
 		}
-		old[at{k, o.Address}] = o
+		m := next[at{k, o.Address}]
+		if m == nil {
+			continue
+		}
+		if m.Description != o.Description || m.Comment != o.Comment {
+			n++
+		}
 	}
-	out := *located
-	out.Objects = make([]*model.Object, 0, len(located.Objects))
-	for _, o := range located.Objects {
+	return n
+}
+
+// mergeKept folds the located model into the previous pack. Conversion,
+// units, and layout stay on the previous object. The description and the
+// comment come from the located model.
+func mergeKept(prev, located *model.Model) (*model.Model, error) {
+	out, _, err := model.Merge(prev, located, model.MergeOptions{
+		Description: "replace",
+		Comment:     "replace",
+	})
+	return out, err
+}
+
+type placeholderExtra struct {
+	items []pubItem
+	lines []pubLine
+}
+
+// placeholderDefs lists corpus definitions that are not already in lines and
+// whose key is obj-N with a blank id. They are not parity images, so they
+// have no tier or confidence. --write clears the key and keeps the origin.
+func placeholderDefs(dir string, lines []pubLine) (placeholderExtra, error) {
+	seen := map[string]bool{}
+	for _, ln := range lines {
+		seen[ln.name] = true
+	}
+	ents, err := os.ReadDir(filepath.Join(dir, "defs"))
+	if err != nil {
+		return placeholderExtra{}, err
+	}
+	var out placeholderExtra
+	for _, e := range ents {
+		if e.IsDir() || !strings.HasSuffix(e.Name(), ".json") {
+			continue
+		}
+		stem := strings.TrimSuffix(e.Name(), ".json")
+		if seen[stem] {
+			continue
+		}
+		m, err := readModel(filepath.Join(dir, "defs", e.Name()))
+		if err != nil {
+			return placeholderExtra{}, err
+		}
+		n := placeholderCount(m)
+		if n == 0 {
+			continue
+		}
+		out.lines = append(out.lines, pubLine{
+			name: stem, status: "keys", tier: "-", delta: fmt.Sprintf("key %d", n), total: -1,
+		})
+		out.items = append(out.items, pubItem{
+			name: stem, merged: clearedCopy(m), keepOrigin: true,
+			def: filepath.Join(dir, "defs", e.Name()),
+		})
+	}
+	return out, nil
+}
+
+// placeholderKey is the key AssignKeys used to invent for a blank id.
+var placeholderKey = regexp.MustCompile(`^obj-[0-9]+$`)
+
+func isPlaceholder(o *model.Object) bool {
+	return o != nil && strings.TrimSpace(o.ID) == "" && placeholderKey.MatchString(o.Key)
+}
+
+func placeholderCount(m *model.Model) int {
+	if m == nil {
+		return 0
+	}
+	n := 0
+	for _, o := range m.Objects {
+		if isPlaceholder(o) {
+			n++
+		}
+	}
+	return n
+}
+
+func clearPlaceholders(m *model.Model) {
+	for _, o := range m.Objects {
+		if isPlaceholder(o) {
+			o.Key = ""
+		}
+	}
+}
+
+// clearedCopy is m with placeholder keys blanked. m itself is unchanged,
+// and the copy keeps m's origin.
+func clearedCopy(m *model.Model) *model.Model {
+	out := *m
+	out.Objects = make([]*model.Object, len(m.Objects))
+	for i, o := range m.Objects {
 		if o == nil {
 			continue
 		}
-		if kept := old[at{objKey(o), o.Address}]; kept != nil {
-			out.Objects = append(out.Objects, kept)
-			continue
+		c := *o
+		if isPlaceholder(&c) {
+			c.Key = ""
 		}
-		out.Objects = append(out.Objects, o)
-	}
-	if located.Provenance != nil {
-		p := *located.Provenance
-		p.Origin = "located"
-		out.Provenance = &p
+		out.Objects[i] = &c
 	}
 	return &out
 }
 
 func objKey(o *model.Object) string {
-	if o == nil {
+	if o == nil || isPlaceholder(o) {
 		return ""
 	}
 	if o.Key != "" {
@@ -369,14 +527,16 @@ func located(d locate.Defs, prepare func() (string, *model.CategoryTable, error)
 	return m, nil
 }
 
-func writePublished(path string, m *model.Model) error {
+func writePublished(path string, m *model.Model, keepOrigin bool) error {
 	if m == nil || len(m.Objects) == 0 {
 		return fmt.Errorf("%s: no located maps", path)
 	}
-	if m.Provenance == nil {
-		m.Provenance = &model.Provenance{Format: "image", Origin: "located"}
+	if !keepOrigin {
+		if m.Provenance == nil {
+			m.Provenance = &model.Provenance{Format: "image", Origin: "located"}
+		}
+		m.Provenance.Origin = "located"
 	}
-	m.Provenance.Origin = "located"
 	b, err := canon.MarshalStamped(m, "me7parity publish")
 	if err != nil {
 		return err

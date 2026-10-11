@@ -98,13 +98,19 @@ func TestHandCover(t *testing.T) {
 	if got, n := handCover(hand, covered); got != "" || n != 1 {
 		t.Fatalf("superset: %s +%d", got, n)
 	}
-	merged := mergeKept(hand, covered)
+	hand.Objects[0].Description = "map_interp_table8"
+	covered.Objects[0].Description = "optimal ignition angle"
+	covered.Objects[0].Comment = "map_interp_table8"
+	merged, err := mergeKept(hand, covered)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(merged.Objects) != 2 {
 		t.Fatalf("%d objects", len(merged.Objects))
 	}
 	kw := merged.Objects[0]
-	if kw.Key != "KFZW" || kw.Value.Conversion.Factor != 0.75 || kw.Value.Units != "grad KW" {
-		t.Fatalf("kept %+v", kw.Value)
+	if kw.Key != "KFZW" || kw.Address != 0x100 || kw.Value.Conversion.Factor != 0.75 || kw.Value.Units != "grad KW" || kw.Description != "optimal ignition angle" || kw.Comment != "map_interp_table8" {
+		t.Fatalf("kept %+v", kw)
 	}
 	if merged.Objects[1].Key != "LAMFA" || merged.Objects[1].Value.Conversion.Factor != 1 {
 		t.Fatalf("new %+v", merged.Objects[1].Value)
@@ -122,14 +128,40 @@ func TestHandCover(t *testing.T) {
 	if got, n := handCover(hand, same); got != "identical" || n != 0 {
 		t.Fatalf("identical: %s +%d", got, n)
 	}
-	shifted := mergeKept(hand, modelOf(pubObj("KFZW", 0x300, 1, "raw")))
-	if shifted.Objects[0].Value.Conversion.Factor != 1 || shifted.Objects[0].Value.Units != "raw" {
-		t.Fatalf("moved object kept the hand scaling: %+v", shifted.Objects[0].Value)
+	shifted, err := mergeKept(hand, modelOf(pubObj("KFZW", 0x300, 1, "raw")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if shifted.Objects[0].Address != 0x100 || shifted.Objects[0].Value.Conversion.Factor != 0.75 || shifted.Objects[0].Value.Units != "grad KW" {
+		t.Fatalf("moved name changed the base: %+v", shifted.Objects[0])
+	}
+	if n := corrections(hand, merged); n != 1 {
+		t.Fatalf("corrections %d", n)
+	}
+	unchanged, err := mergeKept(hand, modelOf(pubObj("KFZW", 0x100, 1, "")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if n := corrections(hand, unchanged); n != 0 {
+		t.Fatalf("unchanged %d", n)
+	}
+	ph := pubObj("obj-2", 0x50, 1, "")
+	ph.ID = ""
+	named := modelOf(pubObj("KFZW", 0x100, 0.75, "grad KW"), ph)
+	if got, n := handCover(named, same); got != "identical" || n != 0 {
+		t.Fatalf("placeholder is a name: %s +%d", got, n)
+	}
+	if placeholderCount(named) != 1 || placeholderCount(modelOf(pubObj("obj-2", 0x50, 1, ""))) != 0 {
+		t.Fatal("placeholder count")
+	}
+	cleared := clearedCopy(named)
+	if cleared.Objects[1].Key != "" || named.Objects[1].Key != "obj-2" {
+		t.Fatalf("cleared %q base %q", cleared.Objects[1].Key, named.Objects[1].Key)
 	}
 }
 
 func modelOf(objs ...*model.Object) *model.Model {
-	return &model.Model{Objects: objs}
+	return &model.Model{Schema: model.SchemaID, Objects: objs}
 }
 
 func pubObj(key string, addr uint32, factor float64, units string) *model.Object {

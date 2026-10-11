@@ -10,6 +10,7 @@ import (
 
 	"go.nyet.org/xdfkit/model"
 
+	"go.nyet.org/me7-logger/config"
 	"go.nyet.org/me7-logger/opcode"
 	"go.nyet.org/me7-logger/record"
 )
@@ -115,7 +116,8 @@ func increasing(image []byte, addr model.Addr, n, w int) bool {
 func object(r record.Map) *model.Object {
 	o := &model.Object{
 		ID:          r.Name,
-		Description: r.Comment,
+		Description: config.Description(r.Name),
+		Comment:     r.Comment,
 		Shape:       "value",
 		Address:     model.Addr(opcode.FileOffset(r.Addr)),
 		Rows:        1,

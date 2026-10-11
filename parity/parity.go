@@ -905,13 +905,18 @@ func loadTiers[V any](path string, want map[string]V) (map[string]string, error)
 
 var epkRE = regexp.MustCompile(`[0-9]+/[0-9]+/ME7[!-~]*`)
 
+// EPK is the calibration string in the image, empty when it has none.
+func EPK(img []byte) string {
+	return string(epkRE.Find(img))
+}
+
 // LayoutID is the id layouts.yaml lists an image by: the Bosch software
 // number, or the EPK string when the image carries none.
 func LayoutID(img []byte) string {
 	if sw := ident.Find(img).SWNumber; sw != "" {
 		return sw
 	}
-	return string(epkRE.Find(img))
+	return EPK(img)
 }
 
 // loadBlocks reads layouts.yaml, the layout ids of each code layout block.

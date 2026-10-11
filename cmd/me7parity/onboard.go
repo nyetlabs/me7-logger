@@ -15,11 +15,11 @@ import (
 )
 
 const onboardHelp = `
-candidates lists corpus images missing from images.yaml: staged when
+candidates lists corpus images missing from images.yaml: eligible when
 incoming/ecus already has an .ecu, needs-ME7Info when ME7Info.exe still
 has to run, unsupported when the image is not 512 KiB or 1 MiB. The
-layout id is the Bosch software number, or the EPK string. dup names a
-scored image that already has that id.
+column is the EPK string. dup names a scored image that already has
+the same layout id.
 
 run writes incoming/ecus/NAME.ecu with ME7Info.exe. ME7INFO_EXE defaults
 to ../ME7L/bin/ME7Info.exe and WINE defaults to wine. An existing file
@@ -38,7 +38,7 @@ With no action, onboard runs candidates, then run, then triage.
 `
 
 const (
-	statusStaged      = "staged"
+	statusEligible    = "eligible"
 	statusNeeds       = "needs-ME7Info"
 	statusUnsupported = "unsupported"
 	statusReady       = "ready"
@@ -109,15 +109,7 @@ type onboard struct {
 }
 
 type candidate struct {
-	name, status, id, note string
-}
-
-func (row candidate) String() string {
-	id := row.id
-	if id == "" {
-		id = "-"
-	}
-	return fmt.Sprintf("%s\t%s\t%s\t%s", row.name, row.status, id, row.note)
+	name, status, id, epk, note string
 }
 
 func (o *onboard) printCandidates() ([]candidate, error) {
@@ -125,8 +117,22 @@ func (o *onboard) printCandidates() ([]candidate, error) {
 	if err != nil {
 		return nil, err
 	}
+	nameW, statusW := len("name"), len("status")
 	for _, row := range rows {
-		fmt.Println(row)
+		nameW = max(nameW, len(row.name))
+		statusW = max(statusW, len(row.status))
+	}
+	fmt.Printf("%-*s  %-*s  %s\n", nameW, "name", statusW, "status", "epk")
+	for _, row := range rows {
+		epk := row.epk
+		if epk == "" {
+			epk = "-"
+		}
+		line := fmt.Sprintf("%-*s  %-*s  %s", nameW, row.name, statusW, row.status, epk)
+		if row.note != "" {
+			line += "  " + row.note
+		}
+		fmt.Println(line)
 	}
 	return rows, nil
 }
@@ -187,7 +193,7 @@ func (o *onboard) candidates() ([]candidate, error) {
 func (o *onboard) oneCandidate(name string) (candidate, error) {
 	row := candidate{name: name, status: statusNeeds}
 	if o.ecuPath(name) != "" {
-		row.status = statusStaged
+		row.status = statusEligible
 	}
 	path, err := o.c.Path(name)
 	if err != nil {
@@ -206,6 +212,7 @@ func (o *onboard) oneCandidate(name string) (candidate, error) {
 		return row, nil
 	}
 	row.id = parity.LayoutID(img)
+	row.epk = parity.EPK(img)
 	return row, nil
 }
 
@@ -333,7 +340,7 @@ func (o *onboard) triage(names []string) error {
 			return err
 		}
 		for _, row := range rows {
-			if row.status == statusStaged && !strings.Contains(row.note, "dup:") {
+			if row.status == statusEligible && !strings.Contains(row.note, "dup:") {
 				names = append(names, row.name)
 			}
 		}
@@ -369,11 +376,20 @@ func (o *onboard) triage(names []string) error {
 	})
 	var b strings.Builder
 	var ready []string
+	nameW, statusW, fracW := len("name"), len("status"), len("me7info")
 	for _, row := range out {
+		nameW = max(nameW, len(row.name))
+		statusW = max(statusW, len(row.status))
+		fracW = max(fracW, len(row.frac))
 		fmt.Fprintf(&b, "%s\t%s\t%s\n", row.name, row.status, row.frac)
-		fmt.Printf("%s\t%s\t%s\n", row.name, row.status, row.frac)
 		if row.status == statusReady {
 			ready = append(ready, row.name)
+		}
+	}
+	if len(out) > 0 {
+		fmt.Printf("\n%-*s  %-*s  %*s\n", nameW, "name", statusW, "status", fracW, "me7info")
+		for _, row := range out {
+			fmt.Printf("%-*s  %-*s  %*s\n", nameW, row.name, statusW, row.status, fracW, row.frac)
 		}
 	}
 	if err := os.MkdirAll(o.in, 0o755); err != nil {

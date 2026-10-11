@@ -7,6 +7,7 @@ import (
 	"go.nyet.org/xdfkit/model"
 	kitxdf "go.nyet.org/xdfkit/xdf"
 
+	"go.nyet.org/me7-logger/config"
 	"go.nyet.org/me7-logger/record"
 )
 
@@ -37,12 +38,15 @@ func TestModelConstantAndTable(t *testing.T) {
 		},
 		{Addr: 0x830000, Bits: 8},
 	}, nil, "t")
+	if m.Objects[0].Comment != "constant" || m.Objects[0].Description != config.Description("CONST") {
+		t.Fatalf("text %+v", m.Objects[0])
+	}
 	got, text := roundTrip(t, m)
 	if len(got.Objects) != 2 {
 		t.Fatalf("%d objects", len(got.Objects))
 	}
 	c, k := got.Objects[0], got.Objects[1]
-	if c.ID != "CONST" || c.Shape != "value" || c.Address != 0x10010 || c.Data.Bits != 16 || c.Data.Endian != "little" || c.Value.Units != "ms" || c.Description != "constant" {
+	if c.ID != "CONST" || c.Shape != "value" || c.Address != 0x10010 || c.Data.Bits != 16 || c.Data.Endian != "little" || c.Value.Units != "ms" || !strings.Contains(c.Description, "constant") {
 		t.Fatalf("constant %+v", c)
 	}
 	if k.ID != "MAP" || k.Shape != "2d" || k.Address != 0x20000 || k.Rows != 2 || k.Cols != 3 || !k.Data.Signed {
