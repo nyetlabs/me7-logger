@@ -1,6 +1,7 @@
 package place
 
 import (
+	"bytes"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -129,10 +130,7 @@ func TestMeasure4D(t *testing.T) {
 			t.Fatalf("%s n %d unique %d frame %d held %d drift %d", shape, n, one, framed, held, drift)
 		}
 	}
-	orig := map[string]*model.Object{}
-	for _, o := range m.Objects {
-		orig[o.Key] = o
-	}
+	src := append([]*model.Object(nil), m.Objects...)
 	got, rep, err := Place(&m, ref, dst)
 	if err != nil {
 		t.Fatal(err)
@@ -140,8 +138,19 @@ func TestMeasure4D(t *testing.T) {
 	if rep.Kept != 182 || rep.Moved != 16 || len(rep.Unresolved) != 339 {
 		t.Fatalf("kept %d moved %d unresolved %d", rep.Kept, rep.Moved, len(rep.Unresolved))
 	}
+	j := 0
 	for _, o := range got.Objects {
-		was := orig[o.Key]
+		var was *model.Object
+		for ; j < len(src); j++ {
+			if sameExceptAddress(src[j], o) {
+				was = src[j]
+				j++
+				break
+			}
+		}
+		if was == nil {
+			t.Fatalf("placed %s at 0x%X has no source", o.ID, o.Address)
+		}
 		if o.Address != was.Address && identical(ref, dst, was) {
 			t.Fatalf("%s identical at 0x%X moved to 0x%X", o.ID, was.Address, o.Address)
 		}
@@ -153,4 +162,15 @@ func TestMeasure4D(t *testing.T) {
 	if err := canon.Unmarshal(raw, &model.Model{}); err != nil {
 		t.Fatal(err)
 	}
+}
+
+// sameExceptAddress reports whether a and b are the same map. Place may
+// change the address, and a repeated key is a different map.
+func sameExceptAddress(a, b *model.Object) bool {
+	aa, ba := a.Address, b.Address
+	a.Address, b.Address = 0, 0
+	ab, errA := json.Marshal(a)
+	bb, errB := json.Marshal(b)
+	a.Address, b.Address = aa, ba
+	return errA == nil && errB == nil && bytes.Equal(ab, bb)
 }

@@ -104,7 +104,7 @@ func cmdPublish(args []string) error {
 			}
 			reason, added := handCover(prev, loc)
 			item.reason = reason
-			if reason == "" || reason == "identical" {
+			if reason == "" {
 				delta = fmt.Sprintf("+%d", added)
 			}
 			if item.reason == "" {

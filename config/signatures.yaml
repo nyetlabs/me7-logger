@@ -337,7 +337,7 @@ mapsigs:
 - {name: NLDIAPU, pattern: 060243F6XXXXFD02XXXX0D01XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXF8, at: 4, add: 4, cols: 2}
 - {name: KFLDRXO, pattern: 5CA7D740060243F8XXXX9D040981, at: 8, add: 34, rows: 8, cols: 4}
 - {name: NASNOTKL, pattern: C2F5XXXX1B45F2F90CFEF2F80EFEF0597C787C795C95708548903D0246F8FFFF8D03, add: 52, cols: 4}
-- {name: KFPBRK, pattern: E6FCXXXXE6FDXX02F2FEXXF8F2FFXXF9DA80XXXX98501B45F2F80CFE, frame: true, add: 44, rows: 10, cols: 10, xbits: 16, ybits: 16}
+- {name: KFPBRK, pattern: E6FCXXXXE6FDXX02F2FEXXF8F2FFXXF9DA80XXXX98501B45F2F80CFE, frame: true, add: 44, rows: 10, cols: 10, xbits: 16, ybits: 16, also: [{name: KFPRG, add: 524}]}
 - {name: KFWDKMSN, pattern: 3A8BD7400602D2F5XXXX4045DD0F, at: 8, add: 68, rows: 16, cols: 6, ybits: 16, xbits: 16}
 - {name: LAMFA, pattern: XXA98840C2F578F88850E6F4XXXXE6F5, at: 12, frame: true, rows: 15, cols: 6, xbits: 16}
 - {name: LAMFA, pattern: 8D13D740070242F4XXXXED0E8A4A, at: 8, add: 66, rows: 15, cols: 6, xbits: 16}
@@ -419,7 +419,7 @@ mapsigs:
 - {name: LAMFA, pattern: C2FFXXXXDA824A6706F00C00C0845C54, add: 29, rows: 15, cols: 6, xbits: 16}
 - {name: KFLDIMX, pattern: F2FFXXXXDA825A6606F00C00E005, add: 32}
 - {name: KFLDRL, pattern: C2FFXXXXDA82F86606F00C00D0845C74, add: 81}
-- {name: LDRQ0DY, pattern: 42F9XXXXBD04, add: 2}
+- {name: LDRQ0DY, pattern: 42F9XXXXBD04, add: 2, also: [{name: LDMXNN, add: -2}, {name: LDMXNP}]}
 - {name: LDRQ1DY, pattern: F2F4XXXXF6F4FAA2, add: 2, also: [{name: LDRQ1ST, add: 34}, {name: LDRQ0S}]}
 - {name: KFFLLDE, pattern: D740E100F6F4XXXXF2F5XXXX8850F2F2XXXX8820E6FCXXXXE6FDXXXXE6FEXXXXE6FFXXXXDA82XXXX0804F084, at: 22, frame: true, rows: 8, cols: 8, xbits: 16, ybits: 16, xat: 10, yat: 16}
 - {name: KFFLLDE, pattern: F2F4XXXXD740E100F6F45414, add: 172}
@@ -803,7 +803,7 @@ mapsigs:
 - {name: KISRM, pattern: 'F6F4XXA1F2F7XXXXC2FC[52/D6]0D', at: 6}
 - {name: KFLDRXO, pattern: 7CA7D740060243F8XXXX9D040981, at: 8, add: 34, rows: 8, cols: 4}
 - {name: TABGSS, pattern: D7400602F2F6XXXX7C162064, at: 6}
-- {name: VMAXNB, pattern: D7400702F2F4XXXX48C06D05, at: 6}
+- {name: VMAXNB, pattern: D7400702F2F4XXXX48C06D05, at: 6, also: [{name: NMAXGA, add: -24}]}
 # scanLamfa. The pointer is the byte counts: 15 one-byte nmot points, a pad, six mrfa_w words.
 - {name: LAMFA, open: '{mrfa_w:F2F4}8840{nmot:C2F5}8850E6FXXXXXE6F5XXXX88X088X0', pattern: C2FCXXXXE6FDXXXXE6FEXXXXD740XX02C2FFXXXXDA8XXXXX, at: 2, add: 30, rows: 15, cols: 6, ybits: 8, xbits: 16}
 # scanKfzw, when the call goes to the segment 0 table. The F2 words are the axis RAM on this image.
@@ -959,15 +959,15 @@ mapsigs:
 # Same 10-byte header as DH. The F2 word is E61B.
 - {name: FBSTABGM, pattern: E6FCA22DE6FD0902D740E100F2FEE61B, frame: true, add: 10, cols: 4, xbits: 16}
 # 23g. F already stores KFZW from the caller. K and Q use DA00 B878.
-- {name: KFZW, pattern: 3D0FE6FCXXXXE6FDXXXXF2FE988DF2FFXXXXDA00B878, at: 4, xat: 16, yat: 12}
+- {name: KFZW, pattern: 3D0FE6FCXXXXE6FDXXXXF2FE988DF2FFXXXXDA00B878, at: 4, xat: 16, yat: 12, also: [{name: SNS04ZUSB, add: -7}]}
 # 23g KFFLLDE. The E6 FC word and the DA80 slot differ on K and Q.
-- {name: KFFLLDE, pattern: F2F5888D8850E6FCXXXXE6FD0702E6FEXXXXE6FF0402DA80XXXX0804, at: 8, frame: true, xat: 2}
+- {name: KFFLLDE, pattern: F2F5888D8850E6FCXXXXE6FD0702E6FEXXXXE6FF0402DA80XXXX0804, at: 8, frame: true, xat: 2, also: [{name: KFFLDEO, add: -128}]}
 # 23g K and Q. F stores KRFKLN from the row above. The A5 page and the F3 word differ.
 - {name: KRFKLN, pattern: FD04E11A75FA06A50D12D7400602F3F8CA18D740, at: 16, add: 17, cols: 16, xtable: bp_nmot}
 # 23g K and Q. The 42 F4 word after 74 F5 is 3CA3.
-- {name: FBSTABGM, pattern: 070242F4XXXX3D04E08574F53CA3, at: 4, add: 58, cols: 4, xbits: 16}
+- {name: FBSTABGM, pattern: 070242F4XXXX3D04E08574F53CA3, at: 4, add: 58, cols: 4, xbits: 16, also: [{name: SRL12GKUW, add: 115}]}
 # 23g. The caller names LDPBN on F. K and Q use this call.
-- {name: LDPBN, pattern: E6FCXXXXE6FD0602F2FE868DDA80XXXXF0945C89, frame: true, xat: 10}
+- {name: LDPBN, pattern: E6FCXXXXE6FD0602F2FE868DDA80XXXXF0945C89, frame: true, xat: 10, also: [{name: LDORXN, add: -8}, {name: LDRAPP, add: 145}, {name: NLLM, add: 648}]}
 # 23g K and Q. The prefix is 7455 and the second C2 word is 8118.
 - {name: KRALH, pattern: 7455C2F4A0F7E0154C54D7400602C2F48118, at: 16, add: 68}
 # 23g K and Q. The F7 word is 76A6. F keeps 70A6 on the row above.
@@ -976,3 +976,21 @@ mapsigs:
 - {name: TABGBTS, pattern: EA0AD740070242F4E60BDD05D740070242F4E40BAD029F, at: 8, add: 94}
 # 23g K and Q. The jump-table words moved by 17F8. DPUPS is 29 bytes after the middle word.
 - {name: KUMSRL, pattern: 6224EA24842468255225, at: 4, add: 3, also: [{name: DPUPS, add: 29}]}
+# 23g. The C2 word is the MRESLL body. The cluster sits at fixed distances on F, K, and Q.
+- {name: MRESLL, pattern: C2F5XXXX5C65F6F5XXA7, at: 2, also: [{name: TDMRESLL, add: 1}, {name: MDSLPE, add: 8}, {name: TDMKO, add: 9}, {name: ZKMDKO, add: 10}, {name: ZKMDSLP, add: 11}, {name: NSLFAKAT, add: 12}, {name: NARAO, add: 19}, {name: NARASTG, add: 20}, {name: TVARSS, add: 30}, {name: TVKUPAR, add: 31}, {name: TVKUPHS, add: 32}, {name: TVKUPRS, add: 38}, {name: TZSPINI, add: 44}, {name: VARAU, add: 45}, {name: FGMIFAL, add: 47}, {name: FGZLSD, add: 55}, {name: KFWMIFAL, add: 73}, {name: KFWZLSD, add: 99}, {name: VLSD, add: 118}, {name: CWMDKOG, add: 119}, {name: CWTEZW, add: 120}, {name: CWZWVMX, add: 121}, {name: DELRL, add: 122}, {name: ETADZW, add: 127}, {name: ETALAM, add: 203}, {name: KFMRESTA, add: -32}]}
+# 23g. The second C2 F4 call is LDRXN. LDRXNZK is 66 bytes after that body.
+- {name: LDRXN, pattern: 0D12C2F4XXXX5C848840E6FCXXXXE6FD0702F2FE02F8DA80XXXX9820, at: 12, frame: true, add: 34, also: [{name: LDRXNZK, add: 100}]}
+# 23g. The third 928D call is LDRQ1ST. STV10LDSW is 35 bytes after it.
+- {name: STV10LDSW, pattern: E6FCXXXXE6FD0702F2FE928DDA80XXXXF6F4XXXXDA87, at: 2, frame: true, add: 35}
+# 23g K and Q. The C6 A7 call is the one F does not have. The body is KFDMDADP.
+- {name: KFDMDADP, pattern: F6F4C6A7D740E100F2F5E80B8850D740E100F2F24A098820E6FCXXXXE6FD0702, at: 26, frame: true}
+# 23g K and Q. The F2 word is the axis. F uses 58 27 and 6A A7.
+- {name: KIFZGAWG, pattern: F2F5902BF6F578A7F3F8AB8A, at: 2}
+- {name: KIFZGHG_2_A, pattern: F2F59C2BF6F578A7F3F8AB8A, at: 2}
+- {name: KIFZGAWG, pattern: F2F55827F6F56AA7F3F8A88A, at: 2}
+# 23g K and Q. F keeps 80 DF on the row above. The F2 word is MLOFS and KFMSNWDK is 88 bytes later.
+- {name: KFMSNWDK, pattern: D8E8F2F3F8F842F368A09D10E003F062F073F2F45646E0052064, at: 20, add: 88}
+# 23g K and Q. The C2 word is KUMSRL. KFKHFM is 201 bytes before it. F keeps 8F 0C.
+- {name: KFKHFM, pattern: C2F4740C5C84F2F5084D1B54F2F20CFEB820A840, at: 2, add: -201}
+# 23g K and Q. The word is ADRONLOGIN. The other two logins are the next words.
+- {name: ADRONLOGIN, pattern: DA88DAE9DA88FCDEF2F48280F2F58480DC55, at: 16, also: [{name: GRAOFLOGIN, add: 2}, {name: GRAONLOGIN, add: 4}]}
