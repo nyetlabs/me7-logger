@@ -56,7 +56,7 @@ func cmdOnboard(args []string) error {
 	default:
 		return fmt.Errorf("onboard %s: want candidates, run, triage, or promote", action)
 	}
-	fs := cli.NewFlagSet("me7info", "onboard", "[candidates|run|triage|promote] [flags] [NAME...]", onboardHelp)
+	fs := cli.NewFlagSet("me7parity", "onboard", "[candidates|run|triage|promote] [flags] [NAME...]", onboardHelp)
 	data := fs.StringP("data", "d", "testdata/parity", "parity root `<dir>`")
 	incoming := fs.String("incoming", "", "incoming `<dir>` (default <data>/incoming)")
 	corpus := fs.String("corpus", ecucorpus.Dir("."), "ecu-corpus checkout `<dir>`")
@@ -95,7 +95,7 @@ func cmdOnboard(args []string) error {
 		}
 		if len(needs) > 0 {
 			if err := o.run(needs); err != nil {
-				fmt.Fprintf(os.Stderr, "me7info: %v\n", err)
+				fmt.Fprintf(os.Stderr, "me7parity: %v\n", err)
 			}
 		}
 		return o.triage(nil)
@@ -383,7 +383,7 @@ func (o *onboard) triage(names []string) error {
 		return err
 	}
 	if len(ready) > 0 {
-		fmt.Printf("ready %d: me7info onboard promote %s\n", len(ready), strings.Join(ready, " "))
+		fmt.Printf("ready %d: me7parity onboard promote %s\n", len(ready), strings.Join(ready, " "))
 	}
 	return nil
 }

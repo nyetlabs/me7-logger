@@ -27,18 +27,18 @@ flowchart LR
   gen --> out[.ecu + tuner .xdf, --full-xdf]
   kit --> out
   out --> log[me7logger log] --> csv[CSV]
-  out --> par[me7info parity]
+  out --> par[me7parity]
   oracle --> par
   def --> par
   par -->|misses| cfg
   par -->|definition errors| src
 ```
 
-Stage new originals under `testdata/parity/incoming/` (gitignored except its README). `me7info onboard` runs ME7Info.exe, scores the `.ecu`, and adds an image when every ME7Info row is 100%. `me7info publish` lists every parity image. Confidence has to pass for all of them. With no corpus definition, or when the JSON is already origin `located`, the name grade must be D or better. Origin `hand` does not wait for that grade: `--write` replaces it when the located model is a strict superset, and the shared objects keep the hand conversion, units, and description. Origin `damos` and `a2l` are not replaced. The corpus is `../ecu-corpus` when that checkout exists, otherwise `corpus/` (`CORPUS=` overrides). It does not commit. KP, XDF, and DAMOS still go through xdfkit `publish/import-incoming.sh`. Corpus edits, `categories.json` included, are committed and pushed in `../ecu-corpus`, then pulled with `make corpus-bump`; `corpus/` is a read-only shallow submodule (xdfkit `docs/corpus.md`). ME7Info's `.ecu` output for each image is the only hard 100% oracle.
+Stage new originals under `testdata/parity/incoming/` (gitignored except its README). `me7parity onboard` runs ME7Info.exe, scores the `.ecu`, and adds an image when every ME7Info row is 100%. `me7parity publish` lists every parity image. Confidence has to pass for all of them. With no corpus definition, or when the JSON is already origin `located`, the name grade must be D or better. Origin `hand` does not wait for that grade: `--write` replaces it when the located model is a strict superset, and the shared objects keep the hand conversion, units, and description. Origin `damos` and `a2l` are not replaced. The corpus is `../ecu-corpus` when that checkout exists, otherwise `corpus/` (`CORPUS=` overrides). It does not commit. KP, XDF, and DAMOS still go through xdfkit `publish/import-incoming.sh`. Corpus edits, `categories.json` included, are committed and pushed in `../ecu-corpus`, then pulled with `make corpus-bump`; `corpus/` is a read-only shallow submodule (xdfkit `docs/corpus.md`). ME7Info's `.ecu` output for each image is the only hard 100% oracle.
 
 ## Design
 
-`me7info` (`generate`, `probe`, `parity`, `place`, `onboard`, `publish`) and `me7logger` (`log`) share one Go module. `generate` and `me7logger` locate items in the image as `record.Item` and `record.Map`. The `.ecu` writer reads those. `xdf.Model` converts the maps to an xdfkit model (file offsets, raw values, provenance origin `located`), and xdfkit files it with `Tuner` or `Categorize` and writes the XDF. `parity` reads the corpus definitions with xdfkit `canon` and `model`. me7-logger imports xdfkit; xdfkit never imports me7-logger.
+`me7info` (`generate`, `probe`, `place`), `me7parity` (the report, plus `onboard` and `publish`), and `me7logger` (`log`) share one Go module. `me7parity` reads `testdata/parity` and is not in the release. `generate` and `me7logger` locate items in the image as `record.Item` and `record.Map`. The `.ecu` writer reads those. `xdf.Model` converts the maps to an xdfkit model (file offsets, raw values, provenance origin `located`), and xdfkit files it with `Tuner` or `Categorize` and writes the XDF. `parity` reads the corpus definitions with xdfkit `canon` and `model`. me7-logger imports xdfkit; xdfkit never imports me7-logger.
 
 `me7info place ref.json ref.bin dst.bin` writes a model for the destination image (`-o`, or stdout). A body that still matches is kept. One code pointer, found once, moves the object. Anything else is omitted. Provenance is format `image`, origin `located`. The report on stderr is the kept, moved, and omitted counts.
 

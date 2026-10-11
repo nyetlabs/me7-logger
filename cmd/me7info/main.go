@@ -18,12 +18,10 @@ import (
 	"go.nyet.org/me7-logger/config"
 	"go.nyet.org/me7-logger/generate"
 	"go.nyet.org/me7-logger/internal/cli"
-	"go.nyet.org/me7-logger/internal/ecucorpus"
+	"go.nyet.org/me7-logger/internal/locate"
 	"go.nyet.org/me7-logger/opcode"
-	"go.nyet.org/me7-logger/parity"
 	"go.nyet.org/me7-logger/place"
 	"go.nyet.org/me7-logger/record"
-	"go.nyet.org/me7-logger/xdf"
 )
 
 // version is set from git describe by the Makefile. Do not edit it here.
@@ -40,14 +38,8 @@ func main() {
 		err = cmdGenerate(os.Args[2:])
 	case "probe":
 		err = cmdProbe(os.Args[2:])
-	case "parity":
-		err = cmdParity(os.Args[2:])
 	case "place":
 		err = cmdPlace(os.Args[2:])
-	case "onboard":
-		err = cmdOnboard(os.Args[2:])
-	case "publish":
-		err = cmdPublish(os.Args[2:])
 	case "-v", "--version":
 		fmt.Println(version)
 	case "-h", "--help", "help":
@@ -71,10 +63,7 @@ func usage() {
 Usage:
   me7info generate [flags] <image.bin>
   me7info probe [flags] <image.bin>
-  me7info parity [flags]
   me7info place [flags] <ref.json> <ref.bin> <dst.bin>
-  me7info onboard [candidates|run|triage|promote]
-  me7info publish [flags]
   me7info -v, --version
   me7info -h, --help
 
@@ -84,13 +73,9 @@ Commands:
             model as JSON. Does not open a serial port.
   probe     Report the DPP block and needle hits. --maps also counts the
             calibration maps generate would write to the XDF.
-  parity    Score each corpus image against legacy ME7Info output.
   place     Copy a map catalog onto another image. An object whose bytes
             match is kept. One code pointer, found once, moves it. Anything
             else is left out. The report is on stderr.
-  onboard   Bring a corpus image into the parity set.
-  publish   List located models the corpus gate accepts. --write updates
-            ecu-corpus and does not commit.
 
 Run "me7info <command> -h" for that command's flags.
 
@@ -99,54 +84,8 @@ in config/ beside this executable (symlinks resolved).
 `, version)
 }
 
-const parityHelp = `
-Legacy ME7Info parity is the only hard mark, scored one image at a time.
-The catalog column is coverage. The measurement list is the extras
-column on each ECU row.
-
-The names section scores names/tuner.yaml on every image, and each
-other names/*.yaml list on the images of its layout block:
-  - A hit is one address and its axes. An axis count of 0 is a scalar,
-    so the address alone is the hit. One axis is a curve, two a map.
-  - When that image's XDF contains the name, the body address must
-    match one of its rows.
-  - The axis column counts the axes present on the maps that hit. Its
-    denominator is the list's axis count for those maps, so a scalar
-    adds nothing. It is 0 only when every map that hit is a scalar.
-  - The confidence column is the body bytes of the names that hit. Its
-    denominator is that matched set, not the tuner list.
-  - A star after the tier means the image has no corpus definition.
-
-The image's corpus definition (corpus.tsv def), when present, is its
-address oracle. Its provenance origin (damos, a2l, hand) says whether it
-is DAMOS sourced; with none, it is hand made. Only
-a DAMOS one turns a name hit into a miss. A hand made one that places a
-name elsewhere is listed under "hand xdf disagrees" for review, since hand
-made files can be wrong. Its x and y axes that have an address are the axis
-column of that section. Origin located is not an oracle.
-
-The names column scores the tuner list. The other names lists of an
-image's layout block are scored in the block column.
-`
-
-// defs are the definition file flags shared by generate and probe.
-type defs struct {
-	core, names, meas, mapPath, alias, user *string
-}
-
-func defFlags(fs *pflag.FlagSet) defs {
-	return defs{
-		core:    fs.String("core", config.Path("ME7_CORE", config.NeedlesFile), "needle YAML `<file>`"),
-		names:   fs.StringP("names", "n", config.Path("ME7_NAMES", config.NamesFile), "ME7 name YAML `<file>`"),
-		meas:    fs.String("meas", config.Path("ME7_MEAS", config.MeasuresFile), "per-part measurement YAML `<file>`"),
-		mapPath: fs.String("map", config.Path("ME7_MAP", config.MapDir), "result-type catalog `<dir>`"),
-		alias:   fs.StringP("alias", "a", config.Path("ME7_ALIAS", config.AliasFile), "alias `<file>`"),
-		user:    fs.StringP("user", "u", config.Path("ME7_USER", "user"), "`<dir>` of user needles, measurements, and conversions"),
-	}
-}
-
 // image parses args, wants one flash image, and resolves --user.
-func image(fs *pflag.FlagSet, d defs, args []string) (path string, img []byte, userDir string, err error) {
+func image(fs *pflag.FlagSet, d locate.Defs, args []string) (path string, img []byte, userDir string, err error) {
 	if err = fs.Parse(args); err != nil {
 		return
 	}
@@ -158,22 +97,13 @@ func image(fs *pflag.FlagSet, d defs, args []string) (path string, img []byte, u
 	if img, err = os.ReadFile(path); err != nil {
 		return
 	}
-	userDir, err = resolveUser(fs, *d.user)
+	userDir, err = locate.UserDir(fs, *d.User)
 	return
-}
-
-func (d defs) generate(imgPath string, img []byte, userDir string, clock int, scale, conn string) (*generate.Result, error) {
-	return generate.Generate(generate.Options{
-		Image: img, ImageName: filepath.Base(imgPath),
-		CorePath: *d.core, NamesPath: *d.names, MeasPath: *d.meas,
-		MapPath: *d.mapPath, AliasPath: *d.alias,
-		Clock: clock, Scale: scale, Connect: conn, UserDir: userDir,
-	})
 }
 
 func cmdGenerate(args []string) error {
 	fs := cli.NewFlagSet("me7info", "generate", "[flags] <image.bin>", "")
-	d := defFlags(fs)
+	d := locate.Flags(fs)
 	out := fs.StringP("output", "o", "", "ecu output `<file>`, - for stdout (default <image>.ecu)")
 	xdfPath := fs.StringP("xdf", "x", "", "tuner xdf output `<file>`, - for stdout (default <image>.xdf when listed maps were located)")
 	fullPath := fs.String("full-xdf", "", "also write every located named map to this xdf `<file>`, - for stdout")
@@ -185,7 +115,7 @@ func cmdGenerate(args []string) error {
 	if err != nil {
 		return err
 	}
-	res, err := d.generate(imgPath, img, userDir, *clock, *scale, *conn)
+	res, err := d.Generate(imgPath, img, userDir, *clock, *scale, *conn)
 	if err != nil {
 		return err
 	}
@@ -217,7 +147,7 @@ func cmdGenerate(args []string) error {
 		return err
 	}
 	if *modelPath != "" {
-		if _, err := writeModel(*modelPath, imgPath, img, res.Maps, cats, "me7info generate"); err != nil {
+		if _, err := locate.WriteModel(*modelPath, imgPath, img, res.Maps, cats, "me7info generate"); err != nil {
 			return err
 		}
 	}
@@ -229,40 +159,8 @@ func cmdGenerate(args []string) error {
 	return writeXDF(*xdfPath, imgPath, img, res.Maps, cats, true)
 }
 
-// xdfModel is the model of the maps for the tuner XDF (the table's maps and
-// their axes) or the full XDF (every map, unlisted ones under xdf.Other),
-// and the constants xdf.Model couldn't make breakpoint curves.
-func xdfModel(imgPath string, img []byte, maps []record.Map, cats *model.CategoryTable, tuner bool) (*model.Model, []string, error) {
-	m, conflicts := xdf.Model(maps, img, filepath.Base(imgPath))
-	if tuner {
-		return m, conflicts, m.Tuner(cats)
-	}
-	m.Categorize(cats, xdf.Other)
-	return m, conflicts, nil
-}
-
-func writeModel(path, imgPath string, img []byte, maps []record.Map, cats *model.CategoryTable, stamp string) (bool, error) {
-	m, _, err := xdfModel(imgPath, img, maps, cats, false)
-	if err != nil || len(m.Objects) == 0 {
-		return false, err
-	}
-	b, err := canon.MarshalStamped(m, stamp)
-	if err != nil {
-		return false, err
-	}
-	if path == "-" {
-		_, err = os.Stdout.Write(b)
-		return err == nil, err
-	}
-	if err := os.WriteFile(path, b, 0o644); err != nil {
-		return false, err
-	}
-	fmt.Fprintf(os.Stderr, "wrote %s\n", path)
-	return true, nil
-}
-
 func writeXDF(path, imgPath string, img []byte, maps []record.Map, cats *model.CategoryTable, tuner bool) error {
-	m, _, err := xdfModel(imgPath, img, maps, cats, tuner)
+	m, _, err := locate.Model(imgPath, img, maps, cats, tuner)
 	if err != nil || len(m.Objects) == 0 {
 		return err
 	}
@@ -284,37 +182,15 @@ func writeXDF(path, imgPath string, img []byte, maps []record.Map, cats *model.C
 	return nil
 }
 
-func cmdParity(args []string) error {
-	fs := cli.NewFlagSet("me7info", "parity", "[flags]", parityHelp)
-	dir := fs.StringP("data", "d", "testdata/parity", "parity root `<dir>`: images.yaml, ecu/me7info, and xdf")
-	corpus := fs.String("corpus", ecucorpus.Dir("."), "ecu-corpus checkout `<dir>`; XDFKIT_CORPUS sets the default")
-	if err := fs.Parse(args); err != nil {
-		return err
-	}
-	if fs.NArg() != 0 {
-		return fmt.Errorf("parity takes no image; images.yaml names corpus images")
-	}
-	c, err := ecucorpus.Load(*corpus)
-	if err != nil {
-		return err
-	}
-	rep, err := parity.Run(*dir, c)
-	if err != nil {
-		return err
-	}
-	fmt.Print(rep.Text())
-	return nil
-}
-
 func cmdProbe(args []string) error {
 	fs := cli.NewFlagSet("me7info", "probe", "[flags] <image.bin>", "")
-	d := defFlags(fs)
+	d := locate.Flags(fs)
 	maps := fs.Bool("maps", false, "also count the calibration maps generate would write to the XDF")
 	imgPath, img, userDir, err := image(fs, d, args)
 	if err != nil {
 		return err
 	}
-	ns, err := config.LoadNeedles(*d.core, userDir)
+	ns, err := config.LoadNeedles(*d.Core, userDir)
 	if err != nil {
 		return err
 	}
@@ -332,7 +208,7 @@ func cmdProbe(args []string) error {
 	if !*maps {
 		return nil
 	}
-	res, err := d.generate(imgPath, img, userDir, 0, "auto", "")
+	res, err := d.Generate(imgPath, img, userDir, 0, "auto", "")
 	if err != nil {
 		return err
 	}
@@ -359,7 +235,7 @@ func cmdProbe(args []string) error {
 	var n [2]int
 	var conflicts []string
 	for i, tuner := range []bool{true, false} {
-		m, c, err := xdfModel(imgPath, img, res.Maps, cats, tuner)
+		m, c, err := locate.Model(imgPath, img, res.Maps, cats, tuner)
 		if err != nil {
 			return err
 		}
@@ -421,10 +297,6 @@ func cmdPlace(args []string) error {
 		return err
 	}
 	return rep.Format(os.Stderr)
-}
-
-func resolveUser(fs *pflag.FlagSet, dir string) (string, error) {
-	return config.ResolveUserDir(dir, os.Getenv("ME7_USER") != "" || fs.Changed("user"))
 }
 
 func fmtOffs(offs []int) string {

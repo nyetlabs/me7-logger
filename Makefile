@@ -1,13 +1,13 @@
-# Build and test me7info and me7logger.
+# Build and test me7info, me7logger, and the checkout-only me7parity.
 #
-#   make                  test, then build both binaries
+#   make                  test, then build the binaries
 #   make test             go test ./...; ME7Info parity must be 100% (image tests skip without corpus/)
-#   make build            build/me7info, build/me7logger, and build/config (user/ is kept)
+#   make build            build/me7info, build/me7logger, build/me7parity, and build/config (user/ is kept)
 #   make version          git describe (tags vX.Y.Z and vX.Y.Z-rcN)
 #   make parity           legacy ME7Info parity, plus coverage of the YAML lists, the tuner names, and the corpus definitions
 #   make package          dist archives for macos, linux, and windows
-#   make install          after make build: binaries and config/ in PREFIX/lib/me7-logger, links in PREFIX/bin
-#                         (PREFIX=/usr/local; DESTDIR stages a package)
+#   make install          after make build: me7info, me7logger, and config/ in PREFIX/lib/me7-logger, links in PREFIX/bin
+#                         (PREFIX=/usr/local; DESTDIR stages a package). me7parity is not installed.
 #   make uninstall        remove those and the links that point into them; config/user/ is kept
 #   make corpus           fetch the corpus submodule at its pinned commit (needs access)
 #   make corpus-bump      move the corpus submodule to the ecu-corpus head and copy its
@@ -48,6 +48,7 @@ build:
 	mkdir -p build
 	go build -ldflags "-X main.version=$(VERSION)" -o build/me7info ./cmd/me7info
 	go build -ldflags "-X main.version=$(VERSION)" -o build/me7logger ./cmd/me7logger
+	go build -ldflags "-X main.version=$(VERSION)" -o build/me7parity ./cmd/me7parity
 	$(CONFIG_SYNC) build/config/
 
 version:
@@ -90,7 +91,7 @@ package:
 	done
 
 parity: build
-	./build/me7info parity --data testdata/parity
+	./build/me7parity --data testdata/parity
 
 bump: xdfkit-bump corpus-bump
 

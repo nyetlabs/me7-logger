@@ -13,6 +13,7 @@ import (
 	"go.nyet.org/me7-logger/config"
 	"go.nyet.org/me7-logger/internal/cli"
 	"go.nyet.org/me7-logger/internal/ecucorpus"
+	"go.nyet.org/me7-logger/internal/locate"
 	"go.nyet.org/me7-logger/parity"
 )
 
@@ -35,11 +36,11 @@ exists, else corpus/.
 `
 
 func cmdPublish(args []string) error {
-	fs := cli.NewFlagSet("me7info", "publish", "[flags]", publishHelp)
+	fs := cli.NewFlagSet("me7parity", "publish", "[flags]", publishHelp)
 	data := fs.StringP("data", "d", "testdata/parity", "parity root `<dir>`")
 	corpusFlag := fs.String("corpus", "", "ecu-corpus checkout `<dir>` (default CORPUS, else ../ecu-corpus, else corpus/)")
 	write := fs.Bool("write", false, "write eligible located models into the corpus")
-	d := defFlags(fs)
+	d := locate.Flags(fs)
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -66,7 +67,7 @@ func cmdPublish(args []string) error {
 			return userDir, cats, nil
 		}
 		var err error
-		if userDir, err = resolveUser(fs, *d.user); err != nil {
+		if userDir, err = locate.UserDir(fs, *d.User); err != nil {
 			return "", nil, err
 		}
 		if cats, err = config.LoadCategories(""); err != nil {
@@ -95,7 +96,7 @@ func cmdPublish(args []string) error {
 			item.reason = gateReason(im.Tier, im.Confidence, item.def != "", item.origin)
 		}
 		if item.reason == "" && item.origin == "hand" {
-			loc, err := d.located(prepare, c, name)
+			loc, err := located(d, prepare, c, name)
 			if err != nil {
 				return err
 			}
@@ -133,7 +134,7 @@ func cmdPublish(args []string) error {
 			if err != nil {
 				return err
 			}
-			loc, err := d.located(prepare, c, item.name)
+			loc, err := located(d, prepare, c, item.name)
 			if err != nil {
 				return err
 			}
@@ -153,11 +154,11 @@ func cmdPublish(args []string) error {
 			if err != nil {
 				return err
 			}
-			res, err := d.generate(imgPath, img, userDir, 0, "auto", "")
+			res, err := d.Generate(imgPath, img, userDir, 0, "auto", "")
 			if err != nil {
 				return err
 			}
-			wrote, err := writeModel(dst, imgPath, img, res.Maps, cats, "me7info publish")
+			wrote, err := locate.WriteModel(dst, imgPath, img, res.Maps, cats, "me7parity publish")
 			if err != nil {
 				return err
 			}
@@ -324,7 +325,7 @@ func readModel(path string) (*model.Model, error) {
 	return &m, nil
 }
 
-func (d defs) located(prepare func() (string, *model.CategoryTable, error), c *ecucorpus.Corpus, name string) (*model.Model, error) {
+func located(d locate.Defs, prepare func() (string, *model.CategoryTable, error), c *ecucorpus.Corpus, name string) (*model.Model, error) {
 	userDir, cats, err := prepare()
 	if err != nil {
 		return nil, err
@@ -337,11 +338,11 @@ func (d defs) located(prepare func() (string, *model.CategoryTable, error), c *e
 	if err != nil {
 		return nil, err
 	}
-	res, err := d.generate(imgPath, img, userDir, 0, "auto", "")
+	res, err := d.Generate(imgPath, img, userDir, 0, "auto", "")
 	if err != nil {
 		return nil, err
 	}
-	m, _, err := xdfModel(imgPath, img, res.Maps, cats, false)
+	m, _, err := locate.Model(imgPath, img, res.Maps, cats, false)
 	if err != nil {
 		return nil, err
 	}
@@ -359,7 +360,7 @@ func writePublished(path string, m *model.Model) error {
 		m.Provenance = &model.Provenance{Format: "image", Origin: "located"}
 	}
 	m.Provenance.Origin = "located"
-	b, err := canon.MarshalStamped(m, "me7info publish")
+	b, err := canon.MarshalStamped(m, "me7parity publish")
 	if err != nil {
 		return err
 	}
