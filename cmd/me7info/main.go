@@ -101,10 +101,24 @@ func image(fs *pflag.FlagSet, d locate.Defs, args []string) (path string, img []
 	return
 }
 
+// ecuOutput is the .ecu path for generate. An explicit flag, including "-",
+// is returned unchanged. An empty flag is ecus/<stem>.ecu under dir, and
+// that directory is created.
+func ecuOutput(imgPath, flag, dir string) (string, error) {
+	if flag != "" {
+		return flag, nil
+	}
+	stem := strings.TrimSuffix(filepath.Base(imgPath), filepath.Ext(imgPath))
+	if err := os.MkdirAll(filepath.Join(dir, "ecus"), 0o755); err != nil {
+		return "", fmt.Errorf("ecus: %w", err)
+	}
+	return filepath.Join(dir, "ecus", stem+".ecu"), nil
+}
+
 func cmdGenerate(args []string) error {
 	fs := cli.NewFlagSet("me7info", "generate", "[flags] <image.bin>", "")
 	d := locate.Flags(fs)
-	out := fs.StringP("output", "o", "", "ecu output `<file>`, - for stdout (default <image>.ecu)")
+	out := fs.StringP("output", "o", "", "ecu output `<file>`, - for stdout (default ecus/<image>.ecu)")
 	xdfPath := fs.StringP("xdf", "x", "", "tuner xdf output `<file>`, - for stdout (default <image>.xdf when listed maps were located)")
 	fullPath := fs.String("full-xdf", "", "also write every located named map to this xdf `<file>`, - for stdout")
 	modelPath := fs.String("model", "", "full located model JSON `<file>`, - for stdout")
@@ -119,9 +133,9 @@ func cmdGenerate(args []string) error {
 	if err != nil {
 		return err
 	}
-	ecuPath := *out
-	if ecuPath == "" {
-		ecuPath = strings.TrimSuffix(imgPath, filepath.Ext(imgPath)) + ".ecu"
+	ecuPath, err := ecuOutput(imgPath, *out, ".")
+	if err != nil {
+		return err
 	}
 	if ecuPath == "-" {
 		if _, err := os.Stdout.Write(res.File.Bytes()); err != nil {

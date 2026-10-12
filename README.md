@@ -17,7 +17,7 @@ Neither program writes flash or EEPROM. `me7info` never opens a serial port.
 flowchart LR
   ecu[(ECU flash)] -->|your flash tool| bin[image.bin]
   bin --> gen["me7info generate"]
-  gen --> ecufile[image.ecu]
+  gen --> ecufile[ecus/image.ecu]
   gen --> xdf["image.xdf<br/>tuner maps"]
   gen -.->|--full-xdf| full["image-full.xdf<br/>every located map"]
   xdf --> tp[TunerPro]
@@ -31,8 +31,8 @@ flowchart LR
 ```
 
 1. Read the flash image from the ECU with a flash tool. These programs don't read flash.
-2. `me7info generate image.bin` writes `image.ecu`, plus `image.xdf` when it locates calibration maps.
-3. List the variables to log in `session.cfg`, pointing at `image.ecu`.
+2. `me7info generate image.bin` writes `ecus/image.ecu`, plus `image.xdf` beside the image when it locates calibration maps.
+3. List the variables to log in `session.cfg`, pointing at `ecus/image.ecu`.
 4. `me7logger log -p PORT -o log.csv image.bin session.cfg` logs until Ctrl-C.
 
 Commands, the `session.cfg` format and user overrides: [QUICKSTART.md](QUICKSTART.md).
@@ -48,7 +48,7 @@ flowchart TD
   user -.-> sigs
   needles --> items["Measurements<br/>RAM addresses, conversions"]
   sigs --> maps["Calibration maps<br/>addresses, axes"]
-  items --> ecuw[".ecu writer"] --> ecufile[image.ecu]
+  items --> ecuw[".ecu writer"] --> ecufile[ecus/image.ecu]
   maps --> xdfw["xdfkit<br/>model, .xdf writer"]
   cats["config/categories.json<br/>tuner names, categories"] --> xdfw
   xdfw --> xdf[image.xdf]
@@ -72,7 +72,7 @@ sequenceDiagram
   loop each sample
     L->>E: $23 ReadMemoryByAddress (up to 254 bytes)
     E-->>L: RAM bytes
-    L->>L: convert with image.ecu, append a CSV row
+    L->>L: convert with ecus/image.ecu, append a CSV row
   end
 ```
 

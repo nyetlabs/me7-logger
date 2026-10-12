@@ -4,7 +4,7 @@ The programs read `config/` beside the executable, symlinks resolved: the unpack
 
 ```bash
 me7info probe image.bin       # one line per needle; --maps counts XDF maps
-me7info generate image.bin    # writes image.ecu, and image.xdf if maps are found
+me7info generate image.bin    # writes ecus/image.ecu, and image.xdf beside the image if maps are found
 me7info generate --full-xdf image-full.xdf image.bin
 me7info place ref.json ref.bin dst.bin   # model on stdout, counts on stderr
 me7logger log -p /dev/tty.usbserial -o log.csv image.bin session.cfg
@@ -17,7 +17,7 @@ me7logger log -p /dev/tty.usbserial -o log.csv image.bin session.cfg
 `session.cfg`:
 
 ```ini
-ECUCharacteristics=image.ecu
+ECUCharacteristics=ecus/image.ecu
 SamplesPerSecond=10
 nmot
 rl
