@@ -24,7 +24,7 @@ import (
 	"go.nyet.org/me7-logger/needle"
 )
 
-//go:embed names.yaml needles.yaml measurements.yaml catalog aliases.yaml maps.yaml signatures.yaml categories.json descriptions.yaml
+//go:embed names.yaml needles.yaml measurements.yaml catalog aliases.yaml maps.yaml signatures.yaml mapsigs.yaml categories.json descriptions.yaml
 var embedded embed.FS
 
 const (
@@ -40,8 +40,10 @@ const (
 	AliasFile = "aliases.yaml"
 	// MapsFile is the caller-slot list, maps.yaml.
 	MapsFile = "maps.yaml"
-	// SigFile is the signature list, signatures.yaml.
+	// SigFile is the RAM signature list, signatures.yaml.
 	SigFile = "signatures.yaml"
+	// MapSigFile is the flash signature list, mapsigs.yaml.
+	MapSigFile = "mapsigs.yaml"
 	// CategoriesFile is the corpus category table, copied by make corpus-bump.
 	CategoriesFile = "categories.json"
 )

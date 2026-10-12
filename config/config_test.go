@@ -65,6 +65,13 @@ func TestShippedSignatures(t *testing.T) {
 	if !strings.Contains(string(b), "frkte_w") || !strings.Contains(string(b), "zwgru") {
 		t.Fatalf("signature list missing rows: %s", b)
 	}
+	maps, err := Read("", MapSigFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(maps), "name: LDRQ0S") || !strings.Contains(string(maps), "name: KFPRG") {
+		t.Fatal("map signature list missing rows")
+	}
 }
 
 // TestShippedCategories: the shipped table loads and is the corpus copy

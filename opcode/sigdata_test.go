@@ -2,6 +2,28 @@ package opcode
 
 import "testing"
 
+func TestParseSigsJoinsLists(t *testing.T) {
+	doc, err := ParseSigs(
+		[]byte("calls:\n  \"13\": {'0': '0x1', '402': '0x0', '602': '0x2'}\nsignatures:\n- {name: ram, size: 1, pattern: AA}\n"),
+		[]byte("mapsigs:\n- {name: flash, pattern: AABB, at: 0}\n"),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(doc.Rows) != 1 || doc.Rows[0].Name != "ram" || len(doc.Maps) != 1 || doc.Maps[0].Name != "flash" {
+		t.Fatalf("rows %+v maps %+v", doc.Rows, doc.Maps)
+	}
+	if _, ok := doc.Calls["13"]; !ok {
+		t.Fatal("call slot dropped")
+	}
+	if _, err := ParseSigs(
+		[]byte("calls:\n  \"13\": {'0': '0x1', '402': '0x0', '602': '0x2'}\n"),
+		[]byte("calls:\n  \"13\": {'0': '0x3', '402': '0x0', '602': '0x4'}\n"),
+	); err == nil {
+		t.Fatal("accepted a call slot twice")
+	}
+}
+
 func TestParseSigRequiresName(t *testing.T) {
 	if _, err := ParseSigs([]byte("signatures:\n- size: 1\n  pattern: AA\n")); err == nil {
 		t.Fatal("accepted a row without a name")

@@ -42,7 +42,7 @@ Stage new originals under `testdata/parity/incoming/` (gitignored except its REA
 
 `me7info place ref.json ref.bin dst.bin` writes a model for the destination image (`-o`, or stdout). A body that still matches is kept. One code pointer, found once, moves the object. Anything else is omitted. Provenance is format `image`, origin `located`. The report on stderr is the kept, moved, and omitted counts.
 
-The generator is a masked byte search plus a few opcodes (selector, case bounds, `EXTP`), not a disassembler. A Bosch name located by bytes is a row in `config/signatures.yaml`, never a literal in Go. A row should match a code layout, not one image; check it across the corpus.
+The generator is a masked byte search plus a few opcodes (selector, case bounds, `EXTP`), not a disassembler. A RAM address located by bytes is a row in `config/signatures.yaml`. A flash body is a row in `config/mapsigs.yaml`. Neither name, pattern, nor offset is a literal in Go. A row should match a code layout, not one image; check it across the corpus.
 
 Out of scope: `.kp`, OLS, DAMOS, WinOLS, ecuxplot, `mapdump`. Do not copy NefMoto `Communication/`.
 
@@ -58,7 +58,7 @@ Files load from `config/` beside the executable (symlinks resolved) when present
 
 Flags use pflag (`internal/cli`): a long name takes two hyphens (`--user`), its one-letter short name one (`-u`), and `-user` is an error.
 
-`signatures.yaml` rows run top to bottom, and the first row that hits fills a name. Prepended axis counts become rows and columns only when they account for every byte up to the body; never invent a count of 1. Only named maps reach the XDF.
+`signatures.yaml` and `mapsigs.yaml` rows run top to bottom, RAM first, and the first row that hits fills a name. Prepended axis counts become rows and columns only when they account for every byte up to the body; never invent a count of 1. Only named maps reach the XDF.
 
 `config/categories.json` is the corpus `categories.json` (xdfkit `docs/corpus.md`), copied by `make corpus-bump`; a test fails when they differ. It files each XDF map under a category. The tuner XDF holds only its names plus the maps at their axis addresses; `--full-xdf` holds every named map, with the rest under `Other`. `--model` writes that full model as JSON for the corpus (`xdfkit` `publish/README.md`).
 

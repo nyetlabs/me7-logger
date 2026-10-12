@@ -225,8 +225,30 @@ func shapeOK(row MapSig) error {
 	return nil
 }
 
-// ParseSigs reads the signature list. Rows run in order.
-func ParseSigs(b []byte) (SigDoc, error) {
+// ParseSigs reads signature lists in order and returns one document.
+// The RAM list comes first, then the flash list. Rows stay in that order.
+// A call slot listed in more than one list is an error.
+func ParseSigs(parts ...[]byte) (SigDoc, error) {
+	doc := SigDoc{Calls: map[string]CallWords{}}
+	for _, b := range parts {
+		one, err := parseSigDoc(b)
+		if err != nil {
+			return SigDoc{}, err
+		}
+		for id, set := range one.Calls {
+			if _, ok := doc.Calls[id]; ok {
+				return SigDoc{}, fmt.Errorf("call slot %s is listed twice", id)
+			}
+			doc.Calls[id] = set
+		}
+		doc.Rows = append(doc.Rows, one.Rows...)
+		doc.Maps = append(doc.Maps, one.Maps...)
+	}
+	return doc, nil
+}
+
+// parseSigDoc reads one yaml document. Rows run in order.
+func parseSigDoc(b []byte) (SigDoc, error) {
 	var raw sigFile
 	if err := yaml.Unmarshal(b, &raw); err != nil {
 		return SigDoc{}, err
