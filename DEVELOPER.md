@@ -48,7 +48,7 @@ Out of scope: `.kp`, OLS, DAMOS, WinOLS, ecuxplot, `mapdump`. Do not copy NefMot
 
 ## xdfkit
 
-`go.mod` pins xdfkit; there is no committed `replace`. `make work` writes the gitignored `go.work` (`use . ../xdfkit`), so builds and tests use the sibling checkout. Before pushing a change that needs new xdfkit code, push xdfkit, then `make xdfkit-bump` (pins its `master` as a pseudo-version) and `make check-pinned` (builds and vets with `GOWORK=off`, as CI does; `make test` runs it), and fold `go.mod` and `go.sum` into the commit. Bump again after xdfkit history is rewritten. Releases should pin a tagged xdfkit; `make package` warns on a pseudo-version.
+`go.mod` pins xdfkit; there is no committed `replace`. `make go.work` writes the gitignored `go.work` (`use . ../xdfkit`) when that file is missing, so builds and tests use the sibling checkout. Delete the file to build the pin. Before pushing a change that needs new xdfkit code, push xdfkit, then `make xdfkit-bump` (pins its `master` as a pseudo-version) and `make check-pinned` (builds and vets; `make test` runs it), and fold `go.mod` and `go.sum` into the commit. Bump again after xdfkit history is rewritten. Releases should pin a tagged xdfkit; `make package` warns on a pseudo-version.
 
 ## Config
 
