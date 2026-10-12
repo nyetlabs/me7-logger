@@ -63,8 +63,8 @@ type Disagreement struct {
 // Both are set only on ME7Info rows. Tier, Axis, and Confidence are set on
 // Tuner rows. Tier is the nameGrade of the image. On a Tuner row, Fraction
 // is the tuner names and Block is the other names lists of the image's
-// layout block. NoDef marks a Tuner row with no corpus definition, or
-// one whose origin is hand. Text prints it as a star after the tier.
+// layout block. NoDef marks a Tuner row whose name grade has not reached
+// S, except a DAMOS or A2L oracle. Text prints it as a star after the tier.
 // Every list is sorted by the layout block tier of its image in
 // layouts-priority.yaml, then by name.
 // Open is the tuner names that were not located, D first. BlockOpen is
@@ -632,14 +632,15 @@ func run(dir string, images []string, defOf func(string) string, gen imageGen) (
 				rep.Disagree = append(rep.Disagree, disagreements(base, want, scored, xrows)...)
 			}
 			gone := absent[blk]
+			tier := nameGrade(ntier, lists.byBlock[blk], lists.any, func(n string) (bool, bool) {
+				_, located := scored[n]
+				return located || gone[n], located
+			})
 			rep.Tuner = append(rep.Tuner, Image{
 				Name: base, Fraction: countScored(tuner, scored),
-				Block: countScored(lists.byBlock[blk], scored),
-				Tier: nameGrade(ntier, lists.byBlock[blk], lists.any, func(n string) (bool, bool) {
-					_, located := scored[n]
-					return located || gone[n], located
-				}),
-				NoDef:     def == "" || origin == "hand",
+				Block:     countScored(lists.byBlock[blk], scored),
+				Tier:      tier,
+				NoDef:     tier != "S" && tier != beyondS && origin != "damos" && origin != "a2l",
 				Axis:      scoreAxes(scored, axes),
 				Open:      openNames(tuner, ntier, scored, gone, lists.any),
 				BlockOpen: openNames(lists.byBlock[blk], nil, scored, gone, lists.any),

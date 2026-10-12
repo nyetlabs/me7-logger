@@ -22,7 +22,8 @@ Prints every parity image. Confidence has to pass for every image:
 high bodies are more than half the tuner names that scored, and a zero
 denominator is not eligible.
 
-A star after the tier is an empty corpus definition, or origin hand.
+A star after the tier means the name grade has not reached S.
+A DAMOS or A2L oracle has no star.
 With no definition, the name grade must be D, C, B, A, S, or S+.
 Origin hand does not wait for that grade. Origin hand or located is
 eligible when the located model is a strict superset: every current
