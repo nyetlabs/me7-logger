@@ -95,6 +95,12 @@ func mapHits(img []byte, dpp [4]uint16, rows []MapSig, known map[string]uint32, 
 		if row.Table || row.Pattern == "" {
 			continue
 		}
+		if row.Absent != "" {
+			absent, ok := expandSig(row.Absent, embed, slot)
+			if !ok || findPat(img, FlashBase, end, absent, false) != 0 {
+				continue
+			}
+		}
 		var ptr uint32
 		var off int
 		if mapScoped(row) {

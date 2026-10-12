@@ -37,8 +37,7 @@ func main() {
 		case "help":
 			usage()
 		default:
-			usage()
-			os.Exit(2)
+			err = cmdParity(args)
 		}
 	}
 	if err != nil {
@@ -54,9 +53,9 @@ func usage() {
 	fmt.Fprintf(os.Stderr, `me7parity %s
 
 Usage:
-  me7parity [flags]
+  me7parity [flags] [pn...]
   me7parity onboard [candidates|run|triage|promote]
-  me7parity corpus [flags]
+  me7parity corpus [flags] [pn...]
   me7parity -v, --version
   me7parity -h, --help
 
@@ -100,17 +99,20 @@ column of that section. Origin located is not an oracle.
 
 The names column scores the tuner list. The other names lists of an
 image's layout block are scored in the block column.
+
+A pn is an image stem or the part number in front of the software
+index: 8D0907551H matches 8D0907551H-0003. The report is those images,
+including the tuner and block names that did not hit. An absent name
+is marked. A family form whose slot is already located is marked with
+that name.
 `
 
 func cmdParity(args []string) error {
-	fs := cli.NewFlagSet("me7parity", "", "[flags]", parityHelp)
+	fs := cli.NewFlagSet("me7parity", "", "[flags] [pn...]", parityHelp)
 	dir := fs.StringP("data", "d", "testdata/parity", "parity root `<dir>`: images.yaml, ecu/me7info, and xdf")
 	corpus := fs.String("corpus", ecucorpus.Dir("."), "ecu-corpus checkout `<dir>`; XDFKIT_CORPUS sets the default")
 	if err := fs.Parse(args); err != nil {
 		return err
-	}
-	if fs.NArg() != 0 {
-		return fmt.Errorf("me7parity takes no image; images.yaml names corpus images")
 	}
 	c, err := ecucorpus.Load(*corpus)
 	if err != nil {
@@ -120,6 +122,64 @@ func cmdParity(args []string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Print(rep.Text())
+	if fs.NArg() == 0 {
+		fmt.Print(rep.Text())
+		return nil
+	}
+	stems, err := matchStems(reportStems(rep), fs.Args())
+	if err != nil {
+		return err
+	}
+	fmt.Print(rep.Detail(stems))
 	return nil
+}
+
+// reportStems is the tuner image names, without .bin, in report order.
+func reportStems(rep *parity.Report) []string {
+	if rep == nil {
+		return nil
+	}
+	out := make([]string, len(rep.Tuner))
+	for i, im := range rep.Tuner {
+		out[i] = strings.TrimSuffix(im.Name, ".bin")
+	}
+	return out
+}
+
+// matchStems selects image stems named by args. An arg is a stem, a stem
+// with .bin, or a part number: the stem with its software index removed.
+// 8D0907551H matches 8D0907551H-0003. An exact stem does not also match
+// a longer one.
+func matchStems(stems, args []string) ([]string, error) {
+	have := map[string]bool{}
+	for _, s := range stems {
+		have[s] = true
+	}
+	var out []string
+	seen := map[string]bool{}
+	for _, arg := range args {
+		arg = strings.TrimSuffix(arg, ".bin")
+		var hit []string
+		if have[arg] {
+			hit = []string{arg}
+		} else {
+			prefix := arg + "-"
+			for _, s := range stems {
+				if strings.HasPrefix(s, prefix) {
+					hit = append(hit, s)
+				}
+			}
+		}
+		if len(hit) == 0 {
+			return nil, fmt.Errorf("%s: no parity image", arg)
+		}
+		for _, s := range hit {
+			if seen[s] {
+				continue
+			}
+			seen[s] = true
+			out = append(out, s)
+		}
+	}
+	return out, nil
 }

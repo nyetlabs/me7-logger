@@ -27,11 +27,22 @@ With no definition, the name grade must be D, C, B, A, S, or S+.
 Origin hand does not wait for that grade. Origin hand or located is
 eligible when the located model is a strict superset: every current
 name is at the same address, and at least one more name is present.
+Both KFPED variants cover a hand KFPED, and both KFPEDR variants cover
+a hand KFPEDR. One variant does not. A located KFPED does not cover a
+hand KFPED_0_A.
 The delta is that added count. A matching name set whose description
 or comment would change is also eligible, and its delta is ~N, the
 number of those maps. An unchanged name set is not eligible and is
-not submitted. Shared objects keep the previous conversion, units, and
-layout. The description is the name table and the comment is the
+not submitted. A name at a different address is a correction. A
+located name the hand file does not have is an addition. A short key
+blocks neither.
+The delta is ~N for the addresses and +N for the additions, and the
+status repeats it after the short, the same way a key count does.
+--submit writes that row: the located address, the added maps, and the
+hand conversion, units, and layout. The origin stays hand, so the
+status is not eligible.
+Shared objects keep the previous conversion, units, and layout. The
+description is the name table and the comment is the
 needle that located the map. Origin damos, a2l, or unset is never
 replaced. A key obj-N whose id is blank is a placeholder, not a name.
 Status keys means those keys are cleared and the origin stays. A row
@@ -43,19 +54,24 @@ that is not a parity image is listed the same way. The delta is key N.
 located) and sets the row's def column. It does not commit, push, bump,
 or upload. The corpus is CORPUS, else ../ecu-corpus when that checkout
 exists, else corpus/.
+
+A pn is an image stem or the part number in front of the software
+index: 8D0907551H matches 8D0907551H-0003. The list is those images.
+Under the row, hand lists every short, disagreeing, and added key, and
+open lists the tuner names that did not hit. An absent name is
+marked. A family form whose slot is already located is marked with
+that name. --submit stores only the
+images named.
 `
 
 func cmdCorpus(args []string) error {
-	fs := cli.NewFlagSet("me7parity", "corpus", "[flags]", corpusHelp)
+	fs := cli.NewFlagSet("me7parity", "corpus", "[flags] [pn...]", corpusHelp)
 	data := fs.StringP("data", "d", "testdata/parity", "parity root `<dir>`")
 	corpusFlag := fs.String("corpus", "", "ecu-corpus checkout `<dir>` (default CORPUS, else ../ecu-corpus, else corpus/)")
 	submit := fs.Bool("submit", false, "submit eligible located models into the corpus")
 	d := locate.Flags(fs)
 	if err := fs.Parse(args); err != nil {
 		return err
-	}
-	if fs.NArg() != 0 {
-		return fmt.Errorf("corpus takes no image; images.yaml names them")
 	}
 	root, err := ecucorpus.ModuleRoot()
 	if err != nil {
@@ -85,10 +101,21 @@ func cmdCorpus(args []string) error {
 		}
 		return userDir, cats, nil
 	}
+	selected, err := matchStems(reportStems(rep), fs.Args())
+	if err != nil {
+		return err
+	}
+	want := map[string]bool{}
+	for _, s := range selected {
+		want[s] = true
+	}
 	var eligible []pubItem
 	var lines []pubLine
 	for _, im := range rep.Tuner {
 		name := strings.TrimSuffix(im.Name, ".bin")
+		if len(want) > 0 && !want[name] {
+			continue
+		}
 		item := pubItem{name: name, tier: im.Tier, def: c.Def(name)}
 		if item.tier == "" {
 			item.tier = "-"
@@ -113,28 +140,51 @@ func cmdCorpus(args []string) error {
 			if err != nil {
 				return err
 			}
-			reason, added := handCover(prev, loc)
+			reason, added, notes := coverAll(prev, loc)
 			item.reason = reason
-			if reason == "" || reason == "identical" {
+			item.notes = notes
+			moves := moveCount(notes)
+			switch {
+			case reason == "" || reason == "identical":
 				item.merged, err = mergeKept(prev, loc)
+			case moves > 0 && !hasShort(notes):
+				moved := applyMoves(prev, loc, notes)
+				item.merged, err = mergeKept(moved, loc)
 				if err != nil {
 					return err
 				}
+				reason, added, _ = coverAll(moved, loc)
+				item.reason = reason
+			case hasShort(notes) && (moves > 0 || added > 0):
+				item.merged = applyMoves(prev, loc, notes)
+				item.keepOrigin = true
+				delta = partialDelta(moves, added)
+				item.reason = reason + ", " + delta
+			}
+			if err != nil {
+				return err
 			}
 			if item.merged != nil {
 				clearPlaceholders(item.merged)
 			}
-			if reason == "" {
+			switch reason {
+			case "":
 				delta = fmt.Sprintf("+%d", added)
-			} else if reason == "identical" {
-				if n := corrections(prev, item.merged); n > 0 {
+			case "identical":
+				n := corrections(prev, item.merged)
+				if moves > 0 {
+					n = moves
+				}
+				if n > 0 {
 					item.reason = ""
 					delta = fmt.Sprintf("~%d", n)
 				}
 			}
 		}
 		if nKey > 0 && item.reason != "" && item.reason != "def unreadable" {
-			item.merged = clearedCopy(prev)
+			if item.merged == nil {
+				item.merged = clearedCopy(prev)
+			}
 			item.keepOrigin = true
 			if item.reason == "identical" || strings.HasPrefix(item.reason, "origin ") {
 				item.reason = "keys"
@@ -165,17 +215,24 @@ func cmdCorpus(args []string) error {
 		lines = append(lines, pubLine{
 			name: name, status: status, tier: tier, delta: delta,
 			hit: im.Confidence.Hit, total: im.Confidence.Total,
+			notes: item.notes, open: im.Open, block: im.BlockOpen,
 		})
 	}
 	extra, err := placeholderDefs(dir, lines)
 	if err != nil {
 		return err
 	}
+	if len(want) > 0 {
+		extra = placeholderExtra{}
+	}
 	for _, item := range extra.items {
 		eligible = append(eligible, item)
 	}
 	lines = append(lines, extra.lines...)
 	printPublish(lines)
+	if len(want) > 0 {
+		printDetail(lines)
+	}
 	if !*submit {
 		return nil
 	}
@@ -227,11 +284,14 @@ type pubItem struct {
 	name, tier, origin, reason, def string
 	merged                          *model.Model
 	keepOrigin                      bool
+	notes                           []coverNote
 }
 
 type pubLine struct {
 	name, status, tier, delta string
 	hit, total                int
+	notes                     []coverNote
+	open, block               []parity.OpenName
 }
 
 func printPublish(lines []pubLine) {
@@ -255,6 +315,42 @@ func printPublish(lines []pubLine) {
 		fmt.Printf("%-*s  %-*s  %-4s  %-*s  %*s\n",
 			nameW, ln.name, statusW, ln.status, ln.tier, deltaW, ln.delta, confW, confs[i])
 	}
+}
+
+// printDetail lists the hand gaps and the tuner names that did not hit.
+func printDetail(lines []pubLine) {
+	for _, ln := range lines {
+		if len(ln.notes) == 0 && len(ln.open) == 0 && len(ln.block) == 0 {
+			continue
+		}
+		fmt.Printf("\n%s\n", ln.name)
+		if len(ln.notes) > 0 {
+			fmt.Println("hand")
+			for _, n := range ln.notes {
+				fmt.Printf("  %s\n", n.line())
+			}
+		}
+		if len(ln.open) > 0 {
+			fmt.Println("open")
+			for _, n := range ln.open {
+				fmt.Printf("  %s\n", openLine(n))
+			}
+		}
+		if len(ln.block) > 0 {
+			fmt.Println("block")
+			for _, n := range ln.block {
+				fmt.Printf("  %s\n", openLine(n))
+			}
+		}
+	}
+}
+
+func openLine(n parity.OpenName) string {
+	tier := n.Tier
+	if tier == "" {
+		tier = "-"
+	}
+	return fmt.Sprintf("%-4s %s%s", tier, n.Name, n.Note())
 }
 
 // gateReason is empty when the image may be submitted, or when origin
@@ -287,8 +383,49 @@ func gateReason(tier string, conf parity.Fraction, hasDef bool, origin string) s
 // is how many names are new. A name the locator does not have is short.
 // The same name at another address disagrees. An equal set of names is
 // identical. --submit still stores that set when a description or comment
-// would change.
+// would change. Both KFPED variants cover a hand KFPED, at the _0_A
+// address. The same for KFPEDR. One variant does not, and a located KFPED
+// does not cover a hand KFPED_0_A.
 func handCover(prev, located *model.Model) (string, int) {
+	reason, added, _ := coverAll(prev, located)
+	return reason, added
+}
+
+// coverNote is one hand key the detail list prints.
+type coverNote struct {
+	op   string
+	key  string
+	hand model.Addr
+	have []model.Addr
+}
+
+func (n coverNote) line() string {
+	switch n.op {
+	case "short":
+		return fmt.Sprintf("short %s %s", n.key, addrText(n.hand))
+	case "disagrees":
+		return fmt.Sprintf("disagrees %s hand %s located %s", n.key, addrText(n.hand), addrsText(n.have))
+	default:
+		return fmt.Sprintf("added %s %s", n.key, addrsText(n.have))
+	}
+}
+
+func addrText(a model.Addr) string {
+	return fmt.Sprintf("0x%X", uint32(a))
+}
+
+func addrsText(as []model.Addr) string {
+	out := make([]string, len(as))
+	for i, a := range as {
+		out[i] = addrText(a)
+	}
+	return strings.Join(out, ",")
+}
+
+// coverAll is handCover plus every short, disagreeing, and added key.
+// The reason is still the first short or disagree. Added keys are listed
+// and counted even when a short or disagree blocks a full replace.
+func coverAll(prev, located *model.Model) (string, int, []coverNote) {
 	have := map[string][]model.Addr{}
 	for _, o := range located.Objects {
 		k := objKey(o)
@@ -298,15 +435,21 @@ func handCover(prev, located *model.Model) (string, int) {
 		have[k] = append(have[k], o.Address)
 	}
 	prevKey := map[string]struct{}{}
+	var reason string
+	var notes []coverNote
 	for _, o := range prev.Objects {
 		k := objKey(o)
 		if k == "" {
 			continue
 		}
 		prevKey[k] = struct{}{}
-		addrs := have[k]
+		addrs := pedalAddrs(k, have)
 		if len(addrs) == 0 {
-			return "hand short " + k, 0
+			notes = append(notes, coverNote{op: "short", key: k, hand: o.Address})
+			if reason == "" {
+				reason = "hand short " + k
+			}
+			continue
 		}
 		match := false
 		for _, a := range addrs {
@@ -316,7 +459,10 @@ func handCover(prev, located *model.Model) (string, int) {
 			}
 		}
 		if !match {
-			return "hand disagrees " + k, 0
+			notes = append(notes, coverNote{op: "disagrees", key: k, hand: o.Address, have: addrs})
+			if reason == "" {
+				reason = "hand disagrees " + k
+			}
 		}
 	}
 	added := 0
@@ -333,12 +479,99 @@ func handCover(prev, located *model.Model) (string, int) {
 			continue
 		}
 		seen[k] = struct{}{}
+		notes = append(notes, coverNote{op: "added", key: k, have: have[k]})
 		added++
 	}
-	if added == 0 {
-		return "identical", 0
+	if reason != "" {
+		return reason, added, notes
 	}
-	return "", added
+	if added == 0 {
+		return "identical", 0, notes
+	}
+	return "", added, notes
+}
+
+// moveCount is the disagreeing names with one located address. Several
+// addresses are left for the report.
+func moveCount(notes []coverNote) int {
+	n := 0
+	for _, note := range notes {
+		if note.op == "disagrees" && len(note.have) == 1 {
+			n++
+		}
+	}
+	return n
+}
+
+func hasShort(notes []coverNote) bool {
+	for _, n := range notes {
+		if n.op == "short" {
+			return true
+		}
+	}
+	return false
+}
+
+// partialDelta is the address corrections and the located names the hand
+// file does not have. Either count may be zero.
+func partialDelta(moves, added int) string {
+	var b string
+	if moves > 0 {
+		b = fmt.Sprintf("~%d", moves)
+	}
+	if added > 0 {
+		if b != "" {
+			b += " "
+		}
+		b += fmt.Sprintf("+%d", added)
+	}
+	if b == "" {
+		return "-"
+	}
+	return b
+}
+
+// applyMoves copies prev, writes each single located address onto that
+// name, and appends each added map. Conversion, units, and layout stay
+// on a name the hand file already has. The description and comment come
+// from the located object of the same key. A short key is unchanged.
+func applyMoves(prev, located *model.Model, notes []coverNote) *model.Model {
+	out := clearedCopy(prev)
+	byKey := map[string]*model.Object{}
+	if located != nil {
+		for _, o := range located.Objects {
+			if k := objKey(o); k != "" && byKey[k] == nil {
+				byKey[k] = o
+			}
+		}
+	}
+	for _, n := range notes {
+		if n.op != "disagrees" || len(n.have) != 1 {
+			continue
+		}
+		for _, o := range out.Objects {
+			if objKey(o) != n.key {
+				continue
+			}
+			o.Address = n.have[0]
+			if src := byKey[n.key]; src != nil {
+				o.Description = src.Description
+				o.Comment = src.Comment
+			}
+		}
+	}
+	for _, n := range notes {
+		if n.op != "added" {
+			continue
+		}
+		src := byKey[n.key]
+		if src == nil {
+			continue
+		}
+		c := *src
+		out.Objects = append(out.Objects, &c)
+	}
+	return out
 }
 
 // corrections is how many previous objects change description or comment
@@ -378,13 +611,120 @@ func corrections(prev, merged *model.Model) int {
 
 // mergeKept folds the located model into the previous pack. Conversion,
 // units, and layout stay on the previous object. The description and the
-// comment come from the located model.
+// comment come from the located model. When both pedal variants are located,
+// the plain name is dropped and the variants take its category. A variant
+// already in the pack keeps its conversion.
 func mergeKept(prev, located *model.Model) (*model.Model, error) {
-	out, _, err := model.Merge(prev, located, model.MergeOptions{
+	drop, stamp := pedalPlan(prev, located)
+	base := withoutKeys(prev, drop)
+	out, _, err := model.Merge(base, located, model.MergeOptions{
 		Description: "replace",
 		Comment:     "replace",
 	})
-	return out, err
+	if err != nil {
+		return nil, err
+	}
+	for _, o := range out.Objects {
+		cats, ok := stamp[objKey(o)]
+		if !ok {
+			continue
+		}
+		o.Categories = append([]int(nil), cats...)
+	}
+	return out, nil
+}
+
+// pedalPair is the plain name and the two variants that replace it.
+var pedalPair = []struct{ plain, a, b string }{
+	{"KFPED", "KFPED_0_A", "KFPED_1_A"},
+	{"KFPEDR", "KFPEDR_0_A", "KFPEDR_1_A"},
+}
+
+// pedalAddrs is the addresses that cover a hand key. Both variants cover
+// the plain name at the _0_A address. One variant does not.
+func pedalAddrs(k string, have map[string][]model.Addr) []model.Addr {
+	for _, p := range pedalPair {
+		if k != p.plain {
+			continue
+		}
+		if len(have[p.a]) > 0 && len(have[p.b]) > 0 {
+			return have[p.a]
+		}
+	}
+	return have[k]
+}
+
+// pedalPlan drops the plain name when both variants are located, and records
+// the category those new variants should keep. An existing variant is left
+// alone, including its conversion.
+func pedalPlan(prev, located *model.Model) (drop []string, stamp map[string][]int) {
+	stamp = map[string][]int{}
+	if prev == nil || located == nil {
+		return nil, stamp
+	}
+	loc := map[string]*model.Object{}
+	for _, o := range located.Objects {
+		if k := objKey(o); k != "" {
+			loc[k] = o
+		}
+	}
+	have := map[string]*model.Object{}
+	for _, o := range prev.Objects {
+		if k := objKey(o); k != "" {
+			have[k] = o
+		}
+	}
+	for _, p := range pedalPair {
+		a, b := loc[p.a], loc[p.b]
+		if a == nil || b == nil {
+			continue
+		}
+		plain := have[p.plain]
+		if plain != nil {
+			drop = append(drop, p.plain)
+			if have[p.a] == nil {
+				stampCats(stamp, p.a, plain.Categories)
+				if a.Address == plain.Address {
+					a.Value = plain.Value
+				}
+			}
+			if have[p.b] == nil {
+				stampCats(stamp, p.b, plain.Categories)
+			}
+			continue
+		}
+		if have[p.a] != nil && have[p.b] == nil {
+			stampCats(stamp, p.b, have[p.a].Categories)
+		}
+	}
+	return drop, stamp
+}
+
+func stampCats(stamp map[string][]int, name string, cats []int) {
+	if len(cats) == 0 {
+		return
+	}
+	stamp[name] = cats
+}
+
+// withoutKeys is m without those object keys. m itself is unchanged.
+func withoutKeys(m *model.Model, keys []string) *model.Model {
+	if m == nil || len(keys) == 0 {
+		return m
+	}
+	drop := map[string]bool{}
+	for _, k := range keys {
+		drop[k] = true
+	}
+	out := *m
+	out.Objects = nil
+	for _, o := range m.Objects {
+		if drop[objKey(o)] {
+			continue
+		}
+		out.Objects = append(out.Objects, o)
+	}
+	return &out
 }
 
 type placeholderExtra struct {

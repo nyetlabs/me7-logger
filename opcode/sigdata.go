@@ -79,6 +79,8 @@ type MapSig struct {
 	First  bool
 	From   uint32
 	Single bool
+	// Absent skips the row when this pattern occurs in the image.
+	Absent string
 	// Frame is the 6-byte framePtr at At. Far is the 4-byte readFar there.
 	// Deref reads that many further words. DerefAt is added to the address
 	// before the first of those reads. DerefFar makes that read a readFar.
@@ -137,6 +139,7 @@ type mapSigDraft struct {
 	First    bool    `yaml:"first"`
 	From     string  `yaml:"from"`
 	Single   bool    `yaml:"single"`
+	Absent   string  `yaml:"absent"`
 	Frame    bool    `yaml:"frame"`
 	Far      bool    `yaml:"far"`
 	Deref    int     `yaml:"deref"`
@@ -359,7 +362,7 @@ func parseSigDoc(b []byte) (SigDoc, error) {
 			Name: d.Name, Pattern: d.Pattern, At: at, Anchor: d.Anchor,
 			Rows: d.Rows, Cols: d.Cols, XBits: xbits, YBits: ybits,
 			XAt: d.XAt, YAt: d.YAt, Table: d.Table, XTable: d.XTable, YTable: d.YTable,
-			Open: d.Open, First: d.First, Single: d.Single, Plain: d.Plain,
+			Open: d.Open, First: d.First, Single: d.Single, Absent: d.Absent, Plain: d.Plain,
 			Frame: d.Frame, Far: d.Far, Deref: d.Deref, DerefAt: d.DerefAt, DerefFar: d.DerefFar,
 		}
 		if d.From != "" {

@@ -13,6 +13,7 @@
 # first     With open, keep the first copy when several exist.
 # from      Lowest address to search. An omitted open starts at 0x820000.
 # single    With open, keep the row only when pattern occurs once in the window.
+# absent    Skip this row when this pattern occurs in the image.
 # frame     The pointer at `at` is the 6-byte segmented form.
 # far       The pointer at `at` is the 4-byte segmented form.
 # deref     Read this many further words at the decoded address.
@@ -591,8 +592,15 @@ mapsigs:
 - {name: WFRL, pattern: E6FCXXXXF2FDXXXXE6FE1F00DAXXXXXX7C14F058, at: 2, cols: 31, plain: true}
 - {name: LDRXNZK, pattern: C2F5XXXX5C858850E6FCXXXXE6FDXXXXF2FEXXXXDA80XXXX9820, at: 10, frame: true, add: 34, cols: 16, xbits: 16}
 - {name: LDRXN, pattern: C2F4XXXX5C848840E6FCXXXXE6FDXXXXF2FEXXXXDA80XXXX9820, at: 10, frame: true, add: 34, cols: 16, xbits: 16}
-- {name: KFPED, pattern: F6F4XXXX0D0AE6FCXXXXF2FDXXXXF2FEXXXXDA00DE73F6F4XXXX9A48, at: 8, add: 60, rows: 16, cols: 12, xbits: 16, ybits: 16}
-- {name: KFPEDR, pattern: E6FCXXXXF2FDXXXXF2FEXXXXDA00DE73F6F4XXXX0D0AE6FCXXXXF2FDXXXXF2FEXXXXDA00DE73F6F4XXXX9A48, at: 2, add: 52, rows: 16, cols: 8, xbits: 16, ybits: 16}
+# scanPed split arm. The first C2F4 call in the window is the KFPEDR pair.
+# The second call, marked by the F2 F4 prefix, is the KFPED pair. Each pair
+# is one pointer and the next word. The plain names are the other arm.
+- {name: KFPEDR_0_A, open: F2F40EFEF189F19A7C85F0XXC2F4XXXX5C14D4C4XXXXE6FDXXXXF2FEXXXXF2FFXXXXDA8XXXXX, pattern: C2F4XXXX5C14D4C4XXXXE6FDXXXXF2FEXXXXF2FFXXXXDA8XXXXX, at: 8, deref: 1, xat: 16, yat: 20}
+- {name: KFPEDR_1_A, open: F2F40EFEF189F19A7C85F0XXC2F4XXXX5C14D4C4XXXXE6FDXXXXF2FEXXXXF2FFXXXXDA8XXXXX, pattern: C2F4XXXX5C14D4C4XXXXE6FDXXXXF2FEXXXXF2FFXXXXDA8XXXXX, at: 8, deref: 1, derefat: 2, xat: 16, yat: 20}
+- {name: KFPED_0_A, pattern: F2F40EFEF189F19A7C85F0XXC2F4XXXX5C14D4C4XXXXE6FDXXXXF2FEXXXXF2FFXXXXDA8XXXXX, at: 20, deref: 1, xat: 28, yat: 32}
+- {name: KFPED_1_A, pattern: F2F40EFEF189F19A7C85F0XXC2F4XXXX5C14D4C4XXXXE6FDXXXXF2FEXXXXF2FFXXXXDA8XXXXX, at: 20, deref: 1, derefat: 2, xat: 28, yat: 32}
+- {name: KFPED, absent: C2F4XXXX5C14D4C4XXXXE6FDXXXXF2FEXXXXF2FFXXXXDA8XXXXX, pattern: F6F4XXXX0D0AE6FCXXXXF2FDXXXXF2FEXXXXDA00DE73F6F4XXXX9A4X, at: 8, add: 60, rows: 16, cols: 12, xbits: 16, ybits: 16}
+- {name: KFPEDR, absent: C2F4XXXX5C14D4C4XXXXE6FDXXXXF2FEXXXXF2FFXXXXDA8XXXXX, pattern: E6FCXXXXF2FDXXXXF2FEXXXXDA00DE73F6F4XXXX0D0AE6FCXXXXF2FDXXXXF2FEXXXXDA00DE73F6F4XXXX9A4X, at: 2, add: 52, rows: 16, cols: 8, xbits: 16, ybits: 16}
 - {name: FZWWLRLN, open: 'E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}X0XX0B98', pattern: 'E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:16}', at: 2, xat: 10, yat: 14}
 - {name: KFZWWLNM, open: 'E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}X0XX0B98', pattern: 'E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}', at: 2}
 - {name: KFMI_UM, open: F3FXXXXXF3FXXXXXB1X041XX, pattern: E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDA8XXXXX, at: 2, xat: 10, yat: 14}
@@ -623,7 +631,7 @@ mapsigs:
 - {name: NLLM_1_A, open: DAXXXXXX, pattern: D4C5XXXXD4D5XXXXD740E100F2FEXXXXDAXXXXXX, at: 2, deref: 1, derefat: 4, dereffar: true, also: [{name: NLL2M_1_A}]}
 - {name: NLLM_2_A, open: DAXXXXXX, pattern: D4C5XXXXD4D5XXXXD740E100F2FEXXXXDAXXXXXX, at: 2, deref: 1, derefat: 8, dereffar: true, also: [{name: NLL2M_2_A}]}
 - {name: NLLM_3_A, open: DAXXXXXX, pattern: D4C5XXXXD4D5XXXXD740E100F2FEXXXXDAXXXXXX, at: 2, deref: 1, derefat: 12, dereffar: true, also: [{name: NLL2M_3_A}]}
-- {name: KFPEDR, open: 'E6FCXXXX{wped_w:F2FD}{slot:11}E6FCXXXX{nmot_w:F2FD}{slot:11}F6F4XXXX', pattern: E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDA8XXXXX, at: 2}
+- {name: KFPEDR, absent: C2F4XXXX5C14D4C4XXXXE6FDXXXXF2FEXXXXF2FFXXXXDA8XXXXX, open: 'E6FCXXXX{wped_w:F2FD}{slot:11}E6FCXXXX{nmot_w:F2FD}{slot:11}F6F4XXXX', pattern: E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDA8XXXXX, at: 2}
 # Rows shared by several families. They sit below the rows above so
 # those fill first.
 - {name: KFMSNWDK, pattern: E6FCXXXXF2FD4CA2F2FE, add: 48}
@@ -874,3 +882,7 @@ mapsigs:
 - {name: KFWPLGTA, pattern: F2F5148D8850C2F22EFA5C12C2F336FA00325C23D4C39C4DD4D39E4DE6FE3801, at: 22, deref: 1, dereffar: true, xat: 2}
 # AK and AS. The C2 FC word is 7806. Page is 0702.
 - {name: CLAATR, pattern: D7400702C2FC7806E6FD7906E6FE0702DA83B4470806F6F41290E6FC, at: 6, add: 56, also: [{name: CLAATR2, add: 57}, {name: CLAATS, add: 60}, {name: CLAATS2, add: 61}, {name: CLAHSH, add: 122}, {name: CLAHSH2, add: 123}, {name: CLAHSHE, add: 124}, {name: CLAHSHE2, add: 125}, {name: CLALSH, add: 160}, {name: CLALSH2, add: 161}]}
+# 551H and 551J. 4Z7 B and C share the word. CLAHSHE is 63 bytes past CLAATR.
+- {name: CLAHSHE, pattern: C2F4750668412D09E6F4, add: 121, also: [{name: CLAHSHE2, add: 122}, {name: CLALSH2, add: 159}]}
+# 551H and 551J. 4Z7 B and C share the word. Page is 0702.
+- {name: KRKTE, pattern: D7400702C2FC3C02, at: 6}

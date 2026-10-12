@@ -17,11 +17,17 @@
 # The slot is met when that name or any later form is located. A block that
 # has none of them lists every form in absent.yaml. The tuner count still
 # scores each form.
+# A pair entry is one slot. The first name is the plain map and the other two
+# are its variants. The slot is met by the plain name, or by both variants
+# when the plain name is not located. One variant does not meet it.
 any:
   - {tier: D, axes: 2, names: [KFZW2, KFZW2_0_A, KFZW2_1_A]}
   - {tier: C, axes: 1, names: [NFSM, NFS2M, NFS2M_0_A, NFS2M_1_A]}
   - {tier: C, axes: 1, names: [NLLM, NLLM_0_A, NLLM_1_A, NLLM_2_A, NLLM_3_A]}
   - {tier: S, axes: 1, names: [NLL2M, NLL2M_0_A, NLL2M_1_A, NLL2M_2_A, NLL2M_3_A]}
+pair:
+  - {tier: S, axes: 2, names: [KFPED, KFPED_0_A, KFPED_1_A]}
+  - {tier: S, axes: 2, names: [KFPEDR, KFPEDR_0_A, KFPEDR_1_A]}
 tiers:
   S:
     0: [AIMVM, CDLDP, CDTES, CWDNMAX, CWMSRCAN, DNMAXH, ITNMXH, KISRM, KUMSRL,
@@ -29,7 +35,7 @@ tiers:
         VNMX, VWPMBBR, WFRL, ZKLAMFAW]
     1: [KLDMASRL, LDORXN, LDRXNZK, NASNOTKL]
     2: [FZWWLRLN, KFDLULS, KFFWLW, KFLDRXO, KFMDZOF_UM, KFMI_UM, KFMPED_UM,
-        KFPED, KFPEDR, KFTARXZK, KFTSRL, KFVPDKLD]
+        KFTARXZK, KFTSRL, KFVPDKLD]
   A:
     0: [KIFZGHG, MLHFM, MLMAX, MLOFS]
     2: [KFDMDADP, KFDMDARO, KFKHFM, KFMLDMX, KFNW, KFNWWL, KFPBRK, KFPBRKNW,

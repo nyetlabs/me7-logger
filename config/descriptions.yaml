@@ -4941,7 +4941,7 @@
 - name: ENTDKNLL
   description: Entjitterschwelle (Ink) für DK-Sollwert außerhalb Leerlauf (!B_ll)
 - name: ESKONF
-  description: Konfiguration Endstufen
+  description: ESKONF
 - name: ESKONF_0_A
   description: Konfiguration Endstufen
 - name: ESKONF_1_A
@@ -7983,19 +7983,19 @@
 - name: KFPBRKNW
   description: Correction factor for combustion chamber pressure at NWS active
 - name: KFPED
-  description: Relatives Fahrerwunschmoment aus Fahrpedal
+  description: Relative torque request from pedal
 - name: KFPEDL
   description: Relatives Fahrerwunschmoment aus Fahrpedal für kleine Geschwindigkeiten
 - name: KFPEDLR
   description: Relatives Fahrerwunschmoment aus Fahrpedal für Low-Range-Betrieb
 - name: KFPEDR
-  description: Relatives Fahrerwunschmoment aus Fahrpedal für Rückwärtsgang
-- name: KFPEDR_0_A
   description: Relative torque request from pedal for reverse gear
+- name: KFPEDR_0_A
+  description: Relatives Fahrerwunschmoment aus Fahrpedal für Rückwärtsgang
 - name: KFPEDR_1_A
   description: Relatives Fahrerwunschmoment aus Fahrpedal für Rückwärtsgang
 - name: KFPED_0_A
-  description: Relative torque request from pedal
+  description: Relatives Fahrerwunschmoment aus Fahrpedal
 - name: KFPED_1_A
   description: Relatives Fahrerwunschmoment aus Fahrpedal
 - name: KFPLGUB
@@ -8981,8 +8981,6 @@
 - name: KRFHT
   description: Fehlerhäufigkeit Testimpuls
 - name: KRFKLN
-  description: Spätverstellung pro Klopfereignis bei langsamer Frühverstellung
-- name: KRFKLN or KRFKN
   description: Ignition retard per knock event
 - name: KRFKN
   description: Spätverstellung pro Klopfereignis
@@ -9387,13 +9385,13 @@
 - name: LDRVL
   description: Vollast Erkennungsschwelle LDR
 - name: LDRXN
-  description: Maximalfuellung LDR
+  description: Maximum specified load
 - name: LDRXNZK
   description: Maximum specified load during continuous knock
 - name: LDRXN_0_A
   description: Maximalfuellung LDR
 - name: LDRXN_1_A
-  description: Maximum specified load
+  description: Maximalfuellung LDR
 - name: LDRXN_1_A (PSI)
   description: Maximum specified load (PSI)
 - name: LDSGEEP

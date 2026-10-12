@@ -284,6 +284,71 @@ func TestReportText(t *testing.T) {
 	}
 }
 
+func TestDetail(t *testing.T) {
+	rep := &Report{
+		Tuner: []Image{
+			{
+				Name: "8D0907551H-0003.bin", Fraction: Fraction{1, 3}, Tier: "D",
+				Open:      []OpenName{{Name: "LAMFA", Tier: "D"}, {Name: "NFS2M", Tier: "C", By: "NFSM"}, {Name: "KFZW", Tier: "C", Absent: true}},
+				BlockOpen: []OpenName{{Name: "KFLDRQ1", Absent: true}},
+			},
+			{Name: "8D0907551L-0001.bin", Fraction: Fraction{3, 3}, Tier: "S"},
+		},
+		Disagree: []Disagreement{{Image: "8D0907551L-0001.bin", Name: "KFZW", Ours: 0x12, XDF: []uint32{0x13}}},
+	}
+	got := rep.Detail([]string{"8D0907551H-0003"})
+	if strings.Contains(got, "8D0907551L") || strings.Contains(got, "hand xdf disagrees") {
+		t.Fatalf("other image leaked\n%s", got)
+	}
+	for _, want := range []string{"8D0907551H-0003", "open\n", "  D    LAMFA\n", "  C    NFS2M  met by NFSM\n", "  C    KFZW  absent\n", "block\n", "  -    KFLDRQ1  absent\n"} {
+		if !strings.Contains(got, want) {
+			t.Fatalf("missing %q\n%s", want, got)
+		}
+	}
+	both := rep.Detail([]string{"8D0907551H-0003", "8D0907551L-0001"})
+	if !strings.Contains(both, "8D0907551H-0003  D    LAMFA") || !strings.Contains(both, "hand xdf disagrees") {
+		t.Fatalf("both\n%s", both)
+	}
+}
+
+func TestOpenMetBy(t *testing.T) {
+	scored := map[string]record.Map{
+		"NFSM":      {Name: "NFSM"},
+		"KFPED":     {Name: "KFPED"},
+		"NLL2M_0_A": {Name: "NLL2M_0_A"},
+		"NLL2M_1_A": {Name: "NLL2M_1_A"},
+	}
+	families := []family{
+		{names: []string{"NFSM", "NFS2M", "NFS2M_0_A"}},
+		{names: []string{"KFPED", "KFPED_0_A", "KFPED_1_A"}, pair: true},
+		{names: []string{"NLL2M", "NLL2M_0_A", "NLL2M_1_A"}},
+		{names: []string{"NLLM", "NLLM_0_A"}},
+	}
+	absent := map[string]bool{"KFZW2_0_A": true}
+	got := openNames([]string{"NFS2M", "KFPED_0_A", "KFPED_1_A", "NLL2M", "NLLM", "LAMFA", "KFZW2_0_A"},
+		map[string]string{"NFS2M": "C", "KFPED_0_A": "S", "KFPED_1_A": "S", "NLL2M": "S", "NLLM": "C", "LAMFA": "D", "KFZW2_0_A": "D"},
+		scored, absent, families)
+	by := map[string]OpenName{}
+	for _, n := range got {
+		by[n.Name] = n
+	}
+	if by["NFS2M"].By != "NFSM" || by["KFPED_0_A"].By != "KFPED" || by["KFPED_1_A"].By != "KFPED" {
+		t.Fatalf("pair and any %+v", by)
+	}
+	if by["NLL2M"].By != "NLL2M_0_A, NLL2M_1_A" {
+		t.Fatalf("several %q", by["NLL2M"].By)
+	}
+	if by["NLLM"].By != "" || by["LAMFA"].By != "" {
+		t.Fatalf("unmet %+v", by)
+	}
+	if !by["KFZW2_0_A"].Absent || by["KFZW2_0_A"].Note() != "  absent" {
+		t.Fatalf("absent %+v", by["KFZW2_0_A"])
+	}
+	if by["NFS2M"].Note() != "  met by NFSM" {
+		t.Fatalf("note %q", by["NFS2M"].Note())
+	}
+}
+
 func TestDisagreements(t *testing.T) {
 	rows := []refRow{{name: "KFZW", addr: 0x20}, {name: "LAMFA", addr: 0x30}}
 	scored := map[string]record.Map{
@@ -401,6 +466,23 @@ func TestNameGrade(t *testing.T) {
 	} {
 		if got := grade(tc.loc, tc.abs); got != tc.want {
 			t.Errorf("family loc %q abs %q: %s, want %s", tc.loc, tc.abs, got, tc.want)
+		}
+	}
+	pairOf := map[string]string{"p": "D", "a": "D", "b": "D", "c": "C"}
+	pair := []family{{tier: "D", names: []string{"p", "a", "b"}, pair: true}}
+	pairGrade := func(located, absent string) string {
+		return nameGrade(pairOf, nil, pair, func(n string) (bool, bool) {
+			loc := strings.Contains(located, n)
+			abs := strings.Contains(absent, n)
+			return loc || abs, loc
+		})
+	}
+	for _, tc := range []struct{ loc, abs, want string }{
+		{"p", "", "D"}, {"ab", "", "D"}, {"pab", "", "-"}, {"a", "", "-"}, {"b", "", "-"},
+		{"pa", "", "-"}, {"pb", "", "-"}, {"", "pab", "D"}, {"", "p", "-"}, {"", "", "-"},
+	} {
+		if got := pairGrade(tc.loc, tc.abs); got != tc.want {
+			t.Errorf("pair loc %q abs %q: %s, want %s", tc.loc, tc.abs, got, tc.want)
 		}
 	}
 }

@@ -67,6 +67,9 @@ type Disagreement struct {
 // one whose origin is hand. Text prints it as a star after the tier.
 // Every list is sorted by the layout block tier of its image in
 // layouts-priority.yaml, then by name.
+// Open is the tuner names that were not located, D first. BlockOpen is
+// the same for the image's layout-block list. Absent names are included
+// and marked. Detail prints them; Text does not.
 type Image struct {
 	Name string
 	Fraction
@@ -77,6 +80,31 @@ type Image struct {
 	Axis       Fraction
 	Confidence Fraction
 	Block      Fraction
+	Open       []OpenName
+	BlockOpen  []OpenName
+}
+
+// OpenName is a tuner or block name the image did not locate.
+// Absent means the name is listed for this layout block, so the grade
+// still counts it. By is the located member that already fills the
+// slot, when this form is not absent.
+type OpenName struct {
+	Name   string
+	Tier   string
+	Absent bool
+	By     string
+}
+
+// Note is the trailing mark on an open line. An absent name says so.
+// A family form whose slot is already located names that member.
+func (n OpenName) Note() string {
+	if n.Absent {
+		return "  absent"
+	}
+	if n.By != "" {
+		return "  met by " + n.By
+	}
+	return ""
 }
 
 // Fraction is hits over the oracle row count.
@@ -345,6 +373,146 @@ func stemName(name string) string {
 	return strings.TrimSuffix(name, ".bin")
 }
 
+// Detail is the report for stems, plus the tuner and block names those
+// images did not locate. stems are image names without .bin.
+func (r *Report) Detail(stems []string) string {
+	sel := r.selectStems(stems)
+	var b strings.Builder
+	b.WriteString(sel.Text())
+	one := len(stems) == 1
+	writeOpen := func(title string, rows []struct {
+		stem string
+		list []OpenName
+	}) {
+		any := false
+		for _, row := range rows {
+			if len(row.list) > 0 {
+				any = true
+				break
+			}
+		}
+		if !any {
+			return
+		}
+		if b.Len() > 0 && !strings.HasSuffix(b.String(), "\n\n") {
+			b.WriteByte('\n')
+		}
+		b.WriteString(title)
+		b.WriteByte('\n')
+		for _, row := range rows {
+			for _, n := range row.list {
+				tier := n.Tier
+				if tier == "" {
+					tier = "-"
+				}
+				if one {
+					fmt.Fprintf(&b, "  %-4s %s%s\n", tier, n.Name, n.Note())
+					continue
+				}
+				fmt.Fprintf(&b, "  %s  %-4s %s%s\n", row.stem, tier, n.Name, n.Note())
+			}
+		}
+	}
+	var tunerRows, blockRows []struct {
+		stem string
+		list []OpenName
+	}
+	for _, im := range sel.Tuner {
+		stem := stemName(im.Name)
+		tunerRows = append(tunerRows, struct {
+			stem string
+			list []OpenName
+		}{stem, im.Open})
+		blockRows = append(blockRows, struct {
+			stem string
+			list []OpenName
+		}{stem, im.BlockOpen})
+	}
+	writeOpen("open", tunerRows)
+	writeOpen("block", blockRows)
+	return b.String()
+}
+
+func (r *Report) selectStems(stems []string) *Report {
+	want := map[string]bool{}
+	for _, s := range stems {
+		want[s] = true
+	}
+	keep := func(name string) bool { return want[stemName(name)] }
+	out := &Report{}
+	if r == nil {
+		return out
+	}
+	for _, im := range r.ME7Info {
+		if keep(im.Name) {
+			out.ME7Info = append(out.ME7Info, im)
+		}
+	}
+	for _, im := range r.Extras {
+		if keep(im.Name) {
+			out.Extras = append(out.Extras, im)
+		}
+	}
+	for _, im := range r.Tuner {
+		if keep(im.Name) {
+			out.Tuner = append(out.Tuner, im)
+		}
+	}
+	for _, im := range r.XDF {
+		if keep(im.Name) {
+			out.XDF = append(out.XDF, im)
+		}
+	}
+	for _, im := range r.Hand {
+		if keep(im.Name) {
+			out.Hand = append(out.Hand, im)
+		}
+	}
+	for _, d := range r.Disagree {
+		if keep(d.Image) {
+			out.Disagree = append(out.Disagree, d)
+		}
+	}
+	return out
+}
+
+// openNames is the wanted names that were not located, lowest tier first.
+// tier may be nil for a list that has no tier. An absent name is kept and marked.
+// A family form whose slot is already located records the member that fills it.
+func openNames(want []string, tier map[string]string, scored map[string]record.Map, absent map[string]bool, families []family) []OpenName {
+	hit := func(n string) (bool, bool) {
+		_, located := scored[n]
+		return located || absent[n], located
+	}
+	filled := map[string]string{}
+	for _, f := range families {
+		why := metBy(f, hit)
+		if why == "" {
+			continue
+		}
+		for _, n := range f.names {
+			if _, ok := scored[n]; ok {
+				continue
+			}
+			filled[n] = why
+		}
+	}
+	var out []OpenName
+	for _, n := range want {
+		if n == "" {
+			continue
+		}
+		if _, ok := scored[n]; ok {
+			continue
+		}
+		out = append(out, OpenName{Name: n, Tier: tier[n], Absent: absent[n], By: filled[n]})
+	}
+	slices.SortStableFunc(out, func(a, b OpenName) int {
+		return cmp.Or(tierRank(b.Tier)-tierRank(a.Tier), strings.Compare(a.Name, b.Name))
+	})
+	return out
+}
+
 type ecuKey struct {
 	name string
 	addr uint32
@@ -471,8 +639,10 @@ func run(dir string, images []string, defOf func(string) string, gen imageGen) (
 					_, located := scored[n]
 					return located || gone[n], located
 				}),
-				NoDef: def == "" || origin == "hand",
-				Axis:  scoreAxes(scored, axes),
+				NoDef:     def == "" || origin == "hand",
+				Axis:      scoreAxes(scored, axes),
+				Open:      openNames(tuner, ntier, scored, gone, lists.any),
+				BlockOpen: openNames(lists.byBlock[blk], nil, scored, gone, lists.any),
 			})
 			held = append(held, kept{base: base, stem: stem, img: img, maps: maps, oracle: oracle})
 		}
@@ -700,7 +870,7 @@ const (
 // other names of each layout block, in file order, without tuner names.
 // dims is the axis count of every name; tuner.yaml wins a conflict.
 // tier is the finder tier of each tuner name. any is the families in
-// tuner.yaml: one tier slot, met by any member.
+// tuner.yaml: one tier slot, met by any member, or by a pair.
 type nameLists struct {
 	tuner   []string
 	byBlock map[string][]string
@@ -776,9 +946,11 @@ type listName struct {
 }
 
 // family is one tier slot. It is met when one name is located.
+// A pair slot is the plain name, or both variants with the plain name absent.
 type family struct {
 	tier  string
 	names []string
+	pair  bool
 }
 
 // loadNameList reads one list and its block. names maps an axis count (0, 1,
@@ -799,6 +971,11 @@ func loadNameList(path string) ([]listName, string, map[string]string, []family,
 			Axes  int      `yaml:"axes"`
 			Names []string `yaml:"names"`
 		} `yaml:"any"`
+		Pair []struct {
+			Tier  string   `yaml:"tier"`
+			Axes  int      `yaml:"axes"`
+			Names []string `yaml:"names"`
+		} `yaml:"pair"`
 	}
 	if err := yaml.Unmarshal(b, &doc); err != nil {
 		return nil, "", nil, nil, fmt.Errorf("%s: %w", base, err)
@@ -852,7 +1029,21 @@ func loadNameList(path string) ([]listName, string, map[string]string, []family,
 				return nil, "", nil, nil, err
 			}
 		}
-		families = append(families, family{g.Tier, g.Names})
+		families = append(families, family{tier: g.Tier, names: g.Names})
+	}
+	for _, g := range doc.Pair {
+		if !slices.Contains(tierOrder, g.Tier) {
+			return nil, "", nil, nil, fmt.Errorf("%s: tier %q is not one of %v", base, g.Tier, tierOrder)
+		}
+		if len(g.Names) != 3 {
+			return nil, "", nil, nil, fmt.Errorf("%s: pair group needs the plain name and both variants", base)
+		}
+		for _, n := range g.Names {
+			if err := add(n, g.Tier, g.Axes); err != nil {
+				return nil, "", nil, nil, err
+			}
+		}
+		families = append(families, family{tier: g.Tier, names: g.Names, pair: true})
 	}
 	slices.SortStableFunc(out, func(a, b listName) int {
 		return cmp.Or(slices.Index(order, tier[a.name])-slices.Index(order, tier[b.name]), strings.Compare(a.name, b.name))
@@ -1002,6 +1193,7 @@ const beyondS = "S+"
 // nameGrade is the highest name tier complete, counted up from D, or "-"
 // when D is not. A tier is complete when each of its names is hit or absent.
 // A family is one name: one member located, or every member absent.
+// A pair slot is the plain name, or both variants with the plain name absent.
 // rest is the untiered names, one level above S. hit reports (counts, located).
 func nameGrade(tierOf map[string]string, rest []string, families []family, hit func(string) (bool, bool)) string {
 	inFamily := map[string]bool{}
@@ -1041,7 +1233,13 @@ func nameGrade(tierOf map[string]string, rest []string, families []family, hit f
 }
 
 // familyMet is true when one member is located, or every member is absent.
+// A pair slot is met by the plain name alone, or by both variants when the
+// plain name is not located. One variant does not meet it, and the plain
+// name does not meet it when either variant is located.
 func familyMet(f family, hit func(string) (bool, bool)) bool {
+	if f.pair {
+		return pairMet(f, hit)
+	}
 	allAbsent := len(f.names) > 0
 	for _, n := range f.names {
 		counts, located := hit(n)
@@ -1053,6 +1251,48 @@ func familyMet(f family, hit func(string) (bool, bool)) bool {
 		}
 	}
 	return allAbsent
+}
+
+// pairMet scores names[0] as the plain map and the rest as its variants.
+func pairMet(f family, hit func(string) (bool, bool)) bool {
+	plain, variants := f.names[0], f.names[1:]
+	_, plainOn := hit(plain)
+	on := 0
+	allAbsent := true
+	for _, n := range f.names {
+		counts, located := hit(n)
+		if n != plain && located {
+			on++
+		}
+		if !counts {
+			allAbsent = false
+		}
+	}
+	if plainOn && on == 0 {
+		return true
+	}
+	if !plainOn && on == len(variants) {
+		return true
+	}
+	if plainOn || on > 0 {
+		return false
+	}
+	return allAbsent
+}
+
+// metBy is the located member that fills the slot, in family order.
+// An unmet slot, or one filled only because every form is absent, is empty.
+func metBy(f family, hit func(string) (bool, bool)) string {
+	if !familyMet(f, hit) {
+		return ""
+	}
+	var on []string
+	for _, n := range f.names {
+		if _, located := hit(n); located {
+			on = append(on, n)
+		}
+	}
+	return strings.Join(on, ", ")
 }
 
 // tierRank is the index of label in tierOrder. No tier sorts last.

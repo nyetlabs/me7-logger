@@ -360,6 +360,31 @@ mapsigs:
 	}
 }
 
+func TestMapSigAbsent(t *testing.T) {
+	body := []byte(`
+mapsigs:
+- name: BASE
+  absent: "FFFF"
+  pattern: "D7400002AABBXXXX"
+  at: 6
+`)
+	doc, err := ParseSigs(body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	img := make([]byte, 32)
+	copy(img, []byte{0xFF, 0xFF})
+	copy(img[8:], []byte{0xD7, 0x40, 0x00, 0x02, 0xAA, 0xBB, 0x10, 0x00})
+	if got := MapAddrs(img, StandardDPP, doc.Maps); len(got) != 0 {
+		t.Fatalf("absent hit %+v", got)
+	}
+	img[0], img[1] = 0, 0
+	got := MapAddrs(img, StandardDPP, doc.Maps)
+	if len(got) != 1 || got[0].Name != "BASE" || got[0].Addr != 0x800010 {
+		t.Fatalf("%+v", got)
+	}
+}
+
 func TestMapSigShape(t *testing.T) {
 	body := []byte(`
 mapsigs:
