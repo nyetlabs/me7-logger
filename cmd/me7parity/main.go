@@ -32,8 +32,8 @@ func main() {
 		switch args[0] {
 		case "onboard":
 			err = cmdOnboard(args[1:])
-		case "publish":
-			err = cmdPublish(args[1:])
+		case "corpus":
+			err = cmdCorpus(args[1:])
 		case "help":
 			usage()
 		default:
@@ -56,14 +56,14 @@ func usage() {
 Usage:
   me7parity [flags]
   me7parity onboard [candidates|run|triage|promote]
-  me7parity publish [flags]
+  me7parity corpus [flags]
   me7parity -v, --version
   me7parity -h, --help
 
 me7parity scores each corpus image against legacy ME7Info output.
   onboard   Bring a corpus image into the parity set.
-  publish   List located models the corpus gate accepts. --write updates
-            ecu-corpus and does not commit.
+  corpus    List located models the corpus gate accepts. --submit stores
+            them in ecu-corpus and does not commit or upload.
 
 Run "me7parity <command> -h" for that command's flags.
 

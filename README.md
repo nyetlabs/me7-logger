@@ -112,7 +112,7 @@ make help            # all targets
 
 Related projects:
 
-- [xdfkit](https://github.com/nyetlabs/xdfkit): converts map definitions between WinOLS KP, TunerPro XDF and JSON, and publishes the corpus map packs. `me7info` writes its XDF and reads the corpus definitions with it.
+- [xdfkit](https://github.com/nyetlabs/xdfkit): converts map definitions between WinOLS KP, TunerPro XDF and JSON. `me7info` writes its XDF and reads the corpus definitions with it. This repo publishes the corpus map packs (`publish/`).
 - [ecu-corpus](https://github.com/nyetlabs/ecu-corpus) (private): flash images and their map definitions, shared by the test suites.
 
 ## Releases

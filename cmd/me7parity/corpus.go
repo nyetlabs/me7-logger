@@ -17,7 +17,7 @@ import (
 	"go.nyet.org/me7-logger/parity"
 )
 
-const publishHelp = `
+const corpusHelp = `
 Prints every parity image. Confidence has to pass for every image:
 high bodies are more than half the tuner names that scored, and a zero
 denominator is not eligible.
@@ -30,32 +30,32 @@ name is at the same address, and at least one more name is present.
 The delta is that added count. A matching name set whose description
 or comment would change is also eligible, and its delta is ~N, the
 number of those maps. An unchanged name set is not eligible and is
-not written. Shared objects keep the previous conversion, units, and
+not submitted. Shared objects keep the previous conversion, units, and
 layout. The description is the name table and the comment is the
 needle that located the map. Origin damos, a2l, or unset is never
 replaced. A key obj-N whose id is blank is a placeholder, not a name.
 Status keys means those keys are cleared and the origin stays. A row
 that is short for another reason still ends with key N. A definition
 that is not a parity image is listed the same way. The delta is key N.
---write does that even when the row is not otherwise eligible.
+--submit does that even when the row is not otherwise eligible.
 
---write stores an eligible model at defs/NAME.json (provenance.origin
+--submit stores an eligible model at defs/NAME.json (provenance.origin
 located) and sets the row's def column. It does not commit, push, bump,
 or upload. The corpus is CORPUS, else ../ecu-corpus when that checkout
 exists, else corpus/.
 `
 
-func cmdPublish(args []string) error {
-	fs := cli.NewFlagSet("me7parity", "publish", "[flags]", publishHelp)
+func cmdCorpus(args []string) error {
+	fs := cli.NewFlagSet("me7parity", "corpus", "[flags]", corpusHelp)
 	data := fs.StringP("data", "d", "testdata/parity", "parity root `<dir>`")
 	corpusFlag := fs.String("corpus", "", "ecu-corpus checkout `<dir>` (default CORPUS, else ../ecu-corpus, else corpus/)")
-	write := fs.Bool("write", false, "write eligible located models into the corpus")
+	submit := fs.Bool("submit", false, "submit eligible located models into the corpus")
 	d := locate.Flags(fs)
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
 	if fs.NArg() != 0 {
-		return fmt.Errorf("publish takes no image; images.yaml names them")
+		return fmt.Errorf("corpus takes no image; images.yaml names them")
 	}
 	root, err := ecucorpus.ModuleRoot()
 	if err != nil {
@@ -176,7 +176,7 @@ func cmdPublish(args []string) error {
 	}
 	lines = append(lines, extra.lines...)
 	printPublish(lines)
-	if !*write {
+	if !*submit {
 		return nil
 	}
 	for _, item := range eligible {
@@ -208,7 +208,7 @@ func cmdPublish(args []string) error {
 			if err != nil {
 				return err
 			}
-			wrote, err := locate.WriteModel(dst, imgPath, img, res.Maps, cats, "me7parity publish")
+			wrote, err := locate.WriteModel(dst, imgPath, img, res.Maps, cats, "me7parity corpus")
 			if err != nil {
 				return err
 			}
@@ -257,7 +257,7 @@ func printPublish(lines []pubLine) {
 	}
 }
 
-// gateReason is empty when the image may be published, or when origin
+// gateReason is empty when the image may be submitted, or when origin
 // hand or located still has to pass handCover. Confidence is required first.
 // Grade "-" passes only for hand. damos, a2l, and an unset origin do not.
 func gateReason(tier string, conf parity.Fraction, hasDef bool, origin string) string {
@@ -286,7 +286,7 @@ func gateReason(tier string, conf parity.Fraction, hasDef bool, origin string) s
 // handCover is empty when located strictly covers prev, and the count
 // is how many names are new. A name the locator does not have is short.
 // The same name at another address disagrees. An equal set of names is
-// identical. Publish still writes that set when a description or comment
+// identical. --submit still stores that set when a description or comment
 // would change.
 func handCover(prev, located *model.Model) (string, int) {
 	have := map[string][]model.Addr{}
@@ -394,7 +394,7 @@ type placeholderExtra struct {
 
 // placeholderDefs lists corpus definitions that are not already in lines and
 // whose key is obj-N with a blank id. They are not parity images, so they
-// have no tier or confidence. --write clears the key and keeps the origin.
+// have no tier or confidence. --submit clears the key and keeps the origin.
 func placeholderDefs(dir string, lines []pubLine) (placeholderExtra, error) {
 	seen := map[string]bool{}
 	for _, ln := range lines {
@@ -537,7 +537,7 @@ func writePublished(path string, m *model.Model, keepOrigin bool) error {
 		}
 		m.Provenance.Origin = "located"
 	}
-	b, err := canon.MarshalStamped(m, "me7parity publish")
+	b, err := canon.MarshalStamped(m, "me7parity corpus")
 	if err != nil {
 		return err
 	}

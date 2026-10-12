@@ -1,5 +1,5 @@
 // Package locate registers the definition-file flags and writes the full
-// located model. generate, probe, and publish share them.
+// located model. generate, probe, and corpus share them.
 package locate
 
 import (
@@ -18,7 +18,7 @@ import (
 	"go.nyet.org/me7-logger/xdf"
 )
 
-// Defs are the definition file flags shared by generate, probe, and publish.
+// Defs are the definition file flags shared by generate, probe, and corpus.
 type Defs struct {
 	Core, Names, Meas, MapPath, Alias, User *string
 }

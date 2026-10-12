@@ -14,6 +14,7 @@
 #   make go.work          gitignored go.work that builds against ../xdfkit
 #   make xdfkit-bump      pin go.mod to the pushed xdfkit master (pseudo-version)
 #   make check-pinned     build and vet; uses go.work when that file exists
+#   make -C publish       stage corpus zips in build/publish/stage (needs ../xdfkit)
 #
 # Version comes from git tags only. Do not edit a version by hand.
 
@@ -139,4 +140,4 @@ clean:
 	rm -rf build dist
 
 help:
-	@sed -n '2,17p' Makefile
+	@sed -n '2,18p' Makefile

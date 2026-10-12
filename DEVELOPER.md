@@ -15,14 +15,14 @@ flowchart LR
   subgraph win[Windows only]
     exe[ME7Info.exe]
   end
-  src -->|xdfkit publish| def
   bin --> exe -->|.ecu| oracle[testdata/parity/ecu/me7info]
   exe -.->|Ghidra decompile| port[ported finders]
   port --> cfg[config/*.yaml]
   bin --> gen[me7info generate]
   cfg --> gen
   cats -->|make corpus-bump copies| cfg
-  cats -->|xdfkit publish| tuner[PACK-tuner.xdf]
+  def -->|"make -C publish"| packs["IMAGE-DATE.zip, IMAGE-tuner.xdf"]
+  cats -->|"make -C publish"| packs
   gen -->|xdf.Model| kit[xdfkit model + XDF writer]
   gen --> out[.ecu + tuner .xdf, --full-xdf]
   kit --> out
@@ -34,11 +34,11 @@ flowchart LR
   par -->|definition errors| src
 ```
 
-Stage new originals under `testdata/parity/incoming/` (gitignored except its README). `me7parity onboard` runs ME7Info.exe, scores the `.ecu`, and adds an image when every ME7Info row is 100%. `me7parity publish` lists every parity image. Confidence has to pass for all of them. A star after the tier is an empty definition or origin `hand`. With no definition, the name grade must be D or better. Origin `hand` does not wait for that grade. `eligible` is a strict improvement: every current name at the same address and at least one new name, or an empty definition that passed the grade. `identical` is an unchanged name set and is not written. A matching name set whose description or comment would change is eligible, and its delta is ~N, the number of those maps. `--write` replaces origin `hand` or `located` only when the row is eligible, and the shared objects keep the previous conversion, units, and layout. The description is the name table and the comment is the locating needle. Origin `damos` and `a2l` are not replaced with a located model. A key `obj-N` with a blank id is a placeholder, not a name. Status `keys` and delta `key N` mean `--write` clears those keys and leaves the origin. A definition that is not a parity image is listed the same way, so `8D0907558E-D03` and `8D0907558M-D01` are included. A row that is short for another reason keeps that status with `, key N` on the end, and the delta is also `key N`. `--write` still clears the keys and sets that row's `def` cell to `defs/NAME.json`. The corpus is `../ecu-corpus` when that checkout exists, otherwise `corpus/` (`CORPUS=` overrides). It does not commit. KP, XDF, and DAMOS still go through xdfkit `publish/import-incoming.sh`. Corpus edits, `categories.json` included, are committed and pushed in `../ecu-corpus`, then pulled with `make corpus-bump`; `corpus/` is a read-only shallow submodule (xdfkit `docs/corpus.md`). ME7Info's `.ecu` output for each image is the only hard 100% oracle.
+Stage new originals under `testdata/parity/incoming/` (gitignored except its README). `me7parity onboard` runs ME7Info.exe, scores the `.ecu`, and adds an image when every ME7Info row is 100%. `me7parity corpus` lists every parity image. Confidence has to pass for all of them. A star after the tier is an empty definition or origin `hand`. With no definition, the name grade must be D or better. Origin `hand` does not wait for that grade. `eligible` is a strict improvement: every current name at the same address and at least one new name, or an empty definition that passed the grade. `identical` is an unchanged name set and is not submitted. A matching name set whose description or comment would change is eligible, and its delta is ~N, the number of those maps. `--submit` replaces origin `hand` or `located` only when the row is eligible, and the shared objects keep the previous conversion, units, and layout. The description is the name table and the comment is the locating needle. Origin `damos` and `a2l` are not replaced with a located model. A key `obj-N` with a blank id is a placeholder, not a name. Status `keys` and delta `key N` mean `--submit` clears those keys and leaves the origin. A definition that is not a parity image is listed the same way, so `8D0907558E-D03` and `8D0907558M-D01` are included. A row that is short for another reason keeps that status with `, key N` on the end, and the delta is also `key N`. `--submit` still clears the keys and sets that row's `def` cell to `defs/NAME.json`. The corpus is `../ecu-corpus` when that checkout exists, otherwise `corpus/` (`CORPUS=` overrides). It does not commit. `make -C publish` writes `build/publish/stage/IMAGE-DATE.zip` from the corpus JSON and `categories.json`, including `IMAGE-tuner.xdf`; `make -C publish upload` rsyncs that directory (`publish/README.md`). Corpus edits, `categories.json` included, are committed and pushed in `../ecu-corpus`, then pulled with `make corpus-bump`; `corpus/` is a read-only shallow submodule (xdfkit `docs/corpus.md`). ME7Info's `.ecu` output for each image is the only hard 100% oracle.
 
 ## Design
 
-`me7info` (`generate`, `probe`, `place`), `me7parity` (the report, plus `onboard` and `publish`), and `me7logger` (`log`) share one Go module. `me7parity` reads `testdata/parity` and is not in the release. `generate` and `me7logger` locate items in the image as `record.Item` and `record.Map`. The `.ecu` writer reads those. `xdf.Model` converts the maps to an xdfkit model (file offsets, raw values, provenance origin `located`), and xdfkit files it with `Tuner` or `Categorize` and writes the XDF. `parity` reads the corpus definitions with xdfkit `canon` and `model`. me7-logger imports xdfkit; xdfkit never imports me7-logger.
+`me7info` (`generate`, `probe`, `place`), `me7parity` (the report, plus `onboard` and `corpus`), and `me7logger` (`log`) share one Go module. `me7parity` reads `testdata/parity` and is not in the release. `generate` and `me7logger` locate items in the image as `record.Item` and `record.Map`. The `.ecu` writer reads those. `xdf.Model` converts the maps to an xdfkit model (file offsets, raw values, provenance origin `located`), and xdfkit files it with `Tuner` or `Categorize` and writes the XDF. `parity` reads the corpus definitions with xdfkit `canon` and `model`. me7-logger imports xdfkit; xdfkit never imports me7-logger.
 
 `me7info place ref.json ref.bin dst.bin` writes a model for the destination image (`-o`, or stdout). A body that still matches is kept. One code pointer, found once, moves the object. Anything else is omitted. Provenance is format `image`, origin `located`. The report on stderr is the kept, moved, and omitted counts.
 
@@ -60,7 +60,7 @@ Flags use pflag (`internal/cli`): a long name takes two hyphens (`--user`), its 
 
 `signatures.yaml` and `mapsigs.yaml` rows run top to bottom, RAM first, and the first row that hits fills a name. Prepended axis counts become rows and columns only when they account for every byte up to the body; never invent a count of 1. Only named maps reach the XDF.
 
-`config/categories.json` is the corpus `categories.json` (xdfkit `docs/corpus.md`), copied by `make corpus-bump`; a test fails when they differ. It files each XDF map under a category. The tuner XDF holds only its names plus the maps at their axis addresses; `--full-xdf` holds every named map, with the rest under `Other`. `--model` writes that full model as JSON for the corpus (`xdfkit` `publish/README.md`).
+`config/categories.json` is the corpus `categories.json` (xdfkit `docs/corpus.md`), copied by `make corpus-bump`; a test fails when they differ. It files each XDF map under a category. The tuner XDF holds only its names plus the maps at their axis addresses; `--full-xdf` holds every named map, with the rest under `Other`. `--model` writes that full model as JSON for the corpus (`publish/README.md`).
 
 A constant at a table axis address becomes a 1d breakpoint curve with that axis's count and data, so xdfkit links the axis to it. That happens only when every axis there has the same shape, the image values strictly increase, and no other map starts inside the curve. Otherwise it stays a constant, and `probe --maps` lists it as `xdf: not a breakpoint curve`.
 

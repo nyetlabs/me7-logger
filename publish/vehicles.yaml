@@ -1,0 +1,37 @@
+# Engine, code, vehicle, year, gearbox, and market for the download page.
+# ECU family comes from corpus.tsv. A file that fits more than one vehicle
+# keeps them in that one cell. Gearbox is manual or automatic. 2.7T and RS6
+# rows follow https://files.s4wiki.com/stock/part-numbers.txt and
+# https://s4wiki.com/wiki/Generations
+# 06A906032HJ-0002 is the Octavia 1.8T 150 file; AUM is the code listed for
+# that ECU. 8E0909518AK is the A4 1.8T AVJ, used 2002-2005.
+# 8E0909518AS-0003 is the A4 1.8T BEX, 190 hp, 2002-2004.
+06A906032HF-0006: {engine: 1.8T, code: AWP, vehicle: "Golf, Jetta", year: 2002+, gearbox: automatic}
+06A906032HJ-0002: {engine: 1.8T, code: AUM, vehicle: Octavia, year: 2001-2006}
+06A906032HS-0008: {engine: 1.8T, code: AWP, vehicle: "Golf, Jetta", year: 2002+, gearbox: manual}
+06A906032LP-0005: {engine: 1.8T, code: AWP, vehicle: "Golf, Jetta", year: 2002+}
+06A906032LQ-0007: {engine: 1.8T, code: AWP, vehicle: "Golf, Jetta", year: 2002+, gearbox: automatic}
+06A906032NL-0003: {engine: 1.8T, code: AWP, vehicle: "Golf, Jetta", year: 2002+, gearbox: automatic}
+06A906032S-0004: {engine: 1.8T, code: APH, vehicle: Beetle, year: 1999-2000, gearbox: automatic}
+4B0906018CM-0008: {engine: 1.8T, code: AWM, vehicle: Passat, year: 2002}
+4B0906018DH-0004: {engine: 1.8T, code: AWT, vehicle: "Passat, Superb", year: 2003-2005, market: EU}
+4B0906018DQ-0010: {engine: 1.8T, code: AWM, vehicle: Passat, year: 2003-2005, market: NA}
+4D1907558-0002: {engine: 4.2T, code: BCY, vehicle: RS6, year: 2002-2004, market: EU}
+4D1907558-0004: {engine: 4.2T, code: BCY, vehicle: RS6, year: 2002-2004, market: EU}
+4Z7907551AA-0010: {engine: 2.7T, code: BEL, vehicle: allroad, year: 2004, market: NA}
+4Z7907551R-0003: {engine: 2.7T, code: BEL, vehicle: "allroad, 04 A6", year: 2003, market: NA}
+8D0907551F-0001: {engine: 2.7T, code: ASJ, vehicle: RS4, year: 2001, gearbox: manual, market: EU}
+8D0907551G-0002: {engine: 2.7T, code: AZB, vehicle: S4, year: 2001, gearbox: manual, market: EU}
+8D0907551H-0003: {engine: 2.7T, code: APB, vehicle: S4, year: 2001, gearbox: manual, market: NA}
+8D0907551AA-4000: {engine: 2.7T, code: APB, vehicle: S4, year: 2002, gearbox: automatic, market: NA}
+8D0907551K-0001: {engine: 2.7T, code: AZR, vehicle: RS4, year: 2001, gearbox: manual, market: EU}
+8D0907551Q-0001: {engine: 2.7T, code: AZR, vehicle: RS4, year: 2002, gearbox: manual, market: EU}
+8D0907551L-0001: {engine: 2.7T, code: APB, vehicle: S4, year: 2001.5, gearbox: automatic, market: NA}
+8D0907551M-0002: {engine: 2.7T, code: APB, vehicle: S4, year: 2001.5, gearbox: manual, market: NA}
+8D0907551T-0003: {engine: 2.7T, code: APB, vehicle: S4, year: 2002, gearbox: manual, market: NA}
+8D0907558E-D03: {engine: 1.8T, code: AEB, vehicle: A4, year: 1997-1999}
+8D0907558M-D01: {engine: 1.8T, code: AEB, vehicle: "A4, Passat", year: 1997-1999}
+8E0909518AK-0004: {engine: 1.8T, code: AVJ, vehicle: A4, year: 2002-2005}
+8E0909518AS-0003: {engine: 1.8T, code: BEX, vehicle: A4, year: 2002-2004}
+8N0906018CB-0003: {engine: 1.8T, code: BAM, vehicle: TT, year: 2003-2006, gearbox: manual, market: EU}
+8N0906018CJ-0001: {engine: 1.8T, code: BEA, vehicle: TT, year: 2004+, gearbox: manual, market: NA}
