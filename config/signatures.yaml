@@ -61,6 +61,8 @@ signatures:
 - {name: fkhfm, size: 1, from: '0x820000', open: 'E6FXXXXX{nmot:C2FX}{rl:C2FX}DAXXXXXXF7F8XXXXC2F4XXXXC2F5XXXX0B45', pattern: F7F8XXXXC2F4XXXXC2F5XXXX0B45, at: 2}
 - {name: ldptv, size: 2, from: '0x820000', pattern: F2FXXXXXF0XXBCFXF2FXXXXXF0XXBCFX, single: true, at: 2, also: [{name: lditv_w, size: 2, at: 10}, {name: ldrdtv, size: 2, at: 22}]}
 - {name: ldptv, size: 2, from: '0x820000', pattern: F2F4XXXXF054BCF5F2FAXXXXF0BABCFB004A, single: true, at: 22, also: [{name: lditv_w, size: 2, at: 10}, {name: ldrdtv, size: 2, at: 2}]}
+# The F2 FX pair occurs three times on 4016.31 24b. The earliest is the one scanLdr stores.
+- {name: ldptv, size: 2, from: '0x820000', pattern: F2FXXXXXF0XXBCFXF2FXXXXXF0XXBCFX, at: 2, also: [{name: lditv_w, size: 2, at: 10}, {name: ldrdtv, size: 2, at: 22}]}
 - {name: ldtvr_ptr, size: 2, after: ldptv, pattern: E6FCXXXXE6FDXXXXE6FEXXXXE6FFXXXXDA8XXXXX, at: -10}
 - {name: ldtvr_w, size: 2, from: '0x800200', pattern: 'E6FCXXXXE6FDXXXXF2FEXXXX{ldtvr_ptr:F2FF}DAXXXXXX{ldtvr_ptr:F6F4}', single: true, at: 10}
 - {name: ldtvr_w, size: 2, from: '0x820000', pattern: 0D02F048F059F6F4XXXXE6FCXXXXE6FD, single: true, at: 8}
@@ -80,6 +82,13 @@ signatures:
 - {name: dzwlamfaw, size: 1, from: '0x800200', pattern: 'E6FCXXXXE6FDXXXXD740E100C2FEXXXX{dzwlam_ext:F2FF}DAXXXXXX{dzwlam_ext:F6F4}', single: true, at: 14}
 - {name: wdkbadmn_w, size: 2, from: '0x820000', open: 'DAXXXXXX{mldmn_w:F6F4}', pattern: 'E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDA8XXXXX{mldmn_w:F6FX}', at: 10}
 - {name: wdkbadmx_w, size: 2, from: '0x820000', open: 'DAXXXXXX{mldmx_w:F6F4}', pattern: 'E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDA8XXXXX{mldmx_w:F6FX}', at: 10}
+# scanAxisPair sites the E6 F4 00 10 row misses. mn is the F2 F4 word, mx the F6 F4 word.
+- {name: wdkbadmn_w, size: 2, from: '0x820000', pattern: 889088808870F2F4XXXXF6F4XXXX, single: true, at: 8, also: [{name: wdkbadmx_w, size: 2, at: 12}]}
+- {name: wdkbadmn_w, size: 2, from: '0x820000', pattern: 0D033E2CF78EXXXXF2F4XXXXF6F4XXXX, single: true, at: 10, also: [{name: wdkbadmx_w, size: 2, at: 14}]}
+- {name: wdkbadmn_w, size: 2, from: '0x820000', pattern: 0D033E28F78EXXXXF2F4XXXXD740E100F6F4XXXX, single: true, at: 10, also: [{name: wdkbadmx_w, size: 2, at: 18}]}
+- {name: wdkbadmn_w, size: 2, from: '0x820000', pattern: E6F40010D740E100F6F4XXXX0D06F2F4XXXXD740E100F6F4XXXXC2F4, single: true, at: 16, also: [{name: wdkbadmx_w, size: 2, at: 24}]}
+# scanAxisPair on the early ME7.5 / ME71 images. The F6 F4 word is wdkbadmx.
+- {name: wdkbadmx_w, size: 2, from: '0x820000', pattern: 0D33F2F4XXXXF6F4XXXXE6FC, single: true, at: 8}
 - {name: wdkbadmx_w, size: 2, from: '0x820000', pattern: E6F40010F6F4XXXX0D04F2F4XXXXF6F4, at: 6, also: [{name: wdkbadmn_w, size: 2, at: 12}]}
 - {name: misopl1_w, size: 2, from: '0x820000', open: '{etazwbm:C2FX}C2F4XXXX0BX4F2FXXXXX', pattern: 'E6FCXXXXF2FDXXXXF2FEXXXX{slot:14}', at: 10}
 # scanMirl uses this window only when the slot pattern above missed.
@@ -94,6 +103,8 @@ signatures:
 - {name: ngfil, size: 1, from: '0x820000', pattern: C2FCXXXXE6FDXXXXE6FEXXXXD7400702C2FFXXXXDA8XXXXX06F00C00D740E100F6F4XXXX0D04D740E100F68EXXXXA840, single: true, at: -42}
 - {name: ngfil, size: 1, from: '0x820000', pattern: C2FCXXXXE6FDXXXXE6FEXXXXD7400902C2FFXXXXDA8XXXXX06F00C00D740E100F6F4XXXX0D04D740E100F68E, single: true, at: -32}
 - {name: ngfil, size: 1, pattern: 7C97F6F272974820DD05BC820941F7F4XXXX, single: true, at: 16}
+# scanLdr KFRBGOF. The 7C97 prefix is EA97 on the 22N images.
+- {name: ngfil, size: 1, pattern: 4820DD05BC820941F7F4XXXX, single: true, at: 10}
 - {name: tmotrvmx_b2w, size: 2, from: '0x820000', open: '{tmot:F3F8}43F8XXXX9D03{tmot:F3F8}0D02', pattern: E6FCXXXXE6FDXXXXC08EDAXXXXXX, at: -2}
 # scanVmax's second window, with the compare read through EXTP.
 - {name: tmotrvmx_b2w, size: 2, from: '0x820000', open: '{tmot:F3F8}D740E10043F8XXXXXD03{tmot:F3F8}0D04', pattern: E6FCXXXXE6FDXXXXC08EDAXXXXXX, at: -2}
@@ -107,6 +118,10 @@ signatures:
 - {name: dns_ptr, size: 1, from: '0x820000', pattern: [E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDA005678F0C4XXXX, 'E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}F1C803FCXXXX5D03'], single: true, at: 14}
 - {name: dns, size: 1, from: '0x800200', pattern: 'E6FCXXXXD2FDXXXX{dns_ptr:F2FE}DAXXXXXX{dns_ptr:F6F4}', single: true, at: 6}
 - {name: dns, size: 1, from: '0x820000', pattern: C2FCXXXXE6FDXXXXE6FEXXXXD2FFXXXXDAXXXXXXF1C8, single: true, at: 14}
+# KFDZMNST on 06A906032BB. The F7 F8 word is dns.
+- {name: dns, size: 1, from: '0x820000', pattern: E6F480FF0D02F049D084F7F8XXXX, single: true, at: 12}
+# bindRow fills msabg from this C2 F4 word. The name is not a string in ME7Info.
+- {name: msabg, size: 1, from: '0x820000', pattern: E10EF069EA00XXXXC2F4XXXXF054, single: true, at: 10}
 - {name: mifa_ptr, size: 2, from: '0x820000', open: '{vfzg:F3FX}43FXXXXX9DXXE6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDAXXXXXX', first: true, pattern: E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDAXXXXXX, at: 14}
 # axisAt tries this window before the F6F4 tail below.
 - {name: mifa_w, size: 2, from: '0x800200', pattern: 'E6FCXXXXE6FDXXXXF6FEXXXX{mifa_ptr:F2FF}DAXXXXXX{mifa_ptr:F6F4}', at: 10}
@@ -126,6 +141,9 @@ signatures:
 - {name: tsel, size: 1, from: '0x820000', open: '{rlmx_w:F6XX}', pattern: F7FXXXXXE6FCXXXXE6FDXXXXC2FEXXXXC0XFDA8XXXXX, at: 2}
 - {name: tsel, size: 1, from: '0x820000', pattern: E6FCXXXXE6FDXXXXC2FEXXXXD740E100C2FFXXXXDA8XXXXXXXXXD740E100C2FX, single: true, at: 18}
 - {name: imlatm, size: 1, from: '0x820000', pattern: C2FCXXXXE6FDXXXXE6FEXXXXD740XX02C2FFXXXXDA8XXXXX06F00C00D0845C7498507C15, single: true, at: -42, also: [{name: tmst, size: 1, at: -32}]}
+# scanLdr KFLDIWL on the images the D0845C74 tail misses. tmst is ptrAt of the word 0x20 before C2 FC.
+- {name: tmst, size: 1, from: '0x820000', pattern: 9AXXXXXXF2F4XXXX8840D740E100C2F5XXXX8850E6F4XXXXE6F5060288508840E6F4XXXXE6F5060288508840D7400602C2FC, single: true, at: 16}
+- {name: tmst, size: 1, from: '0x820000', pattern: 9AXXXXXXF2F4XXXX8840C2F5XXXX8850E6F4XXXXE6F5060288508840E6F4XXXXE6F5060288508840D7400602C2FC, single: true, at: 12}
 # scanLdr KFLDIAPL window.
 - {name: ldimxak_w, size: 2, from: '0x820000', pattern: F2FCXXXXE6FDXXXXE6FEXXXXD740XX02F2FFXXXXDA8XXXXX, single: true, at: -32}
 # scanStart KFSZT window.
@@ -146,6 +164,10 @@ signatures:
 - {name: nmot, size: 1, from: '0x820000', open: '06F480018840E6FCXXXXE6FDXXXX{nmot:C2FE}{rl:C2FF}DA8XXXXX', pattern: E6FCXXXXE6FDXXXXC2FEXXXXC2FFXXXXDAXXXXXX, at: 10, also: [{name: rl, size: 1, at: 14}]}
 - {name: detazwbs, size: 1, from: '0x804000', pattern: [D740E100F7FAXXXX9A44, D740E100F7FAXXXX9A420A70], single: true, at: 6}
 - {name: dzwg, size: 1, from: '0x804000', pattern: D740E100F78EXXXX0D06F480, single: true, at: 6}
+# scanWnw looks tanwre up. The F7 F8 word in this window is that byte.
+- {name: tanwre, size: 1, from: '0x820000', pattern: D740XX02C2F4XXXX66F410002D0EF3FXXXXXF7F8XXXXF3FA, at: 20}
+# scanKhfm's C2 F5 word. This has to precede the F6 F5 A0 E0 row, which stores a different near word.
+- {name: fkhfm, size: 1, from: '0x820000', pattern: F7F8XXXXC2F4XXXXC2F5XXXX1B45F607, single: true, at: 10}
 - {name: fkhfm, size: 1, from: '0x800200', pattern: F6F5A0E0E118XXXX9CE0, single: true, at: 6}
 - {name: misopl1_w, size: 2, from: '0x804000', pattern: 0EFE3D03F68FXXXX0D19, single: true, at: 6}
 - {name: ngfil_w, size: 2, from: '0x804000', pattern: F2F008E4F2F5XXXX7D01, single: true, at: 6}
@@ -161,11 +183,16 @@ signatures:
 - {name: pvdkdsu_w, size: 2, from: '0x804000', pattern: 9D01E005D740E100F6F5XXXXF6F5DC93, at: 10}
 # signVars stores pvdkds from this window when the pvdks_w chain missed.
 - {name: pvdkds, size: 1, from: '0x804000', pattern: '{pvdkds_w:F2FX}7C8XF7FXXXXX', at: 8}
-- {name: frkte_w, size: 1, from: '0x804000', pattern: [EA009621C2F4XXXXF2F5, EA00XXXXC2F4XXXXF2F5, E6F5FFFFF7FAXXXXC2FCEC1D], single: true, at: 6}
+- {name: frkte_w, size: 1, from: '0x804000', pattern: [EA00XXXXC2F4XXXXF2F5, E6F5FFFFF7FAXXXXC2FCEC1D], single: true, at: 6}
 - {name: ftek_w, size: 1, from: '0x804000', pattern: E6F40080F6F4XXXXE6F50080F6F562A2, single: true, at: 6}
 - {name: tevfa_w, size: 1, from: '0x804000', pattern: 1B54F2FF0CFEF2FE0EFE46FF1F003D0246FEE0FFFD03F68FXXXX0D09, single: true, at: 24}
 - {name: tevfakge_w, size: 2, from: '0x804000', pattern: F2F46AA2F6F4XXXX4840, single: true, at: 6}
 - {name: uhfm_w, size: 2, from: '0x804000', pattern: 66F1FF03F6F1XXXXF2F4, single: true, at: 6}
+# scanLdrxn KFFSLDE / KFFLLDE. The DA00 AE6C window is the one those axes use.
+- {name: wkrmdy_w, size: 2, from: '0x820000', pattern: DA00AE6CF6F4XXXXF6F5XXXXF2F2XXXXF6F2XXXXF2F3XXXX8830, single: true, at: 18}
+- {name: wkrmstat_w, size: 2, from: '0x820000', pattern: DA00AE6CF6F4XXXXF6F5XXXXF2F4XXXXF6F4XXXXF2F5, single: true, at: 18}
+# The same pair on the early images, plus wkrmsu from the F7 8F word.
+- {name: wkrmstat_w, size: 2, from: '0x820000', pattern: F0495C14F6F4XXXXC2F9XXXXC2F4XXXX009446F9FF00FD03F78FXXXX, single: true, at: 10, also: [{name: wkrmdy_w, size: 2, at: 14}, {name: wkrmsu_w, size: 2, at: 26}]}
 # The mov r12 immediate is 04 01, or 26 01 on the 512K 06A file.
 - {name: wkrmdy_w, size: 2, from: '0x804000', pattern: 'E6FC[04/DD]01F2FDXXXXF2FE', single: true, at: 6}
 - {name: wkrmstat_w, size: 2, from: '0x804000', pattern: [E6FCF200F2FDXXXXF2FE, E6FC1401F2FDXXXXF2FE], single: true, at: 6}
@@ -177,3 +204,5 @@ signatures:
 - {name: uhfm_w, size: 2, pattern: 66F2FF03F6F2XXXXF2F404F8, single: true, at: 6}
 # uhfm_w is the word after F2 FX in the KRKTE scan.
 - {name: uhfm_w, size: 2, from: '0x804000', pattern: F2FXXXXX7C1X5C1XD4XXXXXX, single: true, at: 2}
+# signVars on 06A906032BB. The first hit is the F6 F4 word.
+- {name: uhfm_w, size: 2, from: '0x804000', pattern: DB00F2FXXXXX66FXFF03F6FXXXXXDB00, at: 12}
