@@ -113,6 +113,8 @@ signatures:
 - {name: tolc_b2w, size: 2, in: tmotrvmx_b2w, pattern: E6FCXXXXE6FDXXXXC2FEXXXXDAXXXXXX, at: 10}
 - {name: perffilt_w, size: 2, from: '0x804000', pattern: 'F2FXXXXX42FXXXXXEA80XXXXF6FXXXXX{rl:F3FX}F7FXXXXX{nmot:F3FX}F7FXXXXX', single: true, at: 2, also: [{name: perfmax_w, size: 2, at: 6}]}
 - {name: perffilt_w, size: 2, from: '0x804000', pattern: F2F2XXXXF6F2XXXXC2F3, single: true, at: 6}
+# signVars findLast of F2 F2 / F6 F2. The byte after C2 F3 is the copy that holds perffilt.
+- {name: perffilt_w, size: 2, from: '0x804000', pattern: F6F4XXXXF6F5XXXXF2F2XXXXF6F2XXXXC2F348E4, single: true, at: 14}
 - {name: perffilt_w, size: 2, from: '0x804000', pattern: F6F4XXXXF6F5XXXXF2F2XXXXF6F2XXXXC2F3, at: 14}
 - {name: perfmax_w, size: 2, from: '0x804000', pattern: 42FXXXXXEA80XXXXF6FXXXXXF3FXXXXXF7FX, single: true, at: 2}
 - {name: dns_ptr, size: 1, from: '0x820000', pattern: [E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDA005678F0C4XXXX, 'E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}F1C803FCXXXX5D03'], single: true, at: 14}
@@ -153,6 +155,8 @@ signatures:
 # scanLdrapp KFLDRAPP window.
 - {name: wped, size: 1, from: '0x820000', open: '{ldtvm:F7F8}', first: true, pattern: E6FCXXXXE6FDXXXXC2FEXXXXC2FFXXXXDAXXXXXX, at: 14, also: [{name: nmot, size: 1, at: 10}]}
 - {name: imlatm, size: 1, from: '0x820000', pattern: E6FCXXXXE6FDXXXXD740E100C2FEXXXXDA8XXXXXD740E100F7F8, at: 14}
+# scanLdr KFLDIWL. The D084 tail is 8840 on X505R, not 5C74.
+- {name: imlatm, size: 1, from: '0x820000', pattern: C2FCXXXXE6FDXXXXE6FEXXXXD740XX02C2FFXXXXDA8XXXXX06F00C00D0848840, single: true, at: -42}
 - {name: tnst, size: 1, from: '0x820000', pattern: E6F3FFFFB83046F3FF00FD03F78FXXXX, single: true, at: 14}
 # scanDlul binds dplsplsdn 14 bytes before this window when the E6FC
 # continuation did not hit twice. The name is not in the catalog, so it is not written.
@@ -193,6 +197,8 @@ signatures:
 - {name: wkrmstat_w, size: 2, from: '0x820000', pattern: DA00AE6CF6F4XXXXF6F5XXXXF2F4XXXXF6F4XXXXF2F5, single: true, at: 18}
 # The same pair on the early images, plus wkrmsu from the F7 8F word.
 - {name: wkrmstat_w, size: 2, from: '0x820000', pattern: F0495C14F6F4XXXXC2F9XXXXC2F4XXXX009446F9FF00FD03F78FXXXX, single: true, at: 10, also: [{name: wkrmdy_w, size: 2, at: 14}, {name: wkrmsu_w, size: 2, at: 26}]}
+# scanLdrxn KFFLDEO. The F6 F5 word is wkrmsu when E6 FC follows.
+- {name: wkrmsu_w, size: 2, from: '0x820000', pattern: F2F5XXXX02F5XXXX9D02E6F5FFFFF6F5XXXXE6FC, single: true, at: 16}
 # The mov r12 immediate is 04 01, or 26 01 on the 512K 06A file.
 - {name: wkrmdy_w, size: 2, from: '0x804000', pattern: 'E6FC[04/DD]01F2FDXXXXF2FE', single: true, at: 6}
 - {name: wkrmstat_w, size: 2, from: '0x804000', pattern: [E6FCF200F2FDXXXXF2FE, E6FC1401F2FDXXXXF2FE], single: true, at: 6}

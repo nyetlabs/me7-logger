@@ -9,9 +9,15 @@
 # 006410010A0-0000 is the Spyker C8 Aileron 4.2 V8, 400 hp, 2009-2017.
 # Listings give no engine code. 4B0906018DQ-0060 is Bosch 1037394791,
 # the 22 Jan 2008 software of the same Passat hardware as DQ-0010.
+# 06A906032HN is Bosch 0261207440, 1.8T AUQ 180 hp. 0001 is software
+# 1037360646, ident 210201, listed for Golf, A3, Leon, and Octavia.
+# 0002 is software 1037363908, ident 220202, listed for Golf, Leon,
+# Octavia, and TT.
 006410010A0-0000: {engine: "4.2", vehicle: "C8 Aileron", year: 2009-2017}
 06A906032HF-0006: {engine: 1.8T, code: AWP, vehicle: "Golf, Jetta", year: 2002+, gearbox: automatic}
 06A906032HJ-0002: {engine: 1.8T, code: AUM, vehicle: Octavia, year: 2001-2006}
+06A906032HN-0001: {engine: 1.8T, code: AUQ, vehicle: "Golf, A3, Leon, Octavia", year: 2002-2003, market: EU}
+06A906032HN-0002: {engine: 1.8T, code: AUQ, vehicle: "Golf, Leon, Octavia, TT", year: 2002, market: EU}
 06A906032HS-0008: {engine: 1.8T, code: AWP, vehicle: "Golf, Jetta", year: 2002+, gearbox: manual}
 06A906032LP-0005: {engine: 1.8T, code: AWP, vehicle: "Golf, Jetta", year: 2002+}
 06A906032LQ-0007: {engine: 1.8T, code: AWP, vehicle: "Golf, Jetta", year: 2002+, gearbox: automatic}

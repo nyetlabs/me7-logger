@@ -1016,3 +1016,50 @@ mapsigs:
 - {name: KFFWL_1_A, pattern: F2F4XXXX8840F2F5XXXX8850C2F23BFA5C22D4C2XXXXD4D2XXXXE6FEXXXXE6FF0602DA834445, at: 20, deref: 1, derefat: 4, dereffar: true, xat: 2}
 # DQ. Page is 0602. The 4A88 tail is 0168.
 - {name: CWKONABG, pattern: D7400602C2F4B90168413A8888364A880168, at: 6}
+# 06A906032HN-0002. Same calls as 0001, with the immediates that changed.
+- {name: ESKONF, pattern: 8880887088602804F3F84D0C47F85500, at: 10}
+- {name: KFMRES, pattern: 0D0BE6FC3B14E6FDC82F, at: 4}
+- {name: KFZW, pattern: 3D0FE6FCEB20E6FDE030, at: 4}
+- {name: KFFLLDE, pattern: 8820E6FC842DE6FD0702E6FEAA32, at: 4, frame: true}
+- {name: KFLDIMX, pattern: E6FC2428E6FD0702E6FEF21D, frame: true}
+- {name: KFLDRL, pattern: E6FC7629E6FD0702E6FEC82C, frame: true}
+- {name: KFMIZUOF, pattern: 3EA6E6FC7D17E6FD8E00, at: 4}
+- {name: KFNLLNST, pattern: 80098850E6FC561B, at: 6, frame: true}
+- {name: KFTARX, pattern: 0D12F2F4DCA38840F2F5948C8850E6FC562F, at: 16, frame: true}
+- {name: KFZWOP, pattern: 0200E6FC8515E6FD4C68, at: 4}
+- {name: KFZWOP2, pattern: F2A5E6FC3516E6FD4C68, at: 4}
+- {name: CLAHSH, pattern: E6F4D007F2F5089E, add: 1, also: [{name: CLAHSH2, add: 2}, {name: CLAHSHE, add: 3}, {name: CLALSH, add: 33}]}
+- {name: TABGBTS, pattern: 42F49010FD04E11875F8418A}
+- {name: CATR, pattern: 01900D08D7400602F3F8FA13, at: 10}
+- {name: CWDLSAHK, pattern: F3F873076984EA205020}
+- {name: DPUPS, pattern: CD8A43F8600DFD03, at: 4}
+- {name: KFMRESK, pattern: AC149D0CE6FC5314, at: 6}
+- {name: KRANH, pattern: 0518D7400602C2F50618, at: 8}
+- {name: NFSM, pattern: 436EE6FC891BE6FD, at: 4, frame: true}
+- {name: TABGSS, pattern: 42F4F8108D013F35}
+- {name: TMNSMN, pattern: 468A43F8F217ED05, at: 4}
+- {name: FKKVS, pattern: 8A9F8840C2F59CF88850E6F4A40B, at: 12, frame: true, rows: 16, cols: 16, xbits: 16}
+- {name: KFMIRL, pattern: 2A9FE6FC3250F2FD9EF8, at: 4, add: 68, cols: 16, rows: 16, xbits: 16, ybits: 16}
+- {name: DWKRMSN, pattern: 6661D740E100F7F8BF08E6FCC117, at: 12, frame: true}
+- {name: KRFKLN, pattern: 9B8A9A3B0DC0E6FC3718, at: 8, frame: true}
+- {name: LDPBN, pattern: 820BE6FCB619E6FD0602F2FE888C, at: 4, frame: true, xat: 12}
+- {name: NLLM_0_A, pattern: D4C5345ED4D5365ED740E100F2FE7409DA824061F7F85FA4, at: 2, deref: 1, dereffar: true, xat: 14, cols: 6}
+- {name: NLLM_1_A, pattern: D4C5345ED4D5365ED740E100F2FE7409DA824061F7F85FA4, at: 2, deref: 1, derefat: 4, dereffar: true, xat: 14, cols: 6}
+- {name: NLLM_2_A, pattern: D4C5345ED4D5365ED740E100F2FE7409DA824061F7F85FA4, at: 2, deref: 1, derefat: 8, dereffar: true, xat: 14, cols: 6}
+- {name: NLLM_3_A, pattern: D4C5345ED4D5365ED740E100F2FE7409DA824061F7F85FA4, at: 2, deref: 1, derefat: 12, dereffar: true, xat: 14, cols: 6}
+- {name: KFLDRAPP, pattern: 13B0E6FCD419E6FD0602C2FE9CF8C2FFB189, at: 4, frame: true, add: 18, rows: 8, cols: 8}
+- {name: KFMIOP, pattern: F0F4E6FCEC66E6FD4C68F2FE9C8C, at: 4, xat: 12}
+# 06A906032NL-0003. Same calls as HF-0006, with the immediates that changed.
+- {name: ESKONF, pattern: 8880887088602804F3F8280C47F85500, at: 10}
+- {name: CLAHSH, pattern: E6F4D007F2F5949E, add: 1, also: [{name: CLAHSH2, add: 2}, {name: CLAHSHE, add: 3}, {name: CLALSH, add: 33}]}
+- {name: CDLSH, pattern: FFFB64F4F88BD7400602C2F4AB0168412D05E6F41000, at: 12}
+- {name: CDHSHE, pattern: BFFF64F4F88BD7400602C2F49F0168412D05E6F48000, at: 12}
+- {name: KFMRES, pattern: 0D0BE6FC3614E6FD6E30F2FEB28CF2FFAC8C, at: 4, xat: 16, yat: 12}
+- {name: KFMRESK, pattern: 9D0CE6FC4E14E6FD6E30F2FEB28CF2FFAC8C, at: 4, xat: 16, yat: 12}
+- {name: NFSM, pattern: 4262E6FC191CE6FD0602D740E100F2FE8609, at: 4, frame: true, xat: 16}
+- {name: KFNLLNST, pattern: 3E098840D740E100F2F552098850E6FC5A06E6FD0602, at: 16, frame: true, xat: 0, yat: 10}
+- {name: FKKVS, pattern: 18A08840C2F5A2F88850E6F4680DE6F50702, at: 12, frame: true, rows: 16, cols: 16, xbits: 16}
+- {name: CLAATR, pattern: 43F86207ED29C2F42AFA, add: 6, also: [{name: CLAATR2, add: 7}, {name: CLAATS, add: 10}, {name: CLAATS2, add: 11}]}
+- {name: CWDLSAHK, pattern: D740060243F85707FD09, at: 6}
+- {name: TABGSS, pattern: D740070222F43014, at: 6}
+- {name: TVUB, pattern: E6FEE43FC2FFD4F9DA00427B, cols: 4}

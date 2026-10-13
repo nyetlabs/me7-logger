@@ -2,6 +2,7 @@
 # Each is read from corpus/images/<part>/<image>.bin. Goldens use the same name:
 # ecu/me7info/<image>.ecu. The address oracle is the image's corpus def.
 - 006410010A0-0000
+- 06A906032DL-0006
 - 06A906032HF-0006
 - 06A906032HJ-0002
 - 06A906032HN-0001
@@ -42,7 +43,9 @@
 - 8E0909518AK-0004
 - 8E0909518AS-0003
 - 8N0906018BB-0003
+- 8N0906018BH-0001
 # names/8N0906018CB.yaml is from a prerelease calibration, not CB-0003.
 - 8N0906018CB-0003
+- 8N0906018CH-0005
 - 8N0906018CJ-0001
 - 8N0906018Q-0004
