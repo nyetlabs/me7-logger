@@ -1,6 +1,8 @@
 # Incoming images
 
-This directory is gitignored apart from this file. `me7parity onboard` is the way in.
+This directory is gitignored apart from this file. `me7parity onboard` is the way in, after the image is in the corpus.
+
+A new flash image goes in the full clone, `../ecu-corpus/images/PART-VERSION.bin`. The name is the part number and software version stored in the image. `make` in that repo rebuilds `corpus.tsv` and the root symlinks. Commit it there. `make corpus-bump` in this repo moves the `./corpus` submodule up to that commit. `me7parity onboard` reads `./corpus` and lists stems that are in its `corpus.tsv` and not yet in `images.yaml`.
 
 - `me7parity onboard candidates` lists corpus images that are not in `images.yaml`: `eligible` when `ecus/NAME.ecu` is already there, `needs-ME7Info` when it is not, `unsupported` when the image is not 512 KiB or 1 MiB. The third column is the EPK string. `dup` means that layout id is already scored.
 - `me7parity onboard run` writes `ecus/NAME.ecu` with ME7Info.exe. `ME7INFO_EXE` defaults to `../ME7L/bin/ME7Info.exe`. `WINE` defaults to `wine`. An existing file is left in place.

@@ -80,9 +80,30 @@ absent:
     - DLBTS
     - KFVPLGU
     - SNM16OPUW
+  # No DAMOS export. 1037371702 is the naturally aspirated V8.
+  # plsol, rlmx_w, and ldtvm are not in the routine table, so scanLdr,
+  # scanLdrxn, and scanLdrapp do not open. The knock window does not
+  # contain KFMIZUOF, and the only 6E 27 F6 F4 frame has no axis.
+  # DLBTS, KFVPLGU, and SNM16OPUW stay absent for the same reason as
+  # 4Z7-like.
+  4Z7-na:
+    - DLBTS
+    - KFFLLDE
+    - KFLDHBN
+    - KFLDIOPU
+    - KFLDRAPP
+    - KFLDRL
+    - KFMIZUOF
+    - KFVPLGU
+    - LDPBN
+    - LDRXN
+    - SNM16OPUW
   # Not in the 8D0907551F DAMOS export. That export has KFDLBTS, ZDLBTS,
-  # and TABGBTS, and it does not have these three.
+  # and TABGBTS, and it does not have these. It also has no FKKVS or KFTARX.
+  # ESKONF is not in that export either; the 0x55 check is still in the image.
   23g:
     - DLBTS
+    - FKKVS
     - KFLBTS_0_A
+    - KFTARX
     - KFVPLGU
