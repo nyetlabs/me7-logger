@@ -18,58 +18,75 @@ import (
 )
 
 const corpusHelp = `
-Prints every parity image. Confidence has to pass for every image:
-high bodies are more than half the tuner names that scored, and a zero
-denominator is not eligible.
+Lists every parity image. Confidence has to pass on every row: high
+bodies are more than half the tuner names that scored. A zero
+denominator fails the row.
 
-A star after the tier means the name grade has not reached S.
-A DAMOS or A2L oracle has no star.
-With no definition, the name grade must be D, C, B, A, S, or S+.
-Origin hand does not wait for that grade. Origin hand or located is
-eligible when the located model is a strict superset: every current
-name is at the same address, and at least one more name is present.
-Both KFPED variants cover a hand KFPED, and both KFPEDR variants cover
-a hand KFPEDR. One variant does not. A located KFPED does not cover a
-hand KFPED_0_A.
-The delta is that added count. A matching name set whose description
-or comment would change is also eligible, and its delta is ~N, the
-number of those maps. An unchanged name set is not eligible and is
-not submitted. A name at a different address is a correction. A
-located name the hand file does not have is an addition. A short key
-blocks neither.
-The delta is ~N for the addresses and +N for the additions, and the
-status repeats it after the short, the same way a key count does.
---submit writes that row: the located address, the added maps, and the
-hand conversion, units, and layout. The origin stays hand, so the
-status is not eligible.
-Shared objects keep the previous conversion, units, and layout. The
-description is the name table and the comment is the
-needle that located the map. Origin damos, a2l, or unset is never
-replaced. A key obj-N whose id is blank is a placeholder, not a name.
-Status keys means those keys are cleared and the origin stays. A row
-that is short for another reason still ends with key N. A definition
-that is not a parity image is listed the same way. The delta is key N.
---submit does that even when the row is not otherwise eligible.
+  status       whether --submit stores the row, and why
+  tier         the names grade. * is below S, except on a DAMOS or
+               A2L definition
+  delta        the edit --submit would write. - is nothing
+  confidence   high bodies / tuner names that scored
 
---submit stores an eligible model at defs/NAME.json (provenance.origin
-located) and sets the row's def column. It does not commit, push, bump,
-or upload. The corpus is CORPUS, else ../ecu-corpus when that checkout
-exists, else corpus/.
+status
+  eligible               stored. Origin becomes located.
+  identical              same names, and the description and comment
+                         would stay.
+  origin damos           DAMOS definition. Left in place.
+  origin a2l             A2L definition. Left in place.
+  origin unset           no provenance origin. Left in place.
+  hand short NAME        that hand name was not located, so the file
+                         stays. When other names can move or be added,
+                         the status continues with the delta and
+                         --submit writes those. Origin stays hand.
+  hand disagrees NAME    that name has more than one located
+                         address. A following delta is a partial
+                         write and the origin stays hand. With no
+                         delta the row is left as it is.
+  grade -                the name grade is below D. Origin hand is
+                         scored without waiting for a grade. With no
+                         definition, D or better is eligible.
+  confidence N/M         high bodies are half or fewer.
+  keys                   blank-id keys named obj-N. --submit clears
+                         them and leaves the origin. Another status
+                         ends with ", key N" for the same clear.
+  def unreadable         the definition file could not be read.
 
-A pn is an image stem or the part number in front of the software
-index: 8D0907551H matches 8D0907551H-0003. The list is those images.
-Under the row, hand lists every short, disagreeing, and added key, and
-open lists the tuner names that did not hit. An absent name is
-marked. A family form whose slot is already located is marked with
-that name. --submit stores only the
-images named.
+delta
+  +N       names added. Status is eligible.
+  ~N       descriptions, comments, or addresses brought in line.
+           Status is eligible when nothing is short.
+  ~N +N    both, while a short name remains. Origin stays hand.
+  key N    placeholder keys cleared. On an eligible row the origin
+           still becomes located.
+
+A definition that is not a parity image is listed when it has
+placeholder keys. Its tier is - and its confidence is -.
+
+A pn is a stem, a stem.bin, or the part number in front of the
+software index: 8D0907551H matches 8D0907551H-0003. An exact stem
+matches only that image. Under each named row:
+  hand    short, disagreeing, and added keys
+  open    tuner names that did not hit
+  block   layout-block names that did not hit
+absent and "met by NAME" are the same marks as the report.
+--submit stores only the images named.
+
+--submit writes defs/NAME.json and sets that row's def column.
+A stored object keeps the previous conversion, units, and layout.
+The description becomes the name table and the comment the needle
+that located the map. It leaves the checkout uncommitted, and it
+does not push or upload.
+
+The corpus is --corpus, else CORPUS, else ../ecu-corpus when that
+checkout exists, else corpus/.
 `
 
 func cmdCorpus(args []string) error {
 	fs := cli.NewFlagSet("me7parity", "corpus", "[flags] [pn...]", corpusHelp)
 	data := fs.StringP("data", "d", "testdata/parity", "parity root `<dir>`")
 	corpusFlag := fs.String("corpus", "", "ecu-corpus checkout `<dir>` (default CORPUS, else ../ecu-corpus, else corpus/)")
-	submit := fs.Bool("submit", false, "submit eligible located models into the corpus")
+	submit := fs.Bool("submit", false, "write the rows marked for storage into the corpus")
 	d := locate.Flags(fs)
 	if err := fs.Parse(args); err != nil {
 		return err

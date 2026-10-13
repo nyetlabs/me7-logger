@@ -57,61 +57,75 @@ Usage:
   me7parity onboard [candidates|run|triage|promote]
   me7parity corpus [flags] [pn...]
   me7parity -v, --version
-  me7parity -h, --help
 
-me7parity scores each corpus image against legacy ME7Info output.
-  onboard   Bring a corpus image into the parity set.
-  corpus    List located models the corpus gate accepts. --submit stores
-            them in ecu-corpus and does not commit or upload.
-
-Run "me7parity <command> -h" for that command's flags.
-
-These commands read testdata/parity in this checkout. They are not in
-the me7info release.
 `, version)
+	fs, _, _ := parityFlags()
+	fmt.Fprintf(os.Stderr, "Flags:\n%s%s", fs.FlagUsages(), reportHelp)
 }
 
-const parityHelp = `
-Legacy ME7Info parity is the only hard mark, scored one image at a time.
-The catalog column is coverage. The measurement list is the extras
-column on each ECU row.
+const reportHelp = `
+Prints the parity report. Each score is hits/total and a percent.
+With no pn the report is every image in images.yaml. A pn is a stem,
+a stem.bin, or the part number in front of the software index:
+8D0907551H matches 8D0907551H-0003. An exact stem matches only that
+image. A pn adds the names that missed, under open and block.
 
-The names section scores names/tuner.yaml on every image, and each
-other names/*.yaml list on the images of its layout block:
-  - A hit is one address and its axes. An axis count of 0 is a scalar,
-    so the address alone is the hit. One axis is a curve, two a map.
-  - When that image's XDF contains the name, the body address must
-    match one of its rows.
-  - The axis column counts the axes present on the maps that hit. Its
-    denominator is the list's axis count for those maps, so a scalar
-    adds nothing. It is 0 only when every map that hit is a scalar.
-  - The confidence column is the body bytes of the names that hit. Its
-    denominator is that matched set, not the tuner list.
-  - A star after the tier means the name grade has not reached S.
-    A DAMOS or A2L oracle has no star.
+ecu me7info
+    The only hard mark. 100% means every row of that image's legacy
+    ME7Info file matched.
+    vs ecu-specific: matched rows / rows in the file. (+N) is catalog
+    names located here that the file does not name.
+    vs corpus: catalog names located on this image / the full catalog.
+    extras: measurement-list names located on this image.
 
-The image's corpus definition (corpus.tsv def), when present, is its
-address oracle. Its provenance origin (damos, a2l, hand) says whether it
-is DAMOS sourced; with none, it is hand made. Only
-a DAMOS one turns a name hit into a miss. A hand made one that places a
-name elsewhere is listed under "hand xdf disagrees" for review, since hand
-made files can be wrong. Its x and y axes that have an address are the axis
-column of that section. Origin located is not an oracle.
+names
+    Hits in names/tuner.yaml. A hit is one address. A scalar is that
+    address, a curve needs its axis, a map needs both. A second
+    address is a miss. On a DAMOS or A2L definition, a name that
+    definition contains has to sit on one of its rows.
+    tier: highest complete tier, from D through S+. "-" means D is
+    still open. "*" means below S, except on a DAMOS or A2L
+    definition. A tier is complete when every name hits or is listed
+    in names/absent.yaml. A family counts as one name: one form
+    located, or every form absent. A pair is the plain name, or both
+    variants when the plain name is absent.
+    axis: axes present on the maps that hit / axes those maps list.
+    A scalar adds nothing.
+    confidence: bodies that hold up / names that hit. Under 16 cells
+    holds up. A larger body holds up when each peer in datasets.yaml
+    is within two cells or 3%. A run of zeros holds up only when a
+    peer has it and every such peer is zero. Names in confidence.yaml
+    are omitted.
+    block: hits in the other names file for this layout block. Blank
+    when that block has no list.
 
-The names column scores the tuner list. The other names lists of an
-image's layout block are scored in the block column.
+xdf damos
+    Maps in a DAMOS or A2L definition found at the same address.
+    axis is those axes found with the same address, count, and width.
 
-A pn is an image stem or the part number in front of the software
-index: 8D0907551H matches 8D0907551H-0003. The report is those images,
-including the tuner and block names that did not hit. An absent name
-is marked. A family form whose slot is already located is marked with
-that name.
+xdf hand
+    The same two columns for a hand-made definition. A tuner name
+    found at another address still hits in names, and is listed under
+    "hand xdf disagrees" with ours and xdf file offsets.
+
+open and block, printed for a pn, are the names that did not hit.
+    absent: listed for this layout block, so the grade counts it.
+    met by NAME: that family slot is already filled.
+
+Reads testdata/parity in this checkout. This program is omitted from
+the me7info release. Run "me7parity onboard -h" or
+"me7parity corpus -h" for those commands.
 `
 
-func cmdParity(args []string) error {
-	fs := cli.NewFlagSet("me7parity", "", "[flags] [pn...]", parityHelp)
-	dir := fs.StringP("data", "d", "testdata/parity", "parity root `<dir>`: images.yaml, ecu/me7info, and xdf")
+func parityFlags() (*pflag.FlagSet, *string, *string) {
+	fs := cli.NewFlagSet("me7parity", "", "[flags] [pn...]", reportHelp)
+	dir := fs.StringP("data", "d", "testdata/parity", "parity root `<dir>`: images.yaml, ecu/me7info, names")
 	corpus := fs.String("corpus", ecucorpus.Dir("."), "ecu-corpus checkout `<dir>`; XDFKIT_CORPUS sets the default")
+	return fs, dir, corpus
+}
+
+func cmdParity(args []string) error {
+	fs, dir, corpus := parityFlags()
 	if err := fs.Parse(args); err != nil {
 		return err
 	}

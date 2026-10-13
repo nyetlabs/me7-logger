@@ -15,26 +15,49 @@ import (
 )
 
 const onboardHelp = `
-candidates lists corpus images missing from images.yaml: eligible when
-incoming/ecus already has an .ecu, needs-ME7Info when ME7Info.exe still
-has to run, unsupported when the image is not 512 KiB or 1 MiB. The
-column is the EPK string. dup names a scored image that already has
-the same layout id.
+Brings a corpus image into the parity set. With no action, onboard
+runs candidates, then run, then triage.
 
-run writes incoming/ecus/NAME.ecu with ME7Info.exe. ME7INFO_EXE defaults
-to ../ME7L/bin/ME7Info.exe and WINE defaults to wine. An existing file
-is left in place.
+NAME is a corpus stem, the whole name column from candidates, such
+as 8D0907551H-0003. The flash image is <corpus>/images/NAME.bin, and
+that stem has to be a row of <corpus>/corpus.tsv. A filesystem path
+is rejected, and the report's shorter part number is not accepted
+here. --corpus is XDFKIT_CORPUS, otherwise ./corpus. BLOCK is a
+layout block already named in layouts.yaml.
 
-triage copies those files to incoming/oracle and scores them. ready in
-incoming/triage.tsv means every ME7Info row is 100%.
+candidates
+    Corpus images missing from images.yaml. Columns are name, status,
+    and epk. epk is the EPK string, or -. The name column is the
+    NAME to pass to run, triage, and promote.
+    eligible        incoming/ecus already has an .ecu
+    needs-ME7Info   ME7Info.exe still has to run
+    unsupported     the image is not 512 KiB or 1 MiB
+    dup:NAME        a scored image already has this layout id
+    shared:A,B      other candidates share this layout id
 
-promote NAME[=BLOCK] inserts the image and its layout id, copies the
-oracle to ecu/me7info, and scores. BLOCK defaults to the scored image
-with the longest shared name prefix. A layout id already on a scored
-image is refused. Any ME7Info row under 100% restores both YAML files
-and the new golden.
+run [NAME...]
+    Runs ME7Info.exe on <corpus>/images/NAME.bin and writes
+    incoming/ecus/NAME.ecu. ME7INFO_EXE defaults to
+    ../ME7L/bin/ME7Info.exe, next to this module. WINE defaults to
+    wine. An existing file is left in place. With no NAME, every
+    needs-ME7Info candidate is run.
 
-With no action, onboard runs candidates, then run, then triage.
+triage [NAME...]
+    Copies those files to incoming/oracle, scores them, and writes
+    incoming/triage.tsv. Columns are name, status, and me7info
+    (matched rows / ME7Info rows).
+    ready      every ME7Info row matched
+    short      a ME7Info row missed
+    unscored   no .ecu to score
+    With no NAME, every eligible candidate that is not a dup is
+    scored. Ready names are printed as the promote command.
+
+promote NAME[=BLOCK]...
+    Inserts the image and its layout id, copies the oracle to
+    ecu/me7info, and scores. BLOCK defaults to the scored image
+    with the longest shared name prefix. A layout id already on a
+    scored image is refused. Any ME7Info row under 100% restores
+    both YAML files and the new golden.
 `
 
 const (
@@ -59,7 +82,7 @@ func cmdOnboard(args []string) error {
 	fs := cli.NewFlagSet("me7parity", "onboard", "[candidates|run|triage|promote] [flags] [NAME...]", onboardHelp)
 	data := fs.StringP("data", "d", "testdata/parity", "parity root `<dir>`")
 	incoming := fs.String("incoming", "", "incoming `<dir>` (default <data>/incoming)")
-	corpus := fs.String("corpus", ecucorpus.Dir("."), "ecu-corpus checkout `<dir>`")
+	corpus := fs.String("corpus", ecucorpus.Dir("."), "ecu-corpus checkout `<dir>`: corpus.tsv and images/<stem>.bin; XDFKIT_CORPUS sets the default")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -315,7 +338,7 @@ func (o *onboard) runOne(wine, exe, name string) error {
 		return fmt.Errorf("%w\n%s", err, tail(string(log), 20))
 	}
 	st, statErr := os.Stat(out)
-	if statErr != nil || st.Size() == 0 || !strings.Contains(string(log), "success") {
+	if statErr != nil || st.Size() == 0 {
 		return fmt.Errorf("ME7Info wrote no .ecu\n%s", tail(string(log), 20))
 	}
 	return nil
