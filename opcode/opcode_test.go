@@ -295,3 +295,28 @@ func TestSubSelector(t *testing.T) {
 		t.Fatalf("%+v", cases)
 	}
 }
+
+func TestFindPatAligned(t *testing.T) {
+	img := make([]byte, 12)
+	copy(img[4:], []byte{0xAA, 0xBB})
+	copy(img[10:], []byte{0xAA, 0xBB})
+	img[1], img[2] = 0xAA, 0xBB
+	end := FlashBase + uint32(len(img))
+	if got := findPat(img, FlashBase, end, "AABB", false); got != FlashBase+4 {
+		t.Fatalf("first %X", got)
+	}
+	if got := findPat(img, FlashBase, end, "AABB", true); got != 0 {
+		t.Fatalf("unique %X", got)
+	}
+	if got := findLast(img, FlashBase, end, "AABB"); got != FlashBase+10 {
+		t.Fatalf("last %X", got)
+	}
+	if got := findPat(img, FlashBase+6, end, "AABB", true); got != FlashBase+10 {
+		t.Fatalf("window %X", got)
+	}
+	// The rightmost 00 00 is odd and overlaps the even hit at 2.
+	zeros := []byte{0, 0, 0, 0, 0, 1}
+	if got := findLast(zeros, FlashBase, FlashBase+uint32(len(zeros)), "0000"); got != FlashBase+2 {
+		t.Fatalf("overlap last %X", got)
+	}
+}

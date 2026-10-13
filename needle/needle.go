@@ -5,10 +5,12 @@
 package needle
 
 import (
+	"bytes"
 	"fmt"
 	"sort"
 	"strconv"
 	"strings"
+	"sync/atomic"
 
 	"gopkg.in/yaml.v3"
 )
@@ -360,14 +362,283 @@ func (n Needle) Find(data []byte) []int {
 }
 
 func scan(data, pat, mask []byte) []int {
-	var hits []int
-	last := len(data) - len(pat)
-	for i := 0; i <= last; i += 2 {
-		if matchAt(data, pat, mask, i) {
+	return Hits(data, pat, mask, 0, len(data), 0)
+}
+
+// Hits returns word-aligned offsets of pat under mask in data[lo:hi).
+// limit caps the result; 0 keeps every hit. A hit is the first byte of pat.
+func Hits(data, pat, mask []byte, lo, hi, limit int) []int {
+	if len(pat) == 0 || len(mask) != len(pat) || limit < 0 {
+		return nil
+	}
+	if lo < 0 {
+		lo = 0
+	}
+	if hi > len(data) {
+		hi = len(data)
+	}
+	maxStart := hi - len(pat)
+	if lo%2 != 0 {
+		lo++
+	}
+	if lo > maxStart {
+		return nil
+	}
+	if ix := indexFor(data); ix != nil {
+		if off, posts, ok := ix.window(pat, mask); ok {
+			return hitsIndexed(data, pat, mask, posts, off, lo, maxStart, limit)
+		}
+	}
+	off, needle := solidRun(pat, mask)
+	if needle == nil {
+		var hits []int
+		for i := lo; i <= maxStart; i += 2 {
+			if !matchAt(data, pat, mask, i) {
+				continue
+			}
 			hits = append(hits, i)
+			if limit > 0 && len(hits) >= limit {
+				return hits
+			}
+		}
+		return hits
+	}
+	var hits []int
+	pos := lo + off
+	end := maxStart + off + len(needle)
+	if end > len(data) {
+		end = len(data)
+	}
+	for pos < end {
+		j := bytes.Index(data[pos:end], needle)
+		if j < 0 {
+			break
+		}
+		abs := pos + j
+		start := abs - off
+		pos = abs + 1
+		if start < lo || start > maxStart || start%2 != 0 {
+			continue
+		}
+		if !matchAt(data, pat, mask, start) {
+			continue
+		}
+		hits = append(hits, start)
+		if limit > 0 && len(hits) >= limit {
+			return hits
 		}
 	}
 	return hits
+}
+
+// LastHit is the greatest word-aligned offset of pat under mask in data[lo:hi),
+// or -1 when there is none.
+func LastHit(data, pat, mask []byte, lo, hi int) int {
+	if len(pat) == 0 || len(mask) != len(pat) {
+		return -1
+	}
+	if lo < 0 {
+		lo = 0
+	}
+	if hi > len(data) {
+		hi = len(data)
+	}
+	maxStart := hi - len(pat)
+	if lo%2 != 0 {
+		lo++
+	}
+	if lo > maxStart {
+		return -1
+	}
+	if ix := indexFor(data); ix != nil {
+		if off, posts, ok := ix.window(pat, mask); ok {
+			return lastIndexed(data, pat, mask, posts, off, lo, maxStart)
+		}
+	}
+	off, needle := solidRun(pat, mask)
+	if needle == nil {
+		for i := maxStart; i >= lo; i-- {
+			if i%2 != 0 {
+				continue
+			}
+			if matchAt(data, pat, mask, i) {
+				return i
+			}
+		}
+		return -1
+	}
+	nLo := lo + off
+	nHi := maxStart + off + len(needle)
+	if nHi > len(data) {
+		nHi = len(data)
+	}
+	for nLo < nHi {
+		j := bytes.LastIndex(data[nLo:nHi], needle)
+		if j < 0 {
+			return -1
+		}
+		abs := nLo + j
+		start := abs - off
+		// Keep a needle that overlaps this one and starts earlier.
+		// abs+len-1 still holds a needle at abs-1, and drops the one at abs.
+		nHi = abs + len(needle) - 1
+		if start < lo || start > maxStart || start%2 != 0 {
+			continue
+		}
+		if matchAt(data, pat, mask, start) {
+			return start
+		}
+	}
+	return -1
+}
+
+// wordIndex lists every file offset of a 2-byte window, grouped by the
+// little-endian word.
+type wordIndex struct {
+	start []int
+	pos   []int32
+}
+
+// span is the index for one Bind. Bytes must not change until unbind.
+type span struct {
+	p  *byte
+	n  int
+	ix *wordIndex
+}
+
+// One image is indexed at a time. A Bind that finds the slot taken searches
+// without the index, so a second Generate stays correct.
+var bound atomic.Pointer[span]
+
+// Bind indexes data for Hits and LastHit until unbind runs.
+// The bytes must stay unchanged until then.
+func Bind(data []byte) (unbind func()) {
+	if len(data) < 2 {
+		return func() {}
+	}
+	s := &span{&data[0], len(data), buildWordIndex(data)}
+	if !bound.CompareAndSwap(nil, s) {
+		return func() {}
+	}
+	return func() { bound.CompareAndSwap(s, nil) }
+}
+
+func indexFor(data []byte) *wordIndex {
+	s := bound.Load()
+	if s == nil || len(data) < 2 || s.n != len(data) || &data[0] != s.p {
+		return nil
+	}
+	return s.ix
+}
+
+func buildWordIndex(data []byte) *wordIndex {
+	n := len(data) - 1
+	count := make([]int, 65536)
+	for i := 0; i < n; i++ {
+		count[int(data[i])|int(data[i+1])<<8]++
+	}
+	ix := &wordIndex{start: make([]int, 65537), pos: make([]int32, n)}
+	for w := 0; w < 65536; w++ {
+		ix.start[w+1] = ix.start[w] + count[w]
+	}
+	cursor := make([]int, 65536)
+	copy(cursor, ix.start[:65536])
+	for i := 0; i < n; i++ {
+		w := int(data[i]) | int(data[i+1])<<8
+		ix.pos[cursor[w]] = int32(i)
+		cursor[w]++
+	}
+	return ix
+}
+
+// window is the fully specified byte pair with the fewest occurrences.
+func (b *wordIndex) window(pat, mask []byte) (off int, posts []int32, ok bool) {
+	best := int(^uint(0) >> 1)
+	for i := 0; i+1 < len(pat); i++ {
+		if mask[i] != 0xFF || mask[i+1] != 0xFF {
+			continue
+		}
+		w := int(pat[i]) | int(pat[i+1])<<8
+		n := b.start[w+1] - b.start[w]
+		if n < best {
+			best = n
+			off = i
+			posts = b.pos[b.start[w]:b.start[w+1]]
+			ok = true
+			if n == 0 {
+				return off, posts, true
+			}
+		}
+	}
+	return off, posts, ok
+}
+
+func hitsIndexed(data, pat, mask []byte, posts []int32, off, lo, maxStart, limit int) []int {
+	minP := lo + off
+	maxP := maxStart + off
+	k := sort.Search(len(posts), func(i int) bool { return int(posts[i]) >= minP })
+	var hits []int
+	for ; k < len(posts); k++ {
+		p := int(posts[k])
+		if p > maxP {
+			break
+		}
+		start := p - off
+		if start < lo || start%2 != 0 {
+			continue
+		}
+		if !matchAt(data, pat, mask, start) {
+			continue
+		}
+		hits = append(hits, start)
+		if limit > 0 && len(hits) >= limit {
+			return hits
+		}
+	}
+	return hits
+}
+
+func lastIndexed(data, pat, mask []byte, posts []int32, off, lo, maxStart int) int {
+	minP := lo + off
+	maxP := maxStart + off
+	k := sort.Search(len(posts), func(i int) bool { return int(posts[i]) > maxP }) - 1
+	for ; k >= 0; k-- {
+		p := int(posts[k])
+		if p < minP {
+			break
+		}
+		start := p - off
+		if start < lo || start > maxStart || start%2 != 0 {
+			continue
+		}
+		if matchAt(data, pat, mask, start) {
+			return start
+		}
+	}
+	return -1
+}
+
+// solidRun is the longest fully specified byte run, used as an index.
+func solidRun(pat, mask []byte) (start int, needle []byte) {
+	best, bestN := 0, 0
+	for i := 0; i < len(pat); {
+		if mask[i] != 0xFF {
+			i++
+			continue
+		}
+		j := i
+		for j < len(pat) && mask[j] == 0xFF {
+			j++
+		}
+		if j-i > bestN {
+			best, bestN = i, j-i
+		}
+		i = j
+	}
+	if bestN == 0 {
+		return 0, nil
+	}
+	return best, pat[best : best+bestN]
 }
 
 func matchAt(data, pat, mask []byte, i int) bool {

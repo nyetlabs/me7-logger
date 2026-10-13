@@ -665,29 +665,22 @@ func scanPat(img []byte, start, end uint32, pattern string, single, last bool) u
 		return 0
 	}
 	lo, hi := patSpan(img, start, end)
-	lim := hi - len(pat)
-	var hit uint32
-	n := 0
-	for i := lo; i <= lim; i += 2 {
-		if !matchBytes(img[i:i+len(pat)], pat, mask) {
-			continue
-		}
-		n++
-		hit = FlashBase + uint32(i)
-		if last {
-			continue
-		}
-		if !single {
-			return hit
-		}
-		if n > 1 {
+	if last {
+		at := needle.LastHit(img, pat, mask, lo, hi)
+		if at < 0 {
 			return 0
 		}
+		return FlashBase + uint32(at)
 	}
-	if n == 0 || (single && n != 1) {
+	limit := 1
+	if single {
+		limit = 2
+	}
+	hits := needle.Hits(img, pat, mask, lo, hi, limit)
+	if len(hits) == 0 || (single && len(hits) != 1) {
 		return 0
 	}
-	return hit
+	return FlashBase + uint32(hits[0])
 }
 
 func patSpan(img []byte, start, end uint32) (lo, hi int) {
@@ -707,15 +700,6 @@ func patSpan(img []byte, start, end uint32) (lo, hi int) {
 		lo++
 	}
 	return lo, hi
-}
-
-func matchBytes(b, pat, mask []byte) bool {
-	for i := range pat {
-		if b[i]&mask[i] != pat[i] {
-			return false
-		}
-	}
-	return true
 }
 
 // compilePat is needle.Compile. ok is false when the pattern does not compile.

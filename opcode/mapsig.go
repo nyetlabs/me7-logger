@@ -1,9 +1,10 @@
 package opcode
 
 import (
-	"bytes"
 	"encoding/binary"
 	"strings"
+
+	"go.nyet.org/me7-logger/needle"
 )
 
 // MapHit is one calibration map located from a mapsig row.
@@ -327,74 +328,9 @@ func inFlash(img []byte, addr uint32) (uint32, bool) {
 
 // findOne returns the file offset of the only even-aligned match.
 func findOne(img, pat, mask []byte) (int, bool) {
-	off, needle := solidNeedle(pat, mask)
-	if needle == nil {
-		return scanOne(img, pat, mask)
-	}
-	hit := -1
-	from := 0
-	for from < len(img) {
-		j := bytes.Index(img[from:], needle)
-		if j < 0 {
-			break
-		}
-		j += from
-		start := j - off
-		from = j + 1
-		if start < 0 || start+len(pat) > len(img) || start%2 != 0 {
-			continue
-		}
-		if !matchBytes(img[start:start+len(pat)], pat, mask) {
-			continue
-		}
-		if hit >= 0 {
-			return 0, false
-		}
-		hit = start
-	}
-	if hit < 0 {
+	hits := needle.Hits(img, pat, mask, 0, len(img), 2)
+	if len(hits) != 1 {
 		return 0, false
 	}
-	return hit, true
-}
-
-func scanOne(img, pat, mask []byte) (int, bool) {
-	hit := -1
-	lim := len(img) - len(pat)
-	for i := 0; i <= lim; i += 2 {
-		if !matchBytes(img[i:i+len(pat)], pat, mask) {
-			continue
-		}
-		if hit >= 0 {
-			return 0, false
-		}
-		hit = i
-	}
-	if hit < 0 {
-		return 0, false
-	}
-	return hit, true
-}
-
-// solidNeedle is the longest run of fully specified bytes, used as an index.
-func solidNeedle(pat, mask []byte) (start int, needle []byte) {
-	best, bestN := 0, 0
-	for i := 0; i < len(pat); {
-		if mask[i] != 0xFF {
-			i++
-			continue
-		}
-		j := i
-		for j < len(pat) && mask[j] == 0xFF {
-			j++
-		}
-		if j-i > bestN {
-			best, bestN = i, j-i
-		}
-		i = j
-	}
-	if bestN == 0 {
-		return 0, nil
-	}
-	return best, pat[best : best+bestN]
+	return hits[0], true
 }

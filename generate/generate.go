@@ -16,6 +16,7 @@ import (
 	"go.nyet.org/me7-logger/ident"
 	"go.nyet.org/me7-logger/interp"
 	"go.nyet.org/me7-logger/mapfile"
+	"go.nyet.org/me7-logger/needle"
 	"go.nyet.org/me7-logger/opcode"
 	"go.nyet.org/me7-logger/record"
 )
@@ -52,6 +53,7 @@ type Result struct {
 // Generate runs the needle consumer and the opcode walk.
 // Callers write Result.File and Result.Maps.
 func Generate(opt Options) (*Result, error) {
+	defer needle.Bind(opt.Image)()
 	names, err := config.LoadNames(opt.NamesPath)
 	if err != nil {
 		return nil, err

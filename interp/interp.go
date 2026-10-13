@@ -35,6 +35,7 @@ func Locate(data []byte, ns []needle.Needle, dpp [4]uint16, calls []record.Call)
 	seen := map[uint32]int{}
 	labels := map[string][]int{}
 	done := map[int]bool{}
+	ramAt := memoRam(data, dpp)
 	add := func(call int, interp, name string) {
 		done[call] = true
 		r12, r13, r14, r15, hasR13, hasAxis, r13ram, r14ram, r15ram, hasR13Ram, hasR14Ram, hasR15Ram, setup, ok := mapArgs(data, call)
@@ -45,7 +46,7 @@ func Locate(data []byte, ns []needle.Needle, dpp [4]uint16, calls []record.Call)
 		if !ok {
 			return
 		}
-		x, y, xOK, yOK := callAxes(data, dpp, r13, hasR13, r14, r15, hasAxis, r13ram, r14ram, r15ram, hasR13Ram, hasR14Ram, hasR15Ram, setup)
+		x, y, xOK, yOK := callAxes(data, dpp, r13, hasR13, r14, r15, hasAxis, r13ram, r14ram, r15ram, hasR13Ram, hasR14Ram, hasR15Ram, setup, ramAt)
 		if i, dup := seen[addr]; dup {
 			if out[i].Name == "" && name != "" {
 				out[i].Name = name
@@ -103,16 +104,16 @@ func Locate(data []byte, ns []needle.Needle, dpp [4]uint16, calls []record.Call)
 // index. A different header is the row axis. Two different row headers leave
 // Y unset. setup is a RAM word loaded into another register immediately
 // before this frame. A curve keeps the one header that matches the column.
-func callAxes(data []byte, dpp [4]uint16, r13 uint16, hasR13 bool, r14, r15 uint16, hasAxis bool, r13ram, r14ram, r15ram uint16, hasR13Ram, hasR14Ram, hasR15Ram bool, setup []uint16) (x, y record.Axis, xOK, yOK bool) {
+func callAxes(data []byte, dpp [4]uint16, r13 uint16, hasR13 bool, r14, r15 uint16, hasAxis bool, r13ram, r14ram, r15ram uint16, hasR13Ram, hasR14Ram, hasR15Ram bool, setup []uint16, ramAt func(uint16) (record.Axis, bool)) (x, y record.Axis, xOK, yOK bool) {
 	if hasR13 && !pageImm(r13) {
 		x, xOK = axisOf(data, dpp, r13)
 	} else if hasR13 && pageImm(r13) && hasAxis {
 		x, xOK = axisAt(data, (uint32(r15)<<14)|uint32(r14&0x3FFF))
 	}
 	if !xOK && hasR14Ram {
-		x, xOK = RamAxis(data, dpp, r14ram, 0)
+		x, xOK = ramAt(r14ram)
 	} else if !xOK && !hasR13 && hasR13Ram {
-		x, xOK = RamAxis(data, dpp, r13ram, 0)
+		x, xOK = ramAt(r13ram)
 	}
 	if !xOK {
 		return x, y, false, false
@@ -131,17 +132,17 @@ func callAxes(data []byte, dpp [4]uint16, r13 uint16, hasR13 bool, r14, r15 uint
 		words[n] = r15ram
 		n++
 	}
-	y, yOK = rowAxis(data, dpp, x, append(words[:n], setup...))
+	y, yOK = rowAxis(x, append(words[:n], setup...), ramAt)
 	return x, y, xOK, yOK
 }
 
 // rowAxis is a header stored into one of words, when its values are not the
 // column axis. Two headers that name different values leave the row unset.
-func rowAxis(data []byte, dpp [4]uint16, x record.Axis, words []uint16) (record.Axis, bool) {
+func rowAxis(x record.Axis, words []uint16, ramAt func(uint16) (record.Axis, bool)) (record.Axis, bool) {
 	var y record.Axis
 	seen := false
 	for _, w := range words {
-		ax, ok := RamAxis(data, dpp, w, 0)
+		ax, ok := ramAt(w)
 		if !ok || ax.Addr == x.Addr {
 			continue
 		}
@@ -162,12 +163,11 @@ func rowAxis(data []byte, dpp [4]uint16, x record.Axis, words []uint16) (record.
 // leave the axis unread.
 func RamAxis(data []byte, dpp [4]uint16, ram uint16, bits int) (record.Axis, bool) {
 	lo, hi := byte(ram), byte(ram>>8)
+	pat := []byte{0xF6, 0xF4, lo, hi}
+	mask := []byte{0xFF, 0xFF, 0xFF, 0xFF}
 	var hdr uint32
 	n := 0
-	for i := 0; i+4 <= len(data); i += 2 {
-		if data[i] != 0xF6 || data[i+1] != 0xF4 || data[i+2] != lo || data[i+3] != hi {
-			continue
-		}
+	for _, i := range needle.Hits(data, pat, mask, 0, len(data), 0) {
 		page, imm, ok := axisSetup(data, i, ram)
 		if !ok {
 			continue
@@ -190,6 +190,25 @@ func RamAxis(data []byte, dpp [4]uint16, ram uint16, bits int) (record.Axis, boo
 		return Breakpoints(data, hdr, bits)
 	}
 	return axisAt(data, hdr)
+}
+
+type savedAxis struct {
+	ax record.Axis
+	ok bool
+}
+
+// memoRam remembers RamAxis for one image. The same RAM word is the row
+// header of many calls, so the header is read once.
+func memoRam(data []byte, dpp [4]uint16) func(uint16) (record.Axis, bool) {
+	memo := map[uint16]savedAxis{}
+	return func(ram uint16) (record.Axis, bool) {
+		if v, ok := memo[ram]; ok {
+			return v.ax, v.ok
+		}
+		ax, ok := RamAxis(data, dpp, ram, 0)
+		memo[ram] = savedAxis{ax, ok}
+		return ax, ok
+	}
 }
 
 // Breakpoints reads a breakpoint table that is not in front of the map.
@@ -333,13 +352,10 @@ func callsTo(data []byte, label int) []int {
 		segs = append(segs, 0)
 	}
 	var out []int
+	mask := []byte{0xFF, 0xFF, 0xFF, 0xFF}
 	for _, seg := range segs {
-		pat := [4]byte{0xDA, seg, byte(label), byte(label >> 8)}
-		for i := 0; i+4 <= len(data); i += 2 {
-			if data[i] == pat[0] && data[i+1] == pat[1] && data[i+2] == pat[2] && data[i+3] == pat[3] {
-				out = append(out, i)
-			}
-		}
+		pat := []byte{0xDA, seg, byte(label), byte(label >> 8)}
+		out = append(out, needle.Hits(data, pat, mask, 0, len(data), 0)...)
 	}
 	sort.Ints(out)
 	return out

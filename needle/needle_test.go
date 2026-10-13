@@ -72,6 +72,76 @@ func TestMatchWildcardAndMask(t *testing.T) {
 	}
 }
 
+func TestHitsAndLast(t *testing.T) {
+	pat, mask, err := Compile("0000")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Even hits at 0 and 2. The rightmost 00 00 sits on the odd offset 3
+	// and overlaps the hit at 2, so the last search has to step back into it.
+	data := []byte{0, 0, 0, 0, 0, 1}
+	if got := Hits(data, pat, mask, 0, len(data), 0); !sameInts(got, []int{0, 2}) {
+		t.Fatalf("hits %v", got)
+	}
+	if got := Hits(data, pat, mask, 0, len(data), 1); !sameInts(got, []int{0}) {
+		t.Fatalf("limit %v", got)
+	}
+	if got := LastHit(data, pat, mask, 0, len(data)); got != 2 {
+		t.Fatalf("last %d", got)
+	}
+	pat, mask, err = Compile("XXBB")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// BB at 0 is not a hit. BB at 2 is an odd start. The hit is at 6.
+	data = []byte{0xBB, 0x00, 0xBB, 0x00, 0x00, 0x00, 0x11, 0xBB}
+	if got := Hits(data, pat, mask, 0, len(data), 0); !sameInts(got, []int{6}) {
+		t.Fatalf("tail hits %v", got)
+	}
+	if got := LastHit(data, pat, mask, 0, len(data)); got != 6 {
+		t.Fatalf("tail last %d", got)
+	}
+}
+
+func TestIndexAgrees(t *testing.T) {
+	data := make([]byte, 512)
+	for i := range data {
+		data[i] = byte(i * 17)
+	}
+	copy(data[40:], []byte{0xAA, 0xBB, 0xCC})
+	copy(data[200:], []byte{0x11, 0xAA, 0xBB})
+	data[10], data[11], data[12], data[13] = 0, 0, 0, 1
+	unbind := Bind(data)
+	defer unbind()
+	for _, s := range []string{"AABB", "XXBB", "0000", "11AABB", "CCDD", "AAXX"} {
+		pat, mask, err := Compile(s)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var want []int
+		for i := 0; i+len(pat) <= len(data); i += 2 {
+			if matchAt(data, pat, mask, i) {
+				want = append(want, i)
+			}
+		}
+		if got := Hits(data, pat, mask, 0, len(data), 0); !sameInts(got, want) {
+			t.Fatalf("%s hits %v want %v", s, got, want)
+		}
+		wantLast := -1
+		if len(want) > 0 {
+			wantLast = want[len(want)-1]
+		}
+		if got := LastHit(data, pat, mask, 0, len(data)); got != wantLast {
+			t.Fatalf("%s last %d want %d", s, got, wantLast)
+		}
+		if len(want) > 0 {
+			if got := Hits(data, pat, mask, 0, len(data), 1); len(got) != 1 || got[0] != want[0] {
+				t.Fatalf("%s limit %v", s, got)
+			}
+		}
+	}
+}
+
 func TestNeedleHexList(t *testing.T) {
 	one, err := Parse([]byte("data:\n  - name: s\n    needle_hex: \"AA 11 BB\"\n"), "scalar")
 	if err != nil {
