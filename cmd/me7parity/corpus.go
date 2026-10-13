@@ -25,6 +25,9 @@ hand, open, and block.
 
 Columns are status, tier, delta, and confidence.
 Status and delta marks are in docs/parity.md.
+--grades prints name, stage, and confidence and does not submit.
+Stage is the tuner tier: D is 1, C is 2, B is 3-, A is 3, S stays S.
+A star means the grade has not reached S. An open D stays -.
 
 The corpus is --corpus, else CORPUS, else ../ecu-corpus when that
 checkout exists, else corpus/.
@@ -35,6 +38,7 @@ func cmdCorpus(args []string) error {
 	data := fs.StringP("data", "d", "testdata/parity", "parity root `<dir>`")
 	corpusFlag := fs.String("corpus", "", "ecu-corpus checkout `<dir>` (default CORPUS, else ../ecu-corpus, else corpus/)")
 	submit := fs.Bool("submit", false, "write the rows marked for storage into the corpus")
+	grades := fs.Bool("grades", false, "print name, stage, and confidence")
 	d := locate.Flags(fs)
 	if err := fs.Parse(args); err != nil {
 		return err
@@ -74,6 +78,12 @@ func cmdCorpus(args []string) error {
 	want := map[string]bool{}
 	for _, s := range selected {
 		want[s] = true
+	}
+	if *grades {
+		if *submit {
+			return fmt.Errorf("--grades does not submit")
+		}
+		return printGrades(rep, want)
 	}
 	var eligible []pubItem
 	var lines []pubLine
@@ -258,6 +268,52 @@ type pubLine struct {
 	hit, total                int
 	notes                     []coverNote
 	open, block               []parity.OpenName
+}
+
+func printGrades(rep *parity.Report, want map[string]bool) error {
+	for _, im := range rep.Tuner {
+		name := strings.TrimSuffix(im.Name, ".bin")
+		if len(want) > 0 && !want[name] {
+			continue
+		}
+		tier := im.Tier
+		if tier == "" {
+			tier = "-"
+		}
+		if im.NoDef {
+			tier += "*"
+		}
+		fmt.Printf("%s\t%s\t%d/%d\n", name, stageLabel(tier), im.Confidence.Hit, im.Confidence.Total)
+	}
+	return nil
+}
+
+// stageLabel is the publish column for a tuner grade. D through A are the
+// tuning stages. S is the list past those stages. A star is kept.
+func stageLabel(tier string) string {
+	star := strings.HasSuffix(tier, "*")
+	switch strings.TrimSuffix(tier, "*") {
+	case "-":
+		return "-"
+	case "D":
+		tier = "1"
+	case "C":
+		tier = "2"
+	case "B":
+		tier = "3-"
+	case "A":
+		tier = "3"
+	case "S":
+		tier = "S"
+	case "S+":
+		tier = "S+"
+	default:
+		return ""
+	}
+	if star {
+		return tier + "*"
+	}
+	return tier
 }
 
 func printPublish(lines []pubLine) {

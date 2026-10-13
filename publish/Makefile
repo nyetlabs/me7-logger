@@ -62,7 +62,8 @@ stage:
 	for z in $(STAGE)/*.zip; do test -e $$z || continue; grep -qxF "$$z" $$keep || rm "$$z"; done; \
 	rm -rf $(STAGE)/full; \
 	find $(STAGE) -maxdepth 1 -type f ! -name '*.zip' -delete; \
-	php index.php --out=$(STAGE)/vehicles.json; \
+	(cd $(LOGGER) && go run ./cmd/me7parity corpus --grades --corpus $(CORPUS)) > $(OUT)/grades.tsv; \
+	GRADES=$(OUT)/grades.tsv php index.php --out=$(STAGE)/vehicles.json; \
 	cp index.php $(STAGE)/
 
 upload: stage

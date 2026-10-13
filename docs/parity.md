@@ -29,7 +29,7 @@ open and block, printed for a NAME, are the names that did not hit. `absent` is 
 
 Confidence has to pass on every row: high bodies are more than half the tuner names that scored. A zero denominator fails the row. A star after the tier means the name grade has not reached S. A DAMOS or A2L oracle has no star. xdfkit does not read tiers.
 
-Columns are status, tier, delta, and confidence. Under a named row the command prints hand, open, and block. `absent` and `met by <form>` are the same marks as the report. A definition that is not a parity image is listed when it has placeholder keys. Its tier is `-` and its confidence is `-`.
+Columns are status, tier, delta, and confidence. `--grades` prints name, stage, and confidence for the download page and does not submit. Stage is the tuner tier: D is 1, C is 2, B is 3-, A is 3, and S stays S. A star means the grade has not reached S. An open D stays `-`. Under a named row the command prints hand, open, and block. `absent` and `met by <form>` are the same marks as the report. A definition that is not a parity image is listed when it has placeholder keys. Its tier is `-` and its confidence is `-`.
 
 status
 

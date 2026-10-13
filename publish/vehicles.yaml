@@ -6,6 +6,10 @@
 # 06A906032HJ-0002 is the Octavia 1.8T 150 file; AUM is the code listed for
 # that ECU. 8E0909518AK is the A4 1.8T AVJ, used 2002-2005.
 # 8E0909518AS-0003 is the A4 1.8T BEX, 190 hp, 2002-2004.
+# 006410010A0-0000 is the Spyker C8 Aileron 4.2 V8, 400 hp, 2009-2017.
+# Listings give no engine code. 4B0906018DQ-0060 is Bosch 1037394791,
+# the 22 Jan 2008 software of the same Passat hardware as DQ-0010.
+006410010A0-0000: {engine: "4.2", vehicle: "C8 Aileron", year: 2009-2017}
 06A906032HF-0006: {engine: 1.8T, code: AWP, vehicle: "Golf, Jetta", year: 2002+, gearbox: automatic}
 06A906032HJ-0002: {engine: 1.8T, code: AUM, vehicle: Octavia, year: 2001-2006}
 06A906032HS-0008: {engine: 1.8T, code: AWP, vehicle: "Golf, Jetta", year: 2002+, gearbox: manual}
@@ -16,6 +20,9 @@
 4B0906018CM-0008: {engine: 1.8T, code: AWM, vehicle: Passat, year: 2002}
 4B0906018DH-0004: {engine: 1.8T, code: AWT, vehicle: "Passat, Superb", year: 2003-2005, market: EU}
 4B0906018DQ-0010: {engine: 1.8T, code: AWM, vehicle: Passat, year: 2003-2005, market: NA}
+4B0906018DQ-0060: {engine: 1.8T, code: AWM, vehicle: Passat, year: 2003-2005, market: NA}
+4B0907551S-0001: {engine: 2.7T, code: AZA, vehicle: A6, year: 2001, market: EU}
+4B0907551T-0001: {engine: 2.7T, code: APB, vehicle: A6, year: 2001, gearbox: automatic, market: NA}
 4D1907558-0002: {engine: 4.2T, code: BCY, vehicle: RS6, year: 2002-2004, market: EU}
 4D1907558-0004: {engine: 4.2T, code: BCY, vehicle: RS6, year: 2002-2004, market: EU}
 4Z7907551AA-0010: {engine: 2.7T, code: BEL, vehicle: allroad, year: 2004, market: NA}
@@ -28,6 +35,7 @@
 8D0907551Q-0001: {engine: 2.7T, code: AZR, vehicle: RS4, year: 2002, gearbox: manual, market: EU}
 8D0907551L-0001: {engine: 2.7T, code: APB, vehicle: S4, year: 2001.5, gearbox: automatic, market: NA}
 8D0907551M-0002: {engine: 2.7T, code: APB, vehicle: S4, year: 2001.5, gearbox: manual, market: NA}
+8D0907551N-0001: {engine: 2.7T, code: AZB, vehicle: S4, year: 2001, gearbox: manual, market: EU}
 8D0907551T-0003: {engine: 2.7T, code: APB, vehicle: S4, year: 2002, gearbox: manual, market: NA}
 8D0907558E-D03: {engine: 1.8T, code: AEB, vehicle: A4, year: 1997-1999}
 8D0907558M-D01: {engine: 1.8T, code: AEB, vehicle: "A4, Passat", year: 1997-1999}

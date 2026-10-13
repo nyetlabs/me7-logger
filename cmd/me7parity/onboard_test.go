@@ -11,6 +11,25 @@ import (
 	"go.nyet.org/me7-logger/parity"
 )
 
+func TestStageLabel(t *testing.T) {
+	cases := []struct{ tier, want string }{
+		{"D", "1"},
+		{"D*", "1*"},
+		{"C*", "2*"},
+		{"B", "3-"},
+		{"A*", "3*"},
+		{"S", "S"},
+		{"S+", "S+"},
+		{"-", "-"},
+		{"-*", "-"},
+	}
+	for _, c := range cases {
+		if got := stageLabel(c.tier); got != c.want {
+			t.Errorf("stageLabel(%q) = %q, want %q", c.tier, got, c.want)
+		}
+	}
+}
+
 func TestInsertImageKeepsComments(t *testing.T) {
 	in := "# header\n- AAA\n# note for CCC\n- CCC\n"
 	got, err := insertSorted(in, "BBB", "- BBB")
