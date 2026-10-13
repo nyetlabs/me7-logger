@@ -26,10 +26,12 @@ func main() {
 		case len(args) > 0 && (args[0] == "-v" || args[0] == "--version"):
 			fmt.Println(version)
 		default:
-			err = cmdParity(args)
+			err = cmdParity(args, "")
 		}
 	} else {
 		switch args[0] {
+		case "report":
+			err = cmdParity(args[1:], "report")
 		case "onboard":
 			err = cmdOnboard(args[1:])
 		case "corpus":
@@ -37,7 +39,8 @@ func main() {
 		case "help":
 			usage()
 		default:
-			err = cmdParity(args)
+			fmt.Fprintf(os.Stderr, "me7parity: unknown command %q\nRun me7parity -h\n", args[0])
+			os.Exit(1)
 		}
 	}
 	if err != nil {
@@ -53,79 +56,52 @@ func usage() {
 	fmt.Fprintf(os.Stderr, `me7parity %s
 
 Usage:
-  me7parity [flags] [pn...]
-  me7parity onboard [candidates|run|triage|promote]
-  me7parity corpus [flags] [pn...]
+  me7parity [flags]
+  me7parity report [NAME...]
+  me7parity corpus [--submit] [NAME...]
+  me7parity onboard [--submit] [NAME...]
   me7parity -v, --version
 
 `, version)
-	fs, _, _ := parityFlags()
+	fs, _, _ := parityFlags("")
 	fmt.Fprintf(os.Stderr, "Flags:\n%s%s", fs.FlagUsages(), reportHelp)
 }
 
-const reportHelp = `
-Prints the parity report. Each score is hits/total and a percent.
-With no pn the report is every image in images.yaml. A pn is a stem,
-a stem.bin, or the part number in front of the software index:
-8D0907551H matches 8D0907551H-0003. An exact stem matches only that
-image. A pn adds the names that missed, under open and block.
-
-ecu me7info
-    The only hard mark. 100% means every row of that image's legacy
-    ME7Info file matched.
-    vs ecu-specific: matched rows / rows in the file. (+N) is catalog
-    names located here that the file does not name.
-    vs corpus: catalog names located on this image / the full catalog.
-    extras: measurement-list names located on this image.
-
-names
-    Hits in names/tuner.yaml. A hit is one address. A scalar is that
-    address, a curve needs its axis, a map needs both. A second
-    address is a miss. On a DAMOS or A2L definition, a name that
-    definition contains has to sit on one of its rows.
-    tier: highest complete tier, from D through S+. "-" means D is
-    still open. "*" means below S, except on a DAMOS or A2L
-    definition. A tier is complete when every name hits or is listed
-    in names/absent.yaml. A family counts as one name: one form
-    located, or every form absent. A pair is the plain name, or both
-    variants when the plain name is absent.
-    axis: axes present on the maps that hit / axes those maps list.
-    A scalar adds nothing.
-    confidence: bodies that hold up / names that hit. Under 16 cells
-    holds up. A larger body holds up when each peer in datasets.yaml
-    is within two cells or 3%. A run of zeros holds up only when a
-    peer has it and every such peer is zero. Names in confidence.yaml
-    are omitted.
-    block: hits in the other names file for this layout block. Blank
-    when that block has no list.
-
-xdf damos
-    Maps in a DAMOS or A2L definition found at the same address.
-    axis is those axes found with the same address, count, and width.
-
-xdf hand
-    The same two columns for a hand-made definition. A tuner name
-    found at another address still hits in names, and is listed under
-    "hand xdf disagrees" with ours and xdf file offsets.
-
-open and block, printed for a pn, are the names that did not hit.
-    absent: listed for this layout block, so the grade counts it.
-    met by NAME: that family slot is already filled.
-
-Reads testdata/parity in this checkout. This program is omitted from
-the me7info release. Run "me7parity onboard -h" or
-"me7parity corpus -h" for those commands.
+const nameArg = `
+NAME is 8D0907551H-0003. Without the software index, 8D0907551H matches
+every index of that part. A .bin suffix is ignored.
 `
 
-func parityFlags() (*pflag.FlagSet, *string, *string) {
-	fs := cli.NewFlagSet("me7parity", "", "[flags] [pn...]", reportHelp)
+const reportHelp = `
+Prints the parity report. Each score is hits/total and a percent.
+With no arguments every image is listed. me7parity report NAME
+limits the report and lists the names that missed.
+
+ecu me7info   ME7Info rows. 100% is the only hard mark.
+names         tuner names: tier, axis, confidence, block.
+xdf damos     DAMOS or A2L maps at the same address.
+xdf hand      the same columns for a hand-made definition.
+
+open and block are the misses. absent counts toward the grade.
+met by <form> means that family slot is already filled.
+
+Column rules are in docs/parity.md. Run "me7parity report -h",
+"me7parity onboard -h", or "me7parity corpus -h" for those commands.
+` + nameArg
+
+func parityFlags(cmd string) (*pflag.FlagSet, *string, *string) {
+	synopsis := "[flags]"
+	if cmd == "report" {
+		synopsis = "[NAME...]"
+	}
+	fs := cli.NewFlagSet("me7parity", cmd, synopsis, reportHelp)
 	dir := fs.StringP("data", "d", "testdata/parity", "parity root `<dir>`: images.yaml, ecu/me7info, names")
 	corpus := fs.String("corpus", ecucorpus.Dir("."), "ecu-corpus checkout `<dir>`; XDFKIT_CORPUS sets the default")
 	return fs, dir, corpus
 }
 
-func cmdParity(args []string) error {
-	fs, dir, corpus := parityFlags()
+func cmdParity(args []string, cmd string) error {
+	fs, dir, corpus := parityFlags(cmd)
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -161,10 +137,9 @@ func reportStems(rep *parity.Report) []string {
 	return out
 }
 
-// matchStems selects image stems named by args. An arg is a stem, a stem
-// with .bin, or a part number: the stem with its software index removed.
-// 8D0907551H matches 8D0907551H-0003. An exact stem does not also match
-// a longer one.
+// matchStems expands each NAME. NAME-VER matches that stem. NAME matches
+// every stem NAME-*. A .bin suffix is ignored. An exact stem does not
+// also match a longer one.
 func matchStems(stems, args []string) ([]string, error) {
 	have := map[string]bool{}
 	for _, s := range stems {
@@ -186,7 +161,7 @@ func matchStems(stems, args []string) ([]string, error) {
 			}
 		}
 		if len(hit) == 0 {
-			return nil, fmt.Errorf("%s: no parity image", arg)
+			return nil, fmt.Errorf("%s: no match", arg)
 		}
 		for _, s := range hit {
 			if seen[s] {

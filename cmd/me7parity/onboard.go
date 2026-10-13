@@ -15,74 +15,38 @@ import (
 )
 
 const onboardHelp = `
-Brings a corpus image into the parity set. With no action, onboard
-runs candidates, then run, then triage.
+Scores corpus images that are not in the parity set yet, and prints
+the score. --submit adds the ones whose ME7Info rows all match.
+With no NAME, every such image is scored. A duplicate layout, a
+short score, or a missing block is left out.
 
-NAME is a corpus stem, the whole name column from candidates, such
-as 8D0907551H-0003. The flash image is <corpus>/images/NAME.bin, and
-that stem has to be a row of <corpus>/corpus.tsv. A filesystem path
-is rejected, and the report's shorter part number is not accepted
-here. --corpus is XDFKIT_CORPUS, otherwise ./corpus. BLOCK is a
-layout block already named in layouts.yaml.
-
-candidates
-    Corpus images missing from images.yaml. Columns are name, status,
-    and epk. epk is the EPK string, or -. The name column is the
-    NAME to pass to run, triage, and promote.
-    eligible        incoming/ecus already has an .ecu
+not scored
+    has-ecu         an .ecu is present, and a duplicate layout kept it out
     needs-ME7Info   ME7Info.exe still has to run
-    unsupported     the image is not 512 KiB or 1 MiB
-    dup:NAME        a scored image already has this layout id
-    shared:A,B      other candidates share this layout id
-
-run [NAME...]
-    Runs ME7Info.exe on <corpus>/images/NAME.bin and writes
-    incoming/ecus/NAME.ecu. ME7INFO_EXE defaults to
-    ../ME7L/bin/ME7Info.exe, next to this module. WINE defaults to
-    wine. An existing file is left in place. With no NAME, every
-    needs-ME7Info candidate is run.
-
-triage [NAME...]
-    Copies those files to incoming/oracle, scores them, and writes
-    incoming/triage.tsv. Columns are name, status, and me7info
-    (matched rows / ME7Info rows).
-    ready      every ME7Info row matched
+    unsupported     the image is not a usable size
+ME7Info
     short      a ME7Info row missed
+    eligible   every ME7Info row matched
     unscored   no .ecu to score
-    With no NAME, every eligible candidate that is not a dup is
-    scored. Ready names are printed as the promote command.
 
-promote NAME[=BLOCK]...
-    Inserts the image and its layout id, copies the oracle to
-    ecu/me7info, and scores. BLOCK defaults to the scored image
-    with the longest shared name prefix. A layout id already on a
-    scored image is refused. Any ME7Info row under 100% restores
-    both YAML files and the new golden.
-`
+Paths, ME7INFO_EXE, and WINE are in docs/parity.md.
+` + nameArg
 
 const (
-	statusEligible    = "eligible"
+	statusHasECU      = "has-ecu"
 	statusNeeds       = "needs-ME7Info"
 	statusUnsupported = "unsupported"
-	statusReady       = "ready"
+	statusEligible    = "eligible"
 	statusShort       = "short"
 	statusUnscored    = "unscored"
 )
 
 func cmdOnboard(args []string) error {
-	action := "all"
-	if len(args) > 0 && !strings.HasPrefix(args[0], "-") {
-		action, args = args[0], args[1:]
-	}
-	switch action {
-	case "all", "candidates", "run", "triage", "promote":
-	default:
-		return fmt.Errorf("onboard %s: want candidates, run, triage, or promote", action)
-	}
-	fs := cli.NewFlagSet("me7parity", "onboard", "[candidates|run|triage|promote] [flags] [NAME...]", onboardHelp)
+	fs := cli.NewFlagSet("me7parity", "onboard", "[--submit] [NAME...]", onboardHelp)
 	data := fs.StringP("data", "d", "testdata/parity", "parity root `<dir>`")
 	incoming := fs.String("incoming", "", "incoming `<dir>` (default <data>/incoming)")
 	corpus := fs.String("corpus", ecucorpus.Dir("."), "ecu-corpus checkout `<dir>`: corpus.tsv and images/<stem>.bin; XDFKIT_CORPUS sets the default")
+	submit := fs.Bool("submit", false, "add the eligible images")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -95,34 +59,64 @@ func cmdOnboard(args []string) error {
 		return err
 	}
 	o := &onboard{data: *data, in: in, c: c}
-	switch action {
-	case "candidates":
-		_, err := o.printCandidates()
+	only := fs.Args()
+	if len(only) > 0 {
+		if only, err = o.resolve(only); err != nil {
+			return err
+		}
+	}
+	return o.all(only, *submit)
+}
+
+func (o *onboard) all(only []string, submit bool) error {
+	cands, err := o.picked(only)
+	if err != nil {
 		return err
-	case "run":
-		return o.run(fs.Args())
-	case "triage":
-		return o.triage(fs.Args())
-	case "promote":
-		return o.promote(fs.Args())
-	default:
-		cands, err := o.printCandidates()
+	}
+	var needs []string
+	for _, row := range cands {
+		if row.status == statusNeeds {
+			needs = append(needs, row.name)
+		}
+	}
+	if len(needs) > 0 {
+		if err := o.run(needs); err != nil {
+			fmt.Fprintf(os.Stderr, "me7parity: %v\n", err)
+		}
+		cands, err = o.picked(only)
 		if err != nil {
 			return err
 		}
-		var needs []string
-		for _, row := range cands {
-			if row.status == statusNeeds {
-				needs = append(needs, row.name)
-			}
-		}
-		if len(needs) > 0 {
-			if err := o.run(needs); err != nil {
-				fmt.Fprintf(os.Stderr, "me7parity: %v\n", err)
-			}
-		}
-		return o.triage(nil)
 	}
+	var score []string
+	var skipped []candidate
+	for _, row := range cands {
+		if row.status == statusHasECU && !strings.Contains(row.note, "dup:") {
+			score = append(score, row.name)
+			continue
+		}
+		skipped = append(skipped, row)
+	}
+	if err := o.printRows("not scored", skipped); err != nil {
+		return err
+	}
+	if len(score) == 0 {
+		return nil
+	}
+	if len(skipped) > 0 {
+		fmt.Println()
+	}
+	rows, err := o.triage(score)
+	if err != nil {
+		return err
+	}
+	var eligible []string
+	for _, row := range rows {
+		if row.status == statusEligible {
+			eligible = append(eligible, row.name)
+		}
+	}
+	return o.promoteReady(eligible, submit)
 }
 
 type onboard struct {
@@ -135,11 +129,50 @@ type candidate struct {
 	name, status, id, epk, note string
 }
 
-func (o *onboard) printCandidates() ([]candidate, error) {
+func (o *onboard) resolve(args []string) ([]string, error) {
+	if len(args) == 0 {
+		return nil, nil
+	}
+	rows, err := o.picked(args)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]string, len(rows))
+	for i, row := range rows {
+		out[i] = row.name
+	}
+	return out, nil
+}
+
+func (o *onboard) picked(only []string) ([]candidate, error) {
 	rows, err := o.candidates()
 	if err != nil {
 		return nil, err
 	}
+	if len(only) == 0 {
+		return rows, nil
+	}
+	names := make([]string, len(rows))
+	by := map[string]candidate{}
+	for i, row := range rows {
+		names[i], by[row.name] = row.name, row
+	}
+	hit, err := matchStems(names, only)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]candidate, len(hit))
+	for i, n := range hit {
+		out[i] = by[n]
+	}
+	return out, nil
+}
+
+func (o *onboard) printRows(heading string, rows []candidate) error {
+	if len(rows) == 0 {
+		return nil
+	}
+	fmt.Println(heading)
 	nameW, statusW := len("name"), len("status")
 	for _, row := range rows {
 		nameW = max(nameW, len(row.name))
@@ -157,7 +190,7 @@ func (o *onboard) printCandidates() ([]candidate, error) {
 		}
 		fmt.Println(line)
 	}
-	return rows, nil
+	return nil
 }
 
 func (o *onboard) candidates() ([]candidate, error) {
@@ -216,7 +249,7 @@ func (o *onboard) candidates() ([]candidate, error) {
 func (o *onboard) oneCandidate(name string) (candidate, error) {
 	row := candidate{name: name, status: statusNeeds}
 	if o.ecuPath(name) != "" {
-		row.status = statusEligible
+		row.status = statusHasECU
 	}
 	path, err := o.c.Path(name)
 	if err != nil {
@@ -272,17 +305,6 @@ func barePart(name string) string {
 }
 
 func (o *onboard) run(names []string) error {
-	if len(names) == 0 {
-		rows, err := o.candidates()
-		if err != nil {
-			return err
-		}
-		for _, row := range rows {
-			if row.status == statusNeeds {
-				names = append(names, row.name)
-			}
-		}
-	}
 	exe := os.Getenv("ME7INFO_EXE")
 	if exe == "" {
 		root, err := ecucorpus.ModuleRoot()
@@ -353,33 +375,22 @@ func tail(s string, n int) string {
 }
 
 type triageRow struct {
-	name, status, frac string
+	name, status, frac, epk string
 }
 
-func (o *onboard) triage(names []string) error {
-	if len(names) == 0 {
-		rows, err := o.candidates()
-		if err != nil {
-			return err
-		}
-		for _, row := range rows {
-			if row.status == statusEligible && !strings.Contains(row.note, "dup:") {
-				names = append(names, row.name)
-			}
-		}
-	}
+func (o *onboard) triage(names []string) ([]triageRow, error) {
 	var out []triageRow
 	oracles := map[string]string{}
 	var score []string
 	for _, name := range names {
 		src := o.ecuPath(name)
 		if src == "" {
-			out = append(out, triageRow{name, statusUnscored, "0/0"})
+			out = append(out, triageRow{name: name, status: statusUnscored, frac: "0/0", epk: o.epkOf(name)})
 			continue
 		}
 		dst, err := o.copyOracle(name, src)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		oracles[name] = dst
 		score = append(score, name)
@@ -387,44 +398,137 @@ func (o *onboard) triage(names []string) error {
 	if len(score) > 0 {
 		got, err := o.scoreNames(score, oracles)
 		if err != nil {
-			return err
+			return nil, err
+		}
+		for i := range got {
+			got[i].epk = o.epkOf(got[i].name)
 		}
 		out = append(out, got...)
 	}
 	sort.Slice(out, func(i, j int) bool {
 		if out[i].status != out[j].status {
-			return out[i].status < out[j].status
+			return statusRank(out[i].status) < statusRank(out[j].status)
 		}
 		return out[i].name < out[j].name
 	})
 	var b strings.Builder
-	var ready []string
 	nameW, statusW, fracW := len("name"), len("status"), len("me7info")
 	for _, row := range out {
 		nameW = max(nameW, len(row.name))
 		statusW = max(statusW, len(row.status))
 		fracW = max(fracW, len(row.frac))
 		fmt.Fprintf(&b, "%s\t%s\t%s\n", row.name, row.status, row.frac)
-		if row.status == statusReady {
-			ready = append(ready, row.name)
-		}
 	}
 	if len(out) > 0 {
-		fmt.Printf("\n%-*s  %-*s  %*s\n", nameW, "name", statusW, "status", fracW, "me7info")
+		fmt.Printf("ME7Info\n%-*s  %-*s  %*s  %s\n", nameW, "name", statusW, "status", fracW, "me7info", "epk")
 		for _, row := range out {
-			fmt.Printf("%-*s  %-*s  %*s\n", nameW, row.name, statusW, row.status, fracW, row.frac)
+			epk := row.epk
+			if epk == "" {
+				epk = "-"
+			}
+			fmt.Printf("%-*s  %-*s  %*s  %s\n", nameW, row.name, statusW, row.status, fracW, row.frac, epk)
 		}
 	}
 	if err := os.MkdirAll(o.in, 0o755); err != nil {
-		return err
+		return nil, err
 	}
 	if err := os.WriteFile(filepath.Join(o.in, "triage.tsv"), []byte(b.String()), 0o644); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (o *onboard) epkOf(name string) string {
+	path, err := o.c.Path(name)
+	if err != nil {
+		return ""
+	}
+	img, err := os.ReadFile(path)
+	if err != nil {
+		return ""
+	}
+	return parity.EPK(img)
+}
+
+func (o *onboard) promoteReady(names []string, submit bool) error {
+	if len(names) == 0 {
+		return nil
+	}
+	scored, err := yamlNames(filepath.Join(o.data, "images.yaml"))
+	if err != nil {
 		return err
 	}
-	if len(ready) > 0 {
-		fmt.Printf("ready %d: me7parity onboard promote %s\n", len(ready), strings.Join(ready, " "))
+	blocks, err := layoutBlocks(filepath.Join(o.data, "layouts.yaml"))
+	if err != nil {
+		return err
+	}
+	nameBlock := map[string]string{}
+	for _, n := range scored {
+		id, err := o.layoutOf(n)
+		if err != nil || id == "" {
+			continue
+		}
+		nameBlock[n] = blocks[id]
+	}
+	sort.SliceStable(names, func(i, j int) bool {
+		return layoutBlock(names[i], scored, nameBlock) != "" && layoutBlock(names[j], scored, nameBlock) == ""
+	})
+	claimed := map[string]string{}
+	var todo []string
+	var failed int
+	for _, name := range names {
+		id, err := o.layoutOf(name)
+		if err != nil {
+			return err
+		}
+		if id == "" {
+			fmt.Fprintf(os.Stderr, "%s: no layout id\n", name)
+			failed++
+			continue
+		}
+		if prev := claimed[id]; prev != "" {
+			fmt.Printf("%s: same layout as %s\n", name, prev)
+			continue
+		}
+		if layoutBlock(name, scored, nameBlock) == "" {
+			fmt.Fprintf(os.Stderr, "%s: no layout block\n", name)
+			failed++
+			continue
+		}
+		claimed[id] = name
+		todo = append(todo, name)
+	}
+	if !submit {
+		return nil
+	}
+	for _, name := range todo {
+		if err := o.promote([]string{name}); err != nil {
+			fmt.Fprintf(os.Stderr, "%s: %v\n", name, err)
+			failed++
+			continue
+		}
+		fmt.Printf("added %s\n", name)
+	}
+	if failed > 0 {
+		return fmt.Errorf("%d not added", failed)
 	}
 	return nil
+}
+
+func statusRank(status string) int {
+	switch status {
+	case statusShort:
+		return 0
+	case statusEligible:
+		return 1
+	case statusUnscored:
+		return 2
+	}
+	return 3
+}
+
+func layoutBlock(name string, scored []string, nameBlock map[string]string) string {
+	return nameBlock[nearestName(name, scored)]
 }
 
 func (o *onboard) copyOracle(name, src string) (string, error) {
@@ -493,7 +597,7 @@ func (o *onboard) scoreNames(names []string, oracles map[string]string) ([]triag
 			row.frac = fmt.Sprintf("%d/%d", frac.Hit, frac.Total)
 			row.status = statusShort
 			if frac.Total > 0 && frac.Hit == frac.Total {
-				row.status = statusReady
+				row.status = statusEligible
 			}
 		}
 		out = append(out, row)
@@ -516,7 +620,7 @@ type promoteSpec struct {
 
 func (o *onboard) promote(args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("promote wants NAME or NAME=BLOCK")
+		return fmt.Errorf("promote wants NAME")
 	}
 	ready, err := o.readySet()
 	if err != nil {
@@ -548,13 +652,12 @@ func (o *onboard) promote(args []string) error {
 	}
 	var specs []promoteSpec
 	seen := map[string]string{}
-	for _, arg := range args {
-		name, block, _ := strings.Cut(arg, "=")
+	for _, name := range args {
 		if _, ok := scoredSet[name]; ok {
 			return fmt.Errorf("%s is already in images.yaml", name)
 		}
-		if ready[name] != statusReady {
-			return fmt.Errorf("%s is not ready in triage.tsv", name)
+		if ready[name] != statusEligible {
+			return fmt.Errorf("%s is not eligible in triage.tsv", name)
 		}
 		if o.oracleFile(name) == "" {
 			return fmt.Errorf("%s: no oracle .ecu", name)
@@ -573,12 +676,9 @@ func (o *onboard) promote(args []string) error {
 			return fmt.Errorf("%s: layout id %s is shared with %s", name, id, prev)
 		}
 		seen[id] = name
+		block := nameBlock[nearestName(name, scored)]
 		if block == "" {
-			near := nearestName(name, scored)
-			block = nameBlock[near]
-		}
-		if block == "" {
-			return fmt.Errorf("%s: no layout block; pass NAME=BLOCK", name)
+			return fmt.Errorf("%s: no layout block", name)
 		}
 		specs = append(specs, promoteSpec{name, block, id})
 	}
@@ -638,7 +738,7 @@ func (o *onboard) promote(args []string) error {
 		restore()
 		return err
 	}
-	if miss := me7Misses(rep, scored, specs); len(miss) > 0 {
+	if miss := me7Misses(rep, goldens(o.data, scored), specs); len(miss) > 0 {
 		restore()
 		return fmt.Errorf("ME7Info parity:\n%s", strings.Join(miss, "\n"))
 	}
@@ -669,6 +769,19 @@ func (o *onboard) oracleFile(name string) string {
 		return p
 	}
 	return ""
+}
+
+// goldens is the images.yaml names that already have a ME7Info file.
+// A row with no golden is not a score, so a later add does not fail on it.
+func goldens(dir string, names []string) []string {
+	var out []string
+	for _, n := range names {
+		st, err := os.Stat(filepath.Join(dir, "ecu", "me7info", n+".ecu"))
+		if err == nil && st.Size() > 0 {
+			out = append(out, n)
+		}
+	}
+	return out
 }
 
 func me7Misses(rep *parity.Report, prev []string, specs []promoteSpec) []string {

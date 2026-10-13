@@ -18,72 +18,20 @@ import (
 )
 
 const corpusHelp = `
-Lists every parity image. Confidence has to pass on every row: high
-bodies are more than half the tuner names that scored. A zero
-denominator fails the row.
+Lists every parity image and what --submit would store.
+--submit writes those rows and does not commit or upload.
+With no NAME, every image is listed. A named row also prints
+hand, open, and block.
 
-  status       whether --submit stores the row, and why
-  tier         the names grade. * is below S, except on a DAMOS or
-               A2L definition
-  delta        the edit --submit would write. - is nothing
-  confidence   high bodies / tuner names that scored
-
-status
-  eligible               stored. Origin becomes located.
-  identical              same names, and the description and comment
-                         would stay.
-  origin damos           DAMOS definition. Left in place.
-  origin a2l             A2L definition. Left in place.
-  origin unset           no provenance origin. Left in place.
-  hand short NAME        that hand name was not located, so the file
-                         stays. When other names can move or be added,
-                         the status continues with the delta and
-                         --submit writes those. Origin stays hand.
-  hand disagrees NAME    that name has more than one located
-                         address. A following delta is a partial
-                         write and the origin stays hand. With no
-                         delta the row is left as it is.
-  grade -                the name grade is below D. Origin hand is
-                         scored without waiting for a grade. With no
-                         definition, D or better is eligible.
-  confidence N/M         high bodies are half or fewer.
-  keys                   blank-id keys named obj-N. --submit clears
-                         them and leaves the origin. Another status
-                         ends with ", key N" for the same clear.
-  def unreadable         the definition file could not be read.
-
-delta
-  +N       names added. Status is eligible.
-  ~N       descriptions, comments, or addresses brought in line.
-           Status is eligible when nothing is short.
-  ~N +N    both, while a short name remains. Origin stays hand.
-  key N    placeholder keys cleared. On an eligible row the origin
-           still becomes located.
-
-A definition that is not a parity image is listed when it has
-placeholder keys. Its tier is - and its confidence is -.
-
-A pn is a stem, a stem.bin, or the part number in front of the
-software index: 8D0907551H matches 8D0907551H-0003. An exact stem
-matches only that image. Under each named row:
-  hand    short, disagreeing, and added keys
-  open    tuner names that did not hit
-  block   layout-block names that did not hit
-absent and "met by NAME" are the same marks as the report.
---submit stores only the images named.
-
---submit writes defs/NAME.json and sets that row's def column.
-A stored object keeps the previous conversion, units, and layout.
-The description becomes the name table and the comment the needle
-that located the map. It leaves the checkout uncommitted, and it
-does not push or upload.
+Columns are status, tier, delta, and confidence.
+Status and delta marks are in docs/parity.md.
 
 The corpus is --corpus, else CORPUS, else ../ecu-corpus when that
 checkout exists, else corpus/.
-`
+` + nameArg
 
 func cmdCorpus(args []string) error {
-	fs := cli.NewFlagSet("me7parity", "corpus", "[flags] [pn...]", corpusHelp)
+	fs := cli.NewFlagSet("me7parity", "corpus", "[--submit] [NAME...]", corpusHelp)
 	data := fs.StringP("data", "d", "testdata/parity", "parity root `<dir>`")
 	corpusFlag := fs.String("corpus", "", "ecu-corpus checkout `<dir>` (default CORPUS, else ../ecu-corpus, else corpus/)")
 	submit := fs.Bool("submit", false, "write the rows marked for storage into the corpus")
