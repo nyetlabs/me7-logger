@@ -45,7 +45,7 @@ func cmdOnboard(args []string) error {
 	fs := cli.NewFlagSet("me7parity", "onboard", "[--submit] [NAME...]", onboardHelp)
 	data := fs.StringP("data", "d", "testdata/parity", "parity root `<dir>`")
 	incoming := fs.String("incoming", "", "incoming `<dir>` (default <data>/incoming)")
-	corpus := fs.String("corpus", ecucorpus.Dir("."), "ecu-corpus checkout `<dir>`: corpus.tsv and images/<stem>.bin; XDFKIT_CORPUS sets the default")
+	corpus := fs.String("corpus", ecucorpus.Dir("."), "ecu-corpus checkout `<dir>`: corpus.tsv and images/<part>/<stem>.bin; XDFKIT_CORPUS sets the default")
 	submit := fs.Bool("submit", false, "add the eligible images")
 	if err := fs.Parse(args); err != nil {
 		return err

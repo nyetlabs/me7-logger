@@ -33,7 +33,8 @@ stage:
 	php index.php $$(awk -F '\t' 'NR > 1 && $$10 != "-" { print $$1 }' $(CORPUS)/corpus.tsv); \
 	awk -F '\t' 'NR > 1 && $$10 != "-" { print $$1, $$4, $$10 }' $(CORPUS)/corpus.tsv | \
 	while read -r name family def; do \
-		src=$(CORPUS)/$$def; img=$(CORPUS)/images/$$name.bin; \
+		part=$${name%%-*}; base=$$(printf '%.9s' "$$part"); \
+		src=$(CORPUS)/$$def; img=$(CORPUS)/images/$$base/$$name.bin; \
 		d=$$(git -C $(CORPUS) log -1 --format=%cd --date=format:%Y%m%d --invert-grep --grep='^chore(schema):' -- $$def); \
 		if test -z "$$d"; then d=$$(stat -f %Sm -t %Y%m%d $$src 2>/dev/null || date -r $$src +%Y%m%d); fi; \
 		tuner=; \

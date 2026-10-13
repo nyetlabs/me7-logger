@@ -59,7 +59,7 @@ Both `KFPED_0_A` and `KFPED_1_A` cover a hand `KFPED`. The same for `KFPEDR`. On
 
 `me7parity onboard` scores corpus images that are not in `images.yaml` yet and prints the score. `--submit` adds the ones whose ME7Info rows all match. The layout block is the scored image with the longest shared name prefix. A duplicate layout, a second image of that layout, a short score, or a missing block is reported and left out. `--submit` restores both YAML files and the new golden when any ME7Info row is under 100%.
 
-The flash file is `<corpus>/images/NAME.bin`, and that stem has to be a row of `<corpus>/corpus.tsv`. A filesystem path is rejected. `--corpus` is `XDFKIT_CORPUS`, otherwise `./corpus`. `ME7INFO_EXE` defaults to `../ME7L/bin/ME7Info.exe`. `WINE` defaults to `wine`. An existing `.ecu` is left in place.
+The flash file is `<corpus>/images/<part>/NAME.bin` (`<part>` is the first 9 characters of the part number), and that stem has to be a row of `<corpus>/corpus.tsv`. A filesystem path is rejected. `--corpus` is `XDFKIT_CORPUS`, otherwise `./corpus`. `ME7INFO_EXE` defaults to `../ME7L/bin/ME7Info.exe`. `WINE` defaults to `wine`. An existing `.ecu` is left in place.
 
 `not scored` columns are name, status, and epk. epk is the EPK string, or `-`.
 

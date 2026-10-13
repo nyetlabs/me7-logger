@@ -24,7 +24,7 @@ func TestLoad(t *testing.T) {
 		t.Fatal(err)
 	}
 	got, err := c.List(list)
-	if err != nil || len(got) != 1 || got[0] != filepath.Join(dir, "images", "a-0001.bin") {
+	if err != nil || len(got) != 1 || got[0] != filepath.Join(dir, "images", "a", "a-0001.bin") {
 		t.Fatalf("%v %v", got, err)
 	}
 	if _, err := c.Path("b-0001"); err == nil {

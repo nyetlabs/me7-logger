@@ -1,5 +1,5 @@
 // Package ecucorpus reads images from the shared ecu-corpus (xdfkit
-// docs/corpus.md): the corpus.tsv manifest and images/<name>.bin. The corpus
+// docs/corpus.md): the corpus.tsv manifest and images/<part>/<name>.bin. The corpus
 // is the private git submodule at corpus/; a checkout without access leaves it
 // empty, and corpus tests skip unless XDFKIT_REQUIRE_CORPUS is set.
 package ecucorpus
@@ -89,12 +89,22 @@ func (c *Corpus) Def(name string) string {
 	return ""
 }
 
-// Path returns images/<name>.bin for a manifest name.
+// Group is the images/ subdirectory for a manifest name: the first 9 characters
+// of the part number (the stem up to '-'). A shorter part is its own directory.
+func Group(name string) string {
+	part, _, _ := strings.Cut(name, "-")
+	if len(part) > 9 {
+		return part[:9]
+	}
+	return part
+}
+
+// Path returns images/<part>/<name>.bin for a manifest name.
 func (c *Corpus) Path(name string) (string, error) {
 	if _, ok := c.defs[name]; !ok {
 		return "", fmt.Errorf("%s: not in %s", name, filepath.Join(c.Dir, "corpus.tsv"))
 	}
-	return filepath.Join(c.Dir, "images", name+".bin"), nil
+	return filepath.Join(c.Dir, "images", Group(name), name+".bin"), nil
 }
 
 // List reads a YAML list of manifest names and returns their image paths.

@@ -8,7 +8,7 @@ flowchart LR
     src[DAMOS / A2L / OLS / hand XDF]
   end
   subgraph corpus[ecu-corpus submodule]
-    bin[images/*.bin]
+    bin[images/part/*.bin]
     def[defs/*.json + provenance]
     cats[categories.json]
   end
