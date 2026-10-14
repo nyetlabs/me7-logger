@@ -48,8 +48,8 @@ const (
 	CategoriesFile = "categories.json"
 )
 
-// LoadCategories reads the category table: the tuner map names, each with its
-// XDF category (xdfkit docs/corpus.md), checked by xdfkit.
+// LoadCategories reads the category table: each category's map names
+// (xdfkit docs/model.md), checked by xdfkit.
 func LoadCategories(path string) (*model.CategoryTable, error) {
 	b, err := Read(path, CategoriesFile)
 	if err != nil {

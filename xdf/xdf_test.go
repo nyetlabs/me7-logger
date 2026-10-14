@@ -146,7 +146,7 @@ func TestModelCategories(t *testing.T) {
 		{Name: "KFZW", Addr: 0x820000, Bits: 8, Rows: 16, Cols: 12, Y: &record.Axis{Addr: 0x810010, Count: 16, Bits: 8}},
 		{Name: "UNLISTED", Addr: 0x830000, Bits: 8},
 	}
-	cats, err := model.ParseCategoryTable([]byte(`{"schema":1,"categories":{"KFZW":"Timing","ABSENT":"Boost"}}`))
+	cats, err := model.ParseCategoryTable([]byte(`{"schema":2,"categories":{"Timing":["KFZW"],"Boost":["ABSENT"]}}`))
 	if err != nil {
 		t.Fatal(err)
 	}

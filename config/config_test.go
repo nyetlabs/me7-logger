@@ -81,11 +81,11 @@ func TestShippedCategories(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if cats.Categories["KFZW"] == "" {
+	if cats.Category("KFZW") == "" {
 		t.Fatal("KFZW has no category")
 	}
 	bad := filepath.Join(t.TempDir(), CategoriesFile)
-	if err := os.WriteFile(bad, []byte(`{"schema": 1, "categories": {"KFZW": "Timing"}, "extra": 1}`), 0o644); err != nil {
+	if err := os.WriteFile(bad, []byte(`{"schema": 2, "categories": {"Timing": ["KFZW"]}, "extra": 1}`), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := LoadCategories(bad); err == nil {
