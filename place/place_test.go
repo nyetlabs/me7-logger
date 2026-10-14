@@ -92,7 +92,7 @@ func TestMeasure4D(t *testing.T) {
 	spans := objectSpans(m.Objects)
 	dppRef, _, _ := opcode.FindDPP(ref)
 	dppDst, _, _ := opcode.FindDPP(dst)
-	want := map[string][4]int{"1d": {62, 7, 4, 0}, "2d": {72, 18, 6, 1}}
+	want := map[string][4]int{"1d": {62, 7, 4, 0}, "2d": {74, 18, 6, 1}}
 	for _, shape := range []string{"1d", "2d"} {
 		one, framed, held, drift := 0, 0, 0, 0
 		n := 0
@@ -135,7 +135,7 @@ func TestMeasure4D(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if rep.Kept != 186 || rep.Moved != 18 || len(rep.Unresolved) != 358 {
+	if rep.Kept != 187 || rep.Moved != 18 || len(rep.Unresolved) != 360 {
 		t.Fatalf("kept %d moved %d unresolved %d", rep.Kept, rep.Moved, len(rep.Unresolved))
 	}
 	j := 0

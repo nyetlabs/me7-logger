@@ -12,7 +12,8 @@
 #   A  stage 3: MAF and intake, ARMD
 #   S  niceties, and boost codes left stock: overboost limp
 #      (KFDLULS, TULV1, LDORXN, KFLDRXO), the P1557 leak check
-#      (KFVPDKLD, TDLDRA2), LDRXNZK, KFTARXZK, and the _UM maps
+#      (KFVPDKLD, TDLDRA2), LDRXNZK, KFTARXZK, the _UM maps,
+#      KFMIZUFIL, KFMIZUOF, and KFMIZUNS
 # An any entry is one slot in that tier. The first name is the plain map.
 # The slot is met when that name or any later form is located. A block that
 # has none of them lists every form in absent.yaml. The tuner count still
@@ -34,8 +35,8 @@ tiers:
         NMAX, NMAXF, NMAXOG, NWPMBBR, TDLDRA2, TMOTNMX, TNMXH, TULV1, VMAXNB,
         VNMX, VWPMBBR, WFRL, ZKLAMFAW]
     1: [KLDMASRL, LDORXN, LDRXNZK, NASNOTKL]
-    2: [FZWWLRLN, KFDLULS, KFFWLW, KFLDRXO, KFMDZOF_UM, KFMI_UM, KFMPED_UM,
-        KFTARXZK, KFTSRL, KFVPDKLD]
+    2: [FZWWLRLN, KFDLULS, KFFWLW, KFLDRXO, KFMDZOF_UM, KFMI_UM, KFMIZUFIL,
+        KFMIZUOF, KFMIZUNS, KFMPED_UM, KFTARXZK, KFTSRL, KFVPDKLD]
   A:
     0: [KIFZGHG, MLHFM, MLMAX, MLOFS]
     2: [KFDMDADP, KFDMDARO, KFKHFM, KFMLDMX, KFNW, KFNWWL, KFPBRK, KFPBRKNW,
@@ -58,6 +59,6 @@ tiers:
     1: [DLAMTANS, DLBTS, DWKRMSN, FBSTABGM, FWFTBRTA, KRFKLN, LDIATA, LDPBN,
         LDRXN]
     2: [KFFLLDE, KFFWTBR, KFLAFWL, KFLAMKR, KFLAMKRL, KFLBTS_0_A, KFLDHBN,
-        KFLDIMX, KFLDIOPU, KFLDRAPP, KFLDRL, KFMIOP, KFMIRL, KFMIZUFIL,
-        KFMIZUNS, KFMIZUOF, KFVPLGU, KFWPLGTA,
+        KFLDIMX, KFLDIOPU, KFLDRAPP, KFLDRL, KFMIOP, KFMIRL, KFVPLGU,
+        KFWPLGTA,
         KFZW, KFZWOP, KFZWOP2, KFZWWLNM, LAMFA]

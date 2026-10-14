@@ -71,6 +71,20 @@ absent:
     # confirm.
     - SNM16OPUW
     - TABGSS2
+  # 4Z7907551R has the full DAMOS. It has KFDLBTS, ZDLBTS, TABGBTS, and
+  # DTBTS, and it does not have DLBTS. The lambts window has no
+  # C2FC E6FD E6FE DA8X arm. It also has no KFMIZU map. The only
+  # 0D0B E6FC E6FD call is KFWEE / KFWEEK. The same export has
+  # KLRLSALULL, KFTABGSS, and KFTABGSS2, and it does not have the
+  # RLSALULL byte or the TABGSS scalars. ASE_rlsalun passes the curve.
+  4Z7:
+    - DLBTS
+    - KFMIZUFIL
+    - KFMIZUNS
+    - KFMIZUOF
+    - RLSALULL
+    - TABGSS
+    - TABGSS2
   # No DAMOS export yet. No image in this block has the DA 00 42 76 call,
   # so KFVPLGU and SNM16OPUW have no reader. DLBTS is only stored from the
   # scanLbts arm that starts with 42 F4 FD 02. DH misses that chain. DQ
@@ -107,3 +121,10 @@ absent:
     - KFLBTS_0_A
     - KFTARX
     - KFVPLGU
+  # No DAMOS export. Neither image has the DA 00 42 76 call, so KFVPLGU
+  # and SNM16OPUW have no reader. The lambts window has DA 83 94 48
+  # 06 F0 0C 00, so scanLbts takes the KFDLBTS arm and does not store DLBTS.
+  25C:
+    - DLBTS
+    - KFVPLGU
+    - SNM16OPUW

@@ -121,15 +121,15 @@ maps:
   interp: map_interp_table8
 - name: KFLAMKRL
   caller: LAMFAW_lamkr
-  at: ['0x26A', '0x2B0']
+  at: ['0x26A', '0x2B0', '0x2B2']
   interp: map_interp_table8_page
 - name: KFLAMKR
   caller: LAMFAW_lamkr
-  at: ['0x2F0', '0x33E']
+  at: ['0x2F0', '0x33E', '0x342']
   interp: map_interp_table8_page
 - name: KFLAFWL
   caller: LAMFAW_lamkr
-  at: ['0x3A0', '0x3DC', '0x444']
+  at: ['0x3A0', '0x3DC', '0x3E2', '0x444', '0x44C']
   interp: map_interp_table8_page
 - name: KFFLLDE
   caller: LDRLMX_ldhbn
@@ -213,7 +213,7 @@ maps:
   interp: map_interp_curve8
 - name: NLLM
   caller: LLR_nllm_b
-  at: ['0x104', '0x11E', '0x152', '0x16C']
+  at: ['0x104', '0x11E', '0x152', '0x16C', '0x2D2']
   interp: map_interp_curve8
 - name: KFNLLNST
   caller: nllnst_entry
@@ -221,7 +221,7 @@ maps:
   interp: map_interp_table8_page
 - name: RLSALUN
   caller: ASE_rlsalun
-  at: ['0x840', '0x8BA', '0xA50']
+  at: ['0x840', '0x8BA', '0xA50', '0xAC2']
   interp: map_interp_curve8_direct
 - name: WDKUGDN
   caller: BGMSZS_wdkugdn

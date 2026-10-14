@@ -7,6 +7,8 @@
 #
 # needle_hex    Hex bytes. Spaces are optional. X is a nibble wildcard, so XX is
 #               one wildcard byte. [VV/MM] is a byte whose bits under MM equal VV.
+#               {push:9876} is MOV [-R0], R9 then R8, R7, R6. Each digit is a
+#               register. {sub:4} is SUB R0, #4. {extp:0206} is EXTP #0x0206, #1.
 #               Only word-aligned hits count. A list is one pattern per code
 #               layout. Those patterns share back_up, and unique counts every hit.
 #               Use needles when each prologue needs its own back_up, unique,
@@ -165,43 +167,39 @@ functions:
   # from this label. One hit on the images that have it.
   - name: ZWGRU_ign_zw
     needles:
-      - needle_hex: "88 90 88 80 88 70 88 60 9A XX 03"
+      - needle_hex: "{push:9876} 9A XX 03"
       # 22N. The jump bit differs. The maps sit at the 22m distances.
-      - needle_hex: "88 90 88 80 88 70 88 60 9A 58 03 F0"
+      - needle_hex: "{push:9876} 9A 58 03 F0"
       # 23g ignition entry. The warm-up map sits in ZWGRU_ign_wl.
-      - needle_hex: "88 90 88 70 88 60 28 02 F3 F8 50 8C 47 F8 FF 00"
+      - needle_hex: "{push:976} {sub:2} F3 F8 50 8C 47 F8 FF 00"
       # K and Q. The F3 address is 538C. The calls sit at the F distances.
-      - needle_hex: "88 90 88 70 88 60 28 02 F3 F8 53 8C 47 F8 FF 00"
+      - needle_hex: "{push:976} {sub:2} F3 F8 53 8C 47 F8 FF 00"
       # 4Z7 ignition entry. One less push, and the F3 address differs per image.
-      - needle_hex: "88 90 88 80 28 02 F3 F8 XX XX 47 F8 FF 00"
+      - needle_hex: "{push:98} {sub:2} F3 F8 XX XX 47 F8 FF 00"
 
   - name: ZWGRU_ign_wl
     needle_hex:
-      - "88 90 88 80 E6 FC XX XX E6 FD CE 00 F2 FE"
+      - "{push:98} E6 FC XX XX E6 FD CE 00 F2 FE"
       # 4Z7. The byte after E6 FD is E7.
-      - "88 90 88 80 E6 FC XX XX E6 FD E7 00 F2 FE"
+      - "{push:98} E6 FC XX XX E6 FD E7 00 F2 FE"
 
   - name: ARMD_kfdmd
     needles:
-      - needle_hex: "28 04 9A 00 05 90 8A XX 03"
+      - needle_hex: "{sub:4} 9A 00 05 90 8A XX 03"
         entry_after: ["DB 00"]
       # 22N pushes two registers first. The byte after 8A is 0C.
-      - needle_hex: "88 90 88 80 28 04 9A 00 05 90 8A 0C"
+      - needle_hex: "{push:98} {sub:4} 9A 00 05 90 8A 0C"
 
   - name: LAMBTS_kflbts
     needle_hex:
-      - "88 90 88 80 88 70 88 60 28 04 E6 FC XX XX F2 FD XX XX DA 00 D0 71"
-      - "88 90 88 80 88 70 88 60 28 04 E6 FC XX XX F2 FD EE 97"
+      - "{push:9876} {sub:4} E6 FC XX XX F2 FD XX XX DA 00 D0 71"
+      - "{push:9876} {sub:4} E6 FC XX XX F2 FD EE 97"
 
   - name: MDBAS_kfmiop
-    needle_hex: "88 90 88 80 88 70 F2 F7"
+    needle_hex: "{push:987} F2 F7"
 
   - name: MDZW_kfmizu
-    needle_hex:
-      - "88 90 88 80 88 60 28 04 9A 55 0C XX"
-      - "88 90 88 80 88 60 28 04 9A 56 0C 50"
-      # K and Q. The byte after 0C is C0. The calls sit at the F distances.
-      - "88 90 88 80 88 60 28 04 9A 56 0C C0"
+    needle_hex: "{push:986} {sub:4} 9A [54/FC] 0C XX"
 
   # Callers for the other tuner maps. config/maps.yaml names each map at a
   # fixed distance from the label. "XX" is an R12 or R13 immediate: that
@@ -219,46 +217,46 @@ functions:
 
   - name: LLR_kfmres
     needles:
-      - needle_hex: "88 90 88 80 88 70 88 60 28 04 C2 F8"
-      - needle_hex: "88 90 88 80 88 70 88 60 28 04 C2 F6"
+      - needle_hex: "{push:9876} {sub:4} C2 F8"
+      - needle_hex: "{push:9876} {sub:4} C2 F6"
 
   - name: FUEDK_kfvpdks
     needle_hex:
       - "8A XX 04 XX 8A XX 02 XX 9A XX 12 XX E6 F4 FF 7F"
       # 4Z7 entry. The calls sit past the distances used on 22m.
-      - "88 90 88 80 88 70 88 60 D7 40 06 02 F3 FC DF 1E"
+      - "{push:9876} {extp:0206} F3 FC DF 1E"
 
   - name: FUEDK_kfvplgu
     needle_hex: "E6 FC XX XX F2 FD XX XX F2 FE XX XX DA 00 42 76 F6 F4 XX XX F2 F5"
 
   - name: MDBAS_kfzwop
     needles:
-      - needle_hex: "88 90 88 80 88 70 88 60 28 04 E6 FC XX XX F2 FD 90 F9"
-      - needle_hex: "88 90 88 80 88 70 88 60 28 04 E6 FC XX XX F2 FD 0E F9"
-      - needle_hex: "88 90 88 80 88 70 88 60 28 04 E6 FC XX XX F2 FD 92 F9"
+      - needle_hex: "{push:9876} {sub:4} E6 FC XX XX F2 FD 90 F9"
+      - needle_hex: "{push:9876} {sub:4} E6 FC XX XX F2 FD 0E F9"
+      - needle_hex: "{push:9876} {sub:4} E6 FC XX XX F2 FD 92 F9"
 
   # 4Z7 entry. 0x28 is KFMIOP. 0x40 passes the KFZWOP body, which the 22m row names KFZWOP2.
   - name: MDBAS_kfzwop_b
-    needle_hex: "88 90 88 80 88 70 88 60 28 06 E6 FC XX XX F2 FD"
+    needle_hex: "{push:9876} {sub:6} E6 FC XX XX F2 FD"
 
   - name: LAMFAW_lamkr
-    needle_hex: "88 90 88 80 88 70 88 60 28 02 F2 F4 XX XX 88 40 C2 F5 XX F8"
+    needle_hex: "{push:9876} {sub:2} F2 F4 XX XX 88 40 C2 F5 XX F8"
 
   - name: LDRLMX_ldhbn
     needles:
-      - needle_hex: "88 90 88 80 C2 F4 B3 F9"
+      - needle_hex: "{push:98} C2 F4 B3 F9"
       # 23g pushes one more register before the same call.
-      - needle_hex: "88 90 88 80 88 70 C2 F4 XX XX 46 F4"
+      - needle_hex: "{push:987} C2 F4 XX XX 46 F4"
       # 22N stores two bytes before that call.
-      - needle_hex: "88 90 88 80 88 70 F3 F8 XX XX F7 F8 XX XX C2 F4 XX XX 46 F4"
+      - needle_hex: "{push:987} F3 F8 XX XX F7 F8 XX XX C2 F4 XX XX 46 F4"
 
   - name: LDRPID_ldiopu
     needles:
-      - needle_hex: "88 90 88 80 88 70 88 60 28 02 F2 F4 XX 8F"
+      - needle_hex: "{push:9876} {sub:2} F2 F4 XX 8F"
       # 23g opens the page with D7 instead of the F2 load above.
-      - needle_hex: "88 90 88 80 88 70 88 60 28 02 D7 40 06 02 F3 F8"
+      - needle_hex: "{push:9876} {sub:2} {extp:0206} F3 F8"
       # 22N reserves a larger frame. 28 XX is ambiguous on 23g.
-      - needle_hex: "88 90 88 80 88 70 88 60 28 06 D7 40 06 02 F3 F8"
+      - needle_hex: "{push:9876} {sub:6} {extp:0206} F3 F8"
 
   # 22N entry that passes KFWPLGTA. 22m reads that map in LDRPID_ldiopu.
   - name: LDRPID_plsolr
@@ -267,28 +265,31 @@ functions:
 
   # 23g entry that passes KFNLLNST. The prologue is this image's.
   - name: nllnst_entry
-    needle_hex: "88 80 88 70 88 60 9A 02 02 40 EA 00 04 B7 9A 58"
+    needle_hex: "{push:876} 9A 02 02 40 EA 00 04 B7 9A 58"
 
   # Caller for the LDRQ maps. config/maps.yaml names each map at a fixed
   # distance from this label. One hit on the images that have it.
   - name: LDRPID_ldrq
-    needle_hex: "88 90 88 80 88 70 88 60 28 02 9A XX 0F XX"
+    needle_hex: "{push:9876} {sub:2} 9A XX 0F XX"
 
   - name: LLR_nfsm
     needle_hex:
-      - "88 70 88 60 9A 02 02 XX EA 00"
-      - "88 70 88 60 9A 02 02 80 EA 00 FE B5"
+      - "{push:76} 9A 02 02 XX EA 00"
+      - "{push:76} 9A 02 02 80 EA 00 FE B5"
 
   - name: LLR_nllm
-    needle_hex: "88 90 88 70 88 60 28 02 C2 F4"
+    needle_hex: "{push:976} {sub:2} C2 F4"
 
   - name: LLR_nllm_b
-    needle_hex: "88 C0 88 90 88 80 88 70 88 60 28 04 F4 80"
+    needle_hex: "{push:C9876} {sub:4} F4 80"
 
   - name: ASE_rlsalun
-    needle_hex: "88 90 88 80 F2 F4 XX XX 68 41 EA 20"
+    needle_hex:
+      - "{push:98} F2 F4 XX XX 68 41 EA 20"
+      # 4Z7. One less push. The curve call is at 0xAC2.
+      - "{push:86} F2 F4 XX XX 68 41 EA 20"
 
   - name: BGMSZS_wdkugdn
     needles:
-      - needle_hex: "28 04 F2 F4 XX XX F2 F5 XX XX 1B 54"
+      - needle_hex: "{sub:4} F2 F4 XX XX F2 F5 XX XX 1B 54"
       - needle_hex: "C2 F4 XX XX 88 40 F2 FC XX XX F2 FD XX XX E6 FE"
