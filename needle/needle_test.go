@@ -1,6 +1,7 @@
 package needle
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"strings"
@@ -139,6 +140,23 @@ func TestIndexAgrees(t *testing.T) {
 				t.Fatalf("%s limit %v", s, got)
 			}
 		}
+	}
+}
+
+func TestPatternMacros(t *testing.T) {
+	ns, err := Parse([]byte("functions:\n  - name: f\n    needle_hex: \"{push:9876} {sub:4} {extp:0206}\"\n"), "m")
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []byte{0x88, 0x90, 0x88, 0x80, 0x88, 0x70, 0x88, 0x60, 0x28, 0x04, 0xD7, 0x40, 0x06, 0x02}
+	if !bytes.Equal(ns[0].Pattern, want) {
+		t.Fatalf("got %x", ns[0].Pattern)
+	}
+	if _, err := Parse([]byte("functions:\n  - name: f\n    needle_hex: \"{push:9G}\"\n"), "m"); err == nil {
+		t.Fatal("accepted a bad register")
+	}
+	if _, err := Parse([]byte("functions:\n  - name: f\n    needle_hex: \"{nope:1}\"\n"), "m"); err == nil {
+		t.Fatal("accepted an unknown macro")
 	}
 }
 

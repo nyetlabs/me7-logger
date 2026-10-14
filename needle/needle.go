@@ -170,6 +170,10 @@ func (f rawNeedle) compile() (Needle, error) {
 	pats := make([][]byte, len(f.NeedleHex.items))
 	masks := make([][]byte, len(f.NeedleHex.items))
 	for i, hex := range f.NeedleHex.items {
+		hex, err := expandPattern(hex)
+		if err != nil {
+			return Needle{}, fmt.Errorf("%s: %w", f.Name, err)
+		}
 		pat, mask, err := Compile(hex)
 		if err != nil {
 			return Needle{}, fmt.Errorf("%s: %w", f.Name, err)
@@ -276,6 +280,90 @@ func parseNum(s string) (int, error) {
 		out = -out
 	}
 	return out, nil
+}
+
+// expandPattern replaces a repeated instruction with its bytes.
+// {push:9876} is MOV [-R0], R9 then R8, R7, R6. Each digit is a register.
+// {sub:4} is SUB R0, #4. {extp:0206} is EXTP #0x0206, #1.
+func expandPattern(s string) (string, error) {
+	var b strings.Builder
+	for i := 0; i < len(s); {
+		if s[i] != '{' {
+			b.WriteByte(s[i])
+			i++
+			continue
+		}
+		j := strings.IndexByte(s[i:], '}')
+		if j < 0 {
+			return "", fmt.Errorf("unclosed {")
+		}
+		body := s[i+1 : i+j]
+		i += j + 1
+		name, arg, ok := strings.Cut(body, ":")
+		if !ok || name == "" {
+			return "", fmt.Errorf("pattern ref %q wants a name and an argument", body)
+		}
+		got, err := expandMacro(name, arg)
+		if err != nil {
+			return "", err
+		}
+		b.WriteString(got)
+	}
+	return b.String(), nil
+}
+
+func expandMacro(name, arg string) (string, error) {
+	arg = strings.Join(strings.Fields(arg), "")
+	switch name {
+	case "push":
+		if arg == "" {
+			return "", fmt.Errorf("push wants registers")
+		}
+		var b strings.Builder
+		for i := 0; i < len(arg); i++ {
+			c := arg[i]
+			if c >= 'a' && c <= 'f' {
+				c = c - 'a' + 'A'
+			}
+			if !isHexNibble(c) {
+				return "", fmt.Errorf("push register %q", arg[i:i+1])
+			}
+			fmt.Fprintf(&b, "88 %c0 ", c)
+		}
+		return strings.TrimSpace(b.String()), nil
+	case "sub":
+		v, err := oneByte(arg)
+		if err != nil {
+			return "", fmt.Errorf("sub: %w", err)
+		}
+		return fmt.Sprintf("28 %02X", v), nil
+	case "extp":
+		if len(arg) != 4 {
+			return "", fmt.Errorf("extp wants a 4-digit page")
+		}
+		page, err := strconv.ParseUint(arg, 16, 16)
+		if err != nil {
+			return "", fmt.Errorf("extp page %q", arg)
+		}
+		return fmt.Sprintf("D7 40 %02X %02X", byte(page), byte(page>>8)), nil
+	default:
+		return "", fmt.Errorf("unknown pattern macro %q", name)
+	}
+}
+
+func isHexNibble(c byte) bool {
+	return c >= '0' && c <= '9' || c >= 'A' && c <= 'F' || c >= 'a' && c <= 'f'
+}
+
+func oneByte(s string) (byte, error) {
+	if s == "" || len(s) > 2 {
+		return 0, fmt.Errorf("wants one byte")
+	}
+	v, err := strconv.ParseUint(s, 16, 8)
+	if err != nil {
+		return 0, fmt.Errorf("%q", s)
+	}
+	return byte(v), nil
 }
 
 // Compile reads a byte pattern. Spaces are ignored. A byte is two hex digits,
