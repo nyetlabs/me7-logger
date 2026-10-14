@@ -168,7 +168,9 @@ mapsigs:
 - {name: NASNOTKL, pattern: C2F5XXXX1B45F2F90CFEF2F80EFEF0597C787C795C95708548903D0246F8FFFF8D03, add: 52, cols: 4}
 - {name: KFPBRK, pattern: E6FCXXXXE6FDXX02F2FEXXF8F2FFXXF9DA80XXXX98501B45F2F80CFE, frame: true, add: 44, rows: 10, cols: 10, xbits: 16, ybits: 16}
 # The same call as KFPBRK. KFPRG is 6 by 10, 524 bytes from that pointer.
+# KFURL is 6 by 10, 680 bytes from it.
 - {name: KFPRG, pattern: E6FCXXXXE6FDXX02F2FEXXF8F2FFXXF9DA80XXXX98501B45F2F80CFE, frame: true, add: 524, rows: 6, cols: 10, xbits: 16, ybits: 16}
+- {name: KFURL, pattern: E6FCXXXXE6FDXX02F2FEXXF8F2FFXXF9DA80XXXX98501B45F2F80CFE, frame: true, add: 680, rows: 6, cols: 10, xbits: 16, ybits: 16}
 - {name: KFWDKMSN, pattern: 3A8BD7400602D2F5XXXX4045DD0F, at: 8, add: 68, rows: 16, cols: 6, ybits: 16, xbits: 16}
 - {name: LAMFA, pattern: XXA98840C2F578F88850E6F4XXXXE6F5, at: 12, frame: true, rows: 15, cols: 6, xbits: 16}
 - {name: LAMFA, pattern: 8D13D740070242F4XXXXED0E8A4A, at: 8, add: 66, rows: 15, cols: 6, xbits: 16}
@@ -816,14 +818,16 @@ mapsigs:
 # 23g. The third 928D call is LDRQ1ST. STV10LDSW is 35 bytes after it.
 - {name: STV10LDSW, pattern: E6FCXXXXE6FD0702F2FE928DDA80XXXXF6F4XXXXDA87, at: 2, frame: true, add: 35}
 # 23g K and Q. The C6 A7 call is the one F does not have. The body is KFDMDADP.
+# The frame 0x50 before it is KFDMDARO.
 - {name: KFDMDADP, pattern: F6F4C6A7D740E100F2F5E80B8850D740E100F2F24A098820E6FCXXXXE6FD0702, at: 26, frame: true}
+- {name: KFDMDARO, pattern: D740E100F2F54A098850E6FCD02AE6FD0702, at: 12, frame: true}
 # 23g K and Q. The F2 word is the axis.
 - {name: KIFZGAWG, pattern: 'F2F5[10/37][23/F3]F6F5[68/ED]A7F3F8[A8/FC]8A', at: 2}
 - {name: KIFZGHG_2_A, pattern: F2F59C2BF6F578A7F3F8AB8A, at: 2}
 # 23g K and Q. F keeps 80 DF on the row above. The F2 word is MLOFS and KFMSNWDK is 88 bytes later.
 - {name: KFMSNWDK, pattern: D8E8F2F3F8F842F368A09D10E003F062F073F2F45646E0052064, at: 20, add: 88, rows: 16, cols: 6, ybits: 16, xbits: 16}
 # 23g K and Q. The C2 word is KUMSRL. KFKHFM is 201 bytes before it. F keeps 8F 0C.
-- {name: KFKHFM, pattern: C2F4740C5C84F2F5084D1B54F2F20CFEB820A840, at: 2, add: -201}
+- {name: KFKHFM, pattern: C2F4740C5C84F2F5084D1B54F2F20CFEB820A840, at: 2, add: -201, rows: 14, cols: 14}
 # 23g K and Q. The word is ADRONLOGIN. The other two logins are the next words.
 - {name: ADRONLOGIN, pattern: DA88DAE9DA88FCDEF2F48280F2F58480DC55, at: 16, also: [{name: GRAOFLOGIN, add: 2}, {name: GRAONLOGIN, add: 4}]}
 # C2 F4 word, then 6841 2D1B, then the F2 word.
@@ -1089,3 +1093,13 @@ mapsigs:
 - {name: CLRKA, pattern: DB00C2F4DE156841EA203213E6FC7E29E6FD0602, at: 4}
 # M's TABGSS call. Page 0702, the 42 F4 word. TABGSS2 is two bytes later.
 - {name: TABGSS, pattern: '0D08F2F4[00/A1][95/F7]D740070242F4[04/45][03/C7]FD01', at: 12, also: [{name: TABGSS2, add: 2}]}
+# 23g. Same D2 F5 call as the 3A8B row. Page is 0702. The body is 68 bytes on.
+- {name: KFWDKMSN, pattern: 8608D7400702D2F5XXXX4045DD0F, at: 8, add: 68, rows: 16, cols: 6, ybits: 16, xbits: 16}
+# 23g cam switchover. The E6 FC word is the body on DPP0. The column axis is
+# the 8-point table. F's count is even. K and Q keep the same bytes one
+# byte earlier, so the second row steps onto the count. KFNWWL is the
+# warmup call, 96 bytes after KFNW.
+- {name: bp_kfnw, pattern: 08223E434A536072A0, table: true}
+- {name: bp_kfnw, pattern: 5A08223E434A536072A0, table: true, add: 1}
+- {name: KFNW, pattern: [DB00E6FCXXXXE6FDEE1BF2FEC0ABF2FFC4ABDA00B878, DB00E6FCXXXXE6FDCB1BF2FECCABF2FFD0ABDA00B878], at: 4, rows: 12, cols: 8, xtable: bp_kfnw}
+- {name: KFNWWL, pattern: [DB00F3F8XX8BD740060243F8XXXXED0BE6FCXXXXE6FDEE1BF2FEC0AB, DB00F3F8XX8BD740060243F8XXXXED0BE6FCXXXXE6FDCB1BF2FECCAB], at: 18, rows: 12, cols: 8, xtable: bp_kfnw}

@@ -115,12 +115,17 @@ absent:
   # Not in the 8D0907551F DAMOS export. That export has KFDLBTS, ZDLBTS,
   # and TABGBTS, and it does not have these. It also has no FKKVS or KFTARX.
   # ESKONF is not in that export either; the 0x55 check is still in the image.
+  # The export has LDRQ1DY and LDRQ1ST, and it does not list KFLDRQ1.
+  # It has KIFZGHG_0_A, KIFZGHG_1_A, and KIFZGHG_2_A, and it
+  # does not list KIFZGHG.
   23g:
     - DLBTS
     - FKKVS
     - KFLBTS_0_A
+    - KFLDRQ1
     - KFTARX
     - KFVPLGU
+    - KIFZGHG
   # No DAMOS export. Neither image has the DA 00 42 76 call, so KFVPLGU
   # and SNM16OPUW have no reader. The lambts window has DA 83 94 48
   # 06 F0 0C 00, so scanLbts takes the KFDLBTS arm and does not store DLBTS.
