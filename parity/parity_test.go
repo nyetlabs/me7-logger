@@ -531,6 +531,31 @@ func TestLoadNames(t *testing.T) {
 	}
 }
 
+func TestSetFamilies(t *testing.T) {
+	dir := filepath.Join("..", "testdata", "parity")
+	blocks, err := loadBlocks(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	lists, err := loadNames(dir, blocks)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(lists.any) != 6 {
+		t.Fatalf("%d families", len(lists.any))
+	}
+	by := map[string]family{}
+	for _, f := range lists.any {
+		by[f.names[0]] = f
+	}
+	if !by["KFPED"].pair || by["KFPED"].tier != "S" || by["KFPEDR"].tier != "S" {
+		t.Fatalf("pedal %+v %+v", by["KFPED"], by["KFPEDR"])
+	}
+	if by["KFZW2"].pair || by["KFZW2"].tier != "D" || by["NLLM"].tier != "C" || by["NLL2M"].tier != "S" || by["NFSM"].tier != "C" {
+		t.Fatalf("any %+v", by)
+	}
+}
+
 func TestConfidenceSkipFile(t *testing.T) {
 	dir := filepath.Join("..", "testdata", "parity")
 	skip, err := loadConfidenceSkip(dir)

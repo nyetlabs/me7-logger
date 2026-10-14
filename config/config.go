@@ -24,7 +24,7 @@ import (
 	"go.nyet.org/me7-logger/needle"
 )
 
-//go:embed names.yaml needles.yaml measurements.yaml catalog aliases.yaml maps.yaml signatures.yaml mapsigs.yaml categories.json descriptions.yaml
+//go:embed names.yaml needles.yaml measurements.yaml catalog aliases.yaml maps.yaml signatures.yaml mapsigs.yaml categories.json descriptions.yaml sets.yaml
 var embedded embed.FS
 
 const (
@@ -46,6 +46,8 @@ const (
 	MapSigFile = "mapsigs.yaml"
 	// CategoriesFile is the corpus category table, copied by make corpus-bump.
 	CategoriesFile = "categories.json"
+	// SetsFile is the map set list, sets.yaml.
+	SetsFile = "sets.yaml"
 )
 
 // LoadCategories reads the category table: each category's map names

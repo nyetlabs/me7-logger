@@ -1,0 +1,7 @@
+# How me7parity corpus --submit compares an auto definition with the manual,
+# DAMOS, or A2L definition it replaces (provenance.reference).
+# except: names a reference lists at another address that our address
+# supersedes. They count with the agreeing names for the matched class.
+# Map aliases are config/sets.yaml.
+except:
+  - ESKONF

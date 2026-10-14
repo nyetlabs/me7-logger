@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"sync"
 
 	"go.nyet.org/xdfkit/canon"
 	"go.nyet.org/xdfkit/model"
@@ -760,21 +761,69 @@ func mergeKept(prev, located *model.Model) (*model.Model, error) {
 	return out, nil
 }
 
-// pedalPair is the plain name and the two variants that replace it.
-var pedalPair = []struct{ plain, a, b string }{
-	{"KFPED", "KFPED_0_A", "KFPED_1_A"},
-	{"KFPEDR", "KFPEDR_0_A", "KFPEDR_1_A"},
+// setIndex is config/sets.yaml. peers is an either name and its other names.
+// both is the sets whose later names together cover the plain name.
+type setIndex struct {
+	peers map[string][]string
+	both  []config.Set
 }
 
-// pedalAddrs is the addresses that cover a hand key. Both variants cover
-// the plain name at the _0_A address. One variant does not.
+var (
+	setOnce sync.Once
+	setIdx  setIndex
+	setErr  error
+)
+
+func mapSets() (setIndex, error) {
+	setOnce.Do(func() { setIdx, setErr = loadSetIndex() })
+	return setIdx, setErr
+}
+
+func loadSetIndex() (setIndex, error) {
+	all, err := config.Sets()
+	if err != nil {
+		return setIndex{}, err
+	}
+	idx := setIndex{peers: map[string][]string{}}
+	for _, s := range all {
+		switch s.Rule {
+		case config.RuleEither:
+			for _, n := range s.Names {
+				var others []string
+				for _, o := range s.Names {
+					if o != n {
+						others = append(others, o)
+					}
+				}
+				idx.peers[n] = others
+			}
+		case config.RuleBoth:
+			idx.both = append(idx.both, s)
+		}
+	}
+	return idx, nil
+}
+
+// pedalAddrs is the addresses that cover a hand key. Every later name of a
+// both set covers the plain name at the first of those addresses. One does not.
 func pedalAddrs(k string, have map[string][]model.Addr) []model.Addr {
-	for _, p := range pedalPair {
-		if k != p.plain {
+	idx, err := mapSets()
+	if err != nil {
+		return have[k]
+	}
+	for _, p := range idx.both {
+		if k != p.Names[0] {
 			continue
 		}
-		if len(have[p.a]) > 0 && len(have[p.b]) > 0 {
-			return have[p.a]
+		ok := true
+		for _, n := range p.Names[1:] {
+			if len(have[n]) == 0 {
+				ok = false
+				break
+			}
+		}
+		if ok {
+			return have[p.Names[1]]
 		}
 	}
 	return have[k]
@@ -800,27 +849,45 @@ func pedalPlan(prev, located *model.Model) (drop []string, stamp map[string][]in
 			have[k] = o
 		}
 	}
-	for _, p := range pedalPair {
-		a, b := loc[p.a], loc[p.b]
-		if a == nil || b == nil {
+	idx, err := mapSets()
+	if err != nil {
+		return nil, stamp
+	}
+	for _, p := range idx.both {
+		banks := p.Names[1:]
+		var found []*model.Object
+		for _, n := range banks {
+			o := loc[n]
+			if o == nil {
+				found = nil
+				break
+			}
+			found = append(found, o)
+		}
+		if found == nil {
 			continue
 		}
-		plain := have[p.plain]
+		plain := have[p.Names[0]]
 		if plain != nil {
-			drop = append(drop, p.plain)
-			if have[p.a] == nil {
-				stampCats(stamp, p.a, plain.Categories)
-				if a.Address == plain.Address {
-					a.Value = plain.Value
+			drop = append(drop, p.Names[0])
+			for i, n := range banks {
+				if have[n] != nil {
+					continue
+				}
+				stampCats(stamp, n, plain.Categories)
+				if i == 0 && found[0].Address == plain.Address {
+					found[0].Value = plain.Value
 				}
 			}
-			if have[p.b] == nil {
-				stampCats(stamp, p.b, plain.Categories)
-			}
 			continue
 		}
-		if have[p.a] != nil && have[p.b] == nil {
-			stampCats(stamp, p.b, have[p.a].Categories)
+		if have[banks[0]] == nil {
+			continue
+		}
+		for _, n := range banks[1:] {
+			if have[n] == nil {
+				stampCats(stamp, n, have[banks[0]].Categories)
+			}
 		}
 	}
 	return drop, stamp

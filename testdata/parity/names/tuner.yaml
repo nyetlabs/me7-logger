@@ -14,29 +14,20 @@
 #      (KFDLULS, TULV1, LDORXN, KFLDRXO), the P1557 leak check
 #      (KFVPDKLD, TDLDRA2), LDRXNZK, KFTARXZK, the _UM maps,
 #      KFMIZUFIL, KFMIZUOF, and KFMIZUNS
-# An any entry is one slot in that tier. The first name is the plain map.
-# The slot is met when that name or any later form is located. A block that
-# has none of them lists every form in absent.yaml. The tuner count still
-# scores each form.
-# A pair entry is one slot. The first name is the plain map and the other two
-# are its variants. The slot is met by the plain name, or by both variants
-# when the plain name is not located. One variant does not meet it.
-any:
-  - {tier: D, axes: 2, names: [KFZW2, KFZW2_0_A, KFZW2_1_A]}
-  - {tier: C, axes: 1, names: [NFSM, NFS2M, NFS2M_0_A, NFS2M_1_A]}
-  - {tier: C, axes: 1, names: [NLLM, NLLM_0_A, NLLM_1_A, NLLM_2_A, NLLM_3_A]}
-  - {tier: S, axes: 1, names: [NLL2M, NLL2M_0_A, NLL2M_1_A, NLL2M_2_A, NLL2M_3_A]}
-pair:
-  - {tier: S, axes: 2, names: [KFPED, KFPED_0_A, KFPED_1_A]}
-  - {tier: S, axes: 2, names: [KFPEDR, KFPEDR_0_A, KFPEDR_1_A]}
+# config/sets.yaml groups forms of one map. any is one slot: one form
+# located, or every form absent. both is the plain name, or every later
+# form when the plain name is not located. The tier is the one here.
+# The tuner count still scores each form.
 tiers:
   S:
     0: [AIMVM, CDLDP, CDTES, CWDNMAX, CWMSRCAN, DNMAXH, ITNMXH, KISRM, KUMSRL,
         NMAX, NMAXF, NMAXOG, NWPMBBR, TDLDRA2, TMOTNMX, TNMXH, TULV1, VMAXNB,
         VNMX, VWPMBBR, WFRL, ZKLAMFAW]
-    1: [KLDMASRL, LDORXN, LDRXNZK, NASNOTKL]
+    1: [KLDMASRL, LDORXN, LDRXNZK, NASNOTKL, NLL2M, NLL2M_0_A, NLL2M_1_A,
+        NLL2M_2_A, NLL2M_3_A]
     2: [FZWWLRLN, KFDLULS, KFFWLW, KFLDRXO, KFMDZOF_UM, KFMI_UM, KFMIZUFIL,
-        KFMIZUOF, KFMIZUNS, KFMPED_UM, KFTARXZK, KFTSRL, KFVPDKLD]
+        KFMIZUOF, KFMIZUNS, KFMPED_UM, KFPED, KFPED_0_A, KFPED_1_A, KFPEDR,
+        KFPEDR_0_A, KFPEDR_1_A, KFTARXZK, KFTSRL, KFVPDKLD]
   A:
     0: [KIFZGHG, MLHFM, MLMAX, MLOFS]
     2: [KFDMDADP, KFDMDARO, KFKHFM, KFMLDMX, KFNW, KFNWWL, KFPBRK, KFPBRKNW,
@@ -51,7 +42,8 @@ tiers:
         CLAHSHE, CLAHSHE2, CLALSH, CLALSH2, CLRHK, CLRHKA, CLRKA, CWDLSAHK,
         CWKONABG, CWKONLS, ESKONF, FHOKH, FKHABMN, FKVA, KRKTE, KVB, RLSALULL,
         TABGSS, TABGSS2, TEMIN, TEMINVA]
-    1: [RLSALUN, TVUB]
+    1: [NFSM, NFS2M, NFS2M_0_A, NFS2M_1_A, NLLM, NLLM_0_A, NLLM_1_A, NLLM_2_A,
+        NLLM_3_A, RLSALUN, TVUB]
     2: [FKKVS, KFFWL_0_A, KFFWL_1_A, KFLF, KFMRES, KFMRESK, KFNLLNST, KFTARX]
   D:
     0: [CWLAMFAW, CWMDAPP, DLAMFAW, DPUPS, KRALH, KRANH, KRDWA, LDHIA, MDIMX,
@@ -61,4 +53,4 @@ tiers:
     2: [KFFLLDE, KFFWTBR, KFLAFWL, KFLAMKR, KFLAMKRL, KFLBTS_0_A, KFLDHBN,
         KFLDIMX, KFLDIOPU, KFLDRAPP, KFLDRL, KFMIOP, KFMIRL, KFVPLGU,
         KFWPLGTA,
-        KFZW, KFZWOP, KFZWOP2, KFZWWLNM, LAMFA]
+        KFZW, KFZW2, KFZW2_0_A, KFZW2_1_A, KFZWOP, KFZWOP2, KFZWWLNM, LAMFA]

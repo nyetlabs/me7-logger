@@ -468,3 +468,25 @@ func TestShippedMeasures(t *testing.T) {
 		t.Fatalf("fdar %+v", amp)
 	}
 }
+
+func TestSets(t *testing.T) {
+	sets, err := Sets()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(sets) != 9 {
+		t.Fatalf("%d sets", len(sets))
+	}
+	seen := map[string]bool{}
+	for _, s := range sets {
+		for _, n := range s.Names {
+			if seen[n] {
+				t.Fatalf("repeated %s", n)
+			}
+			seen[n] = true
+		}
+	}
+	if !seen["KFPED_0_A"] || !seen["KFLBTS"] || !seen["NLLM_3_A"] {
+		t.Fatalf("missing names")
+	}
+}

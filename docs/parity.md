@@ -14,7 +14,7 @@ Each score is hits/total and a percent. With no arguments every image is listed.
 
 `names` is hits in `names/tuner.yaml`. A hit is one address. A scalar is that address, a curve needs its axis, a map needs both. A second address is a miss. On a DAMOS or A2L definition, a name that definition contains has to sit on one of its rows.
 
-- tier: highest complete tier, from D through S+. `-` means D is still open. `*` means below S, except on a DAMOS or A2L definition. A tier is complete when every name hits or is listed in `names/absent.yaml`. A family counts as one name: one form located, or every form absent. A pair is the plain name, or both variants when the plain name is absent.
+- tier: highest complete tier, from D through S+. `-` means D is still open. `*` means below S, except on a DAMOS or A2L definition. A tier is complete when every name hits or is listed in `names/absent.yaml`. `config/sets.yaml` groups forms of one map, and the tier is the one `names/tuner.yaml` already gives those names. An `any` set counts as one name: one form located, or every form absent. A `both` set is the plain name, or every later form when the plain name is absent.
 - axis: axes present on the maps that hit / axes those maps list. A scalar adds nothing.
 - confidence: bodies that hold up / names that hit. Under 16 cells holds up. A larger body holds up when each peer in `datasets.yaml` is within two cells or 3%. A run of zeros holds up only when a peer has it and every such peer is zero. Names in `confidence.yaml` are omitted.
 - block: hits in the other names file for this layout block. Blank when that block has no list.
