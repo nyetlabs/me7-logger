@@ -1,6 +1,7 @@
 package main
 
 import (
+	"archive/zip"
 	"os"
 	"path/filepath"
 	"strings"
@@ -18,15 +19,45 @@ func TestStageLabel(t *testing.T) {
 		{"C*", "2*"},
 		{"B", "3-"},
 		{"A*", "3*"},
-		{"S", "S"},
+		{"S", "3+"},
 		{"S+", "S+"},
 		{"-", "-"},
-		{"-*", "-"},
+		{"-*", "-*"},
 	}
 	for _, c := range cases {
 		if got := stageLabel(c.tier); got != c.want {
 			t.Errorf("stageLabel(%q) = %q, want %q", c.tier, got, c.want)
 		}
+	}
+}
+
+func TestZipDef(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "IMG-0001-20260101.zip")
+	z, err := os.Create(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	w := zip.NewWriter(z)
+	f, err := w.Create("IMG-0001.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.Write([]byte("def")); err != nil {
+		t.Fatal(err)
+	}
+	if err := w.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if err := z.Close(); err != nil {
+		t.Fatal(err)
+	}
+	got, err := zipDef(path, "IMG-0001")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(got) != "def" {
+		t.Fatalf("got %q", got)
 	}
 }
 

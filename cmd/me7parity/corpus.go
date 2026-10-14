@@ -1,7 +1,9 @@
 package main
 
 import (
+	"archive/zip"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -26,8 +28,9 @@ hand, open, and block.
 Columns are status, tier, delta, and confidence.
 Status and delta marks are in docs/parity.md.
 --grades prints name, stage, and confidence and does not submit.
-Stage is the tuner tier: D is 1, C is 2, B is 3-, A is 3, S stays S.
-A star means the grade has not reached S. An open D stays -.
+--staged reads each zip's definition instead of locating maps again.
+Stage is the tuner tier: D is 1, C is 2, B is 3-, A is 3, S is 3+.
+A star means the definition is not a DAMOS oracle. An open D stays -, or -* when it is not a DAMOS oracle.
 
 The corpus is --corpus, else CORPUS, else ../ecu-corpus when that
 checkout exists, else corpus/.
@@ -39,6 +42,7 @@ func cmdCorpus(args []string) error {
 	corpusFlag := fs.String("corpus", "", "ecu-corpus checkout `<dir>` (default CORPUS, else ../ecu-corpus, else corpus/)")
 	submit := fs.Bool("submit", false, "write the rows marked for storage into the corpus")
 	grades := fs.Bool("grades", false, "print name, stage, and confidence")
+	staged := fs.String("staged", "", "grade each zip's definition in this `<dir>`")
 	d := locate.Flags(fs)
 	if err := fs.Parse(args); err != nil {
 		return err
@@ -51,6 +55,37 @@ func cmdCorpus(args []string) error {
 	c, err := ecucorpus.Load(dir)
 	if err != nil {
 		return err
+	}
+	if *staged != "" {
+		if !*grades {
+			return fmt.Errorf("--staged is for --grades")
+		}
+		if *submit {
+			return fmt.Errorf("--grades does not submit")
+		}
+		paths, err := c.List(filepath.Join(*data, "images.yaml"))
+		if err != nil {
+			return err
+		}
+		var stems []string
+		for _, p := range paths {
+			stems = append(stems, strings.TrimSuffix(filepath.Base(p), ".bin"))
+		}
+		selected, err := matchStems(stems, fs.Args())
+		if err != nil {
+			return err
+		}
+		inSet := map[string]bool{}
+		for _, s := range stems {
+			inSet[s] = true
+		}
+		want := map[string]bool{}
+		if len(fs.Args()) > 0 {
+			for _, s := range selected {
+				want[s] = true
+			}
+		}
+		return gradeStaged(*data, *staged, c, inSet, want)
 	}
 	rep, err := parity.Run(*data, c)
 	if err != nil {
@@ -270,6 +305,75 @@ type pubLine struct {
 	open, block               []parity.OpenName
 }
 
+var zipStem = regexp.MustCompile(`^(.+)-[0-9]{8}\.zip$`)
+
+// gradeStaged scores the definition stored in each staged zip.
+func gradeStaged(data, stage string, c *ecucorpus.Corpus, inSet, want map[string]bool) error {
+	matches, err := filepath.Glob(filepath.Join(stage, "*.zip"))
+	if err != nil {
+		return err
+	}
+	seen := map[string]string{}
+	var packed []parity.Packed
+	for _, path := range matches {
+		m := zipStem.FindStringSubmatch(filepath.Base(path))
+		if m == nil {
+			continue
+		}
+		stem := m[1]
+		if !inSet[stem] || len(want) > 0 && !want[stem] {
+			continue
+		}
+		if prev, ok := seen[stem]; ok {
+			return fmt.Errorf("%s: also %s", filepath.Base(path), filepath.Base(prev))
+		}
+		seen[stem] = path
+		def, err := zipDef(path, stem)
+		if err != nil {
+			return err
+		}
+		imgPath, err := c.Path(stem)
+		if err != nil {
+			return err
+		}
+		img, err := os.ReadFile(imgPath)
+		if err != nil {
+			return err
+		}
+		packed = append(packed, parity.Packed{Stem: stem, Img: img, Def: def})
+	}
+	rows, err := parity.GradePacked(data, packed)
+	if err != nil {
+		return err
+	}
+	return printGrades(&parity.Report{Tuner: rows}, nil)
+}
+
+func zipDef(path, stem string) ([]byte, error) {
+	z, err := zip.OpenReader(path)
+	if err != nil {
+		return nil, err
+	}
+	defer z.Close()
+	name := stem + ".json"
+	for _, f := range z.File {
+		if f.Name != name {
+			continue
+		}
+		r, err := f.Open()
+		if err != nil {
+			return nil, err
+		}
+		defer r.Close()
+		b, err := io.ReadAll(r)
+		if err != nil {
+			return nil, err
+		}
+		return b, nil
+	}
+	return nil, fmt.Errorf("%s: no %s", filepath.Base(path), name)
+}
+
 func printGrades(rep *parity.Report, want map[string]bool) error {
 	for _, im := range rep.Tuner {
 		name := strings.TrimSuffix(im.Name, ".bin")
@@ -289,12 +393,12 @@ func printGrades(rep *parity.Report, want map[string]bool) error {
 }
 
 // stageLabel is the publish column for a tuner grade. D through A are the
-// tuning stages. S is the list past those stages. A star is kept.
+// tuning stages. S is 3+, the list past those stages. A star is kept.
 func stageLabel(tier string) string {
 	star := strings.HasSuffix(tier, "*")
 	switch strings.TrimSuffix(tier, "*") {
 	case "-":
-		return "-"
+		tier = "-"
 	case "D":
 		tier = "1"
 	case "C":
@@ -304,7 +408,7 @@ func stageLabel(tier string) string {
 	case "A":
 		tier = "3"
 	case "S":
-		tier = "S"
+		tier = "3+"
 	case "S+":
 		tier = "S+"
 	default:

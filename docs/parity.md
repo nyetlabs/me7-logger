@@ -27,9 +27,9 @@ open and block, printed for a NAME, are the names that did not hit. `absent` is 
 
 `me7parity corpus` lists every parity image and what `--submit` would store. `--submit` writes `defs/<stem>.json`, sets that row's `def` column, and does not commit, push, or upload. A stored object keeps the previous conversion, units, and layout. The description becomes the name table and the comment the needle that located the map. The corpus is `--corpus`, else `CORPUS`, else `../ecu-corpus` when that checkout exists, else `corpus/`.
 
-Confidence has to pass on every row: high bodies are more than half the tuner names that scored. A zero denominator fails the row. A star after the tier means the name grade has not reached S. A DAMOS or A2L oracle has no star. xdfkit does not read tiers.
+Confidence has to pass on every row: high bodies are more than half the tuner names that scored. A zero denominator fails the row. A star means the definition is not a DAMOS oracle. xdfkit does not read tiers.
 
-Columns are status, tier, delta, and confidence. `--grades` prints name, stage, and confidence for the download page and does not submit. Stage is the tuner tier: D is 1, C is 2, B is 3-, A is 3, and S stays S. A star means the grade has not reached S. An open D stays `-`. Under a named row the command prints hand, open, and block. `absent` and `met by <form>` are the same marks as the report. A definition that is not a parity image is listed when it has placeholder keys. Its tier is `-` and its confidence is `-`.
+Columns are status, tier, delta, and confidence. `--grades` prints name, stage, and confidence for the download page and does not submit. `--staged` reads each zip's definition instead of locating maps again. Stage is the tuner tier: D is 1, C is 2, B is 3-, A is 3, and S is 3+. A star means the definition is not a DAMOS oracle. 8D0907551L and 8D0907551M are handmade and are the oracle. An open D stays `-`, or `-*` when it is not a DAMOS oracle. Under a named row the command prints hand, open, and block. `absent` and `met by <form>` are the same marks as the report. A definition that is not a parity image is listed when it has placeholder keys. Its tier is `-` and its confidence is `-`.
 
 status
 
