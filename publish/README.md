@@ -8,7 +8,7 @@ Each corpus definition (`defs/IMAGE.json`, a `corpus.tsv` row whose `def` is set
 
 `DATE` is `YYYYMMDD`, the later of the last commit of the JSON and, for an ME7 image, `categories.json`. A commit whose message starts `chore(schema):` does not count. A file with no such commit uses its modification time. `make upload` is `rsync -a --delete` to `UPLOAD_DEST` (gitignored `local.mk`; `RSYNC_FLAGS=-n` is a dry run). A new date removes the previous zip. The first upload of this tree also removes the old loose files and `full/`.
 
-`CORPUS` is `../ecu-corpus` when that checkout exists, else the `corpus/` submodule (xdfkit `docs/corpus.md`). A shallow submodule may not reach the commit, so the date is wrong; use the full clone.
+`CORPUS` is `../ecu-corpus` when that checkout exists, else the `ecu-corpus/` submodule (xdfkit `docs/corpus.md`). A shallow submodule may not reach the commit, so the date is wrong; use the full clone.
 
 Members keep undated names, so an XDF and its metadata file share a stem:
 

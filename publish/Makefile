@@ -6,8 +6,9 @@
 #                   RSYNC_FLAGS=-n for a dry run
 #   make clean      remove build/publish
 #
-# CORPUS is ../ecu-corpus when that checkout exists, so git log dates the
-# zips; a shallow submodule may not reach the commit. A file with no such
+# CORPUS is ../ecu-corpus when that checkout exists, else the ecu-corpus
+# submodule, so git log dates the zips; a shallow submodule may not reach
+# the commit. A file with no such
 # commit uses its modification time. DATE skips a commit whose message
 # starts chore(schema):. The converter is
 # ../xdfkit/build/xdfkit when that file exists, otherwise xdfkit on PATH.
@@ -16,7 +17,7 @@ LOGGER := $(abspath ..)
 XDFKIT_ROOT := $(abspath $(LOGGER)/../xdfkit)
 OUT := $(LOGGER)/build/publish
 STAGE := $(OUT)/stage
-CORPUS ?= $(or $(wildcard $(abspath $(LOGGER)/../ecu-corpus)),$(LOGGER)/corpus)
+CORPUS ?= $(or $(wildcard $(abspath $(LOGGER)/../ecu-corpus)),$(LOGGER)/ecu-corpus)
 export CORPUS
 
 .PHONY: all stage upload clean

@@ -1,6 +1,6 @@
 // Package ecucorpus reads images from the shared ecu-corpus (xdfkit
 // docs/corpus.md): the corpus.tsv manifest and images/<part>/<name>.bin. The corpus
-// is the private git submodule at corpus/; a checkout without access leaves it
+// is the private git submodule at ecu-corpus/; a checkout without access leaves it
 // empty, and corpus tests skip unless XDFKIT_REQUIRE_CORPUS is set.
 package ecucorpus
 
@@ -25,12 +25,12 @@ type Corpus struct {
 	defs map[string]string
 }
 
-// Dir is XDFKIT_CORPUS, else corpus under root.
+// Dir is XDFKIT_CORPUS, else ecu-corpus under root.
 func Dir(root string) string {
 	if d := os.Getenv("XDFKIT_CORPUS"); d != "" {
 		return d
 	}
-	return filepath.Join(root, "corpus")
+	return filepath.Join(root, "ecu-corpus")
 }
 
 // Load reads dir/corpus.tsv.

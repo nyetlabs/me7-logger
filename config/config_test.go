@@ -75,7 +75,7 @@ func TestShippedSignatures(t *testing.T) {
 }
 
 // TestShippedCategories: the shipped table loads and is the corpus copy
-// (make corpus-bump copies it).
+// (make corpus copies it).
 func TestShippedCategories(t *testing.T) {
 	cats, err := LoadCategories("")
 	if err != nil {
@@ -101,7 +101,7 @@ func TestShippedCategories(t *testing.T) {
 		t.Fatal(err)
 	}
 	if !bytes.Equal(got, want) {
-		t.Fatalf("config/%s differs from the corpus copy: run make corpus-bump", CategoriesFile)
+		t.Fatalf("config/%s differs from the corpus copy: run make corpus", CategoriesFile)
 	}
 }
 

@@ -34,7 +34,7 @@ flowchart LR
   par -->|definition errors| src
 ```
 
-Stage new originals under `testdata/parity/incoming/` (gitignored except its README). `me7parity onboard` scores them and prints the score. `--submit` adds an image when every ME7Info row is 100%. `me7parity corpus` lists every parity image and what `--submit` would store. Report columns and corpus status marks are in `docs/parity.md`. The corpus is `../ecu-corpus` when that checkout exists, otherwise `corpus/` (`CORPUS=` overrides). It does not commit. `make -C publish` writes `build/publish/stage/IMAGE-DATE.zip` from the corpus JSON and `categories.json`, including `IMAGE-tuner.xdf`; `make -C publish upload` rsyncs that directory (`publish/README.md`). Corpus edits, `categories.json` included, are committed and pushed in `../ecu-corpus`, then pulled with `make corpus-bump`; `corpus/` is a read-only shallow submodule (xdfkit `docs/corpus.md`). ME7Info's `.ecu` output for each image is the only hard 100% oracle.
+Stage new originals under `testdata/parity/incoming/` (gitignored except its README). `me7parity onboard` scores them and prints the score. `--submit` adds an image when every ME7Info row is 100%. `me7parity corpus` lists every parity image and what `--submit` would store. Report columns and corpus status marks are in `docs/parity.md`. The corpus is `../ecu-corpus` when that checkout exists, otherwise the `ecu-corpus/` submodule (`CORPUS=` overrides). It does not commit. `make -C publish` writes `build/publish/stage/IMAGE-DATE.zip` from the corpus JSON and `categories.json`, including `IMAGE-tuner.xdf`; `make -C publish upload` rsyncs that directory (`publish/README.md`). Corpus edits, `categories.json` included, are committed and pushed in `../ecu-corpus`, then pulled with `make corpus`; `ecu-corpus/` is a read-only shallow submodule (xdfkit `docs/corpus.md`). ME7Info's `.ecu` output for each image is the only hard 100% oracle.
 
 ## Design
 
@@ -76,7 +76,7 @@ KWP `$23` reads at 10400 baud, up to 254 contiguous bytes per request, 55 ms apa
 
 ## Parity
 
-Images are in the private [ecu-corpus](https://github.com/nyetlabs/ecu-corpus) submodule (`make corpus`, `make corpus-bump`); oracles are in `testdata/parity`, whose files document themselves. `XDFKIT_CORPUS` points elsewhere; `XDFKIT_REQUIRE_CORPUS=1` fails on a missing corpus.
+Images are in the private [ecu-corpus](https://github.com/nyetlabs/ecu-corpus) submodule (`make corpus`); oracles are in `testdata/parity`, whose files document themselves. `XDFKIT_CORPUS` points elsewhere; `XDFKIT_REQUIRE_CORPUS=1` fails on a missing corpus.
 
 `me7parity --data testdata/parity` prints the report from shipped config only. `make test` fails only when an image is below 100% against its legacy `ecu/me7info/<image>.ecu`; every other score is coverage.
 

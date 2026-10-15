@@ -1,20 +1,21 @@
 # Build and test me7info, me7logger, and the checkout-only me7parity.
 #
 #   make                  test, then build the binaries
-#   make test             go test ./...; ME7Info parity must be 100% (image tests skip without corpus/)
+#   make test             go test ./...; ME7Info parity must be 100% (image tests skip without ecu-corpus/)
 #   make build            build/me7info, build/me7logger, build/me7parity, and build/config (user/ is kept)
 #   make version          git describe (tags vX.Y.Z and vX.Y.Z-rcN)
 #   make package          dist archives for macos, linux, and windows
 #   make install          after make build: me7info, me7logger, and config/ in PREFIX/lib/me7-logger, links in PREFIX/bin
 #                         (PREFIX=/usr/local; DESTDIR stages a package). me7parity is not installed.
 #   make uninstall        remove those and the links that point into them; config/user/ is kept
-#   make corpus           fetch the corpus submodule at its pinned commit (needs access)
-#   make corpus-bump      move the corpus submodule to the ecu-corpus head and copy its
-#                         categories.json to config/ (commit them yourself)
+#   make ecu-corpus       move the ecu-corpus submodule to its head and copy its
+#                         categories.json to config/ (commit them yourself). corpus-bump is the same.
 #   make go.work          gitignored go.work that builds against ../xdfkit
 #   make xdfkit-bump      pin go.mod to the pushed xdfkit master (pseudo-version)
 #   make check-pinned     build and vet; uses go.work when that file exists
 #   make parity           build, then run the me7parity report
+#   make corpus           build, then run the me7parity corpus report
+#   make corpus-submit    build, then run me7parity corpus --sumbmit
 #   make -C publish       stage corpus zips in build/publish/stage (needs ../xdfkit)
 #
 # Version comes from git tags only. Do not edit a version by hand.
@@ -93,15 +94,12 @@ package:
 
 bump: xdfkit-bump corpus-bump
 
-# --checkout overrides update = none in .gitmodules.
-corpus:
-	git submodule update --init --checkout --depth 1 corpus
-
+# --checkout overrides update = none in .gitmodules. --remote is the bump.
 corpus-bump:
-	git submodule update --init --checkout --remote --depth 1 corpus
-	cp corpus/categories.json config/categories.json
-	@git -C corpus log -1 --format='corpus now at %h %s'
-	@git status --short corpus config/categories.json
+	git submodule update --init --checkout --remote --depth 1 ecu-corpus
+	cp ecu-corpus/categories.json config/categories.json
+	@git -C ecu-corpus log -1 --format='corpus now at %h %s'
+	@git status --short ecu-corpus config/categories.json
 
 # go.work and go.work.sum are gitignored; DEVELOPER.md has the cross-repo workflow.
 go.work:
@@ -119,6 +117,12 @@ check-pinned:
 
 parity: build
 	./build/me7parity
+
+corpus: build
+	./build/me7parity corpus
+
+corpus-submit: build
+	./build/me7parity corpus --submit
 
 # install does not build, so sudo make install runs no go build as root.
 install:

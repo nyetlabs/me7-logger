@@ -25,7 +25,7 @@ open and block, printed for a NAME, are the names that did not hit. `absent` is 
 
 ## Corpus
 
-`me7parity corpus` lists every parity image and what `--submit` would store. `--submit` writes `defs/<stem>.json`, sets that row's `def` column, and does not commit, push, or upload. A stored object keeps the previous conversion, units, and layout. The description becomes the name table and the comment the needle that located the map. The corpus is `--corpus`, else `CORPUS`, else `../ecu-corpus` when that checkout exists, else `corpus/`.
+`me7parity corpus` lists every parity image and what `--submit` would store. `--submit` writes `defs/<stem>.json`, sets that row's `def` column, and does not commit, push, or upload. A stored object keeps the previous conversion, units, and layout. The description becomes the name table and the comment the needle that located the map. The corpus is `--corpus`, else `CORPUS`, else `../ecu-corpus` when that checkout exists, else `ecu-corpus/`.
 
 Confidence has to pass on every row: high bodies are more than half the tuner names that scored. A zero denominator fails the row. xdfkit does not read tiers.
 
@@ -61,7 +61,7 @@ Both `KFPED_0_A` and `KFPED_1_A` cover a manual `KFPED`. The same for `KFPEDR`. 
 
 `me7parity onboard` scores corpus images that are not in `images.yaml` yet and prints the score. `--submit` adds the ones whose ME7Info rows all match. The layout block is the scored image with the longest shared name prefix. A duplicate layout, a second image of that layout, a short score, or a missing block is reported and left out. `--submit` restores both YAML files and the new golden when any ME7Info row is under 100%.
 
-The flash file is `<corpus>/images/<part>/NAME.bin` (`<part>` is the first 9 characters of the part number), and that stem has to be a row of `<corpus>/corpus.tsv`. A filesystem path is rejected. `--corpus` is `XDFKIT_CORPUS`, otherwise `./corpus`. `ME7INFO_EXE` defaults to `../ME7L/bin/ME7Info.exe`. `WINE` defaults to `wine`. An existing `.ecu` is left in place.
+The flash file is `<corpus>/images/<part>/NAME.bin` (`<part>` is the first 9 characters of the part number), and that stem has to be a row of `<corpus>/corpus.tsv`. A filesystem path is rejected. `--corpus` is `XDFKIT_CORPUS`, otherwise `./ecu-corpus`. `ME7INFO_EXE` defaults to `../ME7L/bin/ME7Info.exe`. `WINE` defaults to `wine`. An existing `.ecu` is left in place.
 
 `not scored` columns are name, status, and epk. epk is the EPK string, or `-`.
 

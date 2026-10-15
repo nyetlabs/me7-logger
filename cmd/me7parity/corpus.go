@@ -38,13 +38,13 @@ An open D is -. Source is verified, DAMOS, matched, manual, or auto
 (docs/parity.md).
 
 The corpus is --corpus, else CORPUS, else ../ecu-corpus when that
-checkout exists, else corpus/.
+checkout exists, else ecu-corpus/.
 ` + nameArg
 
 func cmdCorpus(args []string) error {
 	fs := cli.NewFlagSet("me7parity", "corpus", "[--submit] [NAME...]", corpusHelp)
 	data := fs.StringP("data", "d", "testdata/parity", "parity root `<dir>`")
-	corpusFlag := fs.String("corpus", "", "ecu-corpus checkout `<dir>` (default CORPUS, else ../ecu-corpus, else corpus/)")
+	corpusFlag := fs.String("corpus", "", "ecu-corpus checkout `<dir>` (default CORPUS, else ../ecu-corpus, else ecu-corpus/)")
 	submit := fs.Bool("submit", false, "write the rows marked for storage into the corpus")
 	grades := fs.Bool("grades", false, "print name, stage, and confidence")
 	staged := fs.String("staged", "", "grade each zip's definition in this `<dir>`")

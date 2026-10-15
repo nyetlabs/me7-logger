@@ -69,9 +69,9 @@ func TestPlaceKeepsMovesOmits(t *testing.T) {
 }
 
 func TestMeasure4D(t *testing.T) {
-	def := filepath.Join("..", "corpus", "defs", "4D1907558-0002.json")
-	refPath := filepath.Join("..", "corpus", "images", "4D1907558", "4D1907558-0002.bin")
-	dstPath := filepath.Join("..", "corpus", "images", "4D1907558", "4D1907558-0004.bin")
+	def := filepath.Join("..", "ecu-corpus", "defs", "4D1907558-0002.json")
+	refPath := filepath.Join("..", "ecu-corpus", "images", "4D1907558", "4D1907558-0002.bin")
+	dstPath := filepath.Join("..", "ecu-corpus", "images", "4D1907558", "4D1907558-0004.bin")
 	b, err := os.ReadFile(def)
 	if err != nil {
 		t.Skip(err)

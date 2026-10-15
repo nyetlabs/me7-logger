@@ -1,5 +1,5 @@
-# The parity images, by name in the ecu-corpus manifest (corpus/corpus.tsv).
-# Each is read from corpus/images/<part>/<image>.bin. Goldens use the same name:
+# The parity images, by name in the ecu-corpus manifest (ecu-corpus/corpus.tsv).
+# Each is read from ecu-corpus/images/<part>/<image>.bin. Goldens use the same name:
 # ecu/me7info/<image>.ecu. The address oracle is the image's corpus def.
 - 006410010A0-0000
 - 06A906032DL-0006
