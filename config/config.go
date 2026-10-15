@@ -24,7 +24,7 @@ import (
 	"go.nyet.org/me7-logger/needle"
 )
 
-//go:embed names.yaml needles.yaml measurements.yaml catalog aliases.yaml maps.yaml signatures.yaml mapsigs.yaml categories.json descriptions.yaml sets.yaml
+//go:embed names.yaml needles.yaml measurements.yaml catalog aliases.yaml maps.yaml signatures.yaml mapsigs.yaml categories.json descriptions.yaml sets.yaml storage.yaml
 var embedded embed.FS
 
 const (

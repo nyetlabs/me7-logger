@@ -62,6 +62,8 @@ Flags use pflag (`internal/cli`): a long name takes two hyphens (`--user`), its 
 
 `config/categories.json` is the corpus `categories.json` (xdfkit `docs/corpus.md`), copied by `make corpus-bump`; a test fails when they differ. It files each XDF map under a category. The tuner XDF holds only its names plus the maps at their axis addresses; `--full-xdf` holds every named map, with the rest under `Other`. `--model` writes that full model as JSON for the corpus (`publish/README.md`).
 
+Cell width is the mapsig `bits`, else `config/storage.yaml`: the majority width, sign, and shape of that name in the corpus DAMOS and A2L defs, with part overrides (`go test ./config -update`). `unsized` means those defs disagree on shape. A table the locator did not fully size takes that shape unless a count it read disagrees. Which axis is x comes only from the lookup call (`xat`, `yat`, `yord`, the caller's column header, or the header order), never from the counts. An axis not read is `ordinal` when the table says so, else `unknown`.
+
 A constant at a table axis address becomes a 1d breakpoint curve with that axis's count and data, so xdfkit links the axis to it. That happens only when every axis there has the same shape, the image values strictly increase, and no other map starts inside the curve. Otherwise it stays a constant, and `probe --maps` lists it as `xdf: not a breakpoint curve`.
 
 ### Axes on an interpolator call

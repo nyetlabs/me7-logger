@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"slices"
 	"strings"
@@ -183,6 +184,9 @@ func cmdCorpus(args []string) error {
 				item.reason = reason
 			case hasShort(notes) && (moves > 0 || added > 0):
 				item.merged = applyMoves(prev, loc, notes)
+				if isAuto(prev) {
+					relayout(item.merged, loc)
+				}
 				item.keepOrigin = true
 				delta = partialDelta(moves, added)
 				item.reason = reason + ", " + delta
@@ -204,6 +208,14 @@ func cmdCorpus(args []string) error {
 				if n > 0 {
 					item.reason = ""
 					delta = fmt.Sprintf("~%d", n)
+				}
+			}
+			if item.reason != "" && !item.keepOrigin && isAuto(prev) {
+				r := relayout(clearedCopy(prev), loc)
+				if n := corrections(prev, r); n > 0 {
+					item.merged, item.keepOrigin = r, true
+					delta = fmt.Sprintf("layout %d", n)
+					item.reason += ", " + delta
 				}
 			}
 		}
@@ -680,35 +692,21 @@ func applyMoves(prev, located *model.Model, notes []coverNote) *model.Model {
 	return out
 }
 
-// corrections is how many previous objects change description or comment
-// in merged. Address is part of the match, so a moved name is not counted.
+// corrections is how many previous objects change description, comment,
+// or layout in merged. Address is part of the match, so a moved name is
+// not counted.
 func corrections(prev, merged *model.Model) int {
 	if prev == nil || merged == nil {
 		return 0
 	}
-	type at struct {
-		key  string
-		addr model.Addr
-	}
-	next := map[at]*model.Object{}
-	for _, o := range merged.Objects {
-		k := objKey(o)
-		if k == "" {
-			continue
-		}
-		next[at{k, o.Address}] = o
-	}
+	next := byKeyAddr(merged)
 	n := 0
 	for _, o := range prev.Objects {
-		k := objKey(o)
-		if k == "" {
+		m := next[keyAddr{objKey(o), o.Address}]
+		if m == nil || objKey(o) == "" {
 			continue
 		}
-		m := next[at{k, o.Address}]
-		if m == nil {
-			continue
-		}
-		if m.Description != o.Description || m.Comment != o.Comment {
+		if m.Description != o.Description || m.Comment != o.Comment || !sameLayout(m, o) {
 			n++
 		}
 	}
@@ -719,7 +717,8 @@ func corrections(prev, merged *model.Model) int {
 // units, and layout stay on the previous object. The description and the
 // comment come from the located model. When both pedal variants are located,
 // the plain name is dropped and the variants take its category. A variant
-// already in the pack keeps its conversion.
+// already in the pack keeps its conversion. In an auto pack, an object
+// still in raw located form takes the located layout.
 func mergeKept(prev, located *model.Model) (*model.Model, error) {
 	drop, stamp := pedalPlan(prev, located)
 	base := withoutKeys(prev, drop)
@@ -730,6 +729,9 @@ func mergeKept(prev, located *model.Model) (*model.Model, error) {
 	if err != nil {
 		return nil, err
 	}
+	if isAuto(prev) {
+		relayout(out, located)
+	}
 	for _, o := range out.Objects {
 		cats, ok := stamp[objKey(o)]
 		if !ok {
@@ -738,6 +740,52 @@ func mergeKept(prev, located *model.Model) (*model.Model, error) {
 		o.Categories = append([]int(nil), cats...)
 	}
 	return out, nil
+}
+
+func isAuto(m *model.Model) bool {
+	return m != nil && m.Provenance != nil && m.Provenance.Origin == "auto"
+}
+
+// relayout gives each object of out that has a raw value the shape,
+// storage, and axes of the located object with its key and address.
+func relayout(out, located *model.Model) *model.Model {
+	at := byKeyAddr(located)
+	for _, o := range out.Objects {
+		if src := at[keyAddr{objKey(o), o.Address}]; src != nil && rawValue(o) {
+			o.Shape, o.Rows, o.Cols, o.Data, o.X, o.Y = src.Shape, src.Rows, src.Cols, src.Data, src.X, src.Y
+		}
+	}
+	return out
+}
+
+type keyAddr struct {
+	key  string
+	addr model.Addr
+}
+
+func byKeyAddr(m *model.Model) map[keyAddr]*model.Object {
+	out := map[keyAddr]*model.Object{}
+	if m == nil {
+		return out
+	}
+	for _, o := range m.Objects {
+		if k := objKey(o); k != "" {
+			out[keyAddr{k, o.Address}] = o
+		}
+	}
+	return out
+}
+
+// rawValue is an object with the located value: factor 1, no offset, no units.
+func rawValue(o *model.Object) bool {
+	c := o.Value.Conversion
+	return c.Factor == 1 && c.Offset == 0 && !c.Reciprocal && o.Value.Units == ""
+}
+
+// sameLayout is the same shape, storage, and axes.
+func sameLayout(a, b *model.Object) bool {
+	return a.Shape == b.Shape && a.Rows == b.Rows && a.Cols == b.Cols && a.Data == b.Data &&
+		reflect.DeepEqual(a.X, b.X) && reflect.DeepEqual(a.Y, b.Y)
 }
 
 // setIndex is config/sets.yaml. peers is an either name and its other names.

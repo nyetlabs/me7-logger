@@ -7,10 +7,12 @@ import (
 	"encoding/hex"
 	"fmt"
 	"slices"
+	"strings"
 
 	"go.nyet.org/xdfkit/model"
 
 	"go.nyet.org/me7-logger/config"
+	"go.nyet.org/me7-logger/ident"
 	"go.nyet.org/me7-logger/opcode"
 	"go.nyet.org/me7-logger/record"
 )
@@ -32,9 +34,10 @@ func Model(maps []record.Map, image []byte, title string) (m *model.Model, confl
 		Provenance: &model.Provenance{Format: "image", Origin: "auto", File: title, SHA256: hex.EncodeToString(sum[:])},
 		Objects:    []*model.Object{},
 	}
+	part := strings.TrimSpace(ident.Find(image).PartNumber)
 	for _, r := range maps {
 		if r.Name != "" {
-			m.Objects = append(m.Objects, object(r))
+			m.Objects = append(m.Objects, object(r, part))
 		}
 	}
 	m.AssignKeys()
@@ -55,7 +58,7 @@ func breakpoints(m *model.Model, image []byte) (conflicts []string) {
 			x *model.Axis
 			n int
 		}{{o.X, o.Cols}, {o.Y, o.Rows}} {
-			if a.x != nil {
+			if a.x != nil && a.x.Address != nil {
 				p := points{a.n, *a.x.Data}
 				if !slices.Contains(at[*a.x.Address], p) {
 					at[*a.x.Address] = append(at[*a.x.Address], p)
@@ -113,7 +116,13 @@ func increasing(image []byte, addr model.Addr, n, w int) bool {
 	return true
 }
 
-func object(r record.Map) *model.Object {
+// object takes a width the locator did not read from config.Storage for
+// part, the image's part number.
+func object(r record.Map, part string) *model.Object {
+	cell, known := config.Storage(r.Name, part)
+	if r.Bits == 0 {
+		r.Bits, r.Signed = cell.Bits, cell.Signed
+	}
 	o := &model.Object{
 		ID:          r.Name,
 		Description: config.Description(r.Name),
@@ -125,32 +134,61 @@ func object(r record.Map) *model.Object {
 		Data:        data(r.Bits, r.Signed),
 		Value:       value(r.Unit),
 	}
-	if !tableShape(r) {
+	rows, cols, ok := dims(r, cell, known)
+	if !ok {
 		return o
 	}
-	o.Rows, o.Cols = max(r.Rows, 1), max(r.Cols, 1)
-	o.Shape = "2d"
-	if o.Rows == 1 {
+	o.Rows, o.Cols, o.Shape = rows, cols, "2d"
+	if rows == 1 {
 		o.Shape = "1d"
 	}
-	o.X, o.Y = axis(r.X), axis(r.Y)
+	o.X = axis(r.X, cell.Ordinal)
+	if rows > 1 {
+		o.Y = axis(r.Y, cell.Ordinal)
+	}
 	return o
 }
 
-// tableShape is a map whose row count and column count were both read.
-// A column count with no row count is written as a constant at the body
-// address. The missing row count is not filled in as 1.
-func tableShape(m record.Map) bool {
-	if m.Rows == 0 {
-		return false
+// dims is the shape the locator read when it read a row count, with the
+// config.Storage column count when it read only that row count. Otherwise
+// it is the config.Storage shape, with the column count the locator read
+// for a curve. Which axis is x comes from the locator, which reads it from
+// the lookup call. A map whose column or axis count disagrees with
+// config.Storage, or a table with neither, is written as a constant.
+func dims(m record.Map, c config.Cell, known bool) (int, int, bool) {
+	sized := known && c.Rows*c.Cols > 1
+	if m.Rows > 0 {
+		if m.Cols == 0 && sized && m.Rows == c.Rows && fits(m.X, c.Cols) {
+			return c.Rows, c.Cols, true
+		}
+		return m.Rows, max(m.Cols, 1), m.Rows > 1 || m.Cols > 1 || m.X != nil || m.Y != nil
 	}
-	return m.Rows > 1 || m.Cols > 1 || m.X != nil || m.Y != nil
+	if !sized {
+		return 0, 0, false
+	}
+	if c.Rows == 1 && m.Cols > 1 && fits(m.X, m.Cols) {
+		return 1, m.Cols, true
+	}
+	if m.Cols > 0 && m.Cols != c.Cols || !fits(m.X, c.Cols) || !fits(m.Y, c.Rows) {
+		return 0, 0, false
+	}
+	return c.Rows, c.Cols, true
 }
 
-// axis is an image axis, or nil (ordinal) when it has no address.
-func axis(a *record.Axis) *model.Axis {
+// fits is an axis with no count read, or n points.
+func fits(a *record.Axis, n int) bool {
+	return a == nil || a.Count == 0 || a.Count == n
+}
+
+// axis is an image axis. A located count with no address is ordinal. An
+// axis not located is ordinal when the DAMOS and A2L defs index it, and
+// unknown otherwise.
+func axis(a *record.Axis, ordinal bool) *model.Axis {
+	if a != nil && a.Addr == 0 && a.Count > 0 {
+		ordinal = true
+	}
 	if a == nil || a.Addr == 0 {
-		return nil
+		return &model.Axis{Source: map[bool]string{true: "ordinal", false: "unknown"}[ordinal], Value: value("")}
 	}
 	addr := model.Addr(opcode.FileOffset(a.Addr))
 	d := data(a.Bits, false)

@@ -66,9 +66,13 @@ type MapSig struct {
 	YBits   int
 	XAt     *int
 	YAt     *int
-	Table   bool
-	XTable  string
-	YTable  string
+	// YOrd is a row axis the lookup indexes directly, Rows points.
+	// Bits is the cell width the lookup reads. Zero leaves it to config.
+	YOrd   bool
+	Bits   int
+	Table  bool
+	XTable string
+	YTable string
 	// Plain keeps Rows and Cols when no axis is stored in front of the body.
 	Plain bool
 	// Open limits the search to the DB00 window around that pattern.
@@ -92,6 +96,13 @@ type MapSig struct {
 	// Also is a copy made by an also entry. Its add is measured from the
 	// first name's pointer, so that pointer is not a header in front of it.
 	Also bool
+	// Code is a fault code word. The address is Anchor plus the path of the
+	// first Index word that holds it, four words to a path, path 0 skipped.
+	// Count is a pattern in this row's window whose immediate plus one is
+	// the path count the Index search stays inside.
+	Code  uint16
+	Index string
+	Count string
 }
 
 // SigDoc is the signature list and the call-slot words it references.
@@ -131,6 +142,8 @@ type mapSigDraft struct {
 	YBits    int     `yaml:"ybits"`
 	XAt      *int    `yaml:"xat"`
 	YAt      *int    `yaml:"yat"`
+	YOrd     bool    `yaml:"yord"`
+	Bits     int     `yaml:"bits"`
 	Table    bool    `yaml:"table"`
 	XTable   string  `yaml:"xtable"`
 	YTable   string  `yaml:"ytable"`
@@ -145,6 +158,9 @@ type mapSigDraft struct {
 	Deref    int     `yaml:"deref"`
 	DerefAt  int     `yaml:"derefat"`
 	DerefFar bool    `yaml:"dereffar"`
+	Code     string  `yaml:"code"`
+	Index    string  `yaml:"index"`
+	Count    string  `yaml:"count"`
 	Also     []struct {
 		Name string `yaml:"name"`
 		Add  int    `yaml:"add"`
@@ -284,13 +300,13 @@ func parseSigDoc(b []byte) (SigDoc, error) {
 			if a.Name == "" || a.Size <= 0 {
 				return SigDoc{}, fmt.Errorf("signature %s: also needs a name and a size", d.Name)
 			}
-			row.Also = append(row.Also, SigAt{Name: a.Name, Size: a.Size, At: a.At, Add: a.Add})
+			row.Also = append(row.Also, SigAt(a))
 		}
 		for _, s := range d.Steps {
 			if s.Pattern == "" {
 				return SigDoc{}, fmt.Errorf("signature %s: a step needs a pattern", d.Name)
 			}
-			row.Steps = append(row.Steps, SigStep{Pattern: s.Pattern, Skip: s.Skip})
+			row.Steps = append(row.Steps, SigStep(s))
 		}
 		doc.Rows = append(doc.Rows, row)
 	}
@@ -310,8 +326,14 @@ func parseSigDoc(b []byte) (SigDoc, error) {
 			return SigDoc{}, fmt.Errorf("mapsig %d: name and either a pattern or an anchor are required", i+1)
 		}
 		seen[d.Name] = struct{}{}
-		if d.Anchor != "" && d.Add == nil {
-			return SigDoc{}, fmt.Errorf("mapsig %s: an anchor needs add", d.Name)
+		if d.Anchor != "" && d.Add == nil && d.Code == "" {
+			return SigDoc{}, fmt.Errorf("mapsig %s: an anchor needs add or code", d.Name)
+		}
+		if (d.Code == "") != (d.Index == "") || (d.Code != "" && d.Anchor == "") {
+			return SigDoc{}, fmt.Errorf("mapsig %s: code needs an anchor and an index", d.Name)
+		}
+		if d.Count != "" && d.Open == "" {
+			return SigDoc{}, fmt.Errorf("mapsig %s: count is searched in the open window", d.Name)
 		}
 		if d.Table && (d.Pattern == "" || d.Anchor != "" || d.XTable != "" || d.YTable != "") {
 			return SigDoc{}, fmt.Errorf("mapsig %s: a breakpoint table is a pattern, not a map", d.Name)
@@ -355,15 +377,19 @@ func parseSigDoc(b []byte) (SigDoc, error) {
 		if d.XTable != "" && d.Cols == 0 {
 			return SigDoc{}, fmt.Errorf("mapsig %s: xtable needs the column count", d.Name)
 		}
-		if d.YTable != "" && d.Rows == 0 {
-			return SigDoc{}, fmt.Errorf("mapsig %s: ytable needs the row count", d.Name)
+		if (d.YTable != "" || d.YOrd) && d.Rows == 0 {
+			return SigDoc{}, fmt.Errorf("mapsig %s: ytable and yord need the row count", d.Name)
+		}
+		if d.Bits != 0 && d.Bits != 8 && d.Bits != 16 {
+			return SigDoc{}, fmt.Errorf("mapsig %s: bits is 8 or 16", d.Name)
 		}
 		row := MapSig{
 			Name: d.Name, Pattern: d.Pattern, At: at, Anchor: d.Anchor,
 			Rows: d.Rows, Cols: d.Cols, XBits: xbits, YBits: ybits,
-			XAt: d.XAt, YAt: d.YAt, Table: d.Table, XTable: d.XTable, YTable: d.YTable,
+			XAt: d.XAt, YAt: d.YAt, YOrd: d.YOrd, Bits: d.Bits, Table: d.Table, XTable: d.XTable, YTable: d.YTable,
 			Open: d.Open, First: d.First, Single: d.Single, Absent: d.Absent, Plain: d.Plain,
 			Frame: d.Frame, Far: d.Far, Deref: d.Deref, DerefAt: d.DerefAt, DerefFar: d.DerefFar,
+			Index: d.Index, Count: d.Count,
 		}
 		if d.From != "" {
 			v, err := parseHex(d.From)
@@ -371,6 +397,13 @@ func parseSigDoc(b []byte) (SigDoc, error) {
 				return SigDoc{}, fmt.Errorf("mapsig %s: from: %w", d.Name, err)
 			}
 			row.From = v
+		}
+		if d.Code != "" {
+			v, err := parseHex(d.Code)
+			if err != nil || v == 0 || v > 0xFFFF {
+				return SigDoc{}, fmt.Errorf("mapsig %s: code is a nonzero word", d.Name)
+			}
+			row.Code = uint16(v)
 		}
 		if d.Add != nil {
 			row.Add = *d.Add
@@ -396,9 +429,9 @@ func parseSigDoc(b []byte) (SigDoc, error) {
 		}
 	}
 	for _, row := range doc.Maps {
-		if row.Anchor != "" {
-			if _, ok := seen[row.Anchor]; !ok {
-				return SigDoc{}, fmt.Errorf("mapsig %s: anchor %s is not a mapsig", row.Name, row.Anchor)
+		for _, ref := range []string{row.Anchor, row.Index} {
+			if _, ok := seen[ref]; ref != "" && !ok {
+				return SigDoc{}, fmt.Errorf("mapsig %s: %s is not a mapsig", row.Name, ref)
 			}
 		}
 		if row.XTable != "" && !tables[row.XTable] {

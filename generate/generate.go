@@ -506,6 +506,16 @@ func fillPacked(img []byte, dpp [4]uint16, maps []record.Map, h opcode.MapHit) {
 }
 
 func applyAxes(img []byte, dpp [4]uint16, h opcode.MapHit, m *record.Map) {
+	readAxes(img, dpp, h, m)
+	if h.Bits != 0 {
+		m.Bits = h.Bits
+	}
+	if h.YOrd && m.Y == nil {
+		m.Rows, m.Y = h.Rows, &record.Axis{Count: h.Rows}
+	}
+}
+
+func readAxes(img []byte, dpp [4]uint16, h opcode.MapHit, m *record.Map) {
 	if h.XRam != 0 || h.YRam != 0 {
 		if h.XRam != 0 {
 			if x, ok := interp.RamAxis(img, dpp, h.XRam, h.XBits); ok && (h.Cols == 0 || x.Count == h.Cols) {

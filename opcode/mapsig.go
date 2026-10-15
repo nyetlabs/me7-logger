@@ -2,7 +2,9 @@ package opcode
 
 import (
 	"encoding/binary"
+	"slices"
 	"strings"
+	"unicode"
 
 	"go.nyet.org/me7-logger/needle"
 )
@@ -30,6 +32,9 @@ type MapHit struct {
 	XTab  uint32
 	YTab  uint32
 	Plain bool
+	// YOrd and Bits are the MapSig fields.
+	YOrd bool
+	Bits int
 }
 
 // MapAddrs runs the mapsig rows. A pattern with no window is kept only when
@@ -72,13 +77,14 @@ func mapHits(img []byte, dpp [4]uint16, rows []MapSig, known map[string]uint32, 
 	}
 	tabs := TableAddrs(img, rows)
 	won := map[string]MapSig{}
+	paths := map[string]int{}
 	var out []MapHit
-	add := func(name string, addr, header uint32, row MapSig, xram, yram uint16) {
+	add := func(name string, addr, header uint32, row MapSig, xram, yram uint16) bool {
 		if _, ok := have[name]; ok {
-			return
+			return false
 		}
 		if _, ok := inFlash(img, addr); !ok {
-			return
+			return false
 		}
 		have[name] = len(out)
 		won[name] = row
@@ -88,11 +94,23 @@ func mapHits(img []byte, dpp [4]uint16, rows []MapSig, known map[string]uint32, 
 		out = append(out, MapHit{
 			Name: name, Addr: addr, Header: header,
 			Rows: row.Rows, Cols: row.Cols, XBits: row.XBits, YBits: row.YBits,
-			XRam: xram, YRam: yram, Plain: row.Plain,
+			XRam: xram, YRam: yram, Plain: row.Plain, YOrd: row.YOrd, Bits: row.Bits,
 		})
+		return true
 	}
 	end := FlashBase + uint32(len(img))
 	for _, row := range rows {
+		if row.Code != 0 {
+			base, ok := have[row.Anchor]
+			tab, tok := have[row.Index]
+			if !ok || !tok {
+				continue
+			}
+			if path, ok := pathOf(img, out[tab].Addr, paths[row.Anchor], row.Code); ok {
+				add(row.Name, out[base].Addr+uint32(path), 0, row, 0, 0)
+			}
+			continue
+		}
 		if row.Table || row.Pattern == "" {
 			continue
 		}
@@ -102,10 +120,11 @@ func mapHits(img []byte, dpp [4]uint16, rows []MapSig, known map[string]uint32, 
 				continue
 			}
 		}
-		var ptr uint32
+		var ptr, lo, hi uint32
 		var off int
 		if mapScoped(row) {
-			hit := scopedHit(img, end, row, embed, slot)
+			var hit uint32
+			hit, lo, hi = scopedHit(img, end, row, embed, slot)
 			if hit == 0 {
 				continue
 			}
@@ -130,12 +149,16 @@ func mapHits(img []byte, dpp [4]uint16, rows []MapSig, known map[string]uint32, 
 		if row.Also {
 			header = 0
 		}
-		add(row.Name, addr, header, row, f2Word(img, off, row.XAt), f2Word(img, off, row.YAt))
+		if add(row.Name, addr, header, row, f2Word(img, off, row.XAt), f2Word(img, off, row.YAt)) && row.Count != "" {
+			if h := findPat(img, lo, hi, row.Count, false); h != 0 {
+				paths[row.Name] = int(binary.LittleEndian.Uint16(img[h-FlashBase+2:])) + 1
+			}
+		}
 	}
 	for again := true; again; {
 		again = false
 		for _, row := range rows {
-			if row.Anchor == "" {
+			if row.Anchor == "" || row.Code != 0 {
 				continue
 			}
 			if _, ok := have[row.Name]; ok {
@@ -162,7 +185,27 @@ func mapHits(img []byte, dpp [4]uint16, rows []MapSig, known map[string]uint32, 
 			out[idx].YTab = tabs[row.YTable]
 		}
 	}
-	return out
+	return slices.DeleteFunc(out, func(h MapHit) bool { return helperName(h.Name) })
+}
+
+// helperName is a lowercase row name. Later rows anchor to it; it is not a map.
+func helperName(name string) bool {
+	return name != "" && unicode.IsLower(rune(name[0]))
+}
+
+// pathOf is the path whose four words at tab hold code first. The search
+// starts at path 1 and stops after path n, as scanCla does.
+func pathOf(img []byte, tab uint32, n int, code uint16) (int, bool) {
+	off := int64(tab) - int64(FlashBase)
+	if off < 0 || n <= 0 {
+		return 0, false
+	}
+	for a := off + 8; a <= off+8*int64(n) && a+2 <= int64(len(img)); a += 2 {
+		if binary.LittleEndian.Uint16(img[a:]) == code {
+			return int((a - off + 1) >> 3), true
+		}
+	}
+	return 0, false
 }
 
 // mapScoped is a row the family finders express: a DB00 window, a segmented
@@ -171,10 +214,10 @@ func mapScoped(row MapSig) bool {
 	return row.Open != "" || row.Frame || row.Far || row.Deref > 0 || row.From != 0 || strings.Contains(row.Pattern, "{")
 }
 
-// scopedHit is the CPU address of the pattern. An opener limits it to that
-// DB00 window and keeps the first copy, unless single is set. With no opener
-// the pattern has to occur once.
-func scopedHit(img []byte, end uint32, row MapSig, have map[string]uint32, slot func(string) (string, bool)) uint32 {
+// scopedHit is the CPU address of the pattern and the window searched. An
+// opener limits it to that DB00 window and keeps the first copy, unless
+// single is set. With no opener the pattern has to occur once.
+func scopedHit(img []byte, end uint32, row MapSig, have map[string]uint32, slot func(string) (string, bool)) (hit, lo, hi uint32) {
 	floor := row.From
 	if floor == 0 {
 		floor = FlashBase
@@ -182,43 +225,43 @@ func scopedHit(img []byte, end uint32, row MapSig, have map[string]uint32, slot 
 			floor = 0x820000
 		}
 	}
-	lo, hi := floor, end
+	lo, hi = floor, end
 	if row.Open != "" {
 		open, ok := expandSig(row.Open, have, slot)
 		if !ok {
-			return 0
+			return 0, 0, 0
 		}
 		h := findPat(img, floor, end, open, !row.First)
 		if h == 0 {
-			return 0
+			return 0, 0, 0
 		}
 		db := findLast(img, floor, h, "DB00")
 		if db == 0 {
-			return 0
+			return 0, 0, 0
 		}
 		lo = db + 2
 		hi = findPat(img, lo, end, "DB00", false)
 		if hi == 0 {
-			return 0
+			return 0, 0, 0
 		}
 	}
 	pat, ok := expandSig(row.Pattern, have, slot)
 	if !ok {
-		return 0
+		return 0, 0, 0
 	}
 	n := patLen(pat)
 	if n == 0 {
-		return 0
+		return 0, 0, 0
 	}
 	// The word has to sit in the pattern. A segmented pointer may run past
 	// the last matched byte, and a negative at sits in front of the hit.
 	if !row.Frame && !row.Far && row.At >= 0 && row.At+2 > n {
-		return 0
+		return 0, 0, 0
 	}
 	if (row.Frame || row.Far) && row.At >= 0 && row.At >= n {
-		return 0
+		return 0, 0, 0
 	}
-	return findPat(img, lo, hi, pat, row.Single || row.Open == "")
+	return findPat(img, lo, hi, pat, row.Single || row.Open == ""), lo, hi
 }
 
 // decodeMapPtr reads the map pointer at addr. frame is the 6-byte form and

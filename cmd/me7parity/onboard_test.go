@@ -381,6 +381,31 @@ func TestHandCover(t *testing.T) {
 	}
 }
 
+func TestMergeKeptRelayout(t *testing.T) {
+	for _, origin := range []string{"auto", "manual"} {
+		prev := modelOf(pubObj("KFMIRL", 0x100, 1, ""), pubObj("KFZW", 0x200, 0.75, "grad KW"))
+		prev.Provenance = &model.Provenance{Format: "image", Origin: origin, SHA256: strings.Repeat("ab", 32)}
+		loc := modelOf(pubObj("KFMIRL", 0x100, 1, ""), pubObj("KFZW", 0x200, 1, ""))
+		for _, o := range loc.Objects {
+			o.Data = model.Data{Bits: 16, Endian: "little"}
+		}
+		merged, err := mergeKept(prev, loc)
+		if err != nil {
+			t.Fatal(err)
+		}
+		want := 0
+		if origin == "auto" {
+			want = 16
+		}
+		if merged.Objects[0].Data.Bits != want || merged.Objects[1].Data.Bits != 0 {
+			t.Fatalf("%s: %+v %+v", origin, merged.Objects[0].Data, merged.Objects[1].Data)
+		}
+		if n := corrections(prev, merged); n != want/16 {
+			t.Fatalf("%s: corrections %d", origin, n)
+		}
+	}
+}
+
 func modelOf(objs ...*model.Object) *model.Model {
 	return &model.Model{Schema: model.SchemaID, Objects: objs}
 }

@@ -118,22 +118,77 @@ func TestModelBreakpoints(t *testing.T) {
 	}
 }
 
-func TestModelUnknownRowsIsConstant(t *testing.T) {
+// TestModelTableDims: a table the locator read no row count for takes the
+// config.Storage shape, with an unknown or ordinal axis for the one not
+// read, unless a count the locator read disagrees. A curve keeps the column
+// count read. An x axis with the row count is not moved to y. A located
+// count with no address is ordinal.
+func TestModelTableDims(t *testing.T) {
 	m, _ := Model([]record.Map{{
 		Name: "KFZW", Addr: 0x811C72, Cols: 12,
 		X: &record.Axis{Addr: 0x8100FF, Count: 12, Bits: 8},
 	}, {
 		Name: "KLAF", Addr: 0x812000, Rows: 1, Cols: 6,
 		X: &record.Axis{Addr: 0x811FFA, Count: 6, Bits: 8},
+	}, {
+		Name: "MLHFM", Addr: 0x813000,
+	}, {
+		Name: "KFZW2", Addr: 0x814000, Cols: 7,
+	}, {
+		Name: "KFMIOP", Addr: 0x815000, Cols: 16,
+		X: &record.Axis{Addr: 0x814F00, Count: 16, Bits: 16},
+	}, {
+		Name: "WFRL", Addr: 0x816000, Cols: 26,
+	}, {
+		Name: "KFFLLDE", Addr: 0x817000, Rows: 8,
+		Y: &record.Axis{Addr: 0x816F00, Count: 8, Bits: 16},
+	}, {
+		Name: "KFFWL_0_A", Addr: 0x818000, Bits: 16, Rows: 8, Cols: 6,
+		X: &record.Axis{Addr: 0x817F00, Count: 6, Bits: 16}, Y: &record.Axis{Count: 8},
 	}}, nil, "t")
-	if o := m.Objects[0]; o.Shape != "value" || o.Address != 0x11C72 || o.X != nil {
+	if o := m.Objects[0]; o.Shape != "2d" || o.Rows != 16 || o.Cols != 12 || *o.X.Address != 0x100FF || o.Y.Source != "unknown" {
 		t.Fatalf("%+v", o)
 	}
 	if o := m.Objects[1]; o.Shape != "1d" || o.Cols != 6 || o.X == nil || *o.X.Address != 0x11FFA {
 		t.Fatalf("%+v", o)
 	}
+	if o := m.Objects[2]; o.Shape != "1d" || o.Cols != 512 || o.Data.Bits != 16 || o.X.Source != "ordinal" || o.Y != nil {
+		t.Fatalf("%+v", o)
+	}
+	if o := m.Objects[3]; o.Shape != "value" || o.X != nil {
+		t.Fatalf("%+v", o)
+	}
+	if o := m.Objects[4]; o.Shape != "value" || o.X != nil {
+		t.Fatalf("%+v", o)
+	}
+	if o := m.Objects[5]; o.Shape != "1d" || o.Cols != 26 || o.X.Source != "ordinal" {
+		t.Fatalf("%+v", o)
+	}
+	if o := m.Objects[6]; o.Rows != 8 || o.Cols != 8 || o.X.Source != "unknown" || *o.Y.Address != 0x16F00 {
+		t.Fatalf("%+v", o)
+	}
+	if o := m.Objects[7]; o.Rows != 8 || o.Cols != 6 || o.Data.Bits != 16 || *o.X.Address != 0x17F00 || o.Y.Source != "ordinal" {
+		t.Fatalf("%+v", o)
+	}
 	if p := m.Provenance; p.Format != "image" || p.Origin != "auto" || len(p.SHA256) != 64 {
 		t.Fatalf("%+v", p)
+	}
+}
+
+func TestModelStorage(t *testing.T) {
+	m, _ := Model([]record.Map{
+		{Name: "KFMIRL", Addr: 0x811000, Rows: 2, Cols: 2, X: &record.Axis{Addr: 0x810F00, Count: 2, Bits: 16}},
+		{Name: "KFLDRL", Addr: 0x811100, Bits: 8},
+		{Name: "LDRXN", Addr: 0x811200, Cols: 16, X: &record.Axis{Addr: 0x8111E0, Count: 16, Bits: 16}},
+	}, nil, "t")
+	if d := m.Objects[0].Data; d.Bits != 16 || d.Signed || d.Endian != "little" {
+		t.Fatalf("KFMIRL %+v", d)
+	}
+	if d := m.Objects[1].Data; d.Bits != 8 {
+		t.Fatalf("located width replaced: %+v", d)
+	}
+	if o := m.Objects[2]; o.Shape != "1d" || o.Rows != 1 || o.Cols != 16 || o.X == nil || o.Data.Bits != 16 {
+		t.Fatalf("LDRXN %+v", o)
 	}
 }
 

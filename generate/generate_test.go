@@ -344,3 +344,11 @@ func readHex(t *testing.T, name string) []byte {
 	}
 	return img
 }
+
+func TestApplyAxesYOrd(t *testing.T) {
+	var m record.Map
+	applyAxes(nil, [4]uint16{}, opcode.MapHit{Rows: 8, Cols: 6, YOrd: true, Bits: 16}, &m)
+	if m.Bits != 16 || m.Rows != 8 || m.Y == nil || m.Y.Addr != 0 || m.Y.Count != 8 {
+		t.Fatalf("%+v %+v", m, m.Y)
+	}
+}

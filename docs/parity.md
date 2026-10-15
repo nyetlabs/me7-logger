@@ -12,7 +12,7 @@ Each score is hits/total and a percent. With no arguments every image is listed.
 - vs corpus: catalog names located on this image / the full catalog.
 - extras: measurement-list names located on this image.
 
-`names` is hits in `names/tuner.yaml`. A hit is one address. A scalar is that address, a curve needs its axis, a map needs both. A second address is a miss. On a DAMOS or A2L definition, a name that definition contains has to sit on one of its rows.
+`names` is hits in `names/tuner.yaml`. A hit is one address. A curve or map also needs an axis read from the image; on a staged definition an ordinal axis counts and an unknown one does not. A second address is a miss. On a DAMOS or A2L definition, a name that definition contains has to sit on one of its rows.
 
 - tier: highest complete tier, from D through S+. `-` means D is still open. `*` means below S, except on a DAMOS or A2L definition. A tier is complete when every name hits or is listed in `names/absent.yaml`. `config/sets.yaml` groups forms of one map, and the tier is the one `names/tuner.yaml` already gives those names. An `any` set counts as one name: one form located, or every form absent. A `both` set is the plain name, or every later form when the plain name is absent.
 - axis: axes present on the maps that hit / axes those maps list. A scalar adds nothing.
@@ -48,13 +48,14 @@ status
 delta
 
 - `+N`: names added. Status is eligible.
-- `~N`: descriptions, comments, or addresses brought in line. Status is eligible when nothing is short.
+- `~N`: descriptions, comments, addresses, or layouts brought in line. In an auto file, an object with a raw value (factor 1, no offset, no units) takes the located shape, storage, and axes. Status is eligible when nothing is short.
 - `~N +N`: both, while a short name remains. Origin stays `manual`.
+- `layout N`: an auto file held back by another status. `--submit` writes only the located layouts onto its raw objects, and the origin stays.
 - `key N`: placeholder keys cleared. On an eligible row the origin still becomes `auto`.
 
-`eligible` is a full cover: every current name at the same address and at least one new name, or an empty definition that passed the grade. That replaces the origin. A matching name set whose description or comment would change is also eligible, and its delta is `~N`. A name at a different address is the same kind of correction, and a located name the hand file does not have is added. A short key blocks neither. The status keeps the short and repeats the delta (`manual short KFWPFGR, +8`). `--submit` writes that row, keeps the hand conversion, and leaves the origin until the cover is complete.
+`eligible` is a full cover: every current name at the same address and at least one new name, or an empty definition that passed the grade. That replaces the origin. A matching name set whose description or comment would change is also eligible, and its delta is `~N`. A name at a different address is the same kind of correction, and a located name the manual file does not have is added. A short key blocks neither. The status keeps the short and repeats the delta (`manual short KFWPFGR, +8`). `--submit` writes that row, keeps the manual conversion, and leaves the origin until the cover is complete.
 
-Both `KFPED_0_A` and `KFPED_1_A` cover a hand `KFPED`. The same for `KFPEDR`. One variant does not, and a located `KFPED` does not cover a hand `KFPED_0_A`.
+Both `KFPED_0_A` and `KFPED_1_A` cover a manual `KFPED`. The same for `KFPEDR`. One variant does not, and a located `KFPED` does not cover a manual `KFPED_0_A`.
 
 ## Onboard
 
