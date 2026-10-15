@@ -259,7 +259,7 @@ func TestReportText(t *testing.T) {
 			{Name: "bb.bin", Fraction: Fraction{0, 2}, NoDef: true},
 		},
 		XDF:      []Image{{Name: "a.bin", Fraction: Fraction{0, 3}, Axis: Fraction{1, 4}}},
-		Hand:     []Image{{Name: "bb.bin", Fraction: Fraction{2, 3}, Axis: Fraction{0, 0}}},
+		Manual:   []Image{{Name: "bb.bin", Fraction: Fraction{2, 3}, Axis: Fraction{0, 0}}},
 		Disagree: []Disagreement{{Image: "bb.bin", Name: "KFZW", Ours: 0x12, XDF: []uint32{0x13, 0x20}}},
 	}
 	got := rep.Text()
@@ -274,10 +274,10 @@ func TestReportText(t *testing.T) {
 		"xdf damos                        axis\n" +
 		"  a          0/3    0.0%  1/4   25.0%\n" +
 		"\n" +
-		"xdf hand                         axis\n" +
+		"xdf manual                       axis\n" +
 		"  bb         2/3   66.7%  0/0    0.0%\n" +
 		"\n" +
-		"hand xdf disagrees\n" +
+		"manual xdf disagrees\n" +
 		"  bb  KFZW  ours 0x12  xdf 0x13,0x20\n"
 	if got != want {
 		t.Fatalf("got\n%s\nwant\n%s", got, want)
@@ -297,7 +297,7 @@ func TestDetail(t *testing.T) {
 		Disagree: []Disagreement{{Image: "8D0907551L-0001.bin", Name: "KFZW", Ours: 0x12, XDF: []uint32{0x13}}},
 	}
 	got := rep.Detail([]string{"8D0907551H-0003"})
-	if strings.Contains(got, "8D0907551L") || strings.Contains(got, "hand xdf disagrees") {
+	if strings.Contains(got, "8D0907551L") || strings.Contains(got, "manual xdf disagrees") {
 		t.Fatalf("other image leaked\n%s", got)
 	}
 	for _, want := range []string{"8D0907551H-0003", "open\n", "  D    LAMFA\n", "  C    NFS2M  met by NFSM\n", "  C    KFZW  absent\n", "block\n", "  -    KFLDRQ1  absent\n"} {
@@ -306,7 +306,7 @@ func TestDetail(t *testing.T) {
 		}
 	}
 	both := rep.Detail([]string{"8D0907551H-0003", "8D0907551L-0001"})
-	if !strings.Contains(both, "8D0907551H-0003  D    LAMFA") || !strings.Contains(both, "hand xdf disagrees") {
+	if !strings.Contains(both, "8D0907551H-0003  D    LAMFA") || !strings.Contains(both, "manual xdf disagrees") {
 		t.Fatalf("both\n%s", both)
 	}
 }
@@ -374,7 +374,7 @@ func modelJSON(origin string, n int) string {
 
 func TestLoadOracleKind(t *testing.T) {
 	dir := t.TempDir()
-	for origin, want := range map[string]string{"damos": damosXDF, "a2l": damosXDF, "hand": handXDF, "": handXDF, "kp": "", "located": "skip"} {
+	for origin, want := range map[string]string{"damos": damosXDF, "a2l": damosXDF, "manual": manualXDF, "": manualXDF, "kp": "", "auto": "skip"} {
 		p := filepath.Join(dir, "o"+origin+".json")
 		if err := os.WriteFile(p, []byte(modelJSON(origin, 2)), 0o644); err != nil {
 			t.Fatal(err)

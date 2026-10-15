@@ -161,12 +161,12 @@ variables:
   name: missing
   scale: no_such
 `
-	tab, err := Parse([]byte(body), "rows", nil, scales)
+	_, err = Parse([]byte(body), "rows", nil, scales)
 	if err == nil || !strings.Contains(err.Error(), "no_such") {
 		t.Fatal(err)
 	}
 	body = strings.Replace(body, "- rt: \"0x0003\"\n  name: missing\n  scale: no_such\n", "", 1)
-	tab, err = Parse([]byte(body), "rows", nil, scales)
+	tab, err := Parse([]byte(body), "rows", nil, scales)
 	if err != nil {
 		t.Fatal(err)
 	}

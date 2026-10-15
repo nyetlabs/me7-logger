@@ -19,7 +19,7 @@ Each score is hits/total and a percent. With no arguments every image is listed.
 - confidence: bodies that hold up / names that hit. Under 16 cells holds up. A larger body holds up when each peer in `datasets.yaml` is within two cells or 3%. A run of zeros holds up only when a peer has it and every such peer is zero. Names in `confidence.yaml` are omitted.
 - block: hits in the other names file for this layout block. Blank when that block has no list.
 
-`xdf damos` is maps in a DAMOS or A2L definition found at the same address. axis is those axes found with the same address, count, and width. `xdf hand` is the same two columns for a hand-made definition. A tuner name found at another address still hits in names, and is listed under "hand xdf disagrees" with ours and the xdf file offsets.
+`xdf damos` is maps in a DAMOS or A2L definition found at the same address. axis is those axes found with the same address, count, and width. `xdf manual` is the same two columns for a manual definition. A tuner name found at another address still hits in names, and is listed under "manual xdf disagrees" with ours and the xdf file offsets.
 
 open and block, printed for a NAME, are the names that did not hit. `absent` is listed for this layout block, so the grade counts it. `met by <form>` means that family slot is already filled.
 
@@ -33,13 +33,13 @@ Columns are status, tier, delta, and confidence. `--grades` prints name, stage, 
 
 status
 
-- `eligible`: stored. Origin becomes `located`.
+- `eligible`: stored. Origin becomes `auto`.
 - `identical`: same names, and the description and comment would stay.
 - `origin damos` / `origin a2l`: left in place. Added maps and wrong addresses are edited into that JSON by hand.
 - `origin unset`: no provenance origin. Left in place.
-- `hand short NAME`: that hand name was not located. When other names can move or be added, the status continues with the delta and `--submit` writes those. Origin stays `hand`.
-- `hand disagrees NAME`: that name has more than one located address. A following delta is a partial write and the origin stays `hand`. With no delta the row is left as it is.
-- `grade -`: the name grade is below D. Origin `hand` is scored without waiting for a grade. With no definition, D or better is eligible.
+- `manual short NAME`: that hand name was not located. When other names can move or be added, the status continues with the delta and `--submit` writes those. Origin stays `manual`.
+- `manual disagrees NAME`: that name has more than one located address. A following delta is a partial write and the origin stays `manual`. With no delta the row is left as it is.
+- `grade -`: the name grade is below D. Origin `manual` is scored without waiting for a grade. With no definition, D or better is eligible.
 - `confidence N/M`: high bodies are half or fewer.
 - `keys`: blank-id keys named `obj-N`. `--submit` clears them and leaves the origin. Another status ends with `, key N` for the same clear.
 - `def unreadable`: the definition file could not be read.
@@ -48,10 +48,10 @@ delta
 
 - `+N`: names added. Status is eligible.
 - `~N`: descriptions, comments, or addresses brought in line. Status is eligible when nothing is short.
-- `~N +N`: both, while a short name remains. Origin stays `hand`.
-- `key N`: placeholder keys cleared. On an eligible row the origin still becomes `located`.
+- `~N +N`: both, while a short name remains. Origin stays `manual`.
+- `key N`: placeholder keys cleared. On an eligible row the origin still becomes `auto`.
 
-`eligible` is a full cover: every current name at the same address and at least one new name, or an empty definition that passed the grade. That replaces the origin. A matching name set whose description or comment would change is also eligible, and its delta is `~N`. A name at a different address is the same kind of correction, and a located name the hand file does not have is added. A short key blocks neither. The status keeps the short and repeats the delta (`hand short KFWPFGR, +8`). `--submit` writes that row, keeps the hand conversion, and leaves the origin until the cover is complete.
+`eligible` is a full cover: every current name at the same address and at least one new name, or an empty definition that passed the grade. That replaces the origin. A matching name set whose description or comment would change is also eligible, and its delta is `~N`. A name at a different address is the same kind of correction, and a located name the hand file does not have is added. A short key blocks neither. The status keeps the short and repeats the delta (`manual short KFWPFGR, +8`). `--submit` writes that row, keeps the hand conversion, and leaves the origin until the cover is complete.
 
 Both `KFPED_0_A` and `KFPED_1_A` cover a hand `KFPED`. The same for `KFPEDR`. One variant does not, and a located `KFPED` does not cover a hand `KFPED_0_A`.
 

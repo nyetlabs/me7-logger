@@ -20,7 +20,7 @@ absent:
     - NLLM_2_A
     - NLLM_3_A
   # No DAMOS export yet. No map_interp_table8_b call with M's arguments on T,
-  # and the 8D0907551H hand XDF does not have it.
+  # and the 8D0907551H manual XDF does not have it.
   22N:
     - KFVPLGU
   # Not in the 4B0906018CM DAMOS export.

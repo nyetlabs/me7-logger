@@ -134,9 +134,7 @@ func Generate(opt Options) (*Result, error) {
 				entries = []opcode.SelectorEntry{{Off: label}}
 			}
 			for _, e := range entries {
-				for _, c := range opcode.WalkSelector(opt.Image, e.Off, opcode.FlashBase, dpp, e.Index, names.Selector, names.SelectorEnd, e.Finish) {
-					cases = append(cases, c)
-				}
+				cases = append(cases, opcode.WalkSelector(opt.Image, e.Off, opcode.FlashBase, dpp, e.Index, names.Selector, names.SelectorEnd, e.Finish)...)
 			}
 		}
 	}

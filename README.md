@@ -9,7 +9,7 @@ Tools for Bosch ME7 engine control units, in Go, for macOS, Linux and Windows.
 
 Neither program writes flash or EEPROM. `me7info` never opens a serial port.
 
-`me7info place ref.json ref.bin dst.bin` writes a model JSON for the second image. A body that still matches is kept. One code pointer, found once, moves the object. Anything else is left out. The model's origin is `located`.
+`me7info place ref.json ref.bin dst.bin` writes a model JSON for the second image. A body that still matches is kept. One code pointer, found once, moves the object. Anything else is left out. The model's origin is `auto`.
 
 ## Workflow
 

@@ -5,7 +5,7 @@
 ```mermaid
 flowchart LR
   subgraph priv[private, never committed]
-    src[DAMOS / A2L / OLS / hand XDF]
+    src[DAMOS / A2L / OLS / manual XDF]
   end
   subgraph corpus[ecu-corpus submodule]
     bin[images/part/*.bin]
@@ -38,9 +38,9 @@ Stage new originals under `testdata/parity/incoming/` (gitignored except its REA
 
 ## Design
 
-`me7info` (`generate`, `probe`, `place`), `me7parity` (the report, plus `onboard` and `corpus`), and `me7logger` (`log`) share one Go module. `me7parity` reads `testdata/parity` and is not in the release. `generate` and `me7logger` locate items in the image as `record.Item` and `record.Map`. The `.ecu` writer reads those. `xdf.Model` converts the maps to an xdfkit model (file offsets, raw values, provenance origin `located`), and xdfkit files it with `Tuner` or `Categorize` and writes the XDF. `parity` reads the corpus definitions with xdfkit `canon` and `model`. me7-logger imports xdfkit; xdfkit never imports me7-logger.
+`me7info` (`generate`, `probe`, `place`), `me7parity` (the report, plus `onboard` and `corpus`), and `me7logger` (`log`) share one Go module. `me7parity` reads `testdata/parity` and is not in the release. `generate` and `me7logger` locate items in the image as `record.Item` and `record.Map`. The `.ecu` writer reads those. `xdf.Model` converts the maps to an xdfkit model (file offsets, raw values, provenance origin `auto`), and xdfkit files it with `Tuner` or `Categorize` and writes the XDF. `parity` reads the corpus definitions with xdfkit `canon` and `model`. me7-logger imports xdfkit; xdfkit never imports me7-logger.
 
-`me7info place ref.json ref.bin dst.bin` writes a model for the destination image (`-o`, or stdout). A body that still matches is kept. One code pointer, found once, moves the object. Anything else is omitted. Provenance is format `image`, origin `located`. The report on stderr is the kept, moved, and omitted counts.
+`me7info place ref.json ref.bin dst.bin` writes a model for the destination image (`-o`, or stdout). A body that still matches is kept. One code pointer, found once, moves the object. Anything else is omitted. Provenance is format `image`, origin `auto`. The report on stderr is the kept, moved, and omitted counts.
 
 The generator is a masked byte search plus a few opcodes (selector, case bounds, `EXTP`), not a disassembler. A RAM address located by bytes is a row in `config/signatures.yaml`. A flash body is a row in `config/mapsigs.yaml`. Neither name, pattern, nor offset is a literal in Go. A row should match a code layout, not one image; check it across the corpus.
 
@@ -78,7 +78,7 @@ Images are in the private [ecu-corpus](https://github.com/nyetlabs/ecu-corpus) s
 
 `me7parity --data testdata/parity` prints the report from shipped config only. `make test` fails only when an image is below 100% against its legacy `ecu/me7info/<image>.ecu`; every other score is coverage.
 
-A name hits when it has an address and its listed axes. Each image's definition is its corpus model JSON. Fix definitions in the corpus, not here. `provenance.origin` `damos`/`a2l` is the reference, and a different address is a miss. `hand` or unset is an oracle only: disagreements still hit and are listed under `hand xdf disagrees`. `located` is read and left out of both sections.
+A name hits when it has an address and its listed axes. Each image's definition is its corpus model JSON. Fix definitions in the corpus, not here. `provenance.origin` `damos`/`a2l` is the reference, and a different address is a miss. `manual` or unset is an oracle only: disagreements still hit and are listed under `manual xdf disagrees`. `auto` is read and left out of both sections.
 
 The tier grade is the highest tier in `names/tuner.yaml` where every name hits or is in `names/absent.yaml`. A star means the definition is not a DAMOS oracle. 8D0907551L and 8D0907551M are handmade and are the oracle. `config/sets.yaml` groups forms of one map. An `any` set is one name: one member located, or every member absent. A `both` set is the plain name, or every later form when the plain name is absent. The tier of that slot is the tier those names already have in `names/tuner.yaml`. An open form of a slot that is already located is marked with the located member. `confidence` is high for bodies under 16 cells or matching a peer in `datasets.yaml` within two cells or 3%, and low for zero bodies unless every peer is zero.
 

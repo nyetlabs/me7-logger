@@ -110,7 +110,7 @@ func TestGateReason(t *testing.T) {
 	if got := gateReason("D", high, false, ""); got != "" {
 		t.Fatalf("missing def: %s", got)
 	}
-	if got := gateReason("S+", high, true, "located"); got != "" {
+	if got := gateReason("S+", high, true, "auto"); got != "" {
 		t.Fatalf("located: %s", got)
 	}
 	if got := gateReason("-", high, false, ""); got != "grade -" {
@@ -122,13 +122,13 @@ func TestGateReason(t *testing.T) {
 	if got := gateReason("D", parity.Fraction{}, false, ""); got != "confidence 0/0" {
 		t.Fatalf("empty: %s", got)
 	}
-	if got := gateReason("-", high, true, "hand"); got != "" {
+	if got := gateReason("-", high, true, "manual"); got != "" {
 		t.Fatalf("hand does not wait for D: %s", got)
 	}
-	if got := gateReason("D", half, true, "hand"); got != "confidence 37/74" {
+	if got := gateReason("D", half, true, "manual"); got != "confidence 37/74" {
 		t.Fatalf("hand confidence: %s", got)
 	}
-	if got := gateReason("C", high, true, "hand"); got != "" {
+	if got := gateReason("C", high, true, "manual"); got != "" {
 		t.Fatalf("hand: %s", got)
 	}
 	if got := gateReason("A", high, true, "damos"); got != "origin damos" {
@@ -166,16 +166,16 @@ func TestHandCover(t *testing.T) {
 		t.Fatalf("new %+v", merged.Objects[1].Value)
 	}
 	moved := modelOf(pubObj("KFZW", 0x300, 1, ""), pubObj("LAMFA", 0x200, 1, ""))
-	if got, _ := handCover(hand, moved); got != "hand disagrees KFZW" {
+	if got, _ := handCover(hand, moved); got != "manual disagrees KFZW" {
 		t.Fatalf("moved: %s", got)
 	}
 	short := modelOf(pubObj("LAMFA", 0x200, 1, ""))
 	two := modelOf(pubObj("KFZW", 0x100, 0.75, "grad KW"), pubObj("LAMFA", 0x180, 1, "%%"))
-	if got, _ := handCover(two, short); got != "hand short KFZW" {
+	if got, _ := handCover(two, short); got != "manual short KFZW" {
 		t.Fatalf("short: %s", got)
 	}
 	reason, n, notes := coverAll(two, modelOf(pubObj("OTHER", 0x1, 1, "")))
-	if reason != "hand short KFZW" || n != 1 || len(notes) != 3 || notes[0].line() != "short KFZW 0x100" || notes[1].line() != "short LAMFA 0x180" || notes[2].line() != "added OTHER 0x1" {
+	if reason != "manual short KFZW" || n != 1 || len(notes) != 3 || notes[0].line() != "short KFZW 0x100" || notes[1].line() != "short LAMFA 0x180" || notes[2].line() != "added OTHER 0x1" {
 		t.Fatalf("detail %s +%d %+v", reason, n, notes)
 	}
 	if _, n, notes = coverAll(hand, covered); n != 1 || len(notes) != 1 || notes[0].line() != "added LAMFA 0x200" {
@@ -209,7 +209,7 @@ func TestHandCover(t *testing.T) {
 	locatedMoved.Objects[0].Description = "optimal"
 	locatedMoved.Objects[0].Comment = "needle"
 	reason, _, notes = coverAll(shortMoved, locatedMoved)
-	if reason != "hand short LAMFA" || moveCount(notes) != 1 || !hasShort(notes) || partialDelta(1, 1) != "~1 +1" {
+	if reason != "manual short LAMFA" || moveCount(notes) != 1 || !hasShort(notes) || partialDelta(1, 1) != "~1 +1" {
 		t.Fatalf("short correction %s %+v", reason, notes)
 	}
 	fixed := applyMoves(shortMoved, locatedMoved, notes)
@@ -262,16 +262,16 @@ func TestHandCover(t *testing.T) {
 		t.Fatalf("unlocated %+v", gotKeys["LAMFA"])
 	}
 	one := modelOf(pubObj("KFPED_0_A", 0x100, 1, ""), pubObj("LAMFA", 0x180, 1, ""))
-	if got, _ := handCover(pedalHand, one); got != "hand short KFPED" {
+	if got, _ := handCover(pedalHand, one); got != "manual short KFPED" {
 		t.Fatalf("one variant: %s", got)
 	}
 	movedPair := modelOf(pubObj("KFPED_0_A", 0x300, 1, ""), pubObj("KFPED_1_A", 0x200, 1, ""), pubObj("LAMFA", 0x180, 1, ""))
-	if got, _ := handCover(pedalHand, movedPair); got != "hand disagrees KFPED" {
+	if got, _ := handCover(pedalHand, movedPair); got != "manual disagrees KFPED" {
 		t.Fatalf("pair moved: %s", got)
 	}
 	plain := modelOf(pubObj("KFPED", 0x100, 1, ""))
 	variantHand := modelOf(pubObj("KFPED_0_A", 0x100, 0.5, "Nm"))
-	if got, _ := handCover(variantHand, plain); got != "hand short KFPED_0_A" {
+	if got, _ := handCover(variantHand, plain); got != "manual short KFPED_0_A" {
 		t.Fatalf("plain does not cover the variant: %s", got)
 	}
 	kept := modelOf(pubObj("KFPED_0_A", 0x100, 0.5, "Nm"), pubObj("LAMFA", 0x180, 1, ""))

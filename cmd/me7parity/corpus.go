@@ -147,7 +147,7 @@ func cmdCorpus(args []string) error {
 			item.reason = gateReason(im.Tier, im.Confidence, item.def != "", item.origin)
 		}
 		delta := "-"
-		if item.reason == "" && (item.origin == "hand" || item.origin == "located") {
+		if item.reason == "" && (item.origin == "manual" || item.origin == "auto") {
 			loc, err := located(d, prepare, c, name)
 			if err != nil {
 				return err
@@ -452,7 +452,7 @@ func printDetail(lines []pubLine) {
 		}
 		fmt.Printf("\n%s\n", ln.name)
 		if len(ln.notes) > 0 {
-			fmt.Println("hand")
+			fmt.Println("manual")
 			for _, n := range ln.notes {
 				fmt.Printf("  %s\n", n.line())
 			}
@@ -487,13 +487,13 @@ func gateReason(tier string, conf parity.Fraction, hasDef bool, origin string) s
 	if conf.Total == 0 || conf.Hit*2 <= conf.Total {
 		return fmt.Sprintf("confidence %d/%d", conf.Hit, conf.Total)
 	}
-	if hasDef && origin != "hand" && origin != "located" {
+	if hasDef && origin != "manual" && origin != "auto" {
 		if origin == "" {
 			origin = "unset"
 		}
 		return "origin " + origin
 	}
-	if origin == "hand" {
+	if origin == "manual" {
 		return ""
 	}
 	switch tier {
@@ -531,7 +531,7 @@ func (n coverNote) line() string {
 	case "short":
 		return fmt.Sprintf("short %s %s", n.key, addrText(n.hand))
 	case "disagrees":
-		return fmt.Sprintf("disagrees %s hand %s located %s", n.key, addrText(n.hand), addrsText(n.have))
+		return fmt.Sprintf("disagrees %s manual %s located %s", n.key, addrText(n.hand), addrsText(n.have))
 	default:
 		return fmt.Sprintf("added %s %s", n.key, addrsText(n.have))
 	}
@@ -574,7 +574,7 @@ func coverAll(prev, located *model.Model) (string, int, []coverNote) {
 		if len(addrs) == 0 {
 			notes = append(notes, coverNote{op: "short", key: k, hand: o.Address})
 			if reason == "" {
-				reason = "hand short " + k
+				reason = "manual short " + k
 			}
 			continue
 		}
@@ -588,7 +588,7 @@ func coverAll(prev, located *model.Model) (string, int, []coverNote) {
 		if !match {
 			notes = append(notes, coverNote{op: "disagrees", key: k, hand: o.Address, have: addrs})
 			if reason == "" {
-				reason = "hand disagrees " + k
+				reason = "manual disagrees " + k
 			}
 		}
 	}
@@ -1066,9 +1066,9 @@ func writePublished(path string, m *model.Model, keepOrigin bool) error {
 	}
 	if !keepOrigin {
 		if m.Provenance == nil {
-			m.Provenance = &model.Provenance{Format: "image", Origin: "located"}
+			m.Provenance = &model.Provenance{Format: "image", Origin: "auto"}
 		}
-		m.Provenance.Origin = "located"
+		m.Provenance.Origin = "auto"
 	}
 	b, err := canon.MarshalStamped(m, "me7parity corpus")
 	if err != nil {

@@ -293,7 +293,7 @@ func cmdPlace(args []string) error {
 	}
 	sum := sha256.Sum256(dst)
 	placed.Provenance = &model.Provenance{
-		Format: "image", Origin: "located",
+		Format: "image", Origin: "auto",
 		File: filepath.Base(fs.Arg(2)), SHA256: hex.EncodeToString(sum[:]),
 	}
 	if err := placed.Check(); err != nil {

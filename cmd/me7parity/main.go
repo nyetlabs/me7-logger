@@ -80,7 +80,7 @@ limits the report and lists the names that missed.
 ecu me7info   ME7Info rows. 100% is the only hard mark.
 names         tuner names: tier, axis, confidence, block.
 xdf damos     DAMOS or A2L maps at the same address.
-xdf hand      the same columns for a hand-made definition.
+xdf manual    the same columns for a manual definition.
 
 open and block are the misses. absent counts toward the grade.
 met by <form> means that family slot is already filled.

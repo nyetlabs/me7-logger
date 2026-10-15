@@ -35,22 +35,22 @@ import (
 // Axis and Confidence are set on a Tuner row. Axis is the axes on the
 // maps that scored, and a hit matches that image's XDF. Confidence is the
 // body-byte result for the names that row scored.
-// Axis on an XDF or Hand row is every axis in that file.
-// XDF rows score DAMOS sourced corpus definitions. Hand rows score hand made
-// ones, which are oracles, not targets. Origin located is not an oracle.
-// Disagree lists tuner names located at an address a hand made definition
+// Axis on an XDF or Manual row is every axis in that file.
+// XDF rows score DAMOS sourced corpus definitions. Manual rows score manual
+// ones, which are oracles, not targets. Origin auto is not an oracle.
+// Disagree lists tuner names located at an address a manual definition
 // does not have. Those names still hit.
 type Report struct {
 	ME7Info  []Image
 	Extras   []Image
 	Tuner    []Image
 	XDF      []Image
-	Hand     []Image
+	Manual   []Image
 	Disagree []Disagreement
 }
 
 // Disagreement is one tuner name whose located body is not at any of the
-// hand made XDF's addresses for that name. Addresses are file offsets.
+// manual XDF's addresses for that name. Addresses are file offsets.
 type Disagreement struct {
 	Image, Name string
 	Ours        uint32
@@ -188,12 +188,12 @@ func (r *Report) Text() string {
 			lines = append(lines, line{label: "  " + stemName(im.Name), frac: im.Fraction, axis: im.Axis, xdf: true})
 		}
 	}
-	if len(r.Hand) > 0 {
+	if len(r.Manual) > 0 {
 		if len(lines) > 0 {
 			lines = append(lines, line{})
 		}
-		lines = append(lines, line{label: "xdf hand", head: true, xdf: true})
-		for _, im := range r.Hand {
+		lines = append(lines, line{label: "xdf manual", head: true, xdf: true})
+		for _, im := range r.Manual {
 			lines = append(lines, line{label: "  " + stemName(im.Name), frac: im.Fraction, axis: im.Axis, xdf: true})
 		}
 	}
@@ -357,7 +357,7 @@ func (r *Report) Text() string {
 		}
 	}
 	if len(r.Disagree) > 0 {
-		b.WriteString("\nhand xdf disagrees\n")
+		b.WriteString("\nmanual xdf disagrees\n")
 		for _, d := range r.Disagree {
 			xs := make([]string, len(d.XDF))
 			for i, a := range d.XDF {
@@ -463,9 +463,9 @@ func (r *Report) selectStems(stems []string) *Report {
 			out.XDF = append(out.XDF, im)
 		}
 	}
-	for _, im := range r.Hand {
+	for _, im := range r.Manual {
 		if keep(im.Name) {
-			out.Hand = append(out.Hand, im)
+			out.Manual = append(out.Manual, im)
 		}
 	}
 	for _, d := range r.Disagree {
@@ -628,7 +628,7 @@ func run(dir string, images []string, defOf func(string) string, gen imageGen) (
 			blk := block[LayoutID(img)]
 			want := lists.forBlock(blk)
 			scored := tunerMaps(want, axes, maps, oracle)
-			if kind == handXDF {
+			if kind == manualXDF {
 				rep.Disagree = append(rep.Disagree, disagreements(base, want, scored, xrows)...)
 			}
 			gone := absent[blk]
@@ -654,7 +654,7 @@ func run(dir string, images []string, defOf func(string) string, gen imageGen) (
 			if kind == damosXDF {
 				rep.XDF = append(rep.XDF, im)
 			} else {
-				rep.Hand = append(rep.Hand, im)
+				rep.Manual = append(rep.Manual, im)
 			}
 		}
 	}
@@ -691,7 +691,7 @@ func run(dir string, images []string, defOf func(string) string, gen imageGen) (
 			rep.Tuner[i].Confidence = scoreConfidence(confTuner, axes, h.img, h.maps, h.oracle, peers)
 		}
 	}
-	for _, ims := range [][]Image{rep.ME7Info, rep.Extras, rep.Tuner, rep.XDF, rep.Hand} {
+	for _, ims := range [][]Image{rep.ME7Info, rep.Extras, rep.Tuner, rep.XDF, rep.Manual} {
 		sortImages(ims, tierOf)
 	}
 	slices.SortStableFunc(rep.Disagree, func(a, b Disagreement) int {
@@ -767,14 +767,14 @@ func nameSet(names []string) map[string]struct{} {
 
 // The oracle kinds.
 const (
-	damosXDF = "damos"
-	handXDF  = "hand"
+	damosXDF  = "damos"
+	manualXDF = "manual"
 )
 
 // loadOracle reads the image's corpus definition at path and returns its
 // kind, or "" when path is "" or the origin is located. Its provenance
 // origin (xdfkit docs/corpus.md) damos or a2l is damosXDF; hand, or none,
-// is handXDF. located is a program's placement, so it is not scored.
+// is manualXDF. located is a program's placement, so it is not scored.
 func loadOracle(path string) (maps []Map, axes []Axis, rows []refRow, kind, origin string, err error) {
 	if path == "" {
 		return nil, nil, nil, "", "", nil
@@ -790,9 +790,9 @@ func loadOracle(path string) (maps []Map, axes []Axis, rows []refRow, kind, orig
 	switch origin {
 	case "damos", "a2l":
 		kind = damosXDF
-	case "hand", "":
-		kind = handXDF
-	case "located":
+	case "manual", "":
+		kind = manualXDF
+	case "auto":
 		return nil, nil, nil, "", origin, nil
 	default:
 		return nil, nil, nil, "", origin, fmt.Errorf("%s: unknown origin %q", path, origin)
@@ -800,7 +800,7 @@ func loadOracle(path string) (maps []Map, axes []Axis, rows []refRow, kind, orig
 	return maps, axes, rows, kind, origin, nil
 }
 
-// disagreements lists the scored names whose body is not at a hand made XDF
+// disagreements lists the scored names whose body is not at a manual XDF
 // row of that name.
 func disagreements(image string, tuner []string, scored map[string]record.Map, rows []refRow) []Disagreement {
 	var out []Disagreement

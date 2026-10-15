@@ -50,11 +50,11 @@ const descHeader = `# Map descriptions. 8D0907551M wins when it has a sentence.
 # DAMOS and A2L supply the rest. Located packs are not a source.
 `
 
-// mPack is the original name list. Other hand packs are not a source.
+// mPack is the original name list. Other manual packs are not a source.
 const mPack = "8D0907551M-0002.json"
 
 // BuildDescriptions reads defs in dir and returns descriptions.yaml.
-// Origin located is skipped. dir is an ecu-corpus checkout.
+// Origin auto is skipped. dir is an ecu-corpus checkout.
 func BuildDescriptions(dir string) ([]byte, error) {
 	ents, err := os.ReadDir(filepath.Join(dir, "defs"))
 	if err != nil {
@@ -86,7 +86,7 @@ func BuildDescriptions(dir string) ([]byte, error) {
 		if err := json.Unmarshal(b, &pack); err != nil {
 			return nil, fmt.Errorf("%s: %w", e.Name(), err)
 		}
-		if pack.Provenance.Origin == "located" {
+		if pack.Provenance.Origin == "auto" {
 			continue
 		}
 		mFile := e.Name() == mPack

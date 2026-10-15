@@ -14,6 +14,7 @@
 #   make go.work          gitignored go.work that builds against ../xdfkit
 #   make xdfkit-bump      pin go.mod to the pushed xdfkit master (pseudo-version)
 #   make check-pinned     build and vet; uses go.work when that file exists
+#   make parity           build, then run the me7parity report
 #   make -C publish       stage corpus zips in build/publish/stage (needs ../xdfkit)
 #
 # Version comes from git tags only. Do not edit a version by hand.
@@ -22,7 +23,7 @@ SHELL := /bin/bash
 
 VERSION ?= $(patsubst v%,%,$(shell git describe --tags --match 'v[0-9]*' --dirty --always 2>/dev/null))
 
-.PHONY: all test build version package install uninstall bump corpus corpus-bump xdfkit-bump check-pinned clean help
+.PHONY: all test build version package install uninstall bump corpus-bump xdfkit-bump check-pinned parity corpus clean help
 
 # Archive name uses macos; the Go port is darwin.
 PLATFORMS := darwin/amd64 darwin/arm64 linux/amd64 linux/arm64 windows/amd64
@@ -115,6 +116,9 @@ xdfkit-bump:
 check-pinned:
 	go build ./...
 	go vet ./...
+
+parity: build
+	./build/me7parity
 
 # install does not build, so sudo make install runs no go build as root.
 install:

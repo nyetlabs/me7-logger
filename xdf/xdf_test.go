@@ -132,7 +132,7 @@ func TestModelUnknownRowsIsConstant(t *testing.T) {
 	if o := m.Objects[1]; o.Shape != "1d" || o.Cols != 6 || o.X == nil || *o.X.Address != 0x11FFA {
 		t.Fatalf("%+v", o)
 	}
-	if p := m.Provenance; p.Format != "image" || p.Origin != "located" || len(p.SHA256) != 64 {
+	if p := m.Provenance; p.Format != "image" || p.Origin != "auto" || len(p.SHA256) != 64 {
 		t.Fatalf("%+v", p)
 	}
 }

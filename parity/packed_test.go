@@ -9,7 +9,7 @@ import (
 )
 
 func TestGradePackedUsesDef(t *testing.T) {
-	def := packedModel(t, "hand", &model.Object{
+	def := packedModel(t, "manual", &model.Object{
 		ID: "KRKTE", Shape: "value", Address: 0, Data: model.Data{Bits: 8},
 	})
 	img := []byte{0x10}
@@ -39,7 +39,7 @@ func TestGradePackedOracleHasNoStar(t *testing.T) {
 }
 
 func TestGradePackedKeepsDuplicate(t *testing.T) {
-	def := packedModel(t, "hand",
+	def := packedModel(t, "manual",
 		&model.Object{ID: "KRKTE", Shape: "value", Address: 0, Data: model.Data{Bits: 8}},
 		&model.Object{ID: "KRKTE", Shape: "value", Address: 1, Data: model.Data{Bits: 8}},
 	)
@@ -53,7 +53,7 @@ func TestGradePackedKeepsDuplicate(t *testing.T) {
 }
 
 func TestGradePackedCountsConstantCurve(t *testing.T) {
-	def := packedModel(t, "hand", &model.Object{
+	def := packedModel(t, "manual", &model.Object{
 		ID: "LDPBN", Shape: "value", Address: 0, Rows: 1, Cols: 1, Data: model.Data{Bits: 8},
 	})
 	got, err := GradePacked("../testdata/parity", []Packed{{Stem: "img", Img: []byte{0x10}, Def: def}})
@@ -80,7 +80,7 @@ func TestGradePackedCountsOrdinalAxis(t *testing.T) {
 }
 
 func TestGradePackedSkipsMapWithoutAxis(t *testing.T) {
-	def := packedModel(t, "located", &model.Object{
+	def := packedModel(t, "auto", &model.Object{
 		ID: "LAMFA", Shape: "2d", Address: 0, Rows: 2, Cols: 2, Data: model.Data{Bits: 8},
 	})
 	got, err := GradePacked("../testdata/parity", []Packed{{Stem: "img", Img: make([]byte, 8), Def: def}})

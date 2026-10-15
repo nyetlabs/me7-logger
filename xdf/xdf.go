@@ -29,7 +29,7 @@ func Model(maps []record.Map, image []byte, title string) (m *model.Model, confl
 	sum := sha256.Sum256(image)
 	m = &model.Model{
 		Schema:     model.SchemaID,
-		Provenance: &model.Provenance{Format: "image", Origin: "located", File: title, SHA256: hex.EncodeToString(sum[:])},
+		Provenance: &model.Provenance{Format: "image", Origin: "auto", File: title, SHA256: hex.EncodeToString(sum[:])},
 		Objects:    []*model.Object{},
 	}
 	for _, r := range maps {
