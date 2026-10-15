@@ -277,14 +277,24 @@ func majority(cells map[string]Cell, key func(Cell) Cell) (Cell, bool) {
 // xSignedOnly reports an image X axis whose points are monotonic only
 // when read signed. A big-endian word is the import's byte order, not a sign.
 func xSignedOnly(img []byte, n int, addr string, bits int, endian, source string) bool {
-	if source != "image" || endian == "big" || bits < 8 || n < 2 {
+	if source != "image" {
 		return false
 	}
 	a, ok := parseAddr(addr)
 	if !ok {
 		return false
 	}
-	return monotonic(series(img, a, n, bits, true)) && !monotonic(series(img, a, n, bits, false))
+	return SignedOnly(img, a, n, bits, endian)
+}
+
+// SignedOnly reports an image axis whose points are monotonic only when
+// read signed. A big-endian word is the import's byte order, not a sign.
+// An axis whose unsigned points already rise is false.
+func SignedOnly(img []byte, addr, n, bits int, endian string) bool {
+	if endian == "big" || bits < 8 || n < 2 {
+		return false
+	}
+	return monotonic(series(img, addr, n, bits, true)) && !monotonic(series(img, addr, n, bits, false))
 }
 
 func parseAddr(s string) (int, bool) {

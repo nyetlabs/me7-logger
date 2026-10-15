@@ -1,18 +1,12 @@
-# Finder priority for the blocks in layouts.yaml. Opinion, not measurement.
-# Tiers run S, A, B, C, D, highest first. Every block is in exactly one tier.
-tiers:
-  S:
-    - 22m
-  A:
-    - 22N
-    - 1.8T
-    - 1.8T-CM
-  B:
-    - 4Z7-like
-    - 4Z7-na
-    - 4Z7
-  C:
-    - 23g
-  D:
-    - 25C
-    - selector-sub
+# Finder order for the blocks in layouts.yaml. Opinion, not a stage.
+# Highest first. Every block is listed once.
+- 22m
+- 22N
+- 1.8T
+- 1.8T-CM
+- 4Z7-like
+- 4Z7-na
+- 4Z7
+- 23g
+- 25C
+- selector-sub

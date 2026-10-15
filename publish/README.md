@@ -18,7 +18,7 @@ Members keep undated names, so an XDF and its metadata file share a stem:
 
 CSV is the map list only, with no reference columns. `8N0906018CB` is not published: it has no corpus definition.
 
-A definition that changed since it was stamped is published as written, and its conversions are quiet. The JSON in the zip is still the corpus file.
+A definition that changed since it was stamped is published as written. The JSON in the zip is still the corpus file.
 
 ## Located models
 

@@ -239,6 +239,25 @@ func cmdCorpus(args []string) error {
 				delta += fmt.Sprintf(" key %d", nKey)
 			}
 		}
+		var lintText string
+		if item.reason == "" && item.merged == nil && item.def == "" {
+			loc, err := located(d, prepare, c, name)
+			if err != nil {
+				return err
+			}
+			item.merged = loc
+		}
+		if item.merged != nil && (item.reason == "" || item.keepOrigin) {
+			block, text, err := holdLint(c, name, item.merged)
+			if err != nil {
+				return err
+			}
+			lintText = text
+			if block != "" {
+				item.reason = block
+				item.keepOrigin = false
+			}
+		}
 		status := item.reason
 		if status == "" {
 			status = "eligible"
@@ -254,6 +273,7 @@ func cmdCorpus(args []string) error {
 			name: name, status: status, tier: tier, delta: delta,
 			hit: im.Confidence.Hit, total: im.Confidence.Total,
 			notes: item.notes, open: im.Open, block: im.BlockOpen,
+			lint: lintText,
 		})
 	}
 	extra, err := placeholderDefs(dir, lines)
@@ -263,7 +283,20 @@ func cmdCorpus(args []string) error {
 	if len(want) > 0 {
 		extra = placeholderExtra{}
 	}
-	eligible = append(eligible, extra.items...)
+	for i := range extra.items {
+		block, text, err := holdLint(c, extra.items[i].name, extra.items[i].merged)
+		if err != nil {
+			return err
+		}
+		extra.lines[i].lint = text
+		if block != "" {
+			extra.items[i].reason = block
+			extra.items[i].keepOrigin = false
+			extra.lines[i].status = block
+			continue
+		}
+		eligible = append(eligible, extra.items[i])
+	}
 	lines = append(lines, extra.lines...)
 	printPublish(lines)
 	if len(want) > 0 {
@@ -329,6 +362,7 @@ type pubLine struct {
 	hit, total                int
 	notes                     []coverNote
 	open, block               []parity.OpenName
+	lint                      string
 }
 
 var zipStem = regexp.MustCompile(`^(.+)-[0-9]{8}\.zip$`)
@@ -440,10 +474,11 @@ func printPublish(lines []pubLine) {
 	}
 }
 
-// printDetail lists the manual gaps and the tuner names that did not hit.
+// printDetail lists the manual gaps, the tuner names that did not hit, and
+// the lint findings on the definition that would be stored.
 func printDetail(lines []pubLine) {
 	for _, ln := range lines {
-		if len(ln.notes) == 0 && len(ln.open) == 0 && len(ln.block) == 0 {
+		if len(ln.notes) == 0 && len(ln.open) == 0 && len(ln.block) == 0 && ln.lint == "" {
 			continue
 		}
 		fmt.Printf("\n%s\n", ln.name)
@@ -464,6 +499,10 @@ func printDetail(lines []pubLine) {
 			for _, n := range ln.block {
 				fmt.Printf("  %s\n", openLine(n))
 			}
+		}
+		if ln.lint != "" {
+			fmt.Println("lint")
+			fmt.Print(ln.lint)
 		}
 	}
 }
@@ -694,18 +733,34 @@ func applyMoves(prev, located *model.Model, notes []coverNote) *model.Model {
 
 // corrections is how many previous objects change description, comment,
 // or layout in merged. Address is part of the match, so a moved name is
-// not counted.
+// not counted. Copies of one key pair in order, so one copy is not
+// compared with another.
 func corrections(prev, merged *model.Model) int {
 	if prev == nil || merged == nil {
 		return 0
 	}
-	next := byKeyAddr(merged)
+	next := map[keyAddr][]*model.Object{}
+	for _, o := range merged.Objects {
+		if k := objKey(o); k != "" {
+			ka := keyAddr{k, o.Address}
+			next[ka] = append(next[ka], o)
+		}
+	}
+	used := map[keyAddr]int{}
 	n := 0
 	for _, o := range prev.Objects {
-		m := next[keyAddr{objKey(o), o.Address}]
-		if m == nil || objKey(o) == "" {
+		k := objKey(o)
+		if k == "" {
 			continue
 		}
+		ka := keyAddr{k, o.Address}
+		list := next[ka]
+		i := used[ka]
+		if i >= len(list) {
+			continue
+		}
+		used[ka] = i + 1
+		m := list[i]
 		if m.Description != o.Description || m.Comment != o.Comment || !sameLayout(m, o) {
 			n++
 		}

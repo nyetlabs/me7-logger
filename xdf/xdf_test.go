@@ -269,6 +269,42 @@ func TestModelRecordShape(t *testing.T) {
 	}
 }
 
+func TestModelAxisSign(t *testing.T) {
+	img := make([]byte, 0x400)
+	copy(img[0x20:], []byte{0x52, 0xF8, 0xB8, 0xFE, 0x48, 0x01, 0x33, 0x03})
+	copy(img[0x40:], []byte{1, 0, 2, 0, 3, 0, 4, 0})
+	base := uint32(opcode.FlashBase)
+	m, _ := Model([]record.Map{{
+		Name: "YSIGN", Addr: base + 0x200, Bits: 16, Rows: 4, Cols: 2,
+		Y: &record.Axis{Addr: base + 0x20, Count: 4, Bits: 16},
+		X: &record.Axis{Count: 2},
+	}, {
+		Name: "YPLAIN", Addr: base + 0x300, Bits: 16, Rows: 4, Cols: 2,
+		Y: &record.Axis{Addr: base + 0x40, Count: 4, Bits: 16},
+		X: &record.Axis{Count: 2},
+	}}, img, "t")
+	if y := m.Objects[0].Y; y == nil || y.Data == nil || !y.Data.Signed {
+		t.Fatalf("signed %+v", m.Objects[0].Y)
+	}
+	if y := m.Objects[1].Y; y == nil || y.Data == nil || y.Data.Signed {
+		t.Fatalf("unsigned %+v", m.Objects[1].Y)
+	}
+}
+
+func TestModelAxisAddress(t *testing.T) {
+	img := make([]byte, 0x120)
+	copy(img[0xFA:], []byte{4, 0, 0x40, 0xC5, 0xFB, 0})
+	base := uint32(opcode.FlashBase)
+	m, _ := Model([]record.Map{{
+		Name: "TVUB", Addr: base + 0x100, Bits: 16, Rows: 1, Cols: 4,
+		X: &record.Axis{Addr: base + 0xFC, Count: 4, Bits: 8},
+	}}, img, "t")
+	x := m.Objects[0].X
+	if x == nil || x.Address == nil || *x.Address != 0xFB || x.Data.Bits != 8 {
+		t.Fatalf("%+v", x)
+	}
+}
+
 func slicesHas(ss []string, w string) bool {
 	for _, s := range ss {
 		if s == w {

@@ -47,7 +47,6 @@ stage:
 		if test -f $$zip && test $$zip -nt $$src && test $$zip -nt $$img && test $$zip -nt $$xdfkit \
 			&& { test -z "$$tuner" || test $$zip -nt $(CORPUS)/categories.json; }; then continue; fi; \
 		w=$(OUT)/work/$$name; rm -rf $$w; mkdir -p $$w; cp -p $$src $$w/$$name.json; \
-		st=$$($$xdfkit verify --status $$w/$$name.json) || exit 1; \
 		lintst=0; \
 		lint=$$($$xdfkit lint -i $$img $$w/$$name.json) || lintst=$$?; \
 		if test $$lintst -eq 2; then printf '%s\n' "$$lint" >&2; exit 2; fi; \
@@ -60,15 +59,13 @@ stage:
 				for (r in c) printf " %s=%d", r, c[r]; \
 				print ""; \
 			}'; \
-		q=; \
-		if test "$$st" = edited; then q=--quiet; fi; \
-		$$xdfkit $$q --force $$w/$$name.json $$w/$$name.kp; \
-		$$xdfkit $$q -f csv --force -i $$img $$w/$$name.json $$w/$$name.csv; \
-		$$xdfkit $$q -f xdf --force -i $$img $$w/$$name.json $$w/$$name.xdf; \
+		$$xdfkit --force $$w/$$name.json $$w/$$name.kp; \
+		$$xdfkit -f csv --force -i $$img $$w/$$name.json $$w/$$name.csv; \
+		$$xdfkit -f xdf --force -i $$img $$w/$$name.json $$w/$$name.xdf; \
 		set -- $$name.json $$name.kp $$name.csv $$name.xdf $$name.meta.json; \
 		if test -n "$$tuner"; then \
-			$$xdfkit $$q -f csv --force --tuner $(CORPUS)/categories.json -i $$img $$w/$$name.json $$w/$$name-tuner.csv; \
-			$$xdfkit $$q -f xdf --force --tuner $(CORPUS)/categories.json -i $$img $$w/$$name.json $$w/$$name-tuner.xdf; \
+			$$xdfkit -f csv --force --tuner $(CORPUS)/categories.json -i $$img $$w/$$name.json $$w/$$name-tuner.csv; \
+			$$xdfkit -f xdf --force --tuner $(CORPUS)/categories.json -i $$img $$w/$$name.json $$w/$$name-tuner.xdf; \
 			set -- "$$@" $$name-tuner.csv $$name-tuner.xdf $$name-tuner.meta.json; \
 		fi; \
 		(cd $$w && zip -qX $$zip "$$@"); \

@@ -235,7 +235,7 @@ func TestRunLayout(t *testing.T) {
 
 func TestSortImages(t *testing.T) {
 	ims := []Image{{Name: "c"}, {Name: "b"}, {Name: "a"}, {Name: "d"}}
-	sortImages(ims, map[string]string{"a": "C", "b": "S", "c": "S"})
+	sortImages(ims, map[string]int{"a": 2, "b": 0, "c": 0})
 	var got []string
 	for _, im := range ims {
 		got = append(got, im.Name)
@@ -592,7 +592,7 @@ func TestLayoutBlocks(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := loadLayoutTiers(dir, blocks); err != nil {
+	if _, err := loadLayoutOrder(dir, blocks); err != nil {
 		t.Fatal(err)
 	}
 

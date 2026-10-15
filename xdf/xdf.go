@@ -50,7 +50,9 @@ func Model(maps []record.Map, image []byte, title string) (m *model.Model, confl
 	}
 	conflicts = breakpoints(m, image, pat)
 	conflicts = append(conflicts, aligned(m, image, pat)...)
-	return m, append(conflicts, fitRecord(m, image, pat, fromCall)...)
+	conflicts = append(conflicts, fitRecord(m, image, pat, fromCall)...)
+	signAxes(m, image)
+	return m, conflicts
 }
 
 func withPat(o *model.Object, pat map[string]string, s string) string {
@@ -100,8 +102,8 @@ func aligned(m *model.Model, image []byte, pat map[string]string) (conflicts []s
 }
 
 // fitRecord emits the one image record at an even body when its rows, cols,
-// or axis widths differ from the call or from config.Storage. The located
-// map is left as the locator stored it.
+// or axis widths or addresses differ from the call or from config.Storage.
+// The located map is left as the locator stored it.
 func fitRecord(m *model.Model, image []byte, pat map[string]string, fromCall map[string]bool) (conflicts []string) {
 	for _, o := range m.Objects {
 		if o.Shape == "value" || odd(o.Address, o.Data) {
@@ -133,7 +135,17 @@ func fitRecord(m *model.Model, image []byte, pat map[string]string, fromCall map
 }
 
 func sameShape(o *model.Object, r interp.Record) bool {
-	return o.Rows == r.Rows && o.Cols == r.Cols && axisBits(o.X) == keptBits(r.X) && axisBits(o.Y) == keptBits(r.Y)
+	return o.Rows == r.Rows && o.Cols == r.Cols && sameAxis(o.X, r.X) && sameAxis(o.Y, r.Y)
+}
+
+func sameAxis(a *model.Axis, r record.Axis) bool {
+	if axisBits(a) != keptBits(r) {
+		return false
+	}
+	if r.Addr == 0 {
+		return true
+	}
+	return a != nil && a.Address != nil && uint32(*a.Address) == opcode.FileOffset(r.Addr)
 }
 
 func axisBits(a *model.Axis) int {
@@ -151,6 +163,24 @@ func keptBits(a record.Axis) int {
 }
 
 func odd(a model.Addr, d model.Data) bool { return a%2 == 1 && d.Bits >= 16 && !d.Float }
+
+// signAxes sets Signed on an image axis whose points rise only when read
+// signed. An axis whose unsigned points already rise is left unsigned.
+func signAxes(m *model.Model, image []byte) {
+	for _, o := range m.Objects {
+		signAxis(image, o.X, o.Cols)
+		signAxis(image, o.Y, o.Rows)
+	}
+}
+
+func signAxis(img []byte, a *model.Axis, n int) {
+	if a == nil || a.Source != "image" || a.Address == nil || a.Data == nil {
+		return
+	}
+	if config.SignedOnly(img, int(*a.Address), n, a.Data.Bits, a.Data.Endian) {
+		a.Data.Signed = true
+	}
+}
 
 // moved is the record's axis r, keeping what old axis says it means.
 func moved(old *model.Axis, r record.Axis) *model.Axis {

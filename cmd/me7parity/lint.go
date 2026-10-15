@@ -7,7 +7,9 @@ import (
 
 	"go.nyet.org/me7-logger/internal/ecucorpus"
 	"go.nyet.org/xdfkit/api"
+	"go.nyet.org/xdfkit/canon"
 	"go.nyet.org/xdfkit/lint"
+	"go.nyet.org/xdfkit/model"
 )
 
 // lintSection is the xdfkit lint findings for these images. A finding is
@@ -69,11 +71,11 @@ func writeFindings(b *strings.Builder, one bool, stem string, findings []lint.Fi
 			fmt.Fprintf(b, "  %s  %s\n", stem, cause)
 		}
 		for _, f := range by[cause] {
-			writeLintLine(b, one, stem, f.Rule, f.ID+"  "+f.Message)
+			writeLintLine(b, one, stem, f.Rule, findingLabel(f))
 		}
 	}
 	for _, f := range plain {
-		writeLintLine(b, one, stem, f.Rule, f.ID+"  "+f.Message)
+		writeLintLine(b, one, stem, f.Rule, findingLabel(f))
 	}
 }
 
@@ -90,4 +92,88 @@ func lintLines(one bool, stem string, findings []lint.Finding) string {
 	var b strings.Builder
 	writeFindings(&b, one, stem, findings)
 	return b.String()
+}
+
+// findingLabel is the finding id, its map key when the model had one, and
+// the message. The key is not a fix.
+func findingLabel(f lint.Finding) string {
+	s := f.ID
+	if k := mapKey(f); k != "" {
+		s += "  " + k
+	}
+	return s + "  " + f.Message
+}
+
+func mapKey(f lint.Finding) string {
+	var out []string
+	seen := map[string]bool{}
+	for _, m := range f.Maps {
+		k := m.Key
+		if m.Axis != "" && k != "" {
+			k += " " + m.Axis
+		}
+		if k == "" || seen[k] {
+			continue
+		}
+		seen[k] = true
+		out = append(out, k)
+	}
+	return strings.Join(out, ", ")
+}
+
+// holdLint lints the model --submit would store. A missing image is no
+// finding. R1 and R3 are the block. Other findings are the text. Nothing
+// in a finding is applied.
+func holdLint(c *ecucorpus.Corpus, name string, m *model.Model) (block, text string, err error) {
+	if c == nil || m == nil || len(m.Objects) == 0 {
+		return "", "", nil
+	}
+	imgPath, err := c.Path(name)
+	if err != nil {
+		return "", "", nil
+	}
+	img, err := os.ReadFile(imgPath)
+	if err != nil {
+		return "", "", err
+	}
+	findings, err := lintModel(m, img)
+	if err != nil {
+		return "", "", fmt.Errorf("%s: %w", name, err)
+	}
+	return lintStatus(findings), lintLines(true, name, findings), nil
+}
+
+func lintModel(m *model.Model, img []byte) ([]lint.Finding, error) {
+	b, err := canon.MarshalStamped(m, "me7parity corpus")
+	if err != nil {
+		return nil, err
+	}
+	rep, err := api.Lint(b, api.LintRequest{Image: img})
+	if err != nil {
+		return nil, err
+	}
+	return rep.Findings, nil
+}
+
+// lintStatus is "lint R1", "lint R3", or "lint R1 R3" when those rules
+// fired. Any other rule is empty.
+func lintStatus(findings []lint.Finding) string {
+	var r1, r3 bool
+	for _, f := range findings {
+		switch f.Rule {
+		case "R1":
+			r1 = true
+		case "R3":
+			r3 = true
+		}
+	}
+	switch {
+	case r1 && r3:
+		return "lint R1 R3"
+	case r1:
+		return "lint R1"
+	case r3:
+		return "lint R3"
+	}
+	return ""
 }

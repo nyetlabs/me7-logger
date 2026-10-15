@@ -406,6 +406,22 @@ func TestMergeKeptRelayout(t *testing.T) {
 	}
 }
 
+func TestCorrectionsDuplicate(t *testing.T) {
+	first := pubObj("CDSLS", 0x181AE, 1, "")
+	first.Description = "CDSLS - Euro-Byte"
+	second := pubObj("CDSLS", 0x181AE, 1, "")
+	second.Description = "Euro-Byte"
+	prev := modelOf(first, second)
+	if n := corrections(prev, clearedCopy(prev)); n != 0 {
+		t.Fatalf("duplicate descriptions: %d", n)
+	}
+	changed := clearedCopy(prev)
+	changed.Objects[0].Data.Bits = 16
+	if n := corrections(prev, changed); n != 1 {
+		t.Fatalf("one layout: %d", n)
+	}
+}
+
 func modelOf(objs ...*model.Object) *model.Model {
 	return &model.Model{Schema: model.SchemaID, Objects: objs}
 }

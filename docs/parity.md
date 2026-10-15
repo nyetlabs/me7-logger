@@ -43,6 +43,7 @@ status
 - `grade -`: the name grade is below D. Origin `manual` is scored without waiting for a grade. With no definition, D or better is eligible.
 - `confidence N/M`: high bodies are half or fewer.
 - `keys`: blank-id keys named `obj-N`. `--submit` clears them and leaves the origin. Another status ends with `, key N` for the same clear.
+- `lint R1` / `lint R3`: the definition `--submit` would write has that finding. The row is left in place. A finding is not applied. R4, R5, R6, R9, and R10 are printed for a named row and do not hold it back.
 - `def unreadable`: the definition file could not be read.
 
 delta

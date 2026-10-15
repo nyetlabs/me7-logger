@@ -65,8 +65,8 @@ type Disagreement struct {
 // is the tuner names and Block is the other names lists of the image's
 // layout block. NoDef marks a Tuner row whose name grade has not reached
 // S, except a DAMOS or A2L oracle. Text prints it as a star after the tier.
-// Every list is sorted by the layout block tier of its image in
-// layouts-priority.yaml, then by name.
+// Every list is sorted by the image's place in layouts-priority.yaml,
+// then by name.
 // Open is the tuner names that were not located, D first. BlockOpen is
 // the same for the image's layout-block list. Absent names are included
 // and marked. Detail prints them; Text does not. Provenance is the Tuner
@@ -575,7 +575,7 @@ func run(dir string, images []string, defOf func(string) string, gen imageGen) (
 	}
 	tuner, axes := lists.tuner, lists.dims
 	ntier := lists.tier
-	layout, err := loadLayoutTiers(dir, blocks)
+	layout, err := loadLayoutOrder(dir, blocks)
 	if err != nil {
 		return nil, err
 	}
@@ -584,7 +584,7 @@ func run(dir string, images []string, defOf func(string) string, gen imageGen) (
 		return nil, err
 	}
 	block := blockOf(blocks)
-	tierOf := map[string]string{}
+	rankOf := map[string]int{}
 	rep := &Report{}
 	type kept struct {
 		base, stem string
@@ -600,7 +600,9 @@ func run(dir string, images []string, defOf func(string) string, gen imageGen) (
 		}
 		base := filepath.Base(path)
 		stem := strings.TrimSuffix(base, ".bin")
-		tierOf[base] = layout[LayoutID(img)]
+		if r, ok := layout[LayoutID(img)]; ok {
+			rankOf[base] = r
+		}
 		items, maps, err := gen(base, img)
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", base, err)
@@ -695,10 +697,10 @@ func run(dir string, images []string, defOf func(string) string, gen imageGen) (
 		}
 	}
 	for _, ims := range [][]Image{rep.ME7Info, rep.Extras, rep.Tuner, rep.XDF, rep.Manual} {
-		sortImages(ims, tierOf)
+		sortImages(ims, rankOf)
 	}
 	slices.SortStableFunc(rep.Disagree, func(a, b Disagreement) int {
-		if c := cmp.Compare(tierRank(tierOf[a.Image]), tierRank(tierOf[b.Image])); c != 0 {
+		if c := cmp.Compare(layoutRank(rankOf, a.Image), layoutRank(rankOf, b.Image)); c != 0 {
 			return c
 		}
 		return cmp.Or(strings.Compare(a.Image, b.Image), strings.Compare(a.Name, b.Name))
@@ -1069,46 +1071,6 @@ func familiesOf(sets []config.Set, tier map[string]string, dims map[string]int) 
 // tierOrder is the priority order of a tiers map, highest first.
 var tierOrder = []string{"S", "A", "B", "C", "D"}
 
-// loadTiers reads a priority file: a tiers map from a tierOrder label to members.
-// Every key of want is in exactly one tier. A missing file returns nil.
-func loadTiers[V any](path string, want map[string]V) (map[string]string, error) {
-	b, err := os.ReadFile(path)
-	if os.IsNotExist(err) {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, err
-	}
-	name := filepath.Base(path)
-	var doc struct {
-		Tiers map[string][]string `yaml:"tiers"`
-	}
-	if err := yaml.Unmarshal(b, &doc); err != nil {
-		return nil, fmt.Errorf("%s: %w", name, err)
-	}
-	out := map[string]string{}
-	for tier, members := range doc.Tiers {
-		if !slices.Contains(tierOrder, tier) {
-			return nil, fmt.Errorf("%s: tier %q is not one of %v", name, tier, tierOrder)
-		}
-		for _, m := range members {
-			if _, ok := want[m]; !ok {
-				return nil, fmt.Errorf("%s: %s is not listed in the file it ranks", name, m)
-			}
-			if _, ok := out[m]; ok {
-				return nil, fmt.Errorf("%s: %s repeated", name, m)
-			}
-			out[m] = tier
-		}
-	}
-	for m := range want {
-		if _, ok := out[m]; !ok {
-			return nil, fmt.Errorf("%s: %s has no tier", name, m)
-		}
-	}
-	return out, nil
-}
-
 var epkRE = regexp.MustCompile(`[0-9]+/[0-9]+/ME7[!-~]*`)
 
 // EPK is the calibration string in the image, empty when it has none.
@@ -1142,18 +1104,42 @@ func loadBlocks(dir string) (map[string][]string, error) {
 	return blocks, nil
 }
 
-// loadLayoutTiers maps each layout id to the tier of its block in layouts-priority.yaml.
-func loadLayoutTiers(dir string, blocks map[string][]string) (map[string]string, error) {
+// loadLayoutOrder maps each layout id to its block's index in
+// layouts-priority.yaml, highest first. A missing file returns nil.
+func loadLayoutOrder(dir string, blocks map[string][]string) (map[string]int, error) {
 	if blocks == nil {
 		return nil, nil
 	}
-	tiers, err := loadTiers(filepath.Join(dir, "layouts-priority.yaml"), blocks)
+	path := filepath.Join(dir, "layouts-priority.yaml")
+	b, err := os.ReadFile(path)
+	if os.IsNotExist(err) {
+		return nil, nil
+	}
 	if err != nil {
 		return nil, err
 	}
-	out := map[string]string{}
+	var order []string
+	if err := yaml.Unmarshal(b, &order); err != nil {
+		return nil, fmt.Errorf("layouts-priority.yaml: %w", err)
+	}
+	place := map[string]int{}
+	for i, block := range order {
+		if _, ok := blocks[block]; !ok {
+			return nil, fmt.Errorf("layouts-priority.yaml: %s is not a layout block", block)
+		}
+		if _, ok := place[block]; ok {
+			return nil, fmt.Errorf("layouts-priority.yaml: %s repeated", block)
+		}
+		place[block] = i
+	}
+	for block := range blocks {
+		if _, ok := place[block]; !ok {
+			return nil, fmt.Errorf("layouts-priority.yaml: %s is not listed", block)
+		}
+	}
+	out := map[string]int{}
 	for id, block := range blockOf(blocks) {
-		out[id] = tiers[block]
+		out[id] = place[block]
 	}
 	return out, nil
 }
@@ -1310,7 +1296,7 @@ func metBy(f family, hit func(string) (bool, bool)) string {
 	return strings.Join(on, ", ")
 }
 
-// tierRank is the index of label in tierOrder. No tier sorts last.
+// tierRank is the index of a name tier in tierOrder. No tier sorts last.
 func tierRank(label string) int {
 	if i := slices.Index(tierOrder, label); i >= 0 {
 		return i
@@ -1318,10 +1304,19 @@ func tierRank(label string) int {
 	return len(tierOrder)
 }
 
-// sortImages orders rows by the layout tier of their image, then by name.
-func sortImages(ims []Image, tierOf map[string]string) {
+// layoutRank is the image's place in layouts-priority.yaml. An image
+// with no place sorts last.
+func layoutRank(rankOf map[string]int, name string) int {
+	if r, ok := rankOf[name]; ok {
+		return r
+	}
+	return int(^uint(0) >> 1)
+}
+
+// sortImages orders rows by their place in layouts-priority.yaml, then by name.
+func sortImages(ims []Image, rankOf map[string]int) {
 	slices.SortStableFunc(ims, func(a, b Image) int {
-		if c := cmp.Compare(tierRank(tierOf[a.Name]), tierRank(tierOf[b.Name])); c != 0 {
+		if c := cmp.Compare(layoutRank(rankOf, a.Name), layoutRank(rankOf, b.Name)); c != 0 {
 			return c
 		}
 		return strings.Compare(a.Name, b.Name)
