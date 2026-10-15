@@ -2,12 +2,23 @@ package opcode
 
 import (
 	"encoding/binary"
+	"fmt"
 	"slices"
 	"strings"
 	"unicode"
 
 	"go.nyet.org/me7-logger/needle"
 )
+
+func rowLabel(row MapSig) string {
+	if row.Pattern != "" {
+		return row.Pattern
+	}
+	if row.Anchor != "" {
+		return fmt.Sprintf("anchor %s %+d", row.Anchor, row.Add)
+	}
+	return ""
+}
 
 // MapHit is one calibration map located from a mapsig row.
 // Addr is the CPU address of the map body. Header is the decoded pointer
@@ -35,6 +46,9 @@ type MapHit struct {
 	// YOrd and Bits are the MapSig fields.
 	YOrd bool
 	Bits int
+	// Pattern is the row that stored the name: its pattern, or an anchor
+	// row's anchor and add.
+	Pattern string
 }
 
 // MapAddrs runs the mapsig rows. A pattern with no window is kept only when
@@ -95,6 +109,7 @@ func mapHits(img []byte, dpp [4]uint16, rows []MapSig, known map[string]uint32, 
 			Name: name, Addr: addr, Header: header,
 			Rows: row.Rows, Cols: row.Cols, XBits: row.XBits, YBits: row.YBits,
 			XRam: xram, YRam: yram, Plain: row.Plain, YOrd: row.YOrd, Bits: row.Bits,
+			Pattern: rowLabel(row),
 		})
 		return true
 	}

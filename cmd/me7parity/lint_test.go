@@ -16,6 +16,15 @@ func TestLintLines(t *testing.T) {
 	if got != want {
 		t.Fatalf("%q", got)
 	}
+	got = lintLines(true, "stem", []lint.Finding{
+		{Rule: "R9", ID: "R9@0x10:2", Message: "odd", Cause: "shape"},
+		{Rule: "R6", ID: "R6@0x20:4", Message: "same"},
+		{Rule: "R10", ID: "R10@0x30:2", Message: "start", Cause: "record-start"},
+	})
+	want = "  shape\n  R9   R9@0x10:2  odd\n  record-start\n  R10  R10@0x30:2  start\n  R6   R6@0x20:4  same\n"
+	if got != want {
+		t.Fatalf("%q", got)
+	}
 }
 
 func TestLintFinding(t *testing.T) {

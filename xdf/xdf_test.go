@@ -8,6 +8,7 @@ import (
 	kitxdf "go.nyet.org/xdfkit/xdf"
 
 	"go.nyet.org/me7-logger/config"
+	"go.nyet.org/me7-logger/opcode"
 	"go.nyet.org/me7-logger/record"
 )
 
@@ -227,4 +228,52 @@ func TestModelCategories(t *testing.T) {
 			t.Errorf("got %q, want %q", strings.Join(s, " "), tc.want)
 		}
 	}
+}
+
+func TestModelAligned(t *testing.T) {
+	img := make([]byte, 0x300)
+	img[0xFE], img[0xFF] = 2, 0
+	copy(img[0x100:], []byte{0x00, 0, 0x10, 0})
+	base := uint32(opcode.FlashBase)
+	m, conflicts := Model([]record.Map{
+		{Name: "ODD", Addr: base + 0x101, Bits: 16},
+		{Name: "NONE", Addr: base + 0x201, Bits: 16},
+		{Name: "AXIS", Addr: base + 0x180, Bits: 8, Rows: 2, Cols: 2, X: &record.Axis{Addr: base + 0x181, Count: 2, Bits: 16}},
+	}, img, "t")
+	if len(m.Objects) != 1 || m.Objects[0].ID != "ODD" || m.Objects[0].Address != 0x100 || m.Objects[0].Rows != 1 || m.Objects[0].Cols != 2 {
+		t.Fatalf("moved %+v", m.Objects)
+	}
+	for _, w := range []string{
+		"ODD at 0x101: 16-bit data at an odd address, moved to the record's values at 0x100 from record",
+		"NONE at 0x201: 16-bit data at an odd address and no record there, left out",
+		"AXIS at 0x180: 16-bit axis at an odd address 0x181, left out",
+	} {
+		if !slicesHas(conflicts, w) {
+			t.Errorf("missing %q in %q", w, conflicts)
+		}
+	}
+}
+
+func TestModelRecordShape(t *testing.T) {
+	img := make([]byte, 0x200)
+	copy(img[0xFA:], []byte{2, 2, 1, 2, 3, 4})
+	m, conflicts := Model([]record.Map{{
+		Name: "KFMLDMX", Addr: uint32(opcode.FlashBase) + 0x100, Bits: 16, Pattern: "E6FF",
+	}}, img, "t")
+	o := m.Objects[0]
+	if o.Rows != 2 || o.Cols != 2 || o.Shape != "2d" {
+		t.Fatalf("shape %+v", o)
+	}
+	if len(conflicts) != 1 || !strings.Contains(conflicts[0], "shape 8x8 from storage, record 2x2") || !strings.Contains(conflicts[0], "(E6FF)") {
+		t.Fatalf("%q", conflicts)
+	}
+}
+
+func slicesHas(ss []string, w string) bool {
+	for _, s := range ss {
+		if s == w {
+			return true
+		}
+	}
+	return false
 }

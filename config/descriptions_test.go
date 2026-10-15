@@ -63,14 +63,18 @@ func TestStorage(t *testing.T) {
 		want       Cell
 		ok         bool
 	}{
-		{"KFMIRL", "", Cell{16, false, 16, 16, false}, true},
-		{"KFMIRL", "8D0907551G", Cell{16, false, 16, 12, false}, true},
-		{"KFLDRL", "", Cell{16, true, 16, 10, false}, true},
-		{"LDRXN", "", Cell{16, false, 1, 16, false}, true},
-		{"MLHFM", "", Cell{16, false, 1, 512, true}, true},
+		{"KFMIRL", "", Cell{16, false, 16, 16, false, false}, true},
+		{"KFMIRL", "8D0907551G", Cell{16, false, 16, 12, false, false}, true},
+		{"KFLDRL", "", Cell{16, true, 16, 10, false, false}, true},
+		{"LDRXN", "", Cell{16, false, 1, 16, false, false}, true},
+		{"MLHFM", "", Cell{16, false, 1, 512, true, false}, true},
 		{"KFTARX", "", Cell{Bits: 16}, true},
-		{"KRKTE", "06A906032S", Cell{8, false, 1, 1, false}, true},
-		{"KRKTE", "8D0907551M", Cell{16, false, 1, 1, false}, true},
+		{"KRKTE", "06A906032S", Cell{8, false, 1, 1, false, false}, true},
+		{"KRKTE", "8D0907551M", Cell{16, false, 1, 1, false, false}, true},
+		{"KFDMDADP", "8D0907551L", Cell{Bits: 16, XSigned: true}, true},
+		{"KFDMDADP", "06A906032HF", Cell{16, false, 8, 6, false, false}, true},
+		{"KFWDKPP", "4D1907558", Cell{8, false, 12, 12, false, true}, true},
+		{"KFMIZUFIL", "", Cell{8, false, 8, 8, false, false}, true},
 		{"NOSUCHNAME", "", Cell{}, false},
 	} {
 		got, ok := Storage(c.name, c.part)

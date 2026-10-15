@@ -47,6 +47,18 @@ stage:
 			&& { test -z "$$tuner" || test $$zip -nt $(CORPUS)/categories.json; }; then continue; fi; \
 		w=$(OUT)/work/$$name; rm -rf $$w; mkdir -p $$w; cp -p $$src $$w/$$name.json; \
 		st=$$($$xdfkit verify --status $$w/$$name.json) || exit 1; \
+		lintst=0; \
+		lint=$$($$xdfkit lint -i $$img $$w/$$name.json) || lintst=$$?; \
+		if test $$lintst -eq 2; then printf '%s\n' "$$lint" >&2; exit 2; fi; \
+		if test $$lintst -ne 0 && test $$lintst -ne 1; then printf '%s\n' "$$lint" >&2; exit $$lintst; fi; \
+		printf '%s\n' "$$lint" | awk -v name="$$name" ' \
+			/^R[0-9]+@/ { r = $$1; sub(/@.*/, "", r); c[r]++; n++ } \
+			END { \
+				if (n == 0) { print "lint " name ": 0"; exit } \
+				printf "lint %s:", name; \
+				for (r in c) printf " %s=%d", r, c[r]; \
+				print ""; \
+			}'; \
 		q=; \
 		if test "$$st" = edited; then q=--quiet; fi; \
 		$$xdfkit $$q --force $$w/$$name.json $$w/$$name.kp; \

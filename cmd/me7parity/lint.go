@@ -38,14 +38,43 @@ func lintSection(c *ecucorpus.Corpus, stems []string) string {
 			writeLintLine(&b, one, stem, "lint", err.Error())
 			continue
 		}
-		for _, f := range rep.Findings {
-			writeLintLine(&b, one, stem, f.Rule, f.ID+"  "+f.Message)
-		}
+		writeFindings(&b, one, stem, rep.Findings)
 	}
 	if b.Len() == 0 {
 		return ""
 	}
 	return "lint\n" + b.String()
+}
+
+// writeFindings prints findings that carry a cause under that cause, then
+// the rest. The cause is the field. Nothing is applied.
+func writeFindings(b *strings.Builder, one bool, stem string, findings []lint.Finding) {
+	var causes []string
+	by := map[string][]lint.Finding{}
+	var plain []lint.Finding
+	for _, f := range findings {
+		if f.Cause == "" {
+			plain = append(plain, f)
+			continue
+		}
+		if _, ok := by[f.Cause]; !ok {
+			causes = append(causes, f.Cause)
+		}
+		by[f.Cause] = append(by[f.Cause], f)
+	}
+	for _, cause := range causes {
+		if one {
+			fmt.Fprintf(b, "  %s\n", cause)
+		} else {
+			fmt.Fprintf(b, "  %s  %s\n", stem, cause)
+		}
+		for _, f := range by[cause] {
+			writeLintLine(b, one, stem, f.Rule, f.ID+"  "+f.Message)
+		}
+	}
+	for _, f := range plain {
+		writeLintLine(b, one, stem, f.Rule, f.ID+"  "+f.Message)
+	}
 }
 
 func writeLintLine(b *strings.Builder, one bool, stem, rule, rest string) {
@@ -59,8 +88,6 @@ func writeLintLine(b *strings.Builder, one bool, stem, rule, rest string) {
 // lintLines formats findings the way the named report prints them.
 func lintLines(one bool, stem string, findings []lint.Finding) string {
 	var b strings.Builder
-	for _, f := range findings {
-		writeLintLine(&b, one, stem, f.Rule, f.ID+"  "+f.Message)
-	}
+	writeFindings(&b, one, stem, findings)
 	return b.String()
 }

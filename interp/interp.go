@@ -759,6 +759,15 @@ func Shaped(data []byte, body uint32, rows, cols, yBits, xBits int) (int, int, r
 		seen[key] = struct{}{}
 		hit = append(hit, one)
 	}
+	if len(hit) > 1 {
+		var rise []prepended
+		for _, h := range hit {
+			if rising(data, h.x.Addr, h.x.Count, h.x.Bits) && (h.y.Addr == 0 || rising(data, h.y.Addr, h.y.Count, h.y.Bits)) {
+				rise = append(rise, h)
+			}
+		}
+		hit = rise
+	}
 	if len(hit) != 1 {
 		return 0, 0, record.Axis{}, record.Axis{}, false
 	}
@@ -790,6 +799,15 @@ func shapedCurve(data []byte, header, body uint32, cols, xBits int) (int, record
 		}
 		got = append(got, record.Axis{Addr: header + uint32(start-off), Count: n, Bits: xBits})
 	}
+	if len(got) > 1 {
+		var rise []record.Axis
+		for _, a := range got {
+			if rising(data, a.Addr, a.Count, a.Bits) {
+				rise = append(rise, a)
+			}
+		}
+		got = rise
+	}
 	if len(got) != 1 {
 		return 0, record.Axis{}, false
 	}
@@ -818,6 +836,15 @@ func shapedMap(data []byte, header, body uint32, rows, cols, yBits, xBits int) (
 			seen[key] = struct{}{}
 			got = append(got, prepended{row, col, x, y})
 		}
+	}
+	if len(got) > 1 {
+		var rise []prepended
+		for _, h := range got {
+			if rising(data, h.x.Addr, h.x.Count, h.x.Bits) && (h.y.Addr == 0 || rising(data, h.y.Addr, h.y.Count, h.y.Bits)) {
+				rise = append(rise, h)
+			}
+		}
+		got = rise
 	}
 	if len(got) != 1 {
 		return 0, 0, record.Axis{}, record.Axis{}, false

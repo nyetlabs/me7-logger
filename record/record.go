@@ -66,6 +66,9 @@ type Map struct {
 	Cols    int
 	Unit    string
 	Comment string
+	// Pattern is the mapsig row that stored the name. Empty when a caller
+	// stored it and no mapsig row hit the same body.
+	Pattern string
 	X, Y    *Axis
 }
 

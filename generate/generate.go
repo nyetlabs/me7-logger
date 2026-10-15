@@ -490,6 +490,9 @@ func fillPacked(img []byte, dpp [4]uint16, maps []record.Map, h opcode.MapHit) {
 		if maps[i].Name != h.Name || maps[i].Addr != h.Addr {
 			continue
 		}
+		if maps[i].Pattern == "" {
+			maps[i].Pattern = h.Pattern
+		}
 		if maps[i].X != nil && maps[i].Y != nil {
 			return
 		}
@@ -600,7 +603,7 @@ func mergeMaps(img []byte, dpp [4]uint16, maps []record.Map, hits []opcode.MapHi
 			fillPacked(img, dpp, maps, h)
 			continue
 		}
-		m := record.Map{Name: h.Name, Addr: h.Addr}
+		m := record.Map{Name: h.Name, Addr: h.Addr, Pattern: h.Pattern}
 		applyAxes(img, dpp, h, &m)
 		if m.X == nil && m.Y == nil && slices.ContainsFunc(maps, func(o record.Map) bool {
 			return o.Name != "" && o.Addr == h.Addr && (o.X != nil || o.Y != nil)
@@ -613,6 +616,7 @@ func mergeMaps(img []byte, dpp [4]uint16, maps []record.Map, hits []opcode.MapHi
 				maps[i] = m
 			} else {
 				maps[i].Name = h.Name
+				maps[i].Pattern = h.Pattern
 			}
 			continue
 		}

@@ -42,8 +42,22 @@ func Model(maps []record.Map, image []byte, title string) (m *model.Model, confl
 		}
 	}
 	m.AssignKeys()
-	conflicts = breakpoints(m, image)
-	return m, append(conflicts, aligned(m, image)...)
+	pat := map[string]string{}
+	fromCall := map[string]bool{}
+	for _, r := range maps {
+		pat[r.Name] = r.Pattern
+		fromCall[r.Name] = r.Rows > 0
+	}
+	conflicts = breakpoints(m, image, pat)
+	conflicts = append(conflicts, aligned(m, image, pat)...)
+	return m, append(conflicts, fitRecord(m, image, pat, fromCall)...)
+}
+
+func withPat(o *model.Object, pat map[string]string, s string) string {
+	if p := pat[o.ID]; p != "" {
+		return s + " (" + p + ")"
+	}
+	return s
 }
 
 // aligned keeps every 16- or 32-bit integer field on an even address, where
@@ -51,11 +65,11 @@ func Model(maps []record.Map, image []byte, title string) (m *model.Model, confl
 // one record a byte either side (interp.Aligned) and takes that record's
 // shape and axes; with no such record it is left out, as is an object whose
 // image axis is on an odd address. Each is a conflict.
-func aligned(m *model.Model, image []byte) (conflicts []string) {
+func aligned(m *model.Model, image []byte, pat map[string]string) (conflicts []string) {
 	m.Objects = slices.DeleteFunc(m.Objects, func(o *model.Object) bool {
 		for _, a := range []*model.Axis{o.X, o.Y} {
 			if a != nil && a.Address != nil && a.Data != nil && odd(*a.Address, *a.Data) {
-				conflicts = append(conflicts, fmt.Sprintf("%s at 0x%X: %d-bit axis at an odd address 0x%X, left out", o.Key, uint32(o.Address), a.Data.Bits, uint32(*a.Address)))
+				conflicts = append(conflicts, withPat(o, pat, fmt.Sprintf("%s at 0x%X: %d-bit axis at an odd address 0x%X, left out", o.Key, uint32(o.Address), a.Data.Bits, uint32(*a.Address))))
 				return true
 			}
 		}
@@ -64,10 +78,10 @@ func aligned(m *model.Model, image []byte) (conflicts []string) {
 		}
 		r, ok := interp.Aligned(image, opcode.FlashBase+uint32(o.Address))
 		if !ok {
-			conflicts = append(conflicts, fmt.Sprintf("%s at 0x%X: %d-bit data at an odd address and no record there, left out", o.Key, uint32(o.Address), o.Data.Bits))
+			conflicts = append(conflicts, withPat(o, pat, fmt.Sprintf("%s at 0x%X: %d-bit data at an odd address and no record there, left out", o.Key, uint32(o.Address), o.Data.Bits)))
 			return true
 		}
-		conflicts = append(conflicts, fmt.Sprintf("%s at 0x%X: %d-bit data at an odd address, moved to the record's values at 0x%X", o.Key, uint32(o.Address), o.Data.Bits, opcode.FileOffset(r.Values)))
+		conflicts = append(conflicts, withPat(o, pat, fmt.Sprintf("%s at 0x%X: %d-bit data at an odd address, moved to the record's values at 0x%X from record", o.Key, uint32(o.Address), o.Data.Bits, opcode.FileOffset(r.Values))))
 		o.Address, o.Rows, o.Cols, o.Shape = model.Addr(opcode.FileOffset(r.Values)), r.Rows, r.Cols, "1d"
 		if r.Rows > 1 {
 			o.Shape = "2d"
@@ -85,11 +99,66 @@ func aligned(m *model.Model, image []byte) (conflicts []string) {
 	return conflicts
 }
 
+// fitRecord emits the one image record at an even body when its rows, cols,
+// or axis widths differ from the call or from config.Storage. The located
+// map is left as the locator stored it.
+func fitRecord(m *model.Model, image []byte, pat map[string]string, fromCall map[string]bool) (conflicts []string) {
+	for _, o := range m.Objects {
+		if o.Shape == "value" || odd(o.Address, o.Data) {
+			continue
+		}
+		rec, ok := interp.At(image, opcode.FlashBase+uint32(o.Address))
+		if !ok || sameShape(o, rec) {
+			continue
+		}
+		from := "storage"
+		if fromCall[o.ID] {
+			from = "call"
+		}
+		conflicts = append(conflicts, withPat(o, pat, fmt.Sprintf("%s at 0x%X: shape %dx%d from %s, record %dx%d", o.Key, uint32(o.Address), o.Rows, o.Cols, from, rec.Rows, rec.Cols)))
+		o.Rows, o.Cols, o.Shape = rec.Rows, rec.Cols, "1d"
+		if rec.Rows > 1 {
+			o.Shape = "2d"
+		}
+		if rec.X.Addr != 0 {
+			o.X = moved(o.X, rec.X)
+		}
+		if rec.Y.Addr != 0 {
+			o.Y = moved(o.Y, rec.Y)
+		} else {
+			o.Y = nil
+		}
+	}
+	return conflicts
+}
+
+func sameShape(o *model.Object, r interp.Record) bool {
+	return o.Rows == r.Rows && o.Cols == r.Cols && axisBits(o.X) == keptBits(r.X) && axisBits(o.Y) == keptBits(r.Y)
+}
+
+func axisBits(a *model.Axis) int {
+	if a == nil || a.Data == nil {
+		return 0
+	}
+	return a.Data.Bits
+}
+
+func keptBits(a record.Axis) int {
+	if a.Addr == 0 {
+		return 0
+	}
+	return a.Bits
+}
+
 func odd(a model.Addr, d model.Data) bool { return a%2 == 1 && d.Bits >= 16 && !d.Float }
 
 // moved is the record's axis r, keeping what old axis says it means.
 func moved(old *model.Axis, r record.Axis) *model.Axis {
-	a := axis(&r, false)
+	signed := false
+	if old != nil && old.Data != nil {
+		signed = old.Data.Signed
+	}
+	a := axis(&r, false, signed)
 	if old != nil {
 		a.Value = old.Value
 	}
@@ -99,7 +168,7 @@ func moved(old *model.Axis, r record.Axis) *model.Axis {
 // breakpoints turns each constant at a table's axis address into a curve
 // holding that axis's points, unless the axes there disagree, the points
 // don't strictly increase, or another object starts inside the curve.
-func breakpoints(m *model.Model, image []byte) (conflicts []string) {
+func breakpoints(m *model.Model, image []byte, pat map[string]string) (conflicts []string) {
 	type points struct {
 		n int
 		d model.Data
@@ -139,7 +208,7 @@ func breakpoints(m *model.Model, image []byte) (conflicts []string) {
 			}
 		}
 		if why != "" {
-			conflicts = append(conflicts, fmt.Sprintf("%s at 0x%X: not a breakpoint curve: %s", o.Key, uint32(o.Address), why))
+			conflicts = append(conflicts, withPat(o, pat, fmt.Sprintf("%s at 0x%X: not a breakpoint curve: %s", o.Key, uint32(o.Address), why)))
 			continue
 		}
 		o.Shape, o.Cols, o.Data = "1d", ps[0].n, ps[0].d
@@ -194,9 +263,9 @@ func object(r record.Map, part string) *model.Object {
 	if rows == 1 {
 		o.Shape = "1d"
 	}
-	o.X = axis(r.X, cell.Ordinal)
+	o.X = axis(r.X, cell.Ordinal, cell.XSigned)
 	if rows > 1 {
-		o.Y = axis(r.Y, cell.Ordinal)
+		o.Y = axis(r.Y, cell.Ordinal, false)
 	}
 	return o
 }
@@ -235,7 +304,7 @@ func fits(a *record.Axis, n int) bool {
 // axis is an image axis. A located count with no address is ordinal. An
 // axis not located is ordinal when the DAMOS and A2L defs index it, and
 // unknown otherwise.
-func axis(a *record.Axis, ordinal bool) *model.Axis {
+func axis(a *record.Axis, ordinal, signed bool) *model.Axis {
 	if a != nil && a.Addr == 0 && a.Count > 0 {
 		ordinal = true
 	}
@@ -243,7 +312,7 @@ func axis(a *record.Axis, ordinal bool) *model.Axis {
 		return &model.Axis{Source: map[bool]string{true: "ordinal", false: "unknown"}[ordinal], Value: value("")}
 	}
 	addr := model.Addr(opcode.FileOffset(a.Addr))
-	d := data(a.Bits, false)
+	d := data(a.Bits, signed)
 	return &model.Axis{Source: "image", Stored: "absolute", Address: &addr, Data: &d, Value: value(a.Unit)}
 }
 

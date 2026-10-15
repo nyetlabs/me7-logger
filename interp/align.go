@@ -33,10 +33,28 @@ func Aligned(data []byte, body uint32) (Record, bool) {
 		if v%2 == 1 {
 			continue
 		}
-		hit = append(hit, tablesAt(data, v)...)
-		hit = append(hit, curvesAt(data, v)...)
-		hit = append(hit, mapsAt(data, v)...)
+		hit = append(hit, recordsAt(data, v)...)
 	}
+	return oneRecord(hit)
+}
+
+// At is the one record whose values start at values. A candidate that starts
+// inside another record is that one's axis. Two records, or none, is not ok.
+// An odd address is not a 16-bit value start.
+func At(data []byte, values uint32) (Record, bool) {
+	if values%2 == 1 {
+		return Record{}, false
+	}
+	return oneRecord(recordsAt(data, values))
+}
+
+func recordsAt(data []byte, v uint32) []Record {
+	hit := tablesAt(data, v)
+	hit = append(hit, curvesAt(data, v)...)
+	return append(hit, mapsAt(data, v)...)
+}
+
+func oneRecord(hit []Record) (Record, bool) {
 	hit = slices.DeleteFunc(slices.Clone(hit), func(r Record) bool {
 		return slices.ContainsFunc(hit, func(o Record) bool { return o.Start < r.Start && r.Start < o.Values })
 	})

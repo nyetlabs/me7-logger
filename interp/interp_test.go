@@ -497,6 +497,13 @@ func TestShaped(t *testing.T) {
 	if !ok || rows != 10 || cols != 10 || y.Addr != opcode.FlashBase+4 || x.Addr != opcode.FlashBase+24 {
 		t.Fatalf("word ok=%v rows=%d cols=%d x=%+v y=%+v", ok, rows, cols, x, y)
 	}
+	// A byte count of 4 whose next byte is 0 is also a word count of 4.
+	// The 0 is the first point. The word reading is not monotonic.
+	lead := []byte{0x00, 0x07, 0x04, 0x00, 0x40, 0xc5, 0xfb, 0x00, 0x2c}
+	rows, cols, x, y, ok = Shaped(lead, opcode.FlashBase+8, 0, 4, 0, 8)
+	if !ok || cols != 4 || x.Addr != opcode.FlashBase+3 || y.Addr != 0 {
+		t.Fatalf("leading zero ok=%v cols=%d x=%+v", ok, cols, x)
+	}
 }
 
 func TestPackedHeaderLeadsCounts(t *testing.T) {
