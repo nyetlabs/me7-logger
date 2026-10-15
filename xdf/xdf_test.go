@@ -99,7 +99,7 @@ func TestModelBreakpoints(t *testing.T) {
 	if o := m.Objects[0]; o.Shape != "1d" || o.Rows != 1 || o.Cols != 4 || o.Data.Bits != 16 || o.Data.Endian != "little" {
 		t.Fatalf("SNM %+v", o)
 	}
-	want := []string{"SNX at 0x10100: axes of 2", "SNZ at 0x10200: breakpoints not increasing", "SNO at 0x10300: overlaps NEXT"}
+	want := []string{"SNX at 0x10100: not a breakpoint curve: axes of 2", "SNZ at 0x10200: not a breakpoint curve: breakpoints not increasing", "SNO at 0x10300: not a breakpoint curve: overlaps NEXT"}
 	if len(conflicts) != len(want) {
 		t.Fatalf("conflicts %q", conflicts)
 	}

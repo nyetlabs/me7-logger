@@ -331,17 +331,21 @@ func TableAddrs(img []byte, rows []MapSig) map[string]uint32 {
 	return tabs
 }
 
-// f2Word is the RAM operand of an F2 at hit+rel. rel nil, or a byte that is
-// not that operand, is no word.
+// f2Word is the RAM operand of an F2 at hit+rel. rel nil, a byte that is
+// not that operand, or an odd operand is no word.
 func f2Word(img []byte, hit int, rel *int) uint16 {
 	if rel == nil {
 		return 0
 	}
 	off := hit + *rel
-	if off < 2 || off+2 > len(img) || img[off-2] != 0xF2 {
+	if off < 2 || off%2 == 1 || off+2 > len(img) || img[off-2] != 0xF2 {
 		return 0
 	}
-	return binary.LittleEndian.Uint16(img[off : off+2])
+	mem := binary.LittleEndian.Uint16(img[off : off+2])
+	if mem%2 == 1 {
+		return 0
+	}
+	return mem
 }
 
 // shift adds a byte distance to a decoded pointer and keeps the result only

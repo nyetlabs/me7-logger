@@ -84,6 +84,7 @@ xdf manual    the same columns for a manual definition.
 
 open and block are the misses. absent counts toward the grade.
 met by <form> means that family slot is already filled.
+lint lists xdfkit findings for the named images. They are not applied.
 
 Column rules are in docs/parity.md. Run "me7parity report -h",
 "me7parity onboard -h", or "me7parity corpus -h" for those commands.
@@ -122,6 +123,9 @@ func cmdParity(args []string, cmd string) error {
 		return err
 	}
 	fmt.Print(rep.Detail(stems))
+	if s := lintSection(c, stems); s != "" {
+		fmt.Print("\n" + s)
+	}
 	return nil
 }
 

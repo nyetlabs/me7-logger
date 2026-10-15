@@ -4,7 +4,7 @@
 
 ## Report
 
-Each score is hits/total and a percent. With no arguments every image is listed. `me7parity report NAME` limits the report and lists the names that missed, under open and block.
+Each score is hits/total and a percent. With no arguments every image is listed. `me7parity report NAME` limits the report and lists the names that missed, under open and block. It also lists xdfkit lint findings for that image, rule then id and message. A finding is not applied and does not change an address.
 
 `ecu me7info` is the only hard mark. 100% means every row of that image's legacy ME7Info file matched.
 

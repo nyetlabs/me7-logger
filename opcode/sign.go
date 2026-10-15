@@ -634,7 +634,7 @@ func signAddr(addr uint32) bool {
 // PtrAt reads the word at a CPU address. An EXTP (D7 40) six bytes earlier
 // supplies the page. Otherwise the word is dppAddr.
 func PtrAt(img []byte, addr uint32, dpp [4]uint16) uint32 {
-	if addr < FlashBase {
+	if addr < FlashBase || addr%2 == 1 {
 		return 0
 	}
 	off := int(addr - FlashBase)

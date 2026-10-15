@@ -625,4 +625,36 @@ func TestBreakpoints(t *testing.T) {
 	if _, ok := Breakpoints(img, opcode.FlashBase+2, 8); ok {
 		t.Fatal("accepted a zero count")
 	}
+	// The odd byte is the pad. The count word is the next even address.
+	img[1] = 0xFF
+	img[2] = 2
+	img[3] = 0
+	copy(img[4:], []byte{0x10, 0x00, 0x20, 0x00})
+	ax, ok = Breakpoints(img, opcode.FlashBase+1, 16)
+	if !ok || ax.Addr != opcode.FlashBase+4 || ax.Count != 2 || ax.Bits != 16 {
+		t.Fatalf("pad %v %+v", ok, ax)
+	}
+}
+
+// TestOddHeaderIsBytes: a count byte at an odd address followed by a zero is
+// an 8-bit axis whose first point is 0 (4B0907551S KFLDRQ2 X, 8D0907551K
+// KFMIZUFIL Y), never a count word: its values would start on an odd address.
+func TestOddHeaderIsBytes(t *testing.T) {
+	for _, c := range []struct {
+		at  int
+		hdr []byte
+	}{
+		{0x6F, []byte{4, 0x00, 0x1e, 0x32, 0x46}},
+		{0x43, []byte{8, 0x00, 0x12, 0x1f, 0x2e, 0x3d, 0x42, 0x80, 0x99}},
+	} {
+		img := make([]byte, 0x80)
+		copy(img[c.at:], c.hdr)
+		ax, ok := axisAt(img, opcode.FlashBase+uint32(c.at))
+		if !ok || ax.Bits != 8 || ax.Count != int(c.hdr[0]) || ax.Addr != opcode.FlashBase+uint32(c.at)+1 {
+			t.Errorf("0x%x: ok=%v %+v", c.at, ok, ax)
+		}
+		if _, ok := Breakpoints(img, opcode.FlashBase+uint32(c.at), 16); ok {
+			t.Errorf("0x%x: accepted a count word at an odd address", c.at)
+		}
+	}
 }

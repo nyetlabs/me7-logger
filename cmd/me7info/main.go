@@ -269,7 +269,7 @@ func cmdProbe(args []string) error {
 	}
 	fmt.Printf("xdf: %d in the tuner xdf, %d in the full xdf\n", n[0], n[1])
 	for _, c := range conflicts {
-		fmt.Println("xdf: not a breakpoint curve:", c)
+		fmt.Println("xdf:", c)
 	}
 	return nil
 }

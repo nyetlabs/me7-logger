@@ -212,13 +212,21 @@ func memoRam(data []byte, dpp [4]uint16) func(uint16) (record.Axis, bool) {
 }
 
 // Breakpoints reads a breakpoint table that is not in front of the map.
-// addr is the count. bits 8 keeps a one-byte count and the values start on
-// the next byte. bits 16 keeps a count word whose high byte is zero, and the
-// values start two bytes later. The axis address is the first breakpoint.
+// addr is the count. bits 8 keeps a one-byte count, which may be odd, and
+// the values start on the next byte. bits 16 keeps a count word whose high
+// byte is zero. A count word on an odd address is the pad in front of it,
+// so the word is the next even byte, and the values start two bytes after
+// that. The axis address is the first breakpoint.
 func Breakpoints(data []byte, addr uint32, bits int) (record.Axis, bool) {
 	addr, ok := inImage(data, addr)
 	if !ok {
 		return record.Axis{}, false
+	}
+	if bits == 16 && addr%2 == 1 {
+		addr, ok = inImage(data, addr+1)
+		if !ok {
+			return record.Axis{}, false
+		}
 	}
 	off := int(addr - opcode.FlashBase)
 	n := int(data[off])
@@ -506,8 +514,9 @@ func inImage(data []byte, addr uint32) (uint32, bool) {
 }
 
 // axisOf reads the header at mem in this image. The first byte is the point
-// count. A zero second byte marks a 16-bit axis whose values start two bytes
-// later. Otherwise the values are bytes and start on the next byte. A header
+// count. On an even address, a zero second byte marks a 16-bit axis whose
+// values start two bytes later. Otherwise the values are bytes, the first of
+// them possibly zero, and start on the next byte. A header
 // that does not match this shape is left unread. The M-box count and width
 // are not substituted.
 func axisOf(data []byte, dpp [4]uint16, mem uint16) (record.Axis, bool) {
@@ -528,7 +537,7 @@ func axisAt(data []byte, addr uint32) (record.Axis, bool) {
 		return record.Axis{}, false
 	}
 	bits := 8
-	if data[off+1] == 0 {
+	if data[off+1] == 0 && addr%2 == 0 {
 		bits = 16
 	}
 	return Breakpoints(data, addr, bits)

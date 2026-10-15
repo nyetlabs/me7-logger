@@ -13,6 +13,7 @@ import (
 
 	"go.nyet.org/me7-logger/config"
 	"go.nyet.org/me7-logger/ident"
+	"go.nyet.org/me7-logger/interp"
 	"go.nyet.org/me7-logger/opcode"
 	"go.nyet.org/me7-logger/record"
 )
@@ -41,7 +42,58 @@ func Model(maps []record.Map, image []byte, title string) (m *model.Model, confl
 		}
 	}
 	m.AssignKeys()
-	return m, breakpoints(m, image)
+	conflicts = breakpoints(m, image)
+	return m, append(conflicts, aligned(m, image)...)
+}
+
+// aligned keeps every 16- or 32-bit integer field on an even address, where
+// ME7 stores it. An object on an odd address moves onto the values of the
+// one record a byte either side (interp.Aligned) and takes that record's
+// shape and axes; with no such record it is left out, as is an object whose
+// image axis is on an odd address. Each is a conflict.
+func aligned(m *model.Model, image []byte) (conflicts []string) {
+	m.Objects = slices.DeleteFunc(m.Objects, func(o *model.Object) bool {
+		for _, a := range []*model.Axis{o.X, o.Y} {
+			if a != nil && a.Address != nil && a.Data != nil && odd(*a.Address, *a.Data) {
+				conflicts = append(conflicts, fmt.Sprintf("%s at 0x%X: %d-bit axis at an odd address 0x%X, left out", o.Key, uint32(o.Address), a.Data.Bits, uint32(*a.Address)))
+				return true
+			}
+		}
+		if !odd(o.Address, o.Data) {
+			return false
+		}
+		r, ok := interp.Aligned(image, opcode.FlashBase+uint32(o.Address))
+		if !ok {
+			conflicts = append(conflicts, fmt.Sprintf("%s at 0x%X: %d-bit data at an odd address and no record there, left out", o.Key, uint32(o.Address), o.Data.Bits))
+			return true
+		}
+		conflicts = append(conflicts, fmt.Sprintf("%s at 0x%X: %d-bit data at an odd address, moved to the record's values at 0x%X", o.Key, uint32(o.Address), o.Data.Bits, opcode.FileOffset(r.Values)))
+		o.Address, o.Rows, o.Cols, o.Shape = model.Addr(opcode.FileOffset(r.Values)), r.Rows, r.Cols, "1d"
+		if r.Rows > 1 {
+			o.Shape = "2d"
+		}
+		if r.X.Addr != 0 {
+			o.X = moved(o.X, r.X)
+		}
+		if r.Y.Addr != 0 {
+			o.Y = moved(o.Y, r.Y)
+		} else {
+			o.Y = nil
+		}
+		return false
+	})
+	return conflicts
+}
+
+func odd(a model.Addr, d model.Data) bool { return a%2 == 1 && d.Bits >= 16 && !d.Float }
+
+// moved is the record's axis r, keeping what old axis says it means.
+func moved(old *model.Axis, r record.Axis) *model.Axis {
+	a := axis(&r, false)
+	if old != nil {
+		a.Value = old.Value
+	}
+	return a
 }
 
 // breakpoints turns each constant at a table's axis address into a curve
@@ -87,7 +139,7 @@ func breakpoints(m *model.Model, image []byte) (conflicts []string) {
 			}
 		}
 		if why != "" {
-			conflicts = append(conflicts, fmt.Sprintf("%s at 0x%X: %s", o.Key, uint32(o.Address), why))
+			conflicts = append(conflicts, fmt.Sprintf("%s at 0x%X: not a breakpoint curve: %s", o.Key, uint32(o.Address), why))
 			continue
 		}
 		o.Shape, o.Cols, o.Data = "1d", ps[0].n, ps[0].d

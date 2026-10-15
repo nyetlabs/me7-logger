@@ -263,7 +263,7 @@ mapsigs:
 - {name: NFSM, pattern: [43F8XXXX9D05D7400602F3F8A322, 43F8XXXX9D05D7400602F3F88925], add: 1}
 - {name: NLLM, pattern: [43F8XXXX9D05D7400602F3F8AB22, 43F8XXXX9D05D7400602F3F89125], add: 41}
 - {name: NASNOTKL, pattern: C2F4XXXXC0C51B45, add: 289}
-- {name: KFMLDMX, pattern: E6FFXXXXDA00282E0806F6F4, add: 9}
+- {name: KFMLDMX, pattern: E6FFXXXXDA00282E0806F6F4, add: 10}
 - {name: KFPBRK, pattern: F2FCXXXXF0D2F2FE, add: 46, also: [{name: KFPBRKNW, add: 290}]}
 - {name: KFWDKMSN, pattern: F2FCXXXXE6FD3827, add: 66}
 - {name: FKKVS, pattern: [C2FFXXXXDA82EA6706F00C00F6F47C9E, C2FFXXXXDA80184F06F00C00F6F4F49E], add: 49, rows: 16, cols: 16, xbits: 16}
@@ -310,7 +310,7 @@ mapsigs:
 - {name: KFLDRQ2, pattern: E6FCXXXXE6FD0902E6FE6F00, add: 81920}
 - {name: KFLDHBN, anchor: KFTARX, add: -64, rows: 8, cols: 8}
 - {name: KFKHFM, pattern: CD0DF3F4XXXXF7F471F8F3F4D40A, at: 4, add: 77, rows: 14, cols: 14}
-- {name: SNM16OPUW, pattern: XX8DE6FCXXXXF2FD02F8F2FE968D, at: 4, add: 3}
+- {name: SNM16OPUW, pattern: XX8DE6FCXXXXF2FD02F8F2FE968D, at: 4, add: 2}
 - {name: KFMSNWDK, pattern: 80DFF2F3F8F842F368A09D10E003F062F073F2F4XXXX, at: 20, add: 88, rows: 16, cols: 6, ybits: 16, xbits: 16}
 - {name: KFMIRL, pattern: XX37E6FCXXXXF2FDXXA6DA00D071, at: 4, add: 96, rows: 16, cols: 16, ybits: 16, xbits: 16}
 - {name: TVUB, pattern: 4EA2DB008860C2F409F98840C2F400F88840E6F4XXXX, at: 20, add: 96, cols: 5}
@@ -524,7 +524,7 @@ mapsigs:
 - {name: SDLDRL, pattern: [C2F4XXXX5C5442F4BCF99D08, C2F4XXXX5C5442F4B6F99D02]}
 - {name: SNM16OPUW, pattern: [4276F6F4708CE6FCXXXXF2FD9EF8, 4276F6F4968CE6FCXXXXF2FD9EF8], at: 8, add: 2}
 - {name: SNM16OPUW, pattern: 4276F6F4A28CE6FCXXXXF2FDA4F8, at: 8, add: 2}
-- {name: SNM16OPUW, pattern: 548CE6FCXXXXF2FD9CF8, at: 4}
+- {name: SNM16OPUW, pattern: 548CE6FCXXXXF2FD9CF8, at: 4, add: 2}
 - {name: TABGBTS, pattern: [42F4XXXXFD04E11875F82D8A, 42F4XXXXFD04E11875F85A8A]}
 - {name: TABGBTS, pattern: [42F4XXXXFD04E11875F85D8A, 42F4XXXXFD04E11875F80B8A]}
 - {name: TABGSS, pattern: [42F4XXXX8D018F34, 42F4XXXX8D01CF32]}
@@ -793,7 +793,7 @@ mapsigs:
 # 23g K and Q. F stores KRFKLN from the row above. The A5 page and the F3 word differ.
 - {name: KRFKLN, pattern: FD04E11A75FA06A50D12D7400602F3F8CA18D740, at: 16, add: 17, cols: 16, xtable: bp_nmot}
 # 23g K and Q. The 42 F4 word after 74 F5 is 3CA3.
-- {name: FBSTABGM, pattern: 070242F4XXXX3D04E08574F53CA3, at: 4, add: 58, cols: 4, xbits: 16, also: [{name: SRL12GKUW, add: 115}]}
+- {name: FBSTABGM, pattern: 070242F4XXXX3D04E08574F53CA3, at: 4, add: 58, cols: 4, xbits: 16, also: [{name: SRL12GKUW, add: 114}]}
 # 23g. The caller names LDPBN on F. K and Q use this call.
 - {name: LDPBN, pattern: E6FCXXXXE6FD0602F2FE868DDA80XXXXF0945C89, frame: true, xat: 10, also: [{name: LDORXN, add: -8}, {name: LDRAPP, add: 145}, {name: NLLM, add: 648}]}
 # 23g K and Q. The prefix is 7455 and the second C2 word is 8118.
@@ -808,8 +808,8 @@ mapsigs:
 - {name: MRESLL, pattern: C2F5XXXX5C65F6F5XXA7, at: 2, also: [{name: TDMRESLL, add: 1}, {name: MDSLPE, add: 8}, {name: TDMKO, add: 9}, {name: ZKMDKO, add: 10}, {name: ZKMDSLP, add: 11}, {name: NSLFAKAT, add: 12}, {name: NARAO, add: 19}, {name: NARASTG, add: 20}, {name: TVARSS, add: 30}, {name: TVKUPAR, add: 31}, {name: TVKUPHS, add: 32}, {name: TVKUPRS, add: 38}, {name: TZSPINI, add: 44}, {name: VARAU, add: 45}, {name: FGMIFAL, add: 47}, {name: FGZLSD, add: 55}, {name: KFWMIFAL, add: 73}, {name: KFWZLSD, add: 99}, {name: VLSD, add: 118}, {name: CWMDKOG, add: 119}, {name: CWTEZW, add: 120}, {name: CWZWVMX, add: 121}, {name: DELRL, add: 122}, {name: ETADZW, add: 127}, {name: ETALAM, add: 203}, {name: KFMRESTA, add: -32}]}
 # 23g. The second C2 F4 call is LDRXN. LDRXNZK is 66 bytes after that body.
 - {name: LDRXN, pattern: 0D12C2F4XXXX5C848840E6FCXXXXE6FD0702F2FE02F8DA80XXXX9820, at: 12, frame: true, add: 34, also: [{name: LDRXNZK, add: 100}]}
-# 23g. The third 928D call is LDRQ1ST. STV10LDSW is 35 bytes after it.
-- {name: STV10LDSW, pattern: E6FCXXXXE6FD0702F2FE928DDA80XXXXF6F4XXXXDA87, at: 2, frame: true, add: 35}
+# 23g. The third 928D call is LDRQ1ST. STV10LDSW is 34 bytes after it.
+- {name: STV10LDSW, pattern: E6FCXXXXE6FD0702F2FE928DDA80XXXXF6F4XXXXDA87, at: 2, frame: true, add: 34}
 # 23g K and Q. The C6 A7 call is the one F does not have. The body is KFDMDADP.
 # The frame 0x50 before it is KFDMDARO.
 - {name: KFDMDADP, pattern: F6F4C6A7D740E100F2F5E80B8850D740E100F2F24A098820E6FCXXXXE6FD0702, at: 26, frame: true}

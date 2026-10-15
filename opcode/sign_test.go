@@ -136,6 +136,9 @@ func TestPtrAtExtp(t *testing.T) {
 	img[1] = 0x40
 	binary.LittleEndian.PutUint16(img[2:], 0x00E0)
 	binary.LittleEndian.PutUint16(img[6:], 0x0100)
+	if PtrAt(img, FlashBase+5, StandardDPP) != 0 {
+		t.Fatal("odd address read as a word")
+	}
 	got := PtrAt(img, FlashBase+6, StandardDPP)
 	if got != 0x380100 {
 		t.Fatalf("got %#x", got)
