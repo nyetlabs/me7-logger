@@ -24,7 +24,7 @@ flowchart LR
   def -->|"make -C publish"| packs["IMAGE-DATE.zip, IMAGE-tuner.xdf"]
   cats -->|"make -C publish"| packs
   gen -->|xdf.Model| kit[xdfkit model + XDF writer]
-  gen --> out[.ecu + tuner .xdf, --full-xdf]
+  gen --> out[.ecu + tuner .xdf, --full-xdf, --labels]
   kit --> out
   out --> log[me7logger log] --> csv[CSV]
   out --> par[me7parity]

@@ -48,6 +48,7 @@ type Result struct {
 	ScaleNote string
 	MapNote   string
 	StubNote  string
+	Needles   []needle.Needle
 }
 
 // Generate runs the needle consumer and the opcode walk.
@@ -88,6 +89,7 @@ func Generate(opt Options) (*Result, error) {
 	}
 	res := &Result{
 		MapNote: mapNote,
+		Needles: ns,
 		File: &ecu.File{
 			Version:   "1.20",
 			LogSpeed:  56000,

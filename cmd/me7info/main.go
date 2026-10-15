@@ -70,7 +70,9 @@ Usage:
 Commands:
   generate  Write an .ecu file for the image and, when calibration maps
             were located, a TunerPro XDF. --model writes the full located
-            model as JSON. Does not open a serial port.
+            model as JSON. --labels writes a Ghidra label TSV of the
+            function entries, RAM items, and maps. Does not open a
+            serial port.
   probe     Report the DPP block and needle hits. --maps also counts the
             calibration maps generate would write to the XDF.
   place     Copy a map catalog onto another image. An object whose bytes
@@ -122,6 +124,7 @@ func cmdGenerate(args []string) error {
 	xdfPath := fs.StringP("xdf", "x", "", "tuner xdf output `<file>`, - for stdout (default <image>.xdf when listed maps were located)")
 	fullPath := fs.String("full-xdf", "", "also write every located named map to this xdf `<file>`, - for stdout")
 	modelPath := fs.String("model", "", "full located model JSON `<file>`, - for stdout")
+	labelsPath := fs.String("labels", "", "Ghidra label TSV `<file>` (function entries, RAM, maps), - for stdout")
 	scale := fs.String("5120", "auto", "mbar scaling `<mode>`: auto, on, or off")
 	clock := fs.Int("clock", 0, "CPU clock `<MHz>`: 20, 24, 32, or 40; 0 uses config/names.yaml")
 	conn := fs.String("connect", "", "override Connect with `<mode>`, for example SLOW-0x11")
@@ -162,6 +165,15 @@ func cmdGenerate(args []string) error {
 	}
 	if *modelPath != "" {
 		if _, err := locate.WriteModel(*modelPath, imgPath, img, res.Maps, cats, "me7info generate"); err != nil {
+			return err
+		}
+	}
+	if *labelsPath != "" {
+		m, _, err := locate.Model(imgPath, img, res.Maps, cats, false)
+		if err != nil {
+			return err
+		}
+		if err := generate.WriteLabels(*labelsPath, res.Labels(img, m.Objects)); err != nil {
 			return err
 		}
 	}

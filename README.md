@@ -4,7 +4,7 @@ Tools for Bosch ME7 engine control units, in Go, for macOS, Linux and Windows.
 
 | Program | Does | Reads | Writes |
 |---|---|---|---|
-| `me7info` | Locates measurements and calibration maps in a flash image, and copies a map catalog onto another image | `image.bin`, a reference catalog | ME7Logger `.ecu`, TunerPro `.xdf`, model JSON |
+| `me7info` | Locates measurements and calibration maps in a flash image, and copies a map catalog onto another image | `image.bin`, a reference catalog | ME7Logger `.ecu`, TunerPro `.xdf`, model JSON, Ghidra label TSV |
 | `me7logger` | Samples ECU RAM over the K-line diagnostic port | `image.bin`, `session.cfg` | CSV |
 
 Neither program writes flash or EEPROM. `me7info` never opens a serial port.
@@ -20,6 +20,7 @@ flowchart LR
   gen --> ecufile[ecus/image.ecu]
   gen --> xdf["image.xdf<br/>tuner maps"]
   gen -.->|--full-xdf| full["image-full.xdf<br/>every located map"]
+  gen -.->|--labels| labels["labels.tsv<br/>Ghidra labels"]
   xdf --> tp[TunerPro]
   full --> tp
   ecufile --> cfg["session.cfg<br/>variables, sample rate"]
@@ -58,6 +59,7 @@ flowchart TD
 - Measurements are found by masked byte patterns ("needles") and a few decoded instructions, not by disassembling the whole image.
 - Each Bosch map name and the bytes that locate it are a row in `config/mapsigs.yaml`. A RAM address other rows splice is a row in `config/signatures.yaml`.
 - `image.xdf` holds the maps named in `config/categories.json`, filed under its categories, plus the maps at their axis addresses. `--full-xdf` writes every located map, with the rest under `Other`.
+- `--labels labels.tsv` writes the `addr`, `name`, `size`, `comment` TSV that `ME7ImportLabelsScript` in [ghidra-me7-analyzer](../ghidra-me7-analyzer) reads: needle function entries (0x800000 plus the file offset), the `.ecu` RAM items, and each named map body and axis. A needle with several entries is `NAME_ADDR`.
 - `me7info probe image.bin` reports what was found without writing files. With `--maps`, it also prints how many maps each XDF would hold, and any axis constant it couldn't turn into a breakpoint curve.
 
 ## How `me7logger` reads RAM
