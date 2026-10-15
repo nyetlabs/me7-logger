@@ -7,11 +7,13 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 	"sync"
 
 	"go.nyet.org/xdfkit/canon"
 	"go.nyet.org/xdfkit/model"
+	"gopkg.in/yaml.v3"
 
 	"go.nyet.org/me7-logger/config"
 	"go.nyet.org/me7-logger/internal/cli"
@@ -24,14 +26,15 @@ const corpusHelp = `
 Lists every parity image and what --submit would store.
 --submit writes those rows and does not commit or upload.
 With no NAME, every image is listed. A named row also prints
-hand, open, and block.
+manual, open, and block.
 
 Columns are status, tier, delta, and confidence.
 Status and delta marks are in docs/parity.md.
---grades prints name, stage, and confidence and does not submit.
+--grades prints name, stage, confidence, and source, and does not submit.
 --staged reads each zip's definition instead of locating maps again.
 Stage is the tuner tier: D is 1, C is 2, B is 3-, A is 3, S is 3+.
-A star means the definition is not a DAMOS oracle. An open D stays -, or -* when it is not a DAMOS oracle.
+An open D is -. Source is verified, DAMOS, matched, manual, or auto
+(docs/parity.md).
 
 The corpus is --corpus, else CORPUS, else ../ecu-corpus when that
 checkout exists, else corpus/.
@@ -121,6 +124,13 @@ func cmdCorpus(args []string) error {
 		}
 		return printGrades(rep, want)
 	}
+	refs, err := loadRefTable(*data)
+	if err != nil {
+		return err
+	}
+	if _, err := mapSets(); err != nil {
+		return err
+	}
 	var eligible []pubItem
 	var lines []pubLine
 	for _, im := range rep.Tuner {
@@ -140,6 +150,9 @@ func cmdCorpus(args []string) error {
 				item.reason = "def unreadable"
 			} else if prev.Provenance != nil {
 				item.origin = prev.Provenance.Origin
+				if prev.Provenance.Verified {
+					item.reason = "verified"
+				}
 			}
 			nKey = placeholderCount(prev)
 		}
@@ -155,6 +168,7 @@ func cmdCorpus(args []string) error {
 			reason, added, notes := coverAll(prev, loc)
 			item.reason = reason
 			item.notes = notes
+			item.ref = reference(prev, loc, refs)
 			moves := moveCount(notes)
 			switch {
 			case reason == "" || reason == "identical":
@@ -237,9 +251,7 @@ func cmdCorpus(args []string) error {
 	if len(want) > 0 {
 		extra = placeholderExtra{}
 	}
-	for _, item := range extra.items {
-		eligible = append(eligible, item)
-	}
+	eligible = append(eligible, extra.items...)
 	lines = append(lines, extra.lines...)
 	printPublish(lines)
 	if len(want) > 0 {
@@ -255,7 +267,7 @@ func cmdCorpus(args []string) error {
 		}
 		switch {
 		case item.merged != nil:
-			if err := writePublished(dst, item.merged, item.keepOrigin); err != nil {
+			if err := writePublished(dst, item.merged, item.keepOrigin, item.ref); err != nil {
 				return err
 			}
 		case item.def != "":
@@ -295,6 +307,7 @@ func cmdCorpus(args []string) error {
 type pubItem struct {
 	name, tier, origin, reason, def string
 	merged                          *model.Model
+	ref                             *model.Reference
 	keepOrigin                      bool
 	notes                           []coverNote
 }
@@ -381,44 +394,15 @@ func printGrades(rep *parity.Report, want map[string]bool) error {
 		if len(want) > 0 && !want[name] {
 			continue
 		}
-		tier := im.Tier
-		if tier == "" {
-			tier = "-"
-		}
-		if im.NoDef {
-			tier += "*"
-		}
-		fmt.Printf("%s\t%s\t%d/%d\n", name, stageLabel(tier), im.Confidence.Hit, im.Confidence.Total)
+		fmt.Printf("%s\t%s\t%d/%d\t%s\n", name, stageLabel(im.Tier), im.Confidence.Hit, im.Confidence.Total, sourceClass(im.Provenance))
 	}
 	return nil
 }
 
 // stageLabel is the publish column for a tuner grade. D through A are the
-// tuning stages. S is 3+, the list past those stages. A star is kept.
+// tuning stages. S is 3+, the list past those stages. An open D is -.
 func stageLabel(tier string) string {
-	star := strings.HasSuffix(tier, "*")
-	switch strings.TrimSuffix(tier, "*") {
-	case "-":
-		tier = "-"
-	case "D":
-		tier = "1"
-	case "C":
-		tier = "2"
-	case "B":
-		tier = "3-"
-	case "A":
-		tier = "3"
-	case "S":
-		tier = "3+"
-	case "S+":
-		tier = "S+"
-	default:
-		return ""
-	}
-	if star {
-		return tier + "*"
-	}
-	return tier
+	return map[string]string{"": "-", "-": "-", "D": "1", "C": "2", "B": "3-", "A": "3", "S": "3+", "S+": "S+"}[tier]
 }
 
 func printPublish(lines []pubLine) {
@@ -444,7 +428,7 @@ func printPublish(lines []pubLine) {
 	}
 }
 
-// printDetail lists the hand gaps and the tuner names that did not hit.
+// printDetail lists the manual gaps and the tuner names that did not hit.
 func printDetail(lines []pubLine) {
 	for _, ln := range lines {
 		if len(ln.notes) == 0 && len(ln.open) == 0 && len(ln.block) == 0 {
@@ -481,8 +465,8 @@ func openLine(n parity.OpenName) string {
 }
 
 // gateReason is empty when the image may be submitted, or when origin
-// hand or located still has to pass handCover. Confidence is required first.
-// Grade "-" passes only for hand. damos, a2l, and an unset origin do not.
+// manual or auto still has to pass coverAll. Confidence is required first.
+// Grade "-" passes only for manual. damos, a2l, and an unset origin do not.
 func gateReason(tier string, conf parity.Fraction, hasDef bool, origin string) string {
 	if conf.Total == 0 || conf.Hit*2 <= conf.Total {
 		return fmt.Sprintf("confidence %d/%d", conf.Hit, conf.Total)
@@ -506,32 +490,20 @@ func gateReason(tier string, conf parity.Fraction, hasDef bool, origin string) s
 	return "grade " + tier
 }
 
-// handCover is empty when located strictly covers prev, and the count
-// is how many names are new. A name the locator does not have is short.
-// The same name at another address disagrees. An equal set of names is
-// identical. --submit still stores that set when a description or comment
-// would change. Both KFPED variants cover a hand KFPED, at the _0_A
-// address. The same for KFPEDR. One variant does not, and a located KFPED
-// does not cover a hand KFPED_0_A.
-func handCover(prev, located *model.Model) (string, int) {
-	reason, added, _ := coverAll(prev, located)
-	return reason, added
-}
-
-// coverNote is one hand key the detail list prints.
+// coverNote is one manual key the detail list prints.
 type coverNote struct {
-	op   string
-	key  string
-	hand model.Addr
-	have []model.Addr
+	op     string
+	key    string
+	manual model.Addr
+	have   []model.Addr
 }
 
 func (n coverNote) line() string {
 	switch n.op {
 	case "short":
-		return fmt.Sprintf("short %s %s", n.key, addrText(n.hand))
+		return fmt.Sprintf("short %s %s", n.key, addrText(n.manual))
 	case "disagrees":
-		return fmt.Sprintf("disagrees %s manual %s located %s", n.key, addrText(n.hand), addrsText(n.have))
+		return fmt.Sprintf("disagrees %s manual %s located %s", n.key, addrText(n.manual), addrsText(n.have))
 	default:
 		return fmt.Sprintf("added %s %s", n.key, addrsText(n.have))
 	}
@@ -549,9 +521,16 @@ func addrsText(as []model.Addr) string {
 	return strings.Join(out, ",")
 }
 
-// coverAll is handCover plus every short, disagreeing, and added key.
-// The reason is still the first short or disagree. Added keys are listed
-// and counted even when a short or disagree blocks a full replace.
+// coverAll's reason is empty when located strictly covers prev, and the
+// count is how many names are new. A name the locator does not have is short.
+// The same name at another address disagrees. An equal set of names is
+// identical. --submit still stores that set when a description or comment
+// would change. Both KFPED variants cover a manual KFPED, at the _0_A
+// address. The same for KFPEDR. One variant does not, and a located KFPED
+// does not cover a manual KFPED_0_A.
+// The notes are every short, disagreeing, and added key. The reason is
+// the first short or disagree. Added keys are listed and counted even when
+// a short or disagree blocks a full replace.
 func coverAll(prev, located *model.Model) (string, int, []coverNote) {
 	have := map[string][]model.Addr{}
 	for _, o := range located.Objects {
@@ -572,7 +551,7 @@ func coverAll(prev, located *model.Model) (string, int, []coverNote) {
 		prevKey[k] = struct{}{}
 		addrs := pedalAddrs(k, have)
 		if len(addrs) == 0 {
-			notes = append(notes, coverNote{op: "short", key: k, hand: o.Address})
+			notes = append(notes, coverNote{op: "short", key: k, manual: o.Address})
 			if reason == "" {
 				reason = "manual short " + k
 			}
@@ -586,7 +565,7 @@ func coverAll(prev, located *model.Model) (string, int, []coverNote) {
 			}
 		}
 		if !match {
-			notes = append(notes, coverNote{op: "disagrees", key: k, hand: o.Address, have: addrs})
+			notes = append(notes, coverNote{op: "disagrees", key: k, manual: o.Address, have: addrs})
 			if reason == "" {
 				reason = "manual disagrees " + k
 			}
@@ -639,7 +618,7 @@ func hasShort(notes []coverNote) bool {
 	return false
 }
 
-// partialDelta is the address corrections and the located names the hand
+// partialDelta is the address corrections and the located names the manual
 // file does not have. Either count may be zero.
 func partialDelta(moves, added int) string {
 	var b string
@@ -660,7 +639,7 @@ func partialDelta(moves, added int) string {
 
 // applyMoves copies prev, writes each single located address onto that
 // name, and appends each added map. Conversion, units, and layout stay
-// on a name the hand file already has. The description and comment come
+// on a name the manual file already has. The description and comment come
 // from the located object of the same key. A short key is unchanged.
 func applyMoves(prev, located *model.Model, notes []coverNote) *model.Model {
 	out := clearedCopy(prev)
@@ -804,7 +783,7 @@ func loadSetIndex() (setIndex, error) {
 	return idx, nil
 }
 
-// pedalAddrs is the addresses that cover a hand key. Every later name of a
+// pedalAddrs is the addresses that cover a manual key. Every later name of a
 // both set covers the plain name at the first of those addresses. One does not.
 func pedalAddrs(k string, have map[string][]model.Addr) []model.Addr {
 	idx, err := mapSets()
@@ -1060,15 +1039,131 @@ func located(d locate.Defs, prepare func() (string, *model.CategoryTable, error)
 	return m, nil
 }
 
-func writePublished(path string, m *model.Model, keepOrigin bool) error {
+// refTable is references.yaml: the reference names our address supersedes.
+// Aliases of one map are config/sets.yaml.
+type refTable struct {
+	Except []string `yaml:"except"`
+}
+
+func loadRefTable(data string) (refTable, error) {
+	var t refTable
+	b, err := os.ReadFile(filepath.Join(data, "references.yaml"))
+	if err != nil {
+		return t, err
+	}
+	if err := yaml.Unmarshal(b, &t); err != nil {
+		return t, fmt.Errorf("references.yaml: %w", err)
+	}
+	return t, nil
+}
+
+// reference compares located with the manual, DAMOS, or A2L definition prev.
+// It is nil when prev is auto or has no provenance.
+func reference(prev, located *model.Model, t refTable) *model.Reference {
+	p := prev.Provenance
+	if p == nil || p.Origin == "auto" {
+		return nil
+	}
+	idx, err := mapSets()
+	if err != nil {
+		return nil
+	}
+	have := map[string][]model.Addr{}
+	for _, o := range located.Objects {
+		k := objKey(o)
+		if k == "" {
+			continue
+		}
+		have[k] = append(have[k], o.Address)
+		for _, v := range idx.peers[k] {
+			have[v] = append(have[v], o.Address)
+		}
+	}
+	r := &model.Reference{Origin: p.Origin, File: p.File, SHA256: p.SHA256}
+	listed := map[string]bool{}
+	for _, o := range prev.Objects {
+		k := objKey(o)
+		if k == "" || listed[k] {
+			continue
+		}
+		listed[k] = true
+		r.Agree[1]++
+		switch {
+		case slices.Contains(pedalAddrs(k, have), o.Address):
+			r.Agree[0]++
+		case slices.Contains(t.Except, k):
+			r.Except = append(r.Except, k)
+		}
+	}
+	for _, o := range located.Objects {
+		k := objKey(o)
+		if k != "" && !listed[k] && !peerListed(idx, listed, k) && !listed[pedalPlain(k)] {
+			r.Unreferenced = append(r.Unreferenced, k)
+		}
+	}
+	slices.Sort(r.Unreferenced)
+	r.Unreferenced = slices.Compact(r.Unreferenced)
+	return r
+}
+
+// pedalPlain is the plain name of a both-set bank, else "".
+func pedalPlain(k string) string {
+	idx, err := mapSets()
+	if err != nil {
+		return ""
+	}
+	for _, p := range idx.both {
+		for _, n := range p.Names[1:] {
+			if k == n {
+				return p.Names[0]
+			}
+		}
+	}
+	return ""
+}
+
+// peerListed is true when an either-set peer of k is already in the reference.
+func peerListed(idx setIndex, listed map[string]bool, k string) bool {
+	for _, v := range idx.peers[k] {
+		if listed[v] {
+			return true
+		}
+	}
+	return false
+}
+
+// sourceClass is the publish Source column: verified, DAMOS, matched, manual,
+// or auto.
+func sourceClass(p *model.Provenance) string {
+	switch {
+	case p == nil:
+		return "auto"
+	case p.Verified:
+		return "verified"
+	case p.Origin == "damos" || p.Origin == "a2l":
+		return "DAMOS"
+	case p.Origin == "manual":
+		return "manual"
+	case p.Reference.Agreed():
+		return "matched"
+	}
+	return "auto"
+}
+
+func writePublished(path string, m *model.Model, keepOrigin bool, ref *model.Reference) error {
 	if m == nil || len(m.Objects) == 0 {
 		return fmt.Errorf("%s: no located maps", path)
 	}
 	if !keepOrigin {
-		if m.Provenance == nil {
-			m.Provenance = &model.Provenance{Format: "image", Origin: "auto"}
+		p := model.Provenance{Format: "image"}
+		if m.Provenance != nil {
+			p = *m.Provenance
 		}
-		m.Provenance.Origin = "auto"
+		p.Origin = "auto"
+		if ref != nil {
+			p.Reference = ref
+		}
+		m.Provenance = &p
 	}
 	b, err := canon.MarshalStamped(m, "me7parity corpus")
 	if err != nil {

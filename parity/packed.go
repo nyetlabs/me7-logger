@@ -43,23 +43,24 @@ func GradePacked(dir string, packed []Packed) ([]Image, error) {
 	}
 	block := blockOf(blocks)
 	type held struct {
-		stem, origin string
-		img          []byte
-		maps         []record.Map
+		stem string
+		prov *model.Provenance
+		img  []byte
+		maps []record.Map
 	}
 	var rows []held
 	for _, p := range packed {
 		if len(p.Def) == 0 {
 			continue
 		}
-		maps, origin, err := mapsFromDef(p.Def)
+		maps, prov, err := mapsFromDef(p.Def)
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", p.Stem, err)
 		}
 		// A published file may store two copies of one name. Either copy
 		// is the map the zip contains, so the grade keeps one.
 		maps = uniqueStored(maps, lists.dims)
-		rows = append(rows, held{stem: p.Stem, origin: origin, img: p.Img, maps: maps})
+		rows = append(rows, held{stem: p.Stem, prov: prov, img: p.Img, maps: maps})
 	}
 	slices.SortFunc(rows, func(a, b held) int { return strings.Compare(a.stem, b.stem) })
 	out := make([]Image, len(rows))
@@ -75,11 +76,12 @@ func GradePacked(dir string, packed []Packed) ([]Image, error) {
 			return located || gone[n], located
 		})
 		out[i] = Image{
-			Name:  h.stem + ".bin",
-			Tier:  tier,
-			NoDef: tier != "S" && tier != beyondS && h.origin != "damos" && h.origin != "a2l",
-			Axis:  scoreAxes(scored, lists.dims),
-			Block: countScored(lists.byBlock[blk], scored),
+			Name:       h.stem + ".bin",
+			Tier:       tier,
+			NoDef:      noDef(tier, h.prov),
+			Provenance: h.prov,
+			Axis:       scoreAxes(scored, lists.dims),
+			Block:      countScored(lists.byBlock[blk], scored),
 		}
 	}
 	groups, err := loadDatasets(dir)
@@ -107,20 +109,20 @@ func GradePacked(dir string, packed []Packed) ([]Image, error) {
 				img: o.img, maps: o.maps, scored: tunerMaps(lists.tuner, lists.dims, o.maps, nil),
 			})
 		}
-		out[i].Confidence = scoreConfidence(confTuner, publishedDims(h.maps, lists.dims), h.img, h.maps, nil, peers)
+		out[i].Confidence = scoreConfidence(confTuner, publishedDims(h.maps, lists.dims), h.img, h.maps, nil, peers, h.prov != nil && h.prov.Verified)
 	}
 	return out, nil
 }
 
 // mapsFromDef reads a published model. Addresses stay file offsets.
 // The name is the same one parseModel would use.
-func mapsFromDef(b []byte) ([]record.Map, string, error) {
+func mapsFromDef(b []byte) ([]record.Map, *model.Provenance, error) {
 	var m model.Model
 	if err := canon.Unmarshal(b, &m); err != nil {
-		return nil, "", err
+		return nil, nil, err
 	}
 	if err := m.Check(); err != nil {
-		return nil, "", err
+		return nil, nil, err
 	}
 	titles := make([]string, len(m.Objects))
 	for i, o := range m.Objects {
@@ -148,11 +150,7 @@ func mapsFromDef(b []byte) ([]record.Map, string, error) {
 		}
 		maps = append(maps, rm)
 	}
-	origin := ""
-	if m.Provenance != nil {
-		origin = m.Provenance.Origin
-	}
-	return maps, origin, nil
+	return maps, m.Provenance, nil
 }
 
 // uniqueStored keeps one qualifying copy of each name. A scalar needs no

@@ -69,7 +69,8 @@ type Disagreement struct {
 // layouts-priority.yaml, then by name.
 // Open is the tuner names that were not located, D first. BlockOpen is
 // the same for the image's layout-block list. Absent names are included
-// and marked. Detail prints them; Text does not.
+// and marked. Detail prints them; Text does not. Provenance is the Tuner
+// row's corpus definition provenance, nil without one.
 type Image struct {
 	Name string
 	Fraction
@@ -77,6 +78,7 @@ type Image struct {
 	Corpus     Fraction
 	Tier       string
 	NoDef      bool
+	Provenance *model.Provenance
 	Axis       Fraction
 	Confidence Fraction
 	Block      Fraction
@@ -616,7 +618,7 @@ func run(dir string, images []string, defOf func(string) string, gen imageGen) (
 			})
 		}
 		def := defOf(stem)
-		xmaps, xaxes, xrows, kind, origin, err := loadOracle(def)
+		xmaps, xaxes, xrows, kind, prov, err := loadOracle(def)
 		if err != nil {
 			return nil, err
 		}
@@ -638,12 +640,13 @@ func run(dir string, images []string, defOf func(string) string, gen imageGen) (
 			})
 			rep.Tuner = append(rep.Tuner, Image{
 				Name: base, Fraction: countScored(tuner, scored),
-				Block:     countScored(lists.byBlock[blk], scored),
-				Tier:      tier,
-				NoDef:     tier != "S" && tier != beyondS && origin != "damos" && origin != "a2l",
-				Axis:      scoreAxes(scored, axes),
-				Open:      openNames(tuner, ntier, scored, gone, lists.any),
-				BlockOpen: openNames(lists.byBlock[blk], nil, scored, gone, lists.any),
+				Block:      countScored(lists.byBlock[blk], scored),
+				Tier:       tier,
+				NoDef:      noDef(tier, prov),
+				Provenance: prov,
+				Axis:       scoreAxes(scored, axes),
+				Open:       openNames(tuner, ntier, scored, gone, lists.any),
+				BlockOpen:  openNames(lists.byBlock[blk], nil, scored, gone, lists.any),
 			})
 			held = append(held, kept{base: base, stem: stem, img: img, maps: maps, oracle: oracle})
 		}
@@ -688,7 +691,7 @@ func run(dir string, images []string, defOf func(string) string, gen imageGen) (
 					img: o.img, maps: o.maps, scored: tunerMaps(tuner, axes, o.maps, o.oracle),
 				})
 			}
-			rep.Tuner[i].Confidence = scoreConfidence(confTuner, axes, h.img, h.maps, h.oracle, peers)
+			rep.Tuner[i].Confidence = scoreConfidence(confTuner, axes, h.img, h.maps, h.oracle, peers, false)
 		}
 	}
 	for _, ims := range [][]Image{rep.ME7Info, rep.Extras, rep.Tuner, rep.XDF, rep.Manual} {
@@ -773,31 +776,44 @@ const (
 
 // loadOracle reads the image's corpus definition at path and returns its
 // kind, or "" when path is "" or the origin is located. Its provenance
-// origin (xdfkit docs/corpus.md) damos or a2l is damosXDF; hand, or none,
-// is manualXDF. located is a program's placement, so it is not scored.
-func loadOracle(path string) (maps []Map, axes []Axis, rows []refRow, kind, origin string, err error) {
+// origin (xdfkit docs/corpus.md) damos or a2l is damosXDF; manual, or none,
+// is manualXDF. auto is a program's placement, so it is not scored.
+func loadOracle(path string) (maps []Map, axes []Axis, rows []refRow, kind string, prov *model.Provenance, err error) {
 	if path == "" {
-		return nil, nil, nil, "", "", nil
+		return nil, nil, nil, "", nil, nil
 	}
 	b, err := os.ReadFile(path)
 	if err != nil {
-		return nil, nil, nil, "", "", err
+		return nil, nil, nil, "", nil, err
 	}
-	maps, axes, rows, origin, err = parseModel(b)
+	maps, axes, rows, prov, err = parseModel(b)
 	if err != nil {
-		return nil, nil, nil, "", "", fmt.Errorf("%s: %w", path, err)
+		return nil, nil, nil, "", nil, fmt.Errorf("%s: %w", path, err)
 	}
-	switch origin {
+	switch origin := originOf(prov); origin {
 	case "damos", "a2l":
 		kind = damosXDF
 	case "manual", "":
 		kind = manualXDF
 	case "auto":
-		return nil, nil, nil, "", origin, nil
+		return nil, nil, nil, "", prov, nil
 	default:
-		return nil, nil, nil, "", origin, fmt.Errorf("%s: unknown origin %q", path, origin)
+		return nil, nil, nil, "", prov, fmt.Errorf("%s: unknown origin %q", path, origin)
 	}
-	return maps, axes, rows, kind, origin, nil
+	return maps, axes, rows, kind, prov, nil
+}
+
+func originOf(p *model.Provenance) string {
+	if p == nil {
+		return ""
+	}
+	return p.Origin
+}
+
+// noDef is Image.NoDef: below S, and not a DAMOS or A2L oracle.
+func noDef(tier string, p *model.Provenance) bool {
+	o := originOf(p)
+	return tier != "S" && tier != beyondS && o != "damos" && o != "a2l"
 }
 
 // disagreements lists the scored names whose body is not at a manual XDF
@@ -1607,15 +1623,14 @@ func located(a *model.Axis) bool {
 }
 
 // parseModel reads a model JSON. The title is the first word of the id, else
-// the description, as in the XDF xdfkit writes from it. origin is the
-// provenance origin.
-func parseModel(b []byte) (maps []Map, axes []Axis, rows []refRow, origin string, err error) {
+// the description, as in the XDF xdfkit writes from it.
+func parseModel(b []byte) (maps []Map, axes []Axis, rows []refRow, prov *model.Provenance, err error) {
 	var m model.Model
 	if err := canon.Unmarshal(b, &m); err != nil {
-		return nil, nil, nil, "", err
+		return nil, nil, nil, nil, err
 	}
 	if err := m.Check(); err != nil {
-		return nil, nil, nil, "", err
+		return nil, nil, nil, nil, err
 	}
 	titles := make([]string, len(m.Objects))
 	for i, o := range m.Objects {
@@ -1646,10 +1661,7 @@ func parseModel(b []byte) (maps []Map, axes []Axis, rows []refRow, origin string
 		maps = append(maps, Map{Name: name, Addr: uint32(o.Address)})
 		rows = append(rows, row)
 	}
-	if m.Provenance != nil {
-		origin = m.Provenance.Origin
-	}
-	return maps, axes, rows, origin, nil
+	return maps, axes, rows, m.Provenance, nil
 }
 
 var titleName = regexp.MustCompile(`\(([A-Z][A-Z0-9_]*)\)\s*$`)

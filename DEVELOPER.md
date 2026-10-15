@@ -78,9 +78,7 @@ Images are in the private [ecu-corpus](https://github.com/nyetlabs/ecu-corpus) s
 
 `me7parity --data testdata/parity` prints the report from shipped config only. `make test` fails only when an image is below 100% against its legacy `ecu/me7info/<image>.ecu`; every other score is coverage.
 
-A name hits when it has an address and its listed axes. Each image's definition is its corpus model JSON. Fix definitions in the corpus, not here. `provenance.origin` `damos`/`a2l` is the reference, and a different address is a miss. `manual` or unset is an oracle only: disagreements still hit and are listed under `manual xdf disagrees`. `auto` is read and left out of both sections.
-
-The tier grade is the highest tier in `names/tuner.yaml` where every name hits or is in `names/absent.yaml`. A star means the definition is not a DAMOS oracle. 8D0907551L and 8D0907551M are handmade and are the oracle. `config/sets.yaml` groups forms of one map. An `any` set is one name: one member located, or every member absent. A `both` set is the plain name, or every later form when the plain name is absent. The tier of that slot is the tier those names already have in `names/tuner.yaml`. An open form of a slot that is already located is marked with the located member. `confidence` is high for bodies under 16 cells or matching a peer in `datasets.yaml` within two cells or 3%, and low for zero bodies unless every peer is zero.
+Each image's definition is its corpus model JSON. Fix definitions in the corpus, not here. `provenance.origin` `damos`/`a2l` is the reference, and a different address is a miss. `manual` or unset is an oracle only: disagreements still hit and are listed under `manual xdf disagrees`. `auto` is read and left out of both sections. Hits, tiers, and confidence are in `docs/parity.md`.
 
 ## Version
 

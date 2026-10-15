@@ -379,7 +379,8 @@ func TestLoadOracleKind(t *testing.T) {
 		if err := os.WriteFile(p, []byte(modelJSON(origin, 2)), 0o644); err != nil {
 			t.Fatal(err)
 		}
-		_, _, rows, kind, gotOrigin, err := loadOracle(p)
+		_, _, rows, kind, prov, err := loadOracle(p)
+		gotOrigin := originOf(prov)
 		if want == "skip" {
 			if err != nil || kind != "" || gotOrigin != origin {
 				t.Fatalf("%q: %q %q %v", origin, kind, gotOrigin, err)
@@ -396,8 +397,8 @@ func TestLoadOracleKind(t *testing.T) {
 			t.Fatalf("%q: %d %q %q %v", origin, len(rows), kind, gotOrigin, err)
 		}
 	}
-	if _, _, _, kind, origin, err := loadOracle(""); err != nil || kind != "" || origin != "" {
-		t.Fatalf("none: %q %q %v", kind, origin, err)
+	if _, _, _, kind, prov, err := loadOracle(""); err != nil || kind != "" || prov != nil {
+		t.Fatalf("none: %q %v %v", kind, prov, err)
 	}
 }
 
@@ -411,9 +412,9 @@ func TestParseModel(t *testing.T) {
 {"key":"obj-3","id":"","description":"Codewort (CWDLSU)","shape":"value","address":"0x10"},
 {"key":"obj-4","id":"","description":"Faktor (FKAT)","shape":"1d","address":"0x50","rows":1,"cols":3,
  "x":{"source":"ordinal"}}]}`)
-	maps, axes, rows, origin, err := parseModel(b)
-	if err != nil || origin != "" {
-		t.Fatal(origin, err)
+	maps, axes, rows, prov, err := parseModel(b)
+	if err != nil || prov != nil {
+		t.Fatal(prov, err)
 	}
 	if len(maps) != 4 || maps[0] != (Map{Name: "KFLDRQ2", Addr: 0x40}) || maps[1] != (Map{Name: "KFX", Addr: 0x60}) ||
 		maps[2] != (Map{Name: "CWDLSU", Addr: 0x10}) || maps[3] != (Map{Name: "FKAT", Addr: 0x50}) {

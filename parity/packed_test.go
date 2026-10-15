@@ -41,7 +41,7 @@ func TestGradePackedOracleHasNoStar(t *testing.T) {
 func TestGradePackedKeepsDuplicate(t *testing.T) {
 	def := packedModel(t, "manual",
 		&model.Object{ID: "KRKTE", Shape: "value", Address: 0, Data: model.Data{Bits: 8}},
-		&model.Object{ID: "KRKTE", Shape: "value", Address: 1, Data: model.Data{Bits: 8}},
+		&model.Object{ID: "KRKTE 16", Shape: "value", Address: 1, Data: model.Data{Bits: 8}},
 	)
 	got, err := GradePacked("../testdata/parity", []Packed{{Stem: "img", Img: []byte{0x10, 0x20}, Def: def}})
 	if err != nil {

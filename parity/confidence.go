@@ -26,7 +26,9 @@ const (
 // scoreConfidence judges the body of each name the locator already scored.
 // The denominator is that matched set. A name the locator missed is not in it.
 // High means the body bytes hold up. A shared axis does not change that.
-func scoreConfidence(tuner []string, dims map[string]int, img []byte, maps []record.Map, rows []refRow, peers []binBody) Fraction {
+// A verified definition skips the peer comparison: a sibling calibration
+// may differ.
+func scoreConfidence(tuner []string, dims map[string]int, img []byte, maps []record.Map, rows []refRow, peers []binBody, verified bool) Fraction {
 	scored := tunerMaps(tuner, dims, maps, rows)
 	high := 0
 	for _, n := range tuner {
@@ -34,11 +36,64 @@ func scoreConfidence(tuner []string, dims map[string]int, img []byte, maps []rec
 		if !ok {
 			continue
 		}
-		if confident(img, maps, m, peers) {
+		c, known := dims[n]
+		if !known {
+			c = -1
+		}
+		if plausible(img, m, c) && confident(img, maps, m, peers, verified) {
 			high++
 		}
 	}
 	return Fraction{high, len(scored)}
+}
+
+// plausible needs no peer. A map listed with two axes needs a row and a
+// column count, an image axis rises or falls without a turn, and a byte body
+// whose every other byte is closer than its neighbors is a word table.
+func plausible(img []byte, m record.Map, axes int) bool {
+	if axes == 2 && (m.Rows == 0 && m.Y == nil || m.Cols == 0 && m.X == nil) {
+		return false
+	}
+	for _, a := range []*record.Axis{m.X, m.Y} {
+		if a != nil && !ordered(img, a) {
+			return false
+		}
+	}
+	return true
+}
+
+func ordered(img []byte, a *record.Axis) bool {
+	if a.Addr == 0 || a.Count < 2 {
+		return true
+	}
+	step := 1
+	if a.Bits == 16 {
+		step = 2
+	}
+	off := int(opcode.FileOffset(a.Addr))
+	if off < 0 || off+a.Count*step > len(img) {
+		return true
+	}
+	u := make([]int, a.Count)
+	s := make([]int, a.Count)
+	for i := range u {
+		if step == 2 {
+			w := uint16(img[off+2*i]) | uint16(img[off+2*i+1])<<8
+			u[i], s[i] = int(w), int(int16(w))
+		} else {
+			u[i], s[i] = int(img[off+i]), int(int8(img[off+i]))
+		}
+	}
+	return monotonic(u) || monotonic(s)
+}
+
+func monotonic(v []int) bool {
+	up, down := true, true
+	for i := 1; i < len(v); i++ {
+		up = up && v[i] >= v[i-1]
+		down = down && v[i] <= v[i-1]
+	}
+	return (up || down) && v[0] != v[len(v)-1]
 }
 
 type binBody struct {
@@ -47,16 +102,16 @@ type binBody struct {
 	scored map[string]record.Map
 }
 
-func confident(img []byte, maps []record.Map, m record.Map, peers []binBody) bool {
+func confident(img []byte, maps []record.Map, m record.Map, peers []binBody, verified bool) bool {
 	cells, _, raw, ok := bodyOf(img, m)
 	if !ok {
 		return false
 	}
-	// A one-byte body is one cell. The empty-body rule is for a longer run of zeros.
-	if len(raw) > 1 && allZero(raw) {
+	// The empty-body rule is for more than one cell of zeros.
+	if cells > 1 && allZero(raw) {
 		return zerosMatch(m, raw, peers)
 	}
-	if cells < largeBody {
+	if verified || cells < largeBody {
 		return true
 	}
 	for _, p := range peers {

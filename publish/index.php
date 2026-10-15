@@ -142,10 +142,10 @@ function loadGrades(): array {
 			continue;
 		}
 		$f = explode("\t", $line);
-		if (count($f) < 3 || $f[0] === '') {
+		if (count($f) < 4 || $f[0] === '') {
 			return [[], "$path: bad line"];
 		}
-		$out[$f[0]] = [$f[1], $f[2]];
+		$out[$f[0]] = [$f[1], $f[2], $f[3]];
 	}
 	return [$out, ''];
 }
@@ -156,8 +156,16 @@ function joined(string $name, array $vehicles, array $families, array $grades): 
 		return null;
 	}
 	$v = $vehicles[$name];
-	$g = $grades[$name] ?? ['', ''];
-	return [$fam, $v['engine'], $v['code'], $v['vehicle'], $v['year'], $v['gearbox'], $v['market'], $g[0], $g[1]];
+	$g = $grades[$name] ?? ['', '', ''];
+	return [$fam, $v['engine'], $v['code'], $v['vehicle'], $v['year'], $v['gearbox'], $v['market'], $g[0], $g[1], $g[2]];
+}
+
+// percent is a hit/total cell as a whole percent, or blank.
+function percent(string $frac): string {
+	if (!preg_match('/^(\d+)\/(\d+)$/', $frac, $m) || $m[2] === '0') {
+		return '';
+	}
+	return round(100 * $m[1] / $m[2]).'%';
 }
 
 function prettyJson(array $rows): string {
@@ -178,7 +186,7 @@ function note(string $name, array $notes): array {
 	}
 	$part = preg_replace('/-[^-]+$/', '', $name);
 	$part = preg_replace('/[A-Z]+$/', '', $part);
-	return array_pad($notes[$part] ?? [], 9, '');
+	return array_pad($notes[$part] ?? [], 10, '');
 }
 
 function maps(string $path, string $name): ?int {
@@ -261,7 +269,8 @@ $cols = [
 	['gearbox', 'Gearbox', false],
 	['market', 'Market', false],
 	['stage', 'Stage', false],
-	['confidence', 'Confidence', false],
+	['source', 'Source', false],
+	['confidence', 'Confidence', true],
 	['maps', 'Maps', true],
 	['date', 'Last modified', true],
 ];
@@ -277,15 +286,17 @@ $cols = [
 <tbody id="defs">
 <?php $group = null; ?>
 <?php foreach ($rows as [$file, $name, $date, $cells, $count]): ?>
-<?php $cells = array_pad($cells, 9, ''); ?>
+<?php $cells = array_pad($cells, 10, ''); ?>
 <?php if ($cells[3] !== $group): $group = $cells[3]; ?>
 <tr class="group"><th colspan="<?= count($cols) ?>"><?= htmlspecialchars($group) ?></th></tr>
 <?php endif ?>
-<tr data-image="<?= htmlspecialchars($name) ?>" data-ecu="<?= htmlspecialchars($cells[0]) ?>" data-engine="<?= htmlspecialchars($cells[1]) ?>" data-code="<?= htmlspecialchars($cells[2]) ?>" data-vehicle="<?= htmlspecialchars($cells[3]) ?>" data-year="<?= htmlspecialchars($cells[4]) ?>" data-gearbox="<?= htmlspecialchars($cells[5]) ?>" data-market="<?= htmlspecialchars($cells[6]) ?>" data-stage="<?= htmlspecialchars($cells[7]) ?>" data-confidence="<?= htmlspecialchars($cells[8]) ?>" data-maps="<?= $count === null ? '' : (string)$count ?>" data-date="<?= htmlspecialchars($date) ?>">
+<tr data-image="<?= htmlspecialchars($name) ?>" data-ecu="<?= htmlspecialchars($cells[0]) ?>" data-engine="<?= htmlspecialchars($cells[1]) ?>" data-code="<?= htmlspecialchars($cells[2]) ?>" data-vehicle="<?= htmlspecialchars($cells[3]) ?>" data-year="<?= htmlspecialchars($cells[4]) ?>" data-gearbox="<?= htmlspecialchars($cells[5]) ?>" data-market="<?= htmlspecialchars($cells[6]) ?>" data-stage="<?= htmlspecialchars($cells[7]) ?>" data-confidence="<?= htmlspecialchars($cells[8]) ?>" data-source="<?= htmlspecialchars($cells[9]) ?>" data-maps="<?= $count === null ? '' : (string)$count ?>" data-date="<?= htmlspecialchars($date) ?>">
 <td><a href="<?= htmlspecialchars($file) ?>"><code><?= htmlspecialchars($name) ?></code></a></td>
-<?php foreach ($cells as $cell): ?>
+<?php foreach (array_slice($cells, 0, 8) as $cell): ?>
 <td><?= htmlspecialchars($cell) ?></td>
 <?php endforeach ?>
+<td><?= htmlspecialchars($cells[9]) ?></td>
+<td class="num"><?= htmlspecialchars(percent($cells[8])) ?></td>
 <td class="num"><?= $count === null ? '' : number_format($count) ?></td>
 <td class="num"><?= htmlspecialchars($date) ?></td>
 </tr>
@@ -329,22 +340,12 @@ $cols = [
 			}
 			return cmpText(va, vb);
 		}
-		if (k === 'stage') {
-			const rank = function (s) {
-				const handmade = s.endsWith('*') ? 1 : 0;
-				const t = handmade ? s.slice(0, -1) : s;
-				const order = {'1': 1, '2': 2, '3-': 3, '3': 4, '3+': 5, 'S+': 6};
-				return [order[t] || 0, handmade];
-			};
-			const pa = rank(val(a, 'stage'));
-			const pb = rank(val(b, 'stage'));
-			if (pa[0] !== pb[0]) {
-				return pa[0] < pb[0] ? -1 : 1;
-			}
-			if (pa[1] !== pb[1]) {
-				return pa[1] < pb[1] ? -1 : 1;
-			}
-			return 0;
+		if (k === 'stage' || k === 'source') {
+			const order = {
+				stage: {'1': 1, '2': 2, '3-': 3, '3': 4, '3+': 5, 'S+': 6},
+				source: {verified: 1, DAMOS: 2, matched: 3, manual: 4, auto: 5},
+			}[k];
+			return (order[val(a, k)] || 0) - (order[val(b, k)] || 0);
 		}
 		if (k === 'confidence') {
 			const ratio = function (s) {
@@ -394,7 +395,7 @@ $cols = [
 	function rebuild() {
 		const rows = [...tbody.querySelectorAll('tr[data-image]')];
 		rows.sort(function (a, b) {
-			if (key === 'stage' || key === 'confidence') {
+			if (key === 'stage' || key === 'confidence' || key === 'source') {
 				const ea = val(a, key) === '';
 				const eb = val(b, key) === '';
 				if (ea !== eb) {
@@ -447,9 +448,15 @@ $cols = [
 </script>
 <h2>Stage</h2>
 <ul>
-<li>1, 2, 3-, 3, then 3+. An open stage 1 stays <code>-</code>, or <code>-*</code> when it is not a DAMOS oracle.</li>
-<li>A star means the definition is not a DAMOS oracle.</li>
-<li><code>8D0907551L</code> and <code>8D0907551M</code> are handmade and are the oracle.</li>
+<li>1, 2, 3-, 3, then 3+. An open stage 1 is <code>-</code>.</li>
+</ul>
+<h2>Source</h2>
+<ul>
+<li><code>verified</code> - A person checked every definition against the image.</li>
+<li><code>DAMOS</code> - From the Bosch DAMOS or A2L. Canonical.</li>
+<li><code>matched</code> - Found by program, and every name in the reference it replaced is at the same address, apart from known exceptions such as <code>ESKONF</code>.</li>
+<li><code>manual</code> - Made by hand, and no one has verified it.</li>
+<li><code>auto</code> - Found by program, with no reference or one that only partly agrees.</li>
 </ul>
 <h2>Inside a zip</h2>
 <ul>

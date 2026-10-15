@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
@@ -15,14 +16,14 @@ import (
 func TestStageLabel(t *testing.T) {
 	cases := []struct{ tier, want string }{
 		{"D", "1"},
-		{"D*", "1*"},
-		{"C*", "2*"},
+		{"C", "2"},
 		{"B", "3-"},
-		{"A*", "3*"},
+		{"A", "3"},
 		{"S", "3+"},
 		{"S+", "S+"},
 		{"-", "-"},
-		{"-*", "-*"},
+		{"", "-"},
+		{"D*", ""},
 	}
 	for _, c := range cases {
 		if got := stageLabel(c.tier); got != c.want {
@@ -123,13 +124,13 @@ func TestGateReason(t *testing.T) {
 		t.Fatalf("empty: %s", got)
 	}
 	if got := gateReason("-", high, true, "manual"); got != "" {
-		t.Fatalf("hand does not wait for D: %s", got)
+		t.Fatalf("manual does not wait for D: %s", got)
 	}
 	if got := gateReason("D", half, true, "manual"); got != "confidence 37/74" {
-		t.Fatalf("hand confidence: %s", got)
+		t.Fatalf("manual confidence: %s", got)
 	}
 	if got := gateReason("C", high, true, "manual"); got != "" {
-		t.Fatalf("hand: %s", got)
+		t.Fatalf("manual: %s", got)
 	}
 	if got := gateReason("A", high, true, "damos"); got != "origin damos" {
 		t.Fatalf("damos: %s", got)
@@ -139,19 +140,88 @@ func TestGateReason(t *testing.T) {
 	}
 }
 
+func TestReference(t *testing.T) {
+	refs, err := loadRefTable("../../testdata/parity")
+	if err != nil {
+		t.Fatal(err)
+	}
+	prev := modelOf(
+		pubObj("KFZW", 0x100, 1, ""),
+		pubObj("ESKONF", 0x180, 1, ""),
+		pubObj("KFLBTS", 0x200, 1, ""),
+		pubObj("KFPED", 0x300, 1, ""),
+		pubObj("LAMFA", 0x400, 1, ""),
+	)
+	loc := modelOf(
+		pubObj("KFZW", 0x100, 1, ""),
+		pubObj("ESKONF", 0x190, 1, ""),
+		pubObj("KFLBTS_0_A", 0x200, 1, ""),
+		pubObj("KFPED_0_A", 0x300, 1, ""),
+		pubObj("KFPED_1_A", 0x340, 1, ""),
+		pubObj("LAMFA", 0x410, 1, ""),
+		pubObj("KFMIRL", 0x500, 1, ""),
+	)
+	if reference(prev, loc, refs) != nil {
+		t.Fatal("reference without provenance")
+	}
+	prev.Provenance = &model.Provenance{Format: "kp", Origin: "manual", File: "h.kp", SHA256: strings.Repeat("a", 64), Verified: true}
+	r := reference(prev, loc, refs)
+	if r.Origin != "manual" || r.File != "h.kp" || r.Agree != [2]int{3, 5} || !slices.Equal(r.Except, []string{"ESKONF"}) || !slices.Equal(r.Unreferenced, []string{"KFMIRL"}) || r.Agreed() {
+		t.Fatalf("%+v", r)
+	}
+	path := filepath.Join(t.TempDir(), "d.json")
+	merged, err := mergeKept(prev, loc)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := writePublished(path, merged, false, r); err != nil {
+		t.Fatal(err)
+	}
+	got, err := readModel(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if p := got.Provenance; p.Origin != "auto" || !p.Verified || p.Reference.Agree != r.Agree || prev.Provenance.Origin != "manual" {
+		t.Fatalf("%+v", p)
+	}
+}
+
+func TestSourceClass(t *testing.T) {
+	agreed := &model.Reference{Agree: [2]int{4, 5}, Except: []string{"ESKONF"}}
+	partial := &model.Reference{Agree: [2]int{3, 5}}
+	for _, c := range []struct {
+		p    *model.Provenance
+		want string
+	}{
+		{nil, "auto"},
+		{&model.Provenance{Origin: "manual", Verified: true}, "verified"},
+		{&model.Provenance{Origin: "auto", Verified: true}, "verified"},
+		{&model.Provenance{Origin: "damos"}, "DAMOS"},
+		{&model.Provenance{Origin: "a2l"}, "DAMOS"},
+		{&model.Provenance{Origin: "manual"}, "manual"},
+		{&model.Provenance{Origin: "auto", Reference: agreed}, "matched"},
+		{&model.Provenance{Origin: "auto", Reference: partial}, "auto"},
+		{&model.Provenance{Origin: "auto"}, "auto"},
+	} {
+		if got := sourceClass(c.p); got != c.want {
+			t.Errorf("%+v: %s, want %s", c.p, got, c.want)
+		}
+	}
+}
+
 func TestHandCover(t *testing.T) {
-	hand := modelOf(pubObj("KFZW", 0x100, 0.75, "grad KW"))
+	manual := modelOf(pubObj("KFZW", 0x100, 0.75, "grad KW"))
 	covered := modelOf(
 		pubObj("KFZW", 0x100, 1, ""),
 		pubObj("LAMFA", 0x200, 1, ""),
 	)
-	if got, n := handCover(hand, covered); got != "" || n != 1 {
+	if got, n, _ := coverAll(manual, covered); got != "" || n != 1 {
 		t.Fatalf("superset: %s +%d", got, n)
 	}
-	hand.Objects[0].Description = "map_interp_table8"
+	manual.Objects[0].Description = "map_interp_table8"
 	covered.Objects[0].Description = "optimal ignition angle"
 	covered.Objects[0].Comment = "map_interp_table8"
-	merged, err := mergeKept(hand, covered)
+	merged, err := mergeKept(manual, covered)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -166,40 +236,40 @@ func TestHandCover(t *testing.T) {
 		t.Fatalf("new %+v", merged.Objects[1].Value)
 	}
 	moved := modelOf(pubObj("KFZW", 0x300, 1, ""), pubObj("LAMFA", 0x200, 1, ""))
-	if got, _ := handCover(hand, moved); got != "manual disagrees KFZW" {
+	if got, _, _ := coverAll(manual, moved); got != "manual disagrees KFZW" {
 		t.Fatalf("moved: %s", got)
 	}
 	short := modelOf(pubObj("LAMFA", 0x200, 1, ""))
 	two := modelOf(pubObj("KFZW", 0x100, 0.75, "grad KW"), pubObj("LAMFA", 0x180, 1, "%%"))
-	if got, _ := handCover(two, short); got != "manual short KFZW" {
+	if got, _, _ := coverAll(two, short); got != "manual short KFZW" {
 		t.Fatalf("short: %s", got)
 	}
 	reason, n, notes := coverAll(two, modelOf(pubObj("OTHER", 0x1, 1, "")))
 	if reason != "manual short KFZW" || n != 1 || len(notes) != 3 || notes[0].line() != "short KFZW 0x100" || notes[1].line() != "short LAMFA 0x180" || notes[2].line() != "added OTHER 0x1" {
 		t.Fatalf("detail %s +%d %+v", reason, n, notes)
 	}
-	if _, n, notes = coverAll(hand, covered); n != 1 || len(notes) != 1 || notes[0].line() != "added LAMFA 0x200" {
+	if _, n, notes = coverAll(manual, covered); n != 1 || len(notes) != 1 || notes[0].line() != "added LAMFA 0x200" {
 		t.Fatalf("added %+v +%d", notes, n)
 	}
 	same := modelOf(pubObj("KFZW", 0x100, 1, ""))
-	if got, n := handCover(hand, same); got != "identical" || n != 0 {
+	if got, n, _ := coverAll(manual, same); got != "identical" || n != 0 {
 		t.Fatalf("identical: %s +%d", got, n)
 	}
-	shifted, err := mergeKept(hand, modelOf(pubObj("KFZW", 0x300, 1, "raw")))
+	shifted, err := mergeKept(manual, modelOf(pubObj("KFZW", 0x300, 1, "raw")))
 	if err != nil {
 		t.Fatal(err)
 	}
 	if shifted.Objects[0].Address != 0x100 || shifted.Objects[0].Value.Conversion.Factor != 0.75 || shifted.Objects[0].Value.Units != "grad KW" {
 		t.Fatalf("moved name changed the base: %+v", shifted.Objects[0])
 	}
-	if n := corrections(hand, merged); n != 1 {
+	if n := corrections(manual, merged); n != 1 {
 		t.Fatalf("corrections %d", n)
 	}
-	unchanged, err := mergeKept(hand, modelOf(pubObj("KFZW", 0x100, 1, "")))
+	unchanged, err := mergeKept(manual, modelOf(pubObj("KFZW", 0x100, 1, "")))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if n := corrections(hand, unchanged); n != 0 {
+	if n := corrections(manual, unchanged); n != 0 {
 		t.Fatalf("unchanged %d", n)
 	}
 	shortMoved := modelOf(pubObj("LAMFA", 0x180, 1, "%%"), pubObj("KFZW", 0x100, 0.75, "grad KW"))
@@ -227,21 +297,21 @@ func TestHandCover(t *testing.T) {
 		t.Fatal("base mutated")
 	}
 	twoAddrs := []coverNote{{op: "disagrees", key: "KFZW", have: []model.Addr{0x300, 0x400}}}
-	if moveCount(twoAddrs) != 0 || applyMoves(hand, locatedMoved, twoAddrs).Objects[0].Address != 0x100 {
+	if moveCount(twoAddrs) != 0 || applyMoves(manual, locatedMoved, twoAddrs).Objects[0].Address != 0x100 {
 		t.Fatal("several addresses")
 	}
 	pedal := pubObj("KFPED", 0x100, 0.75, "Nm")
 	pedal.Categories = []int{3}
-	pedalHand := modelOf(pedal, pubObj("LAMFA", 0x180, 1, "%%"))
+	pedalManual := modelOf(pedal, pubObj("LAMFA", 0x180, 1, "%%"))
 	pair := modelOf(
 		pubObj("KFPED_0_A", 0x100, 1, ""),
 		pubObj("KFPED_1_A", 0x200, 1, ""),
 		pubObj("LAMFA", 0x180, 1, ""),
 	)
-	if got, n := handCover(pedalHand, pair); got != "" || n != 2 {
+	if got, n, _ := coverAll(pedalManual, pair); got != "" || n != 2 {
 		t.Fatalf("pair covers KFPED: %s +%d", got, n)
 	}
-	mergedPedal, err := mergeKept(pedalHand, pair)
+	mergedPedal, err := mergeKept(pedalManual, pair)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -262,22 +332,22 @@ func TestHandCover(t *testing.T) {
 		t.Fatalf("unlocated %+v", gotKeys["LAMFA"])
 	}
 	one := modelOf(pubObj("KFPED_0_A", 0x100, 1, ""), pubObj("LAMFA", 0x180, 1, ""))
-	if got, _ := handCover(pedalHand, one); got != "manual short KFPED" {
+	if got, _, _ := coverAll(pedalManual, one); got != "manual short KFPED" {
 		t.Fatalf("one variant: %s", got)
 	}
 	movedPair := modelOf(pubObj("KFPED_0_A", 0x300, 1, ""), pubObj("KFPED_1_A", 0x200, 1, ""), pubObj("LAMFA", 0x180, 1, ""))
-	if got, _ := handCover(pedalHand, movedPair); got != "manual disagrees KFPED" {
+	if got, _, _ := coverAll(pedalManual, movedPair); got != "manual disagrees KFPED" {
 		t.Fatalf("pair moved: %s", got)
 	}
 	plain := modelOf(pubObj("KFPED", 0x100, 1, ""))
-	variantHand := modelOf(pubObj("KFPED_0_A", 0x100, 0.5, "Nm"))
-	if got, _ := handCover(variantHand, plain); got != "manual short KFPED_0_A" {
+	variantManual := modelOf(pubObj("KFPED_0_A", 0x100, 0.5, "Nm"))
+	if got, _, _ := coverAll(variantManual, plain); got != "manual short KFPED_0_A" {
 		t.Fatalf("plain does not cover the variant: %s", got)
 	}
 	kept := modelOf(pubObj("KFPED_0_A", 0x100, 0.5, "Nm"), pubObj("LAMFA", 0x180, 1, ""))
 	kept.Objects[0].Categories = []int{4}
 	added := modelOf(pubObj("KFPED_0_A", 0x100, 1, ""), pubObj("KFPED_1_A", 0x200, 1, ""), pubObj("LAMFA", 0x180, 1, ""))
-	if got, n := handCover(kept, added); got != "" || n != 1 {
+	if got, n, _ := coverAll(kept, added); got != "" || n != 1 {
 		t.Fatalf("existing variant: %s +%d", got, n)
 	}
 	mergedKept, err := mergeKept(kept, added)
@@ -299,7 +369,7 @@ func TestHandCover(t *testing.T) {
 	ph := pubObj("obj-2", 0x50, 1, "")
 	ph.ID = ""
 	named := modelOf(pubObj("KFZW", 0x100, 0.75, "grad KW"), ph)
-	if got, n := handCover(named, same); got != "identical" || n != 0 {
+	if got, n, _ := coverAll(named, same); got != "identical" || n != 0 {
 		t.Fatalf("placeholder is a name: %s +%d", got, n)
 	}
 	if placeholderCount(named) != 1 || placeholderCount(modelOf(pubObj("obj-2", 0x50, 1, ""))) != 0 {
