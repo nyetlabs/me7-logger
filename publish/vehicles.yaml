@@ -3,22 +3,14 @@
 # keeps them in that one cell. Gearbox is manual or automatic. 2.7T and RS6
 # rows follow https://files.s4wiki.com/stock/part-numbers.txt and
 # https://s4wiki.com/wiki/Generations
-# 06A906032HJ-0002 is the Octavia 1.8T 150 file; AUM is the code listed for
-# that ECU. 8E0909518AK is the A4 1.8T AVJ, used 2002-2005.
-# 8E0909518AS-0003 is the A4 1.8T BEX, 190 hp, 2002-2004.
-# 006410010A0-0000 is the Spyker C8 Aileron 4.2 V8, 400 hp, 2009-2017.
-# Listings give no engine code. 4B0906018DQ-0060 is Bosch 1037394791,
-# the 22 Jan 2008 software of the same Passat hardware as DQ-0010.
-# 06A906032HN is Bosch 0261207440, 1.8T AUQ 180 hp. 0001 is software
-# 1037360646, ident 210201, listed for Golf, A3, Leon, and Octavia.
-# 0002 is software 1037363908, ident 220202, listed for Golf, A3, Leon,
-# Octavia, and TT. 4Z7907551S-0020 is Bosch 0261208288, software
-# 1037368391, ident 030603, the 2003 NA BEL file also used on the 2004
-# A6. 4Z7907551T-0010 is Bosch 0261208484, software 1037369096, ident
-# 070404, the 2003 allroad file. Both code for tip and 6-speed.
+
+# Spyker; listings give no engine code. 400 hp.
 006410010A0-0000: {engine: "4.2", vehicle: "C8 Aileron", year: 2009-2017}
 06A906032HF-0006: {engine: 1.8T, code: AWP, vehicle: "Golf, Jetta", year: 2002+, gearbox: automatic}
+# 150 hp.
 06A906032HJ-0002: {engine: 1.8T, code: AUM, vehicle: Octavia, year: 2001-2006}
+# Bosch 0261207440, 180 hp. 0001: sw 1037360646 ident 210201.
+# 0002: sw 1037363908 ident 220202.
 06A906032HN-0001: {engine: 1.8T, code: AUQ, vehicle: "Golf, TT, A3, Leon, Octavia", year: 2002-2003, market: EU}
 06A906032HN-0002: {engine: 1.8T, code: AUQ, vehicle: "Golf, TT, A3, Leon, Octavia", year: 2002, market: EU}
 06A906032HS-0008: {engine: 1.8T, code: AWP, vehicle: "Golf, Jetta", year: 2002+, gearbox: manual}
@@ -29,6 +21,7 @@
 4B0906018CM-0008: {engine: 1.8T, code: AWM, vehicle: Passat, year: 2002}
 4B0906018DH-0004: {engine: 1.8T, code: AWT, vehicle: "Passat, Superb", year: 2003-2005, market: EU}
 4B0906018DQ-0010: {engine: 1.8T, code: AWM, vehicle: Passat, year: 2003-2005, market: NA}
+# Bosch 1037394791, 22 Jan 2008 software of same hardware as DQ-0010.
 4B0906018DQ-0060: {engine: 1.8T, code: AWM, vehicle: Passat, year: 2003-2005, market: NA}
 4B0907551S-0001: {engine: 2.7T, code: AZA, vehicle: A6, year: 2001, market: EU}
 4B0907551T-0001: {engine: 2.7T, code: APB, vehicle: A6, year: 2001, gearbox: automatic, market: NA}
@@ -36,7 +29,9 @@
 4D1907558-0004: {engine: 4.2T, code: BCY, vehicle: RS6, year: 2002-2004, market: EU}
 4Z7907551AA-0010: {engine: 2.7T, code: BEL, vehicle: allroad, year: 2004, market: NA}
 4Z7907551R-0003: {engine: 2.7T, code: BEL, vehicle: "allroad, 04 A6", year: 2003, market: NA}
+# Bosch 0261208288, sw 1037368391 ident 030603. Tip and 6-speed.
 4Z7907551S-0020: {engine: 2.7T, code: BEL, vehicle: "allroad, 04 A6", year: 2003, market: NA}
+# Bosch 0261208484, sw 1037369096 ident 070404. Tip and 6-speed.
 4Z7907551T-0010: {engine: 2.7T, code: BEL, vehicle: allroad, year: 2003, market: NA}
 8D0907551F-0001: {engine: 2.7T, code: ASJ, vehicle: RS4, year: 2001, gearbox: manual, market: EU}
 8D0907551G-0002: {engine: 2.7T, code: AZB, vehicle: S4, year: 2001, gearbox: manual, market: EU}
@@ -51,6 +46,7 @@
 8D0907558E-D03: {engine: 1.8T, code: AEB, vehicle: A4, year: 1997-1999}
 8D0907558M-D01: {engine: 1.8T, code: AEB, vehicle: "A4, Passat", year: 1997-1999}
 8E0909518AK-0004: {engine: 1.8T, code: AVJ, vehicle: A4, year: 2002-2005}
+# 190 hp.
 8E0909518AS-0003: {engine: 1.8T, code: BEX, vehicle: A4, year: 2002-2004}
 8N0906018CB-0003: {engine: 1.8T, code: BAM, vehicle: TT, year: 2003-2006, gearbox: manual, market: EU}
 8N0906018CJ-0001: {engine: 1.8T, code: BEA, vehicle: TT, year: 2004+, gearbox: manual, market: NA}

@@ -77,7 +77,7 @@ absent:
   # 0D0B E6FC E6FD call is KFWEE / KFWEEK. The same export has
   # KLRLSALULL, KFTABGSS, and KFTABGSS2, and it does not have the
   # RLSALULL byte or the TABGSS scalars. ASE_rlsalun passes the curve.
-  4Z7:
+  25A:
     - DLBTS
     - KFMIZUFIL
     - KFMIZUNS
@@ -90,7 +90,7 @@ absent:
   # scanLbts arm that starts with 42 F4 FD 02. DH misses that chain. DQ
   # takes the other arm, which does not store DLBTS. The M call
   # 42 F4 FD 07 D7 40 .. 02 F2 F4 does not occur here.
-  4Z7-like:
+  24EGKS:
     - DLBTS
     - KFVPLGU
     - SNM16OPUW
@@ -99,8 +99,8 @@ absent:
   # scanLdrxn, and scanLdrapp do not open. The knock window does not
   # contain KFMIZUOF, and the only 6E 27 F6 F4 frame has no axis.
   # DLBTS, KFVPLGU, and SNM16OPUW stay absent for the same reason as
-  # 4Z7-like.
-  4Z7-na:
+  # 24EGKS.
+  05A:
     - DLBTS
     - KFFLLDE
     - KFLDHBN

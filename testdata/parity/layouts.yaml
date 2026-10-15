@@ -5,7 +5,7 @@
 # string when the image carries no software number.
 #
 # The blocks come from which variant of each needle hits. A near match stays in
-# the block: F with K and Q, the 4Z7 T with S, AA, and R, LP and CB with HF and
+# the block: F with K and Q, the 25B T with S, AA, and R, LP and CB with HF and
 # HS, and 06A906032S and 4B0906018Q with A and B. 1.8T-CM is the 1.8T code
 # without maps its DAMOS export does not have.
 # datasets.yaml is a different grouping: calibration contents, not code.
@@ -21,13 +21,15 @@
   - "1037354531"
   - "1037360387"
   - "1037360388"
-4Z7:
+# T is dataset 25B and stays in this block.
+25A:
   - "1037366370"
   - "1037366424"
   - "1037368391"
   - "1037369096"
   - "1037369097"
-4Z7-like:
+# 24E, 24G, 24K, and 24KS. AK-0004 is the 24H member. CM, the other 24H, is not.
+24EGKS:
   - "1037366494"
   - "1037366497"
   - "1037368072"
@@ -35,9 +37,9 @@
   - "1037369044"
   - "1037369307"
   - "1037394791"
-# 006410010A0, the naturally aspirated V8. Same needles as 4Z7-like.
+# 006410010A0, the naturally aspirated V8. Same needles as 24EGKS.
 # The LDR finders do not open.
-4Z7-na:
+05A:
   - "1037371702"
 1.8T:
   - "1037354510"

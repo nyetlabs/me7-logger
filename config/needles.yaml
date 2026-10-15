@@ -71,7 +71,7 @@ functions:
         unique: false
       # 23g calls this entry. The 20-byte body above is present and nothing calls it.
       - needle_hex: "EA 30 XX XX F3 FA 8C 8E 47 FA"
-      # 4Z7 calls this body through segment 0. Two copies. The twin on 22m ends F2 F1.
+      # 25A calls this body through segment 0. Two copies. The twin on 22m ends F2 F1.
       - needle_hex: "A9 4D C0 4D F0 1E C0 31 1B 1D 02 FC"
         unique: false
       # 22N callers enter the first copy of the 20-byte body twelve bytes in.
@@ -85,7 +85,7 @@ functions:
       - needle_hex: "0D 00 FD F4 F0 C0 E0 ED E0 9E E6 FF DE BB"
       # 22N calls this body with segment 0. The 22m prologue is not in that image.
       - needle_hex: "5E BC 9A F5 63 70 E7 F8 BF 00 65 F8"
-      # Same 4Z7 body as map_interp_table8. KFMRES on that image calls the other copy.
+      # Same 25A body as map_interp_table8. KFMRES on that image calls the other copy.
       - needle_hex: "A9 4D C0 4D F0 1E C0 31 1B 1D 02 FC"
         unique: false
 
@@ -149,7 +149,7 @@ functions:
     needles:
       - needle_hex: "0D 03 6D 02 E6 F4 00 80 F6 F4 C8 8F"
       - needle_hex: "2C 01 FD 04 E6 F5 2C 01 F6 F5 70 8E"
-      # 4Z7 and the 1.8T images. Two copies. The curve16 prologue on 22m is F0 3E.
+      # 25A and the 1.8T images. Two copies. The curve16 prologue on 22m is F0 3E.
       - needle_hex: "F0 3D C0 72 5C 12 00 C2 98 4C"
         unique: false
 
@@ -174,13 +174,13 @@ functions:
       - needle_hex: "{push:976} {sub:2} F3 F8 50 8C 47 F8 FF 00"
       # K and Q. The F3 address is 538C. The calls sit at the F distances.
       - needle_hex: "{push:976} {sub:2} F3 F8 53 8C 47 F8 FF 00"
-      # 4Z7 ignition entry. One less push, and the F3 address differs per image.
+      # 25A ignition entry. One less push, and the F3 address differs per image.
       - needle_hex: "{push:98} {sub:2} F3 F8 XX XX 47 F8 FF 00"
 
   - name: ZWGRU_ign_wl
     needle_hex:
       - "{push:98} E6 FC XX XX E6 FD CE 00 F2 FE"
-      # 4Z7. The byte after E6 FD is E7.
+      # 25A. The byte after E6 FD is E7.
       - "{push:98} E6 FC XX XX E6 FD E7 00 F2 FE"
 
   - name: ARMD_kfdmd
@@ -223,7 +223,7 @@ functions:
   - name: FUEDK_kfvpdks
     needle_hex:
       - "8A XX 04 XX 8A XX 02 XX 9A XX 12 XX E6 F4 FF 7F"
-      # 4Z7 entry. The calls sit past the distances used on 22m.
+      # 25A entry. The calls sit past the distances used on 22m.
       - "{push:9876} {extp:0206} F3 FC DF 1E"
 
   - name: FUEDK_kfvplgu
@@ -235,7 +235,7 @@ functions:
       - needle_hex: "{push:9876} {sub:4} E6 FC XX XX F2 FD 0E F9"
       - needle_hex: "{push:9876} {sub:4} E6 FC XX XX F2 FD 92 F9"
 
-  # 4Z7 entry. 0x28 is KFMIOP. 0x40 passes the KFZWOP body, which the 22m row names KFZWOP2.
+  # 25A entry. 0x28 is KFMIOP. 0x40 passes the KFZWOP body, which the 22m row names KFZWOP2.
   - name: MDBAS_kfzwop_b
     needle_hex: "{push:9876} {sub:6} E6 FC XX XX F2 FD"
 
@@ -286,7 +286,7 @@ functions:
   - name: ASE_rlsalun
     needle_hex:
       - "{push:98} F2 F4 XX XX 68 41 EA 20"
-      # 4Z7. One less push. The curve call is at 0xAC2.
+      # 25A. One less push. The curve call is at 0xAC2.
       - "{push:86} F2 F4 XX XX 68 41 EA 20"
 
   - name: BGMSZS_wdkugdn

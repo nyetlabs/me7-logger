@@ -1,12 +1,24 @@
 # Finder order for the blocks in layouts.yaml. Opinion, not a stage.
 # Highest first. Every block is listed once.
+# Engine codes are the ones publish/vehicles.yaml lists for that block.
+# APB, AWM, and AZB each sit in more than one block.
+# APB, AZB. H is project 22l.
 - 22m
+# APB.
 - 22N
+# AWP, AUM, AUQ, BAM, BEA.
 - 1.8T
+# AWM, AZA, APB.
 - 1.8T-CM
-- 4Z7-like
-- 4Z7-na
-- 4Z7
+# AWT, AWM, AVJ, BEX.
+- 24EGKS
+# BEL. T is dataset 25B.
+- 25A
+# ASJ, AZR.
 - 23g
+# BCY.
 - 25C
+# APH, AZB.
 - selector-sub
+# Spyker 4.2. No engine code.
+- 05A
