@@ -921,7 +921,8 @@ func isAuto(m *model.Model) bool {
 
 // annotateConfidence notes low body confidence, a missing axis, and a value
 // that stayed factor 1 with no units. High confidence keeps the needle, then
-// the gap notes. A name without a Conf still gets the gap notes.
+// the gap notes. A name without a Conf still gets the gap notes. A bitmap
+// stays raw and does not get a no-scale note.
 func annotateConfidence(m *model.Model, byName map[string]parity.Conf) {
 	if m == nil {
 		return
@@ -939,7 +940,8 @@ func annotateConfidence(m *model.Model, byName map[string]parity.Conf) {
 }
 
 // gapNotes is a missing image axis, or a cell or image axis left at factor 1
-// with no units. An ordinal axis is not a missing scale.
+// with no units. An ordinal axis is not a missing scale. A codeword, a
+// configuration byte, or an error class is raw on purpose.
 func gapNotes(o *model.Object) []string {
 	var g []string
 	for _, ax := range []struct {
@@ -957,7 +959,7 @@ func gapNotes(o *model.Object) []string {
 			g = append(g, "no "+ax.w+" scale")
 		}
 	}
-	if rawValue(o) {
+	if rawValue(o) && !config.Bitmap(objKey(o)) {
 		g = append(g, "no scale")
 	}
 	return g

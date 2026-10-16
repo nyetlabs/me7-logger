@@ -373,6 +373,12 @@ func TestHandCover(t *testing.T) {
 	if curve.Objects[0].Comment != "map_interp_curve8: missing x axis" {
 		t.Fatalf("missing axis: %q", curve.Objects[0].Comment)
 	}
+	word := modelOf(pubObj("CWLAMFAW", 0x100, 1, ""))
+	word.Objects[0].Comment = "map_const"
+	annotateConfidence(word, nil)
+	if word.Objects[0].Comment != "map_const" {
+		t.Fatalf("codeword scale note: %q", word.Objects[0].Comment)
+	}
 	twoAddrs := []coverNote{{op: "disagrees", key: "KFZW", have: []model.Addr{0x300, 0x400}}}
 	if moveCount(twoAddrs) != 0 || applyMoves(manual, locatedMoved, twoAddrs).Objects[0].Address != 0x100 {
 		t.Fatal("several addresses")

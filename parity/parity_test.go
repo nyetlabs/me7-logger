@@ -379,9 +379,12 @@ func TestTierNeedsEveryAxis(t *testing.T) {
 	if len(open) != 1 || open[0].Note() != "  scale" {
 		t.Fatalf("scale open %+v", open)
 	}
-	wide := record.Map{Name: "KFMIRL", X: x, Y: &record.Axis{Addr: 0x20, Unit: "y"}}
+	wide := record.Map{Name: "KFMIOP", X: x, Y: &record.Axis{Addr: 0x20, Unit: "y"}}
 	if !scaled(wide) {
 		t.Fatal("unset cell width")
+	}
+	if !scaled(record.Map{Name: "CWLAMFAW", Bits: 8}) {
+		t.Fatal("codeword")
 	}
 }
 

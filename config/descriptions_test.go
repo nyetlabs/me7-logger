@@ -104,6 +104,12 @@ func TestScales(t *testing.T) {
 	if _, ok := Conversion("KFFWL", "z", 8, 0); ok {
 		t.Fatal("plain name does not take a form's row")
 	}
+	if !Codeword("CWLAMFAW") || !Codeword("CWMDAPP") || Codeword("KRALH") {
+		t.Fatal("codeword")
+	}
+	if !Bitmap("CATR") || !Bitmap("CLAATR") || Bitmap("ESKONF") || Bitmap("KRALH") {
+		t.Fatal("bitmap")
+	}
 	if v, ok := Conversion("TEMIN", "z", 16, 0); !ok || v.Units != "ms" || v.Conversion.Factor == 0 {
 		t.Fatalf("TEMIN %+v %v", v, ok)
 	}

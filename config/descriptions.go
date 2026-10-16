@@ -21,6 +21,31 @@ func Description(name string) string {
 	return descriptions[name]
 }
 
+// Codeword reports a hex bitmap. It has no conversion.
+func Codeword(name string) bool {
+	d := strings.ToLower(Description(name))
+	return strings.Contains(d, "codeword") || strings.Contains(d, "codewort") || strings.Contains(d, "code word")
+}
+
+// Bitmap is a raw byte: a codeword, a configuration byte, or an error class.
+// ESKONF is a byte string and is not one of these.
+func Bitmap(name string) bool {
+	if Codeword(name) {
+		return true
+	}
+	d := strings.ToLower(Description(name))
+	for _, s := range []string{
+		"konfigurationsbyte", "configuration byte",
+		"fehlerklasse", "error class", "failure code",
+		"eurobit", "euro-byte", "euro byte",
+	} {
+		if strings.Contains(d, s) {
+			return true
+		}
+	}
+	return false
+}
+
 var (
 	descOnce     sync.Once
 	descriptions map[string]string

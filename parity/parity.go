@@ -1451,6 +1451,9 @@ func hasScale(name, role string, bits int, unit string) bool {
 	if unit != "" {
 		return true
 	}
+	if role == "z" && config.Bitmap(name) {
+		return true
+	}
 	if bits == 0 {
 		if cell, ok := config.Storage(name, ""); ok && cell.Bits != 0 {
 			bits = cell.Bits
