@@ -425,7 +425,9 @@ func mapArgs(data []byte, call int) (r12, r13, r14, r15 uint16, hasR13, hasAxis 
 
 // setupWords is each RAM word loaded into R0–R11 immediately before the
 // R12 frame, then the RAM word a setup stored when that store is the next
-// instruction before those loads. 0x88 is the register move between the loads.
+// instruction before those loads. 0x88 with a zero low nibble is the register
+// move between the loads. The low byte of an F2 operand can be 0x88.
+// EXTP #pag,#1 between those loads is the page prefix and is skipped.
 func setupWords(data []byte, frame int) []uint16 {
 	var words []uint16
 	pos := frame
@@ -434,11 +436,18 @@ func setupWords(data []byte, frame int) []uint16 {
 		limit = 0
 	}
 	for pos-2 >= limit {
-		if data[pos-2] == 0x88 {
+		if data[pos-2] == 0x88 && data[pos-1]&0x0F == 0 {
 			pos -= 2
 			continue
 		}
-		if pos-4 < limit || data[pos-4] != 0xF2 || data[pos-3] < 0xF0 || data[pos-3] >= 0xFC {
+		if pos-4 < limit {
+			break
+		}
+		if data[pos-4] == 0xD7 && data[pos-3] == 0x40 {
+			pos -= 4
+			continue
+		}
+		if data[pos-4] != 0xF2 || data[pos-3] < 0xF0 || data[pos-3] >= 0xFC {
 			break
 		}
 		words = append(words, binary.LittleEndian.Uint16(data[pos-2:pos]))
