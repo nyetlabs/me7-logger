@@ -919,22 +919,48 @@ func isAuto(m *model.Model) bool {
 	return m != nil && m.Provenance != nil && m.Provenance.Origin == "auto"
 }
 
-// annotateConfidence notes low body confidence on raw located objects.
-// High confidence keeps the needle only. A name without a Conf is unchanged.
+// annotateConfidence notes low body confidence, a missing axis, and a value
+// that stayed factor 1 with no units. High confidence keeps the needle, then
+// the gap notes. A name without a Conf still gets the gap notes.
 func annotateConfidence(m *model.Model, byName map[string]parity.Conf) {
-	if m == nil || len(byName) == 0 {
+	if m == nil {
 		return
 	}
 	for _, o := range m.Objects {
+		if o == nil {
+			continue
+		}
+		c := byName[objKey(o)]
 		if !rawValue(o) {
-			continue
+			c = parity.Conf{}
 		}
-		c, ok := byName[objKey(o)]
-		if !ok || c.Reason == "" {
-			continue
-		}
-		o.Comment = c.Comment(o.Comment)
+		o.Comment = parity.JoinComment(o.Comment, c, gapNotes(o))
 	}
+}
+
+// gapNotes is a missing image axis, or a cell or image axis left at factor 1
+// with no units. An ordinal axis is not a missing scale.
+func gapNotes(o *model.Object) []string {
+	var g []string
+	for _, ax := range []struct {
+		w string
+		a *model.Axis
+		n bool
+	}{
+		{"x", o.X, o.Shape == "1d" || o.Shape == "2d"},
+		{"y", o.Y, o.Shape == "2d"},
+	} {
+		if ax.n && (ax.a == nil || ax.a.Source == "" || ax.a.Source == "unknown") {
+			g = append(g, "missing "+ax.w+" axis")
+		}
+		if ax.a != nil && ax.a.Source == "image" && rawScale(ax.a.Value) {
+			g = append(g, "no "+ax.w+" scale")
+		}
+	}
+	if rawValue(o) {
+		g = append(g, "no scale")
+	}
+	return g
 }
 
 // relayout gives each object of out that has a raw value the shape,
@@ -969,8 +995,12 @@ func byKeyAddr(m *model.Model) map[keyAddr]*model.Object {
 
 // rawValue is an object with the located value: factor 1, no offset, no units.
 func rawValue(o *model.Object) bool {
-	c := o.Value.Conversion
-	return c.Factor == 1 && c.Offset == 0 && !c.Reciprocal && o.Value.Units == ""
+	return o != nil && rawScale(o.Value)
+}
+
+func rawScale(v model.Value) bool {
+	c := v.Conversion
+	return c.Factor == 1 && c.Offset == 0 && !c.Reciprocal && v.Units == ""
 }
 
 // sameLayout is the same shape, storage, and axes.

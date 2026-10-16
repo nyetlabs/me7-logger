@@ -30,31 +30,40 @@ type Conf struct {
 	Reason string
 }
 
-// Comment formats a low-confidence note for a raw auto object.
-// High confidence leaves the needle alone (empty string when needle is empty).
-// Low reasons are short phrases, not token soup. Calling again with a
-// previous Comment result does not double the note.
+// Comment is the needle plus a low-confidence phrase. High confidence is the needle.
 func (c Conf) Comment(needle string) string {
-	needle = stripConfNote(needle)
-	if c.High || c.Reason == "" {
-		return needle
-	}
-	detail := lowPhrase(c.Reason)
-	if needle == "" || needle == detail {
-		return detail
-	}
-	return needle + ": " + detail
+	return JoinComment(needle, c, nil)
 }
 
-// stripConfNote keeps the locate needle when comment is "needle: note".
-func stripConfNote(s string) string {
-	if i := strings.Index(s, ": "); i >= 0 {
-		return s[:i]
+// JoinComment is Comment plus gap notes. A previous result is not doubled.
+func JoinComment(needle string, c Conf, gaps []string) string {
+	parts := strings.Split(baseComment(needle), ": ")
+	if parts[0] == "" {
+		parts = nil
 	}
-	if i := strings.Index(s, " confidence "); i >= 0 {
-		return s[:i]
+	if !c.High && c.Reason != "" {
+		if p := lowPhrase(c.Reason); p != "" {
+			parts = append(parts, p)
+		}
 	}
-	return s
+	parts = append(parts, gaps...)
+	return strings.Join(parts, ": ")
+}
+
+func baseComment(s string) string {
+	parts := strings.Split(s, ": ")
+	for len(parts) > 0 && isNote(parts[len(parts)-1]) {
+		parts = parts[:len(parts)-1]
+	}
+	return strings.Join(parts, ": ")
+}
+
+func isNote(s string) bool {
+	return strings.HasPrefix(s, "missing ") || strings.HasPrefix(s, "no ") ||
+		strings.HasPrefix(s, "zero body") || strings.HasPrefix(s, "differs from ") ||
+		strings.HasPrefix(s, "close to ") || strings.HasPrefix(s, "cannot compare ") ||
+		strings.HasPrefix(s, "neighbors differ ") ||
+		s == "axis not monotonic" || s == "all zeros" || s == "body unreadable"
 }
 
 func lowPhrase(reason string) string {
