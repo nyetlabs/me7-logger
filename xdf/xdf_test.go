@@ -1,6 +1,7 @@
 package xdf
 
 import (
+	"encoding/binary"
 	"strings"
 	"testing"
 
@@ -265,6 +266,48 @@ func TestModelRecordShape(t *testing.T) {
 		t.Fatalf("shape %+v", o)
 	}
 	if len(conflicts) != 1 || !strings.Contains(conflicts[0], "shape 8x8 from storage, record 2x2") || !strings.Contains(conflicts[0], "(E6FF)") {
+		t.Fatalf("%q", conflicts)
+	}
+}
+
+func TestModelCallAxesStay(t *testing.T) {
+	img := make([]byte, 0x200)
+	img[0x17] = 4
+	copy(img[0x18:], []byte{0xCE, 0xE7, 0xFB, 0x00, 0xFF, 0x00, 0x64, 0x64})
+	for i := range 12 {
+		binary.LittleEndian.PutUint16(img[0x80+2*i:], uint16(1000+i*400))
+	}
+	for i := range 16 {
+		binary.LittleEndian.PutUint16(img[0xC0+2*i:], uint16(2000+i*800))
+	}
+	copy(img[0x14A:], []byte{2, 2, 1, 2, 3, 4})
+	img[0x160] = 9
+	base := uint32(opcode.FlashBase)
+	m, conflicts := Model([]record.Map{{
+		Name: "KEEP", Addr: base + 0x20, Bits: 8, Rows: 16, Cols: 12,
+		X: &record.Axis{Addr: base + 0x80, Count: 12, Bits: 16},
+		Y: &record.Axis{Addr: base + 0xC0, Count: 16, Bits: 16},
+	}, {
+		Name: "SNAP", Addr: base + 0x150, Bits: 8, Rows: 8, Cols: 8,
+		X: &record.Axis{Addr: base + 0x160, Count: 8, Bits: 8},
+		Y: &record.Axis{Addr: base + 0x170, Count: 8, Bits: 8},
+	}}, img, "t")
+	var keep, snap *model.Object
+	for _, o := range m.Objects {
+		switch o.ID {
+		case "KEEP":
+			keep = o
+		case "SNAP":
+			snap = o
+		}
+	}
+	if keep == nil || keep.Rows != 16 || keep.Cols != 12 || keep.X == nil || keep.Y == nil || uint32(*keep.X.Address) != 0x80 || uint32(*keep.Y.Address) != 0xC0 {
+		t.Fatalf("kept %+v", keep)
+	}
+	if snap == nil || snap.Rows != 2 || snap.Cols != 2 {
+		t.Fatalf("snapped %+v", snap)
+	}
+	if !slicesHas(conflicts, "KEEP at 0x20: shape 16x12 from call, record 1x4") || !slicesHas(conflicts, "SNAP at 0x150: shape 8x8 from call, record 2x2") {
 		t.Fatalf("%q", conflicts)
 	}
 }

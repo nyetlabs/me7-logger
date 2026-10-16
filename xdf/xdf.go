@@ -103,7 +103,9 @@ func aligned(m *model.Model, image []byte, pat map[string]string) (conflicts []s
 
 // fitRecord emits the one image record at an even body when its rows, cols,
 // or axis widths or addresses differ from the call or from config.Storage.
-// The located map is left as the locator stored it.
+// A call keeps its shape when the inline record is a curve that rises only
+// signed and the call's own axes are ordered breakpoint tables. Any other
+// disagreement takes the record.
 func fitRecord(m *model.Model, image []byte, pat map[string]string, fromCall map[string]bool) (conflicts []string) {
 	for _, o := range m.Objects {
 		if o.Shape == "value" || odd(o.Address, o.Data) {
@@ -118,6 +120,9 @@ func fitRecord(m *model.Model, image []byte, pat map[string]string, fromCall map
 			from = "call"
 		}
 		conflicts = append(conflicts, withPat(o, pat, fmt.Sprintf("%s at 0x%X: shape %dx%d from %s, record %dx%d", o.Key, uint32(o.Address), o.Rows, o.Cols, from, rec.Rows, rec.Cols)))
+		if from == "call" && signedOnlyCurve(image, rec) && axesHold(image, o) {
+			continue
+		}
 		o.Rows, o.Cols, o.Shape = rec.Rows, rec.Cols, "1d"
 		if rec.Rows > 1 {
 			o.Shape = "2d"
@@ -132,6 +137,48 @@ func fitRecord(m *model.Model, image []byte, pat map[string]string, fromCall map
 		}
 	}
 	return conflicts
+}
+
+// signedOnlyCurve is a one-row record whose axis rises only when read
+// signed. An unsigned run is the map's own axis, and the record stands.
+func signedOnlyCurve(image []byte, rec interp.Record) bool {
+	if rec.Rows != 1 || rec.X.Addr == 0 || (rec.X.Bits != 8 && rec.X.Bits != 16) {
+		return false
+	}
+	addr := opcode.FileOffset(rec.X.Addr)
+	if increasing(image, model.Addr(addr), rec.Cols, rec.X.Bits/8) {
+		return false
+	}
+	return config.SignedOnly(image, int(addr), rec.Cols, rec.X.Bits, "little")
+}
+
+// axesHold is a call shape whose image axes are ordered breakpoint runs of
+// the call's counts. An axis with no address does not count. One that turns
+// or is flat means the inline record is the shape to publish.
+func axesHold(image []byte, o *model.Object) bool {
+	n := 0
+	for _, a := range []struct {
+		x *model.Axis
+		n int
+	}{{o.X, o.Cols}, {o.Y, o.Rows}} {
+		if a.x == nil || a.x.Address == nil || a.x.Data == nil || a.x.Source != "image" {
+			continue
+		}
+		n++
+		w := a.x.Data.Bits / 8
+		if (w != 1 && w != 2) || !ordered(image, *a.x.Address, a.n, a.x.Data) {
+			return false
+		}
+	}
+	return n > 0
+}
+
+func ordered(image []byte, addr model.Addr, n int, d *model.Data) bool {
+	w := d.Bits / 8
+	if increasing(image, addr, n, w) {
+		return true
+	}
+	return config.SignedOnly(image, int(addr), n, d.Bits, d.Endian)
 }
 
 func sameShape(o *model.Object, r interp.Record) bool {

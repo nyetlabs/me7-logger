@@ -223,6 +223,8 @@ mapsigs:
 - {name: KFZWOP, pattern: [22A5E6FCXXXX, 1EA5E6FCXXXX], at: 4}
 - {name: KFZWOP2, pattern: 'F1E8E6FCXXXXE6FD[54/F5]69', at: 4}
 - {name: KLDMASRL, pattern: E6FDXXXXE6FE7C1B}
+# DQ-0060. The short 3D 0F row was reading the body as a 4-point axis. These F2 words are KFZW2's axes.
+- {name: KFZW, pattern: 3D0FE6FC302AE6FDC83CF2FE708CF2FF848CDA00242B, at: 4, xat: 16, yat: 12}
 - {name: KFZW, pattern: [3D0FE6FCXXXXE6FD, 3D0FE6FCXXXXE6FD1A31], at: 4, absent: 3D0FE6FC2E29E6FD0702}
 - {name: KFZW2, pattern: '3D10E6FCXXXXE6FD[18/79]3X', at: 4}
 - {name: KFZWWLNM, pattern: E6FCXXXXE6FD2E01}

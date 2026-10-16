@@ -1165,7 +1165,6 @@
 - {bits: 8, signed: true, rows: 12, cols: 16, ordinal: true, parts: [06A906032HF], names: [
     KFZWMN, KFZWMNST]}
 - {bits: 8, signed: true, rows: 16, cols: 11, parts: [06A906032S], names: [KFDZWOAGR]}
-- {bits: 8, signed: true, xsigned: true, rows: 16, cols: 12, parts: [4B0906018DQ], names: [KFZW]}
 - {bits: 16, parts: [06A906032HF, 06A906032HS], names: [TNSRT]}
 - {bits: 16, parts: [06A906032HF, 06A906032HS, 06A906032LP, 4B0906018CM], names: [HSLDSUA, LDUVRS]}
 - {bits: 16, parts: [06A906032S], names: [
