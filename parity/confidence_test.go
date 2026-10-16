@@ -15,37 +15,37 @@ func TestConfidence(t *testing.T) {
 	t.Run("zeros", func(t *testing.T) {
 		img := make([]byte, 32)
 		m := record.Map{Name: "S", Addr: opcode.FlashBase, Rows: 4, Cols: 4, X: axis}
-		got := scoreConfidence(tuner, nil, img, []record.Map{m}, nil, nil, false)
-		if got.Hit != 0 || got.Total != 1 {
-			t.Fatalf("%+v", got)
+		got, by := scoreConfidence(tuner, nil, img, []record.Map{m}, nil, nil, false)
+		if got.Hit != 0 || got.Total != 1 || by["S"].Reason != "zeros" {
+			t.Fatalf("%+v %+v", got, by["S"])
 		}
 	})
 
 	t.Run("short repeated", func(t *testing.T) {
 		img := []byte{0x11, 0x22, 0, 0, 0x11, 0x22}
 		m := record.Map{Name: "S", Addr: opcode.FlashBase, Cols: 2, X: axis}
-		got := scoreConfidence(tuner, nil, img, []record.Map{m}, nil, nil, false)
-		if got.Hit != 1 || got.Total != 1 {
-			t.Fatalf("%+v", got)
+		got, by := scoreConfidence(tuner, nil, img, []record.Map{m}, nil, nil, false)
+		if got.Hit != 1 || got.Total != 1 || by["S"].Reason != "short" {
+			t.Fatalf("%+v %+v", got, by["S"])
 		}
 	})
 
 	t.Run("miss stays out", func(t *testing.T) {
 		img := []byte{0x11, 0x22, 0, 0}
 		m := record.Map{Name: "S", Addr: opcode.FlashBase, Cols: 2, X: axis}
-		got := scoreConfidence([]string{"S", "Gone"}, nil, img, []record.Map{m}, nil, nil, false)
-		if got.Hit != 1 || got.Total != 1 {
-			t.Fatalf("%+v", got)
+		got, by := scoreConfidence([]string{"S", "Gone"}, nil, img, []record.Map{m}, nil, nil, false)
+		if got.Hit != 1 || got.Total != 1 || by["Gone"].Reason != "" || by["S"].Reason != "short" {
+			t.Fatalf("%+v %+v", got, by)
 		}
 	})
 
 	t.Run("shared zero", func(t *testing.T) {
 		img := make([]byte, 32)
 		m := record.Map{Name: "S", Addr: opcode.FlashBase, Rows: 4, Cols: 4, X: axis}
-		peer := binBody{img: img, scored: map[string]record.Map{"S": m}}
-		got := scoreConfidence(tuner, nil, img, []record.Map{m}, nil, []binBody{peer}, false)
-		if got.Hit != 1 || got.Total != 1 {
-			t.Fatalf("%+v", got)
+		peer := binBody{stem: "peerA", img: img, scored: map[string]record.Map{"S": m}}
+		got, by := scoreConfidence(tuner, nil, img, []record.Map{m}, nil, []binBody{peer}, false)
+		if got.Hit != 1 || got.Total != 1 || by["S"].Reason != "peer-same peerA" {
+			t.Fatalf("%+v %+v", got, by["S"])
 		}
 	})
 
@@ -54,10 +54,10 @@ func TestConfidence(t *testing.T) {
 			img := []byte{0, 0}
 			peerImg := []byte{1, 1}
 			m := record.Map{Name: "S", Addr: opcode.FlashBase, Bits: bits}
-			peer := binBody{img: peerImg, scored: map[string]record.Map{"S": m}}
-			got := scoreConfidence(tuner, map[string]int{"S": 0}, img, []record.Map{m}, nil, []binBody{peer}, false)
-			if got.Hit != 1 || got.Total != 1 {
-				t.Fatalf("%d bits: %+v", bits, got)
+			peer := binBody{stem: "peerA", img: peerImg, scored: map[string]record.Map{"S": m}}
+			got, by := scoreConfidence(tuner, map[string]int{"S": 0}, img, []record.Map{m}, nil, []binBody{peer}, false)
+			if got.Hit != 1 || got.Total != 1 || by["S"].Reason != "short" {
+				t.Fatalf("%d bits: %+v %+v", bits, got, by["S"])
 			}
 		}
 	})
@@ -67,10 +67,10 @@ func TestConfidence(t *testing.T) {
 		filled := make([]byte, 32)
 		filled[0] = 1
 		m := record.Map{Name: "S", Addr: opcode.FlashBase, Rows: 4, Cols: 4, X: axis}
-		peer := binBody{img: filled, scored: map[string]record.Map{"S": m}}
-		got := scoreConfidence(tuner, nil, img, []record.Map{m}, nil, []binBody{peer}, false)
-		if got.Hit != 0 || got.Total != 1 {
-			t.Fatalf("%+v", got)
+		peer := binBody{stem: "peerA", img: filled, scored: map[string]record.Map{"S": m}}
+		got, by := scoreConfidence(tuner, nil, img, []record.Map{m}, nil, []binBody{peer}, false)
+		if got.Hit != 0 || got.Total != 1 || by["S"].Reason != "zeros peerA" {
+			t.Fatalf("%+v %+v", got, by["S"])
 		}
 	})
 
@@ -78,9 +78,9 @@ func TestConfidence(t *testing.T) {
 		img := []byte{0x11, 0x22, 0, 0}
 		m := record.Map{Name: "S", Addr: opcode.FlashBase, Cols: 2, X: axis}
 		other := record.Map{Name: "T", Addr: opcode.FlashBase, Cols: 2, X: axis}
-		got := scoreConfidence(tuner, nil, img, []record.Map{m, other}, nil, nil, false)
-		if got.Hit != 1 || got.Total != 1 {
-			t.Fatalf("%+v", got)
+		got, by := scoreConfidence(tuner, nil, img, []record.Map{m, other}, nil, nil, false)
+		if got.Hit != 1 || got.Total != 1 || by["S"].Reason != "short" {
+			t.Fatalf("%+v %+v", got, by["S"])
 		}
 	})
 
@@ -88,9 +88,9 @@ func TestConfidence(t *testing.T) {
 		img := bodyImage(0x22)
 		peer := bodyImage(0x22)
 		m := subject(opcode.FlashBase+16, axis)
-		got := scoreConfidence(tuner, nil, img, trio(axis), nil, []binBody{peerBody(peer, axis)}, false)
-		if got.Hit != 1 || got.Total != 1 {
-			t.Fatalf("exact %+v body %x", got, m.Addr)
+		got, by := scoreConfidence(tuner, nil, img, trio(axis), nil, []binBody{peerBody(peer, axis)}, false)
+		if got.Hit != 1 || got.Total != 1 || by["S"].Reason != "peer-same peerA" {
+			t.Fatalf("exact %+v %+v body %x", got, by["S"], m.Addr)
 		}
 	})
 
@@ -98,9 +98,9 @@ func TestConfidence(t *testing.T) {
 		img := bodyImage(0x22)
 		peer := bodyImage(0x22)
 		peer[16], peer[17] = 0x99, 0x98
-		got := scoreConfidence(tuner, nil, img, trio(axis), nil, []binBody{peerBody(peer, axis)}, false)
-		if got.Hit != 1 || got.Total != 1 {
-			t.Fatalf("%+v", got)
+		got, by := scoreConfidence(tuner, nil, img, trio(axis), nil, []binBody{peerBody(peer, axis)}, false)
+		if got.Hit != 1 || got.Total != 1 || by["S"].Reason != "peer-near 2/16 peerA" {
+			t.Fatalf("%+v %+v", got, by["S"])
 		}
 	})
 
@@ -114,11 +114,11 @@ func TestConfidence(t *testing.T) {
 			{Name: "S", Addr: opcode.FlashBase + 16, Cols: 192, X: axis},
 			{Name: "C", Addr: opcode.FlashBase + 16 + 192, Cols: 16, X: axis},
 		}
-		got := scoreConfidence(tuner, nil, img, maps, nil, []binBody{{
-			img: peer, maps: maps, scored: map[string]record.Map{"S": maps[1]},
+		got, by := scoreConfidence(tuner, nil, img, maps, nil, []binBody{{
+			stem: "peerA", img: peer, maps: maps, scored: map[string]record.Map{"S": maps[1]},
 		}}, false)
-		if got.Hit != 1 || got.Total != 1 {
-			t.Fatalf("%+v", got)
+		if got.Hit != 1 || got.Total != 1 || by["S"].Reason != "peer-near 4/192 peerA" {
+			t.Fatalf("%+v %+v", got, by["S"])
 		}
 	})
 
@@ -128,25 +128,26 @@ func TestConfidence(t *testing.T) {
 		for i := 16; i < 22; i++ {
 			peer[i] = byte(i)
 		}
+		axis := &record.Axis{Addr: opcode.FlashBase + 0x1000, Count: 4, Bits: 8}
 		maps := []record.Map{
 			{Name: "B", Addr: opcode.FlashBase, Cols: 16, X: axis},
 			{Name: "S", Addr: opcode.FlashBase + 16, Cols: 192, X: axis},
 			{Name: "C", Addr: opcode.FlashBase + 16 + 192, Cols: 16, X: axis},
 		}
-		got := scoreConfidence(tuner, nil, img, maps, nil, []binBody{{
-			img: peer, maps: maps, scored: map[string]record.Map{"S": maps[1]},
+		got, by := scoreConfidence(tuner, nil, img, maps, nil, []binBody{{
+			stem: "peerA", img: peer, maps: maps, scored: map[string]record.Map{"S": maps[1]},
 		}}, false)
-		if got.Hit != 0 || got.Total != 1 {
-			t.Fatalf("%+v", got)
+		if got.Hit != 0 || got.Total != 1 || by["S"].Reason != "peer-diff 6/192 peerA" {
+			t.Fatalf("%+v %+v", got, by["S"])
 		}
 	})
 
 	t.Run("one axis of a map", func(t *testing.T) {
 		img := []byte{0x11, 0x22, 0, 0}
 		m := record.Map{Name: "S", Addr: opcode.FlashBase, Cols: 2, X: axis}
-		got := scoreConfidence(tuner, map[string]int{"S": 2}, img, []record.Map{m}, nil, nil, false)
-		if got.Hit != 0 || got.Total != 1 {
-			t.Fatalf("%+v", got)
+		got, by := scoreConfidence(tuner, map[string]int{"S": 2}, img, []record.Map{m}, nil, nil, false)
+		if got.Hit != 0 || got.Total != 1 || by["S"].Reason != "shape" {
+			t.Fatalf("%+v %+v", got, by["S"])
 		}
 	})
 
@@ -154,12 +155,25 @@ func TestConfidence(t *testing.T) {
 		img := []byte{0x11, 0x22, 1, 3, 2, 4}
 		x := &record.Axis{Addr: opcode.FlashBase + 2, Count: 4, Bits: 8}
 		m := record.Map{Name: "S", Addr: opcode.FlashBase, Cols: 2, X: x}
-		if got := scoreConfidence(tuner, nil, img, []record.Map{m}, nil, nil, false); got.Hit != 0 {
-			t.Fatalf("%+v", got)
+		if got, by := scoreConfidence(tuner, nil, img, []record.Map{m}, nil, nil, false); got.Hit != 0 || by["S"].Reason != "axis" {
+			t.Fatalf("%+v %+v", got, by["S"])
 		}
 		img[3], img[4] = 2, 3
-		if got := scoreConfidence(tuner, nil, img, []record.Map{m}, nil, nil, false); got.Hit != 1 {
-			t.Fatalf("%+v", got)
+		if got, by := scoreConfidence(tuner, nil, img, []record.Map{m}, nil, nil, false); got.Hit != 1 || by["S"].Reason != "short" {
+			t.Fatalf("%+v %+v", got, by["S"])
+		}
+	})
+
+	t.Run("axis all zeros", func(t *testing.T) {
+		img := []byte{0x11, 0x22, 0, 0, 0, 0}
+		x := &record.Axis{Addr: opcode.FlashBase + 2, Count: 4, Bits: 8}
+		m := record.Map{Name: "S", Addr: opcode.FlashBase, Cols: 2, X: x}
+		got, by := scoreConfidence(tuner, nil, img, []record.Map{m}, nil, nil, false)
+		if got.Hit != 0 || by["S"].Reason != "axis-zeros" {
+			t.Fatalf("%+v %+v", got, by["S"])
+		}
+		if got := by["S"].Comment("map_interp_table8"); got != "map_interp_table8: all zeros" {
+			t.Fatalf("comment %q", got)
 		}
 	})
 
@@ -167,8 +181,8 @@ func TestConfidence(t *testing.T) {
 		img := []byte{0x11, 0x22, 0xFE, 0xFF, 0, 1}
 		x := &record.Axis{Addr: opcode.FlashBase + 2, Count: 4, Bits: 8}
 		m := record.Map{Name: "S", Addr: opcode.FlashBase, Cols: 2, X: x}
-		if got := scoreConfidence(tuner, nil, img, []record.Map{m}, nil, nil, false); got.Hit != 1 {
-			t.Fatalf("%+v", got)
+		if got, by := scoreConfidence(tuner, nil, img, []record.Map{m}, nil, nil, false); got.Hit != 1 || by["S"].Reason != "short" {
+			t.Fatalf("%+v %+v", got, by["S"])
 		}
 	})
 
@@ -176,16 +190,22 @@ func TestConfidence(t *testing.T) {
 		img := bodyImage(0x22)
 		peer := bodyImage(0x77)
 		for _, verified := range []bool{false, true} {
-			got := scoreConfidence(tuner, nil, img, trio(axis), nil, []binBody{peerBody(peer, axis)}, verified)
+			got, by := scoreConfidence(tuner, nil, img, trio(axis), nil, []binBody{peerBody(peer, axis)}, verified)
 			if got.Hit == 1 != verified || got.Total != 1 {
-				t.Fatalf("verified %v: %+v", verified, got)
+				t.Fatalf("verified %v: %+v %+v", verified, got, by["S"])
+			}
+			if verified && by["S"].Reason != "verified" {
+				t.Fatalf("verified reason %+v", by["S"])
+			}
+			if !verified && by["S"].Reason != "peer-diff 16/16 peerA" {
+				t.Fatalf("unverified reason %+v", by["S"])
 			}
 		}
 		x := &record.Axis{Addr: opcode.FlashBase, Count: 4, Bits: 8}
 		img[1] = 0x10
 		maps := trio(x)
-		if got := scoreConfidence(tuner, nil, img, maps, nil, []binBody{peerBody(peer, x)}, true); got.Hit != 0 {
-			t.Fatalf("axis turns: %+v", got)
+		if got, by := scoreConfidence(tuner, nil, img, maps, nil, []binBody{peerBody(peer, x)}, true); got.Hit != 0 || by["S"].Reason != "axis" {
+			t.Fatalf("axis turns: %+v %+v", got, by["S"])
 		}
 	})
 
@@ -194,9 +214,25 @@ func TestConfidence(t *testing.T) {
 		peer := bodyImage(0x22)
 		peer[16], peer[17] = 0x99, 0x98
 		peer[32], peer[33], peer[34] = 0x44, 0x45, 0x46
-		got := scoreConfidence(tuner, nil, img, trio(axis), nil, []binBody{peerBody(peer, axis)}, false)
-		if got.Hit != 0 || got.Total != 1 {
-			t.Fatalf("%+v", got)
+		got, by := scoreConfidence(tuner, nil, img, trio(axis), nil, []binBody{peerBody(peer, axis)}, false)
+		if got.Hit != 0 || got.Total != 1 || by["S"].Reason != "peer-neighbor 2/16 peerA" {
+			t.Fatalf("%+v %+v", got, by["S"])
+		}
+	})
+
+	t.Run("comment form", func(t *testing.T) {
+		c := Conf{High: true, Reason: "peer-near 2/16 peerA"}
+		if got := c.Comment("map_interp_table8"); got != "map_interp_table8" {
+			t.Fatalf("high %q", got)
+		}
+		if got := (Conf{High: false, Reason: "zeros"}).Comment(""); got != "zero body with no zero peer" {
+			t.Fatalf("zeros %q", got)
+		}
+		if got := (Conf{High: false, Reason: "peer-diff 6/192 peerA"}).Comment("map_interp_table8"); got != "map_interp_table8: differs from peerA by 6/192 cells" {
+			t.Fatalf("peer-diff %q", got)
+		}
+		if got := (Conf{High: false, Reason: "peer-neighbor 2/16 peerA"}).Comment("n"); got != "n: close to peerA (2/16) but neighbors differ" {
+			t.Fatalf("peer-neighbor %q", got)
 		}
 	})
 }
@@ -225,5 +261,5 @@ func trio(axis *record.Axis) []record.Map {
 
 func peerBody(img []byte, axis *record.Axis) binBody {
 	maps := trio(axis)
-	return binBody{img: img, maps: maps, scored: map[string]record.Map{"S": maps[1]}}
+	return binBody{stem: "peerA", img: img, maps: maps, scored: map[string]record.Map{"S": maps[1]}}
 }

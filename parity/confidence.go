@@ -23,13 +23,82 @@ const (
 	nearPercent = 3
 )
 
+// Conf is one tuner's body-confidence grade and a short reason.
+// Reason is a fixed token, or a peer token plus stem and cell detail.
+type Conf struct {
+	High   bool
+	Reason string
+}
+
+// Comment formats a low-confidence note for a raw auto object.
+// High confidence leaves the needle alone (empty string when needle is empty).
+// Low reasons are short phrases, not token soup.
+func (c Conf) Comment(needle string) string {
+	if c.High || c.Reason == "" {
+		return needle
+	}
+	detail := lowPhrase(c.Reason)
+	if needle == "" {
+		return detail
+	}
+	return needle + ": " + detail
+}
+
+func lowPhrase(reason string) string {
+	switch reason {
+	case "axis":
+		return "axis not monotonic"
+	case "axis-zeros":
+		return "all zeros"
+	case "shape":
+		return "missing row or column axis"
+	case "body":
+		return "body unreadable"
+	case "zeros":
+		return "zero body with no zero peer"
+	}
+	if stem, ok := strings.CutPrefix(reason, "zeros "); ok {
+		return "zero body, " + stem + " is not zero"
+	}
+	if rest, ok := strings.CutPrefix(reason, "peer-diff "); ok {
+		if n, m, stem, ok := splitPeerDetail(rest); ok {
+			return fmt.Sprintf("differs from %s by %d/%d cells", stem, n, m)
+		}
+		return "cannot compare body to " + rest
+	}
+	if rest, ok := strings.CutPrefix(reason, "peer-neighbor "); ok {
+		if n, m, stem, ok := splitPeerDetail(rest); ok {
+			return fmt.Sprintf("close to %s (%d/%d) but neighbors differ", stem, n, m)
+		}
+		return "neighbors differ vs " + rest
+	}
+	return reason
+}
+
+// splitPeerDetail parses "diff/cells stem" from a peer reason tail.
+func splitPeerDetail(s string) (diff, cells int, stem string, ok bool) {
+	parts := strings.SplitN(s, " ", 2)
+	if len(parts) != 2 {
+		return 0, 0, "", false
+	}
+	nm := strings.SplitN(parts[0], "/", 2)
+	if len(nm) != 2 {
+		return 0, 0, "", false
+	}
+	if _, err := fmt.Sscanf(nm[0]+" "+nm[1], "%d %d", &diff, &cells); err != nil {
+		return 0, 0, "", false
+	}
+	return diff, cells, parts[1], true
+}
+
 // scoreConfidence judges the body of each name the locator already scored.
 // The denominator is that matched set. A name the locator missed is not in it.
 // High means the body bytes hold up. A shared axis does not change that.
 // A verified definition skips the peer comparison: a sibling calibration
-// may differ.
-func scoreConfidence(tuner []string, dims map[string]int, img []byte, maps []record.Map, rows []refRow, peers []binBody, verified bool) Fraction {
+// may differ. byName has one entry per scored name.
+func scoreConfidence(tuner []string, dims map[string]int, img []byte, maps []record.Map, rows []refRow, peers []binBody, verified bool) (Fraction, map[string]Conf) {
 	scored := tunerMaps(tuner, dims, maps, rows)
+	byName := make(map[string]Conf, len(scored))
 	high := 0
 	for _, n := range tuner {
 		m, ok := scored[n]
@@ -40,51 +109,73 @@ func scoreConfidence(tuner []string, dims map[string]int, img []byte, maps []rec
 		if !known {
 			c = -1
 		}
-		if plausible(img, m, c) && confident(img, maps, m, peers, verified) {
+		ok, reason := plausible(img, m, c)
+		if ok {
+			ok, reason = confident(img, maps, m, peers, verified)
+		}
+		byName[n] = Conf{High: ok, Reason: reason}
+		if ok {
 			high++
 		}
 	}
-	return Fraction{high, len(scored)}
+	return Fraction{high, len(scored)}, byName
 }
 
 // plausible needs no peer. A map listed with two axes needs a row and a
 // column count, an image axis rises or falls without a turn, and a byte body
 // whose every other byte is closer than its neighbors is a word table.
-func plausible(img []byte, m record.Map, axes int) bool {
+func plausible(img []byte, m record.Map, axes int) (bool, string) {
 	if axes == 2 && (m.Rows == 0 && m.Y == nil || m.Cols == 0 && m.X == nil) {
-		return false
+		return false, "shape"
 	}
 	for _, a := range []*record.Axis{m.X, m.Y} {
-		if a != nil && !ordered(img, a) {
-			return false
+		if a == nil {
+			continue
+		}
+		if reason := axisFail(img, a); reason != "" {
+			return false, reason
 		}
 	}
-	return true
+	return true, ""
 }
 
-func ordered(img []byte, a *record.Axis) bool {
+// axisFail is empty when the axis is ordered, "axis-zeros" when the
+// breakpoint bytes are all zero, or "axis" for any other turn or flat run.
+func axisFail(img []byte, a *record.Axis) string {
 	if a.Addr == 0 || a.Count < 2 {
-		return true
+		return ""
 	}
 	step := 1
 	if a.Bits == 16 {
 		step = 2
 	}
 	off := int(opcode.FileOffset(a.Addr))
-	if off < 0 || off+a.Count*step > len(img) {
-		return true
+	n := a.Count * step
+	if off < 0 || off+n > len(img) {
+		return ""
 	}
+	raw := img[off : off+n]
 	u := make([]int, a.Count)
 	s := make([]int, a.Count)
 	for i := range u {
 		if step == 2 {
-			w := uint16(img[off+2*i]) | uint16(img[off+2*i+1])<<8
+			w := uint16(raw[2*i]) | uint16(raw[2*i+1])<<8
 			u[i], s[i] = int(w), int(int16(w))
 		} else {
-			u[i], s[i] = int(img[off+i]), int(int8(img[off+i]))
+			u[i], s[i] = int(raw[i]), int(int8(raw[i]))
 		}
 	}
-	return monotonic(u) || monotonic(s)
+	if monotonic(u) || monotonic(s) {
+		return ""
+	}
+	if allZero(raw) {
+		return "axis-zeros"
+	}
+	return "axis"
+}
+
+func ordered(img []byte, a *record.Axis) bool {
+	return axisFail(img, a) == ""
 }
 
 func monotonic(v []int) bool {
@@ -97,47 +188,68 @@ func monotonic(v []int) bool {
 }
 
 type binBody struct {
+	stem   string
 	img    []byte
 	maps   []record.Map
 	scored map[string]record.Map
 }
 
-func confident(img []byte, maps []record.Map, m record.Map, peers []binBody, verified bool) bool {
+func confident(img []byte, maps []record.Map, m record.Map, peers []binBody, verified bool) (bool, string) {
 	cells, _, raw, ok := bodyOf(img, m)
 	if !ok {
-		return false
+		return false, "body"
 	}
 	// The empty-body rule is for more than one cell of zeros.
 	if cells > 1 && allZero(raw) {
 		return zerosMatch(m, raw, peers)
 	}
-	if verified || cells < largeBody {
-		return true
+	if verified {
+		return true, "verified"
 	}
+	if cells < largeBody {
+		return true, "short"
+	}
+	var stems []string
+	nearReason := ""
 	for _, p := range peers {
 		other, ok := p.scored[m.Name]
 		if !ok {
 			continue
 		}
-		if !bodiesMatch(img, maps, m, p.img, p.maps, other) {
-			return false
+		ok, reason := bodiesMatch(img, maps, m, p.img, p.maps, other, p.stem)
+		if !ok {
+			return false, reason
+		}
+		stems = append(stems, p.stem)
+		if strings.HasPrefix(reason, "peer-near") {
+			nearReason = reason
 		}
 	}
-	return true
+	if len(stems) == 0 {
+		return true, "no-peer"
+	}
+	if nearReason != "" {
+		return true, nearReason
+	}
+	return true, "peer-same " + strings.Join(stems, ",")
 }
 
-func bodiesMatch(img []byte, maps []record.Map, m record.Map, pimg []byte, pmaps []record.Map, other record.Map) bool {
+func bodiesMatch(img []byte, maps []record.Map, m record.Map, pimg []byte, pmaps []record.Map, other record.Map, stem string) (bool, string) {
 	diff, cells, ok := diffCells(img, m, pimg, other)
 	if !ok {
-		return false
+		return false, "peer-diff " + stem
 	}
+	detail := fmt.Sprintf("%d/%d %s", diff, cells, stem)
 	if diff == 0 {
-		return true
+		return true, "peer-same " + stem
 	}
 	if !nearDiff(diff, cells) {
-		return false
+		return false, "peer-diff " + detail
 	}
-	return neighborsMatch(img, maps, m, pimg, pmaps)
+	if !neighborsMatch(img, maps, m, pimg, pmaps) {
+		return false, "peer-neighbor " + detail
+	}
+	return true, "peer-near " + detail
 }
 
 // nearDiff is a large body whose cells are close: two cells, or 3% of the body.
@@ -284,11 +396,11 @@ func allZero(b []byte) bool {
 
 // zerosMatch is high when every sibling that has this name is zero too.
 // A body with no sibling stays low.
-func zerosMatch(m record.Map, raw []byte, peers []binBody) bool {
+func zerosMatch(m record.Map, raw []byte, peers []binBody) (bool, string) {
 	if len(peers) == 0 {
-		return false
+		return false, "zeros"
 	}
-	seen := false
+	var stems []string
 	for _, p := range peers {
 		other, ok := p.scored[m.Name]
 		if !ok {
@@ -296,11 +408,14 @@ func zerosMatch(m record.Map, raw []byte, peers []binBody) bool {
 		}
 		_, _, praw, pok := bodyOf(p.img, other)
 		if !pok || len(praw) != len(raw) || !allZero(praw) {
-			return false
+			return false, "zeros " + p.stem
 		}
-		seen = true
+		stems = append(stems, p.stem)
 	}
-	return seen
+	if len(stems) == 0 {
+		return false, "zeros"
+	}
+	return true, "peer-same " + strings.Join(stems, ",")
 }
 
 func tunerMaps(want []string, dims map[string]int, maps []record.Map, rows []refRow) map[string]record.Map {

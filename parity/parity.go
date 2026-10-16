@@ -81,6 +81,8 @@ type Image struct {
 	Provenance *model.Provenance
 	Axis       Fraction
 	Confidence Fraction
+	// ConfByName is per tuner name on a Tuner row after confidence scoring.
+	ConfByName map[string]Conf
 	Block      Fraction
 	Open       []OpenName
 	BlockOpen  []OpenName
@@ -690,10 +692,12 @@ func run(dir string, images []string, defOf func(string) string, gen imageGen) (
 					continue
 				}
 				peers = append(peers, binBody{
-					img: o.img, maps: o.maps, scored: tunerMaps(tuner, axes, o.maps, o.oracle),
+					stem: stem, img: o.img, maps: o.maps, scored: tunerMaps(tuner, axes, o.maps, o.oracle),
 				})
 			}
-			rep.Tuner[i].Confidence = scoreConfidence(confTuner, axes, h.img, h.maps, h.oracle, peers, false)
+			var byName map[string]Conf
+			rep.Tuner[i].Confidence, byName = scoreConfidence(confTuner, axes, h.img, h.maps, h.oracle, peers, false)
+			rep.Tuner[i].ConfByName = byName
 		}
 	}
 	for _, ims := range [][]Image{rep.ME7Info, rep.Extras, rep.Tuner, rep.XDF, rep.Manual} {

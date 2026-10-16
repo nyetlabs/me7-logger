@@ -139,7 +139,7 @@ func cmdCorpus(args []string) error {
 		if len(want) > 0 && !want[name] {
 			continue
 		}
-		item := pubItem{name: name, tier: im.Tier, def: c.Def(name)}
+		item := pubItem{name: name, tier: im.Tier, def: c.Def(name), conf: im.ConfByName}
 		if item.tier == "" {
 			item.tier = "-"
 		}
@@ -158,7 +158,7 @@ func cmdCorpus(args []string) error {
 			nKey = placeholderCount(prev)
 		}
 		if item.reason == "" {
-			item.reason = gateReason(im.Tier, im.Confidence, item.def != "", item.origin)
+			item.reason = gateReason(im.Tier, im.Confidence, im.ConfByName, item.def != "", item.origin)
 		}
 		delta := "-"
 		if item.reason == "" && (item.origin == "manual" || item.origin == "auto") {
@@ -196,6 +196,7 @@ func cmdCorpus(args []string) error {
 			}
 			if item.merged != nil {
 				clearPlaceholders(item.merged)
+				annotateConfidence(item.merged, item.conf)
 			}
 			switch reason {
 			case "":
@@ -212,6 +213,7 @@ func cmdCorpus(args []string) error {
 			}
 			if item.reason != "" && !item.keepOrigin && isAuto(prev) {
 				r := relayout(clearedCopy(prev), loc)
+				annotateConfidence(r, item.conf)
 				if n := corrections(prev, r); n > 0 {
 					item.merged, item.keepOrigin = r, true
 					delta = fmt.Sprintf("layout %d", n)
@@ -246,6 +248,9 @@ func cmdCorpus(args []string) error {
 				return err
 			}
 			item.merged = loc
+		}
+		if item.reason == "" && item.merged != nil && item.def == "" {
+			annotateConfidence(item.merged, item.conf)
 		}
 		if item.merged != nil && (item.reason == "" || item.keepOrigin) {
 			block, text, err := holdLint(c, name, item.merged)
@@ -312,6 +317,7 @@ func cmdCorpus(args []string) error {
 		}
 		switch {
 		case item.merged != nil:
+			annotateConfidence(item.merged, item.conf)
 			if err := writePublished(dst, item.merged, item.keepOrigin, item.ref); err != nil {
 				return err
 			}
@@ -334,12 +340,16 @@ func cmdCorpus(args []string) error {
 			if err != nil {
 				return err
 			}
-			wrote, err := locate.WriteModel(dst, imgPath, img, res.Maps, cats, "me7parity corpus")
+			m, _, err := locate.Model(imgPath, img, res.Maps, cats, false)
 			if err != nil {
 				return err
 			}
-			if !wrote {
+			if m == nil || len(m.Objects) == 0 {
 				return fmt.Errorf("%s: no located maps", item.name)
+			}
+			annotateConfidence(m, item.conf)
+			if err := writePublished(dst, m, false, nil); err != nil {
+				return err
 			}
 		}
 		if err := setCorpusDef(dir, item.name, "defs/"+item.name+".json"); err != nil {
@@ -355,6 +365,7 @@ type pubItem struct {
 	ref                             *model.Reference
 	keepOrigin                      bool
 	notes                           []coverNote
+	conf                            map[string]parity.Conf
 }
 
 type pubLine struct {
@@ -516,9 +527,14 @@ func openLine(n parity.OpenName) string {
 }
 
 // gateReason is empty when the image may be submitted, or when origin
-// manual or auto still has to pass coverAll. Confidence is required first.
-// Grade "-" passes only for manual. damos, a2l, and an unset origin do not.
-func gateReason(tier string, conf parity.Fraction, hasDef bool, origin string) string {
+// manual or auto still has to pass coverAll. A non-monotonic axis that is
+// not all zeros is a hard fail (axis NAME). Soft low confidence
+// (including an all-zero axis) still uses the Hit/Total gate. Grade "-"
+// passes only for manual. damos, a2l, and an unset origin do not.
+func gateReason(tier string, conf parity.Fraction, byName map[string]parity.Conf, hasDef bool, origin string) string {
+	if name := hardAxis(byName); name != "" {
+		return "axis " + name
+	}
 	if conf.Total == 0 || conf.Hit*2 <= conf.Total {
 		return fmt.Sprintf("confidence %d/%d", conf.Hit, conf.Total)
 	}
@@ -539,6 +555,21 @@ func gateReason(tier string, conf parity.Fraction, hasDef bool, origin string) s
 		tier = "-"
 	}
 	return "grade " + tier
+}
+
+// hardAxis is the first tuner name whose axis turns and is not all zeros.
+func hardAxis(byName map[string]parity.Conf) string {
+	var names []string
+	for n, c := range byName {
+		if c.Reason == "axis" {
+			names = append(names, n)
+		}
+	}
+	if len(names) == 0 {
+		return ""
+	}
+	slices.Sort(names)
+	return names[0]
 }
 
 // coverNote is one manual key the detail list prints.
@@ -769,17 +800,22 @@ func corrections(prev, merged *model.Model) int {
 }
 
 // mergeKept folds the located model into the previous pack. Conversion,
-// units, and layout stay on the previous object. The description and the
-// comment come from the located model. When both pedal variants are located,
-// the plain name is dropped and the variants take its category. A variant
-// already in the pack keeps its conversion. In an auto pack, an object
-// still in raw located form takes the located layout.
+// units, and layout stay on the previous object. The description comes from
+// the located model. On an auto pack the comment is replaced too; on a
+// manual pack an existing comment is kept. When both pedal variants are
+// located, the plain name is dropped and the variants take its category. A
+// variant already in the pack keeps its conversion. In an auto pack, an
+// object still in raw located form takes the located layout.
 func mergeKept(prev, located *model.Model) (*model.Model, error) {
 	drop, stamp := pedalPlan(prev, located)
 	base := withoutKeys(prev, drop)
+	comment := "keep"
+	if isAuto(prev) {
+		comment = "replace"
+	}
 	out, _, err := model.Merge(base, located, model.MergeOptions{
 		Description: "replace",
-		Comment:     "replace",
+		Comment:     comment,
 	})
 	if err != nil {
 		return nil, err
@@ -799,6 +835,31 @@ func mergeKept(prev, located *model.Model) (*model.Model, error) {
 
 func isAuto(m *model.Model) bool {
 	return m != nil && m.Provenance != nil && m.Provenance.Origin == "auto"
+}
+
+// annotateConfidence notes low body confidence on raw located objects.
+// High confidence keeps the needle only. A name without a Conf is unchanged.
+func annotateConfidence(m *model.Model, byName map[string]parity.Conf) {
+	if m == nil || len(byName) == 0 {
+		return
+	}
+	for _, o := range m.Objects {
+		if !rawValue(o) {
+			continue
+		}
+		c, ok := byName[objKey(o)]
+		if !ok || c.Reason == "" {
+			continue
+		}
+		needle := o.Comment
+		if i := strings.Index(needle, ": "); i >= 0 {
+			needle = needle[:i]
+		}
+		if i := strings.Index(needle, " confidence "); i >= 0 {
+			needle = needle[:i]
+		}
+		o.Comment = c.Comment(needle)
+	}
 }
 
 // relayout gives each object of out that has a raw value the shape,

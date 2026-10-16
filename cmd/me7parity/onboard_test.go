@@ -108,35 +108,45 @@ func TestNearestName(t *testing.T) {
 func TestGateReason(t *testing.T) {
 	high := parity.Fraction{Hit: 73, Total: 74}
 	half := parity.Fraction{Hit: 37, Total: 74}
-	if got := gateReason("D", high, false, ""); got != "" {
+	if got := gateReason("D", high, nil, false, ""); got != "" {
 		t.Fatalf("missing def: %s", got)
 	}
-	if got := gateReason("S+", high, true, "auto"); got != "" {
+	if got := gateReason("S+", high, nil, true, "auto"); got != "" {
 		t.Fatalf("located: %s", got)
 	}
-	if got := gateReason("-", high, false, ""); got != "grade -" {
+	if got := gateReason("-", high, nil, false, ""); got != "grade -" {
 		t.Fatalf("open grade: %s", got)
 	}
-	if got := gateReason("D", half, false, ""); got != "confidence 37/74" {
+	if got := gateReason("D", half, nil, false, ""); got != "confidence 37/74" {
 		t.Fatalf("half: %s", got)
 	}
-	if got := gateReason("D", parity.Fraction{}, false, ""); got != "confidence 0/0" {
+	if got := gateReason("D", parity.Fraction{}, nil, false, ""); got != "confidence 0/0" {
 		t.Fatalf("empty: %s", got)
 	}
-	if got := gateReason("-", high, true, "manual"); got != "" {
+	if got := gateReason("-", high, nil, true, "manual"); got != "" {
 		t.Fatalf("manual does not wait for D: %s", got)
 	}
-	if got := gateReason("D", half, true, "manual"); got != "confidence 37/74" {
+	if got := gateReason("D", half, nil, true, "manual"); got != "confidence 37/74" {
 		t.Fatalf("manual confidence: %s", got)
 	}
-	if got := gateReason("C", high, true, "manual"); got != "" {
+	if got := gateReason("C", high, nil, true, "manual"); got != "" {
 		t.Fatalf("manual: %s", got)
 	}
-	if got := gateReason("A", high, true, "damos"); got != "origin damos" {
+	if got := gateReason("A", high, nil, true, "damos"); got != "origin damos" {
 		t.Fatalf("damos: %s", got)
 	}
-	if got := gateReason("-", high, true, ""); got != "origin unset" {
+	if got := gateReason("-", high, nil, true, ""); got != "origin unset" {
 		t.Fatalf("unset: %s", got)
+	}
+	turned := map[string]parity.Conf{
+		"KFZW": {Reason: "axis"},
+		"LAMFA": {Reason: "axis-zeros"},
+	}
+	if got := gateReason("D", high, turned, true, "auto"); got != "axis KFZW" {
+		t.Fatalf("hard axis: %s", got)
+	}
+	if got := gateReason("D", high, map[string]parity.Conf{"LAMFA": {Reason: "axis-zeros"}}, true, "auto"); got != "" {
+		t.Fatalf("soft zeros: %s", got)
 	}
 }
 
@@ -219,6 +229,7 @@ func TestHandCover(t *testing.T) {
 		t.Fatalf("superset: %s +%d", got, n)
 	}
 	manual.Objects[0].Description = "map_interp_table8"
+	manual.Objects[0].Comment = "hand note"
 	covered.Objects[0].Description = "optimal ignition angle"
 	covered.Objects[0].Comment = "map_interp_table8"
 	merged, err := mergeKept(manual, covered)
@@ -229,7 +240,7 @@ func TestHandCover(t *testing.T) {
 		t.Fatalf("%d objects", len(merged.Objects))
 	}
 	kw := merged.Objects[0]
-	if kw.Key != "KFZW" || kw.Address != 0x100 || kw.Value.Conversion.Factor != 0.75 || kw.Value.Units != "grad KW" || kw.Description != "optimal ignition angle" || kw.Comment != "map_interp_table8" {
+	if kw.Key != "KFZW" || kw.Address != 0x100 || kw.Value.Conversion.Factor != 0.75 || kw.Value.Units != "grad KW" || kw.Description != "optimal ignition angle" || kw.Comment != "hand note" {
 		t.Fatalf("kept %+v", kw)
 	}
 	if merged.Objects[1].Key != "LAMFA" || merged.Objects[1].Value.Conversion.Factor != 1 {
@@ -295,6 +306,38 @@ func TestHandCover(t *testing.T) {
 	}
 	if shortMoved.Objects[1].Address != 0x100 {
 		t.Fatal("base mutated")
+	}
+	autoPrev := modelOf(pubObj("KFZW", 0x100, 1, ""))
+	autoPrev.Provenance = &model.Provenance{Origin: "auto"}
+	autoPrev.Objects[0].Comment = "old-needle"
+	autoLoc := modelOf(pubObj("KFZW", 0x100, 1, ""))
+	autoLoc.Objects[0].Comment = "map_interp_table8"
+	autoMerged, err := mergeKept(autoPrev, autoLoc)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if autoMerged.Objects[0].Comment != "map_interp_table8" {
+		t.Fatalf("auto comment replace: %q", autoMerged.Objects[0].Comment)
+	}
+	annotateConfidence(autoMerged, map[string]parity.Conf{
+		"KFZW": {High: true, Reason: "short"},
+	})
+	if autoMerged.Objects[0].Comment != "map_interp_table8" {
+		t.Fatalf("high keeps needle: %q", autoMerged.Objects[0].Comment)
+	}
+	annotateConfidence(autoMerged, map[string]parity.Conf{
+		"KFZW": {High: false, Reason: "peer-diff 6/192 peerA"},
+	})
+	if autoMerged.Objects[0].Comment != "map_interp_table8: differs from peerA by 6/192 cells" {
+		t.Fatalf("low annotate: %q", autoMerged.Objects[0].Comment)
+	}
+	keptConv := modelOf(pubObj("KFZW", 0x100, 0.75, "grad KW"))
+	keptConv.Objects[0].Comment = "hand"
+	annotateConfidence(keptConv, map[string]parity.Conf{
+		"KFZW": {High: false, Reason: "zeros"},
+	})
+	if keptConv.Objects[0].Comment != "hand" {
+		t.Fatalf("raw-only annotate: %q", keptConv.Objects[0].Comment)
 	}
 	twoAddrs := []coverNote{{op: "disagrees", key: "KFZW", have: []model.Addr{0x300, 0x400}}}
 	if moveCount(twoAddrs) != 0 || applyMoves(manual, locatedMoved, twoAddrs).Objects[0].Address != 0x100 {

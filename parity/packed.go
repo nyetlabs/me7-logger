@@ -106,10 +106,12 @@ func GradePacked(dir string, packed []Packed) ([]Image, error) {
 				continue
 			}
 			peers = append(peers, binBody{
-				img: o.img, maps: o.maps, scored: tunerMaps(lists.tuner, lists.dims, o.maps, nil),
+				stem: stem, img: o.img, maps: o.maps, scored: tunerMaps(lists.tuner, lists.dims, o.maps, nil),
 			})
 		}
-		out[i].Confidence = scoreConfidence(confTuner, publishedDims(h.maps, lists.dims), h.img, h.maps, nil, peers, h.prov != nil && h.prov.Verified)
+		var byName map[string]Conf
+		out[i].Confidence, byName = scoreConfidence(confTuner, publishedDims(h.maps, lists.dims), h.img, h.maps, nil, peers, h.prov != nil && h.prov.Verified)
+		out[i].ConfByName = byName
 	}
 	return out, nil
 }
