@@ -35,6 +35,10 @@ maps:
   caller: ZWGRU_ign_zw
   at: ['0x48', '0x8A', '0x5DE', '0x620', '0x46', '0x84']
   interp: map_interp_table8
+- name: KFZW
+  caller: ZWGRU_ign_zw_dc
+  at: '0x50'
+  interp: map_interp_table8_twin
 - name: KFZWWLNM
   caller: ZWGRU_ign_zw
   at: '0x6BC'
@@ -119,6 +123,14 @@ maps:
   caller: MDBAS_kfzwop
   at: '0x68'
   interp: map_interp_table8
+- name: KFZWOP2
+  caller: MDBAS_kfzwop_dc
+  at: '0x40'
+  interp: map_interp_table8_twin
+- name: KFZWOP
+  caller: MDBAS_kfzwop_dc
+  at: '0x6C'
+  interp: map_interp_table8_twin
 - name: KFLAMKRL
   caller: LAMFAW_lamkr
   at: ['0x26A', '0x2B0', '0x2B2']

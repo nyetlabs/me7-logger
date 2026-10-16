@@ -177,6 +177,10 @@ functions:
       # 25A ignition entry. One less push, and the F3 address differs per image.
       - needle_hex: "{push:98} {sub:2} F3 F8 XX XX 47 F8 FF 00"
 
+  # DC ignition entry. The call at 0x50 is KFZW. It uses the twin interpolator.
+  - name: ZWGRU_ign_zw_dc
+    needle_hex: "{push:976} {sub:2} {extp:00E1} F3 F8 02 09 47 F8 FF 00"
+
   - name: ZWGRU_ign_wl
     needle_hex:
       - "{push:98} E6 FC XX XX E6 FD CE 00 F2 FE"
@@ -238,6 +242,10 @@ functions:
   # 25A entry. 0x28 is KFMIOP. 0x40 passes the KFZWOP body, which the 22m row names KFZWOP2.
   - name: MDBAS_kfzwop_b
     needle_hex: "{push:9876} {sub:6} E6 FC XX XX F2 FD"
+
+  # DC entry. 0x40 is KFZWOP2 and 0x6C is KFZWOP. Both use the twin interpolator.
+  - name: MDBAS_kfzwop_dc
+    needle_hex: "{push:9876} {sub:4} E6 FC 44 65 F2 FD BA F9"
 
   - name: LAMFAW_lamkr
     needle_hex: "{push:9876} {sub:2} F2 F4 XX XX 88 40 C2 F5 XX F8"

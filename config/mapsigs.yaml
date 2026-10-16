@@ -767,7 +767,7 @@ mapsigs:
 # KRANH is 17 bytes before that body.
 - {name: KRFKLN, pattern: '9A[38/FE]0D[00/EF]E6FC[E1/E5][1A/FB]E6FD0602', at: 6, frame: true, xat: 18, also: [{name: KRANH, add: -17}]}
 - {name: DLAMTANS, pattern: 5C548840C2F42C898840E6F46939, at: 12, frame: true, cols: 4}
-- {name: DWKRMSN, pattern: D7400602C2F4931E68412D1BF2F49A9A, at: 6, add: 1, xat: 14}
+- {name: DWKRMSN, pattern: [D7400602C2F4931E68412D1BF2F49A9A, D7400602C2F4XXXX68412D1BF2F4XXXX], at: 6, add: 1, xat: 14}
 # Body starts 20 0F 56 12, the same curve CM scores with add 34.
 - {name: LDRXN, pattern: E6FCC83EE6FD0902F2FE9EF8, frame: true, add: 34, cols: 16, xbits: 16}
 - {name: LDRXN, pattern: F6F426A5E6FCF819E6FD0A02, at: 6, frame: true, add: 34, cols: 16, xbits: 16}
@@ -785,7 +785,7 @@ mapsigs:
 # The F2 word is an 8-point axis.
 - {name: KFLAFWL, pattern: 'F2F5[08/19][09/EF]8850C2F2[22/E2]FA5C22D4C2[40/43]5XD4D2[42/43]5XE6FE[68/E9]02', at: 14, deref: 1, dereffar: true, cols: 8, yat: 2}
 # scanLbts. The E6 FC frame is the map, and the E6 FE word is its x axis.
-- {name: KFLBTS_0_A, pattern: [F2F5XXXX88508840E6FC1916E6FD0602E6FED916E6FF0602, F2F5XXXX88508840E6FCEF18E6FD0602E6FEAF19E6FF0602, F2F5XXXX88508840E6FCEE18E6FD0602E6FEAE19E6FF0602, F2F5XXXX88508840E6FCE51AE6FD0602E6FEA51BE6FF0602, F2F5XXXX88508840E6FC5317E6FD0602E6FE1318E6FF0602, F2F5XXXX88508840E6FC1116E6FD0602E6FED116E6FF0602, F2F5XXXX88508840E6FC4C17E6FD0602E6FE0C18E6FF0602], at: 10, frame: true}
+- {name: KFLBTS_0_A, pattern: [F2F5XXXX88508840E6FC1916E6FD0602E6FED916E6FF0602, F2F5XXXX88508840E6FCEF18E6FD0602E6FEAF19E6FF0602, F2F5XXXX88508840E6FCEE18E6FD0602E6FEAE19E6FF0602, F2F5XXXX88508840E6FCE51AE6FD0602E6FEA51BE6FF0602, F2F5XXXX88508840E6FC5317E6FD0602E6FE1318E6FF0602, F2F5XXXX88508840E6FC1116E6FD0602E6FED116E6FF0602, F2F5XXXX88508840E6FC4C17E6FD0602E6FE0C18E6FF0602, F2F5040B88508840E6FCB313E6FD0602E6FE7314E6FF0602], at: 10, frame: true}
 # 23g. F already stores KFZW from the caller. K and Q use DA00 B878.
 - {name: KFZW, pattern: 3D0FE6FCXXXXE6FDXXXXF2FE988DF2FFXXXXDA00B878, at: 4, xat: 16, yat: 12, also: [{name: SNS04ZUSB, add: -7}]}
 # 23g KFFLLDE. The E6 FC word and the DA80 slot differ on K and Q.
@@ -1113,3 +1113,31 @@ mapsigs:
 # DQ-0060. Two copies of the F2 F4 9E51 call share the address, so the
 # existing FFFF row sees two hits. The 1B13 copy is the one.
 - {name: DSLOFS, pattern: 1B13F2F20EFEF2FC0CFE6D055C2C8D037CE270C20D02E6FCFFFFF2F49E516D05004C, at: 28}
+# DC lamfa. The D4 word is the far pointer. Both calls pass the 6-point axis.
+- {name: bp_lamkr, pattern: 065E6B788693A0, table: true}
+- {name: KFLAMKR, pattern: 8850C2F212FA5C22D4C2AA3FD4D2AC3FE6FE7202E6FF0602, at: 10, deref: 1, dereffar: true, cols: 6, xbits: 8, xtable: bp_lamkr}
+- {name: KFLAFWL, pattern: C2F312FA5C23D4C3A23FD4D3A43FE6FE7202E6FF0602, at: 8, deref: 1, dereffar: true, cols: 6, xbits: 8, xtable: bp_lamkr}
+# DC knock. EXTP 0602. KRALH is the rl hysteresis, KRANH the nmot hysteresis.
+- {name: KRALH, pattern: C2F50C182045C2F5B5F94054CD05E138F7F8988A}
+- {name: KRANH, pattern: 43F8AB18FD05E7FA1000}
+# DC scalars. The word at byte 6 is the body. TABGBTS uses page 0702.
+- {name: DPUPS, pattern: F3F8C68A43F84C0EFD03E11A75FAC69F, at: 6}
+- {name: TMNSMN, pattern: F3F8408A43F8F81BED05F3FA3F8A43FAF71BFD0D, at: 6}
+- {name: TABGBTS, pattern: D740070242F48612FD04E11875F83B8A0D13, at: 6}
+# DC knock retard. Third frame of the cluster, same order as DQ. The F2 word is the axis.
+- {name: KRFKLN, pattern: 9A390D80E6FC2118E6FD0602D740E100F2FE7C09, at: 6, frame: true, xat: 18}
+# DC KFLDIMX. The E6 FE word is a 10-point axis. ldtv is the result.
+- {name: bp_kfldimx, pattern: 0A000000D007A00F7017401F1027E02EB036803E38, table: true}
+- {name: KFLDIMX, pattern: F6F47E0B8840F2F5888C8850E6FCB22BE6FD0702E6FEBE2DE6FF0702, at: 14, frame: true, cols: 10, xbits: 16, xtable: bp_kfldimx}
+# DC. Component-protection factor from modeled EGT. The 4-point axis sits 10 bytes in front.
+- {name: FBSTABGM, pattern: 0D06F2F430A1D740E100F6F4020BE6FCA411E6FD0702, at: 16, frame: true, add: 10, cols: 4, xbits: 16}
+# DC LDIATA. Curve added into the I-regulator. The F2 word is the axis.
+- {name: LDIATA, pattern: C0848840E6FCB71AE6FD0602F2FEA68CDA83, at: 6, frame: true, xat: 14}
+# DC. Weight of ftbr against IAT. The 14-point axis is the 15 bytes in front of the body.
+- {name: FWFTBRTA, pattern: D740E100F7F86508E6FC5A08E6FD0602, at: 10, frame: true, add: 15, cols: 14}
+# DC KFFLLDE. table8, one flash axis. Same 8820 call as the other rows.
+- {name: KFFLLDE, pattern: 8850F2F2B48C8820E6FC5E0FE6FD0602E6FE6701E6FF0402, at: 10, frame: true}
+# DC KFLDHBN. Indexed by nmot and tsel. The header is 08 08.
+- {name: KFLDHBN, pattern: E6FC481BE6FD0602C2FE9CF8D740E100C2FFC708, frame: true, add: 18, rows: 8, cols: 8}
+# DC KFMIRL. Desired load, 16 by 16. The result limits rlsol.
+- {name: KFMIRL, pattern: E6FCD256F2FD9EF8F2FECC9FDA00DE73F084, add: 68, rows: 16, cols: 16, xbits: 16, ybits: 16}

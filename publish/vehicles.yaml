@@ -18,7 +18,11 @@
 06A906032LQ-0007: {engine: 1.8T, code: AWP, vehicle: "Golf, Jetta", year: 2002+, gearbox: automatic}
 06A906032NL-0003: {engine: 1.8T, code: AWP, vehicle: "Golf, Jetta", year: 2002+, gearbox: automatic}
 06A906032S-0004: {engine: 1.8T, code: APH, vehicle: Beetle, year: 1999-2000, gearbox: automatic}
+# Bosch 0261207216, sw 1037360101. 150 hp.
+4B0906018CH-0001: {engine: 1.8T, code: AVJ, vehicle: A4, year: 2000-2002}
 4B0906018CM-0008: {engine: 1.8T, code: AWM, vehicle: Passat, year: 2002}
+# Bosch 0261207636, sw 1037362358.
+4B0906018DC-0001: {engine: 1.8T, code: AWT, vehicle: Passat, year: 2001-2005, market: EU}
 4B0906018DH-0004: {engine: 1.8T, code: AWT, vehicle: "Passat, Superb", year: 2003-2005, market: EU}
 4B0906018DQ-0010: {engine: 1.8T, code: AWM, vehicle: Passat, year: 2003-2005, market: NA}
 # Bosch 1037394791, 22 Jan 2008 software of same hardware as DQ-0010.

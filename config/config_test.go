@@ -139,7 +139,7 @@ func TestShippedNeedles(t *testing.T) {
 	if strings.Contains(string(b), "function:") {
 		t.Fatal("function is the list, not a field")
 	}
-	if len(ns) != 66 {
+	if len(ns) != 68 {
 		t.Fatalf("needles %d", len(ns))
 	}
 	if ns[0].Name != "slow_init_table" {
@@ -193,7 +193,7 @@ func TestShippedMaps(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(calls) != 117 {
+	if len(calls) != 120 {
 		t.Fatalf("maps %d", len(calls))
 	}
 	ns, err := LoadNeedles("", "")
@@ -216,6 +216,12 @@ func TestShippedMaps(t *testing.T) {
 		got[c.Name] = append(got[c.Name], c.At)
 		switch c.Name {
 		case "KFZW", "KFZW2", "KFZWWLNM":
+			if c.Name == "KFZW" && c.Caller == "ZWGRU_ign_zw_dc" {
+				if c.Interp != "map_interp_table8_twin" || c.At != 0x50 {
+					t.Fatalf("%+v", c)
+				}
+				break
+			}
 			if c.Interp != "map_interp_table8" {
 				t.Fatalf("%+v", c)
 			}
