@@ -527,13 +527,14 @@ func openLine(n parity.OpenName) string {
 }
 
 // gateReason is empty when the image may be submitted, or when origin
-// manual or auto still has to pass coverAll. A non-monotonic axis that is
-// not all zeros is a hard fail (axis NAME). Soft low confidence
-// (including an all-zero axis) still uses the Hit/Total gate. Grade "-"
-// passes only for manual. damos, a2l, and an unset origin do not.
+// manual or auto still has to pass coverAll. Hard fails are a turned
+// non-zero axis (axis NAME) or an unreadable body (body NAME). Soft low
+// confidence (shape, all-zero axis, zero body, peer miss) still uses the
+// Hit/Total gate. Grade "-" passes only for manual. damos, a2l, and an
+// unset origin do not.
 func gateReason(tier string, conf parity.Fraction, byName map[string]parity.Conf, hasDef bool, origin string) string {
-	if name := hardAxis(byName); name != "" {
-		return "axis " + name
+	if status := hardConf(byName); status != "" {
+		return status
 	}
 	if conf.Total == 0 || conf.Hit*2 <= conf.Total {
 		return fmt.Sprintf("confidence %d/%d", conf.Hit, conf.Total)
@@ -557,11 +558,22 @@ func gateReason(tier string, conf parity.Fraction, byName map[string]parity.Conf
 	return "grade " + tier
 }
 
-// hardAxis is the first tuner name whose axis turns and is not all zeros.
-func hardAxis(byName map[string]parity.Conf) string {
+// hardConf is "axis NAME" or "body NAME" for the first hard tuner fail.
+// Axis is checked before body. Soft reasons (shape, axis-zeros, zeros,
+// peer-*) are not hard.
+func hardConf(byName map[string]parity.Conf) string {
+	for _, reason := range []string{"axis", "body"} {
+		if name := hardReason(byName, reason); name != "" {
+			return reason + " " + name
+		}
+	}
+	return ""
+}
+
+func hardReason(byName map[string]parity.Conf, reason string) string {
 	var names []string
 	for n, c := range byName {
-		if c.Reason == "axis" {
+		if c.Reason == reason {
 			names = append(names, n)
 		}
 	}
@@ -851,14 +863,7 @@ func annotateConfidence(m *model.Model, byName map[string]parity.Conf) {
 		if !ok || c.Reason == "" {
 			continue
 		}
-		needle := o.Comment
-		if i := strings.Index(needle, ": "); i >= 0 {
-			needle = needle[:i]
-		}
-		if i := strings.Index(needle, " confidence "); i >= 0 {
-			needle = needle[:i]
-		}
-		o.Comment = c.Comment(needle)
+		o.Comment = c.Comment(o.Comment)
 	}
 }
 

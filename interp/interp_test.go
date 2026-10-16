@@ -415,8 +415,10 @@ func TestRamAxisZeroBreakpoint(t *testing.T) {
 	if !ok || got.Count != 6 || got.Bits != 8 || got.Addr != opcode.FlashBase+0x11 {
 		t.Fatalf("byte ok=%v %+v", ok, got)
 	}
+	// bits 0 used to treat the zero as a 16-bit marker. The words turn
+	// (the buffer after the points is zero) and the bytes rise, so it is 8-bit.
 	wide, ok := RamAxis(img, opcode.StandardDPP, 0x8F20, 0)
-	if !ok || wide.Bits != 16 || wide.Addr != opcode.FlashBase+0x12 {
+	if !ok || wide.Bits != 8 || wide.Count != 6 || wide.Addr != opcode.FlashBase+0x11 {
 		t.Fatalf("marker ok=%v %+v", ok, wide)
 	}
 }
@@ -663,5 +665,23 @@ func TestOddHeaderIsBytes(t *testing.T) {
 		if _, ok := Breakpoints(img, opcode.FlashBase+uint32(c.at), 16); ok {
 			t.Errorf("0x%x: accepted a count word at an odd address", c.at)
 		}
+	}
+}
+
+// TestEvenZeroPointIsBytes: a count on an even address whose next byte is 0
+// is 16-bit when those words are ordered, and 8-bit when the words turn and
+// the bytes (the 0 included) are ordered. KFNLLNST Y and KFLDRQ2 X are the
+// 8-bit case. FBSTABGM is the 16-bit case.
+func TestEvenZeroPointIsBytes(t *testing.T) {
+	img := make([]byte, 0x40)
+	copy(img[0x10:], []byte{6, 0x00, 0x0f, 0x32, 0x64, 0xc8, 0xfa, 0x05})
+	ax, ok := axisAt(img, opcode.FlashBase+0x10)
+	if !ok || ax.Bits != 8 || ax.Count != 6 || ax.Addr != opcode.FlashBase+0x11 {
+		t.Fatalf("bytes %v %+v", ok, ax)
+	}
+	copy(img[0x20:], []byte{4, 0x00, 0x00, 0x96, 0x00, 0xaa, 0x00, 0xbe, 0x00, 0xd2})
+	ax, ok = axisAt(img, opcode.FlashBase+0x20)
+	if !ok || ax.Bits != 16 || ax.Count != 4 || ax.Addr != opcode.FlashBase+0x22 {
+		t.Fatalf("words %v %+v", ok, ax)
 	}
 }

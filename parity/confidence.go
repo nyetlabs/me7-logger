@@ -32,16 +32,29 @@ type Conf struct {
 
 // Comment formats a low-confidence note for a raw auto object.
 // High confidence leaves the needle alone (empty string when needle is empty).
-// Low reasons are short phrases, not token soup.
+// Low reasons are short phrases, not token soup. Calling again with a
+// previous Comment result does not double the note.
 func (c Conf) Comment(needle string) string {
+	needle = stripConfNote(needle)
 	if c.High || c.Reason == "" {
 		return needle
 	}
 	detail := lowPhrase(c.Reason)
-	if needle == "" {
+	if needle == "" || needle == detail {
 		return detail
 	}
 	return needle + ": " + detail
+}
+
+// stripConfNote keeps the locate needle when comment is "needle: note".
+func stripConfNote(s string) string {
+	if i := strings.Index(s, ": "); i >= 0 {
+		return s[:i]
+	}
+	if i := strings.Index(s, " confidence "); i >= 0 {
+		return s[:i]
+	}
+	return s
 }
 
 func lowPhrase(reason string) string {

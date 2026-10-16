@@ -234,6 +234,18 @@ func TestConfidence(t *testing.T) {
 		if got := (Conf{High: false, Reason: "peer-neighbor 2/16 peerA"}).Comment("n"); got != "n: close to peerA (2/16) but neighbors differ" {
 			t.Fatalf("peer-neighbor %q", got)
 		}
+		zeros := Conf{High: false, Reason: "zeros"}
+		once := zeros.Comment("")
+		if once != "zero body with no zero peer" {
+			t.Fatalf("once %q", once)
+		}
+		if got := zeros.Comment(once); got != once {
+			t.Fatalf("doubled %q", got)
+		}
+		withNeedle := zeros.Comment("map_interp_table8")
+		if got := zeros.Comment(withNeedle); got != withNeedle {
+			t.Fatalf("needle doubled %q", got)
+		}
 	})
 }
 

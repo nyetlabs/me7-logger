@@ -139,7 +139,7 @@ func TestGateReason(t *testing.T) {
 		t.Fatalf("unset: %s", got)
 	}
 	turned := map[string]parity.Conf{
-		"KFZW": {Reason: "axis"},
+		"KFZW":  {Reason: "axis"},
 		"LAMFA": {Reason: "axis-zeros"},
 	}
 	if got := gateReason("D", high, turned, true, "auto"); got != "axis KFZW" {
@@ -147,6 +147,19 @@ func TestGateReason(t *testing.T) {
 	}
 	if got := gateReason("D", high, map[string]parity.Conf{"LAMFA": {Reason: "axis-zeros"}}, true, "auto"); got != "" {
 		t.Fatalf("soft zeros: %s", got)
+	}
+	if got := gateReason("D", high, map[string]parity.Conf{"KFZW": {Reason: "shape"}}, true, "auto"); got != "" {
+		t.Fatalf("soft shape: %s", got)
+	}
+	if got := gateReason("D", high, map[string]parity.Conf{"KFZW": {Reason: "body"}}, true, "auto"); got != "body KFZW" {
+		t.Fatalf("hard body: %s", got)
+	}
+	both := map[string]parity.Conf{
+		"KFZW":  {Reason: "body"},
+		"LAMFA": {Reason: "axis"},
+	}
+	if got := gateReason("D", high, both, true, "auto"); got != "axis LAMFA" {
+		t.Fatalf("axis before body: %s", got)
 	}
 }
 
@@ -330,6 +343,18 @@ func TestHandCover(t *testing.T) {
 	})
 	if autoMerged.Objects[0].Comment != "map_interp_table8: differs from peerA by 6/192 cells" {
 		t.Fatalf("low annotate: %q", autoMerged.Objects[0].Comment)
+	}
+	annotateConfidence(autoMerged, map[string]parity.Conf{
+		"KFZW": {High: false, Reason: "peer-diff 6/192 peerA"},
+	})
+	if autoMerged.Objects[0].Comment != "map_interp_table8: differs from peerA by 6/192 cells" {
+		t.Fatalf("annotate twice: %q", autoMerged.Objects[0].Comment)
+	}
+	emptyNeedle := modelOf(pubObj("LAMFA", 0x200, 1, ""))
+	annotateConfidence(emptyNeedle, map[string]parity.Conf{"LAMFA": {High: false, Reason: "zeros"}})
+	annotateConfidence(emptyNeedle, map[string]parity.Conf{"LAMFA": {High: false, Reason: "zeros"}})
+	if emptyNeedle.Objects[0].Comment != "zero body with no zero peer" {
+		t.Fatalf("empty needle doubled: %q", emptyNeedle.Objects[0].Comment)
 	}
 	keptConv := modelOf(pubObj("KFZW", 0x100, 0.75, "grad KW"))
 	keptConv.Objects[0].Comment = "hand"

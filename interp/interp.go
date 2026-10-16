@@ -514,11 +514,11 @@ func inImage(data []byte, addr uint32) (uint32, bool) {
 }
 
 // axisOf reads the header at mem in this image. The first byte is the point
-// count. On an even address, a zero second byte marks a 16-bit axis whose
-// values start two bytes later. Otherwise the values are bytes, the first of
-// them possibly zero, and start on the next byte. A header
-// that does not match this shape is left unread. The M-box count and width
-// are not substituted.
+// count. On an even address, a zero second byte is a 16-bit axis when those
+// words rise or fall. The same bytes are an 8-bit axis whose first point is
+// 0 when the words turn and the bytes do not. Otherwise the values are
+// bytes and start on the next byte. A header that does not match this shape
+// is left unread. The M-box count and width are not substituted.
 func axisOf(data []byte, dpp [4]uint16, mem uint16) (record.Axis, bool) {
 	addr, ok := inImage(data, opcode.Physical(dpp, mem, -1))
 	if !ok {
@@ -536,11 +536,58 @@ func axisAt(data []byte, addr uint32) (record.Axis, bool) {
 	if off+1 >= len(data) {
 		return record.Axis{}, false
 	}
-	bits := 8
 	if data[off+1] == 0 && addr%2 == 0 {
-		bits = 16
+		wide, ok16 := Breakpoints(data, addr, 16)
+		if ok16 && axisOrdered(data, wide) {
+			return wide, true
+		}
+		narrow, ok8 := Breakpoints(data, addr, 8)
+		if ok8 && axisOrdered(data, narrow) {
+			return narrow, true
+		}
+		if ok16 {
+			return wide, true
+		}
 	}
-	return Breakpoints(data, addr, bits)
+	return Breakpoints(data, addr, 8)
+}
+
+// axisOrdered is true when the breakpoint values rise or fall without a turn.
+// A flat list is not ordered. Signed and unsigned readings both count.
+func axisOrdered(data []byte, a record.Axis) bool {
+	if a.Count < 2 {
+		return true
+	}
+	step := 1
+	if a.Bits == 16 {
+		step = 2
+	}
+	off := int(a.Addr - opcode.FlashBase)
+	n := a.Count * step
+	if off < 0 || off+n > len(data) {
+		return false
+	}
+	raw := data[off : off+n]
+	u := make([]int, a.Count)
+	s := make([]int, a.Count)
+	for i := range u {
+		if step == 2 {
+			w := uint16(raw[2*i]) | uint16(raw[2*i+1])<<8
+			u[i], s[i] = int(w), int(int16(w))
+		} else {
+			u[i], s[i] = int(raw[i]), int(int8(raw[i]))
+		}
+	}
+	return monoAxis(u) || monoAxis(s)
+}
+
+func monoAxis(v []int) bool {
+	up, down := true, true
+	for i := 1; i < len(v); i++ {
+		up = up && v[i] >= v[i-1]
+		down = down && v[i] <= v[i-1]
+	}
+	return (up || down) && v[0] != v[len(v)-1]
 }
 
 // Packed reads a row count and a column count when they sit in front of the

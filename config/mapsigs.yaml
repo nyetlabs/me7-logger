@@ -234,7 +234,7 @@ mapsigs:
 - {name: KFMIRL, pattern: 'E6FCXXXXE6FD0702F2FEXXF8F2FFXX[A0/FE]DA83', at: 2, frame: true, add: 68, rows: 16, cols: 16, xbits: 16, ybits: 16}
 # The F048 tails are the pointer table.
 - {name: KFMIRL, pattern: [F048004A08049860987098809890DB00F2F4F6B9, F048004A08049860987098809890DB00C2F4C286, F048004A08049860987098809890DB00C2F4F086], add: 28, rows: 16, cols: 16, ybits: 16, xbits: 16}
-- {name: FBSTABGM, pattern: 42F4XXXXDD05D740070242F4782EAD02DF3D, add: 14}
+- {name: FBSTABGM, pattern: 42F4XXXXDD05D740070242F4782EAD02DF3D, add: 14, cols: 4, xbits: 16}
 - {name: KFVPDKSD, pattern: D4F9E6FCXXXX, at: 4}
 - {name: KFVPDKSE, pattern: F048XXXXBC58}
 - {name: KFMIOP, pattern: E6FCXXXXE6FD5E69F2FEC289DA83}
@@ -254,7 +254,9 @@ mapsigs:
 - {name: TLDIAPN, pattern: 43F8XXXX9D040981F7F806A3, add: 1}
 - {name: KFLDRXO, pattern: 43FAXXXXFD039F4D, add: 15}
 - {name: LDORXN, pattern: '43F8XXXX9D040981F7F8[00/E3]A3', add: 1, also: [{name: LDPBN, add: 9}]}
-- {name: KFLDRAPP, pattern: [F3F8XXXXD740E100F7F82609, F3F8XXXXD740E100F7F82709], add: 19}
+- {name: KFLDRAPP, pattern: [F3F82F20D740E100F7F82609, F3F82F20D740E100F7F82709], add: 19}
+# CH and DC. The F3 F8 word is a different map. This frame is 8 by 8.
+- {name: KFLDRAPP, pattern: 13B0E6FCXXXXE6FD0602C2FE9CF8C2FFA889, at: 4, frame: true, add: 18, rows: 8, cols: 8}
 - {name: KFDLULS, pattern: 42A3D7400602C2F4XXXX, at: 8, add: 19}
 - {name: KFVPDKLD, pattern: [42A3D7400602C2F4XXXX, 98A6D7400602C2F4XXXX], at: 8, add: 107, rows: 10, cols: 12}
 - {name: NDLDRAPU, pattern: 43F8XXXXFD10F3FA3CA3, add: 4, cols: 2}
@@ -377,7 +379,7 @@ mapsigs:
 - {name: KFWDKMSN, pattern: F3FCD386D7400602F2FCXXXXC0CDF2FE, at: 10, add: 68, rows: 16, cols: 6, ybits: 16, xbits: 16}
 # 4Z7 S copies of 4Z7 R rows. Same code, shifted RAM and branch words.
 - {name: DLAMTANS, pattern: [C2FCXXXXE6FD412D, C2FCXXXXE6FD272D], add: 5, cols: 4}
-- {name: FBSTABGM, pattern: [42F4XXXXDD05D740070242F48E2EAD02FF3D, 42F4XXXXAD05D740070242F4742EDD02EF3E], add: 14}
+- {name: FBSTABGM, pattern: [42F4XXXXDD05D740070242F48E2EAD02FF3D, 42F4XXXXAD05D740070242F4742EDD02EF3E], add: 14, cols: 4, xbits: 16}
 - {name: FWFTBRTA, pattern: [C2F4XXXX6842EA20F2F1, C2F4XXXX6842EA20A07F], add: 59, cols: 14}
 - {name: KFDLULS, pattern: 3EA3D7400602C2F4XXXX, at: 8, add: 19}
 - {name: KFFWTBR, pattern: [C2F4XXXX6842EA20F2F1, C2F4XXXX6842EA20A07F], add: 110, rows: 10, cols: 8}
@@ -858,7 +860,8 @@ mapsigs:
 # AK and AS. The C2 F5 words are F31F and B9F9.
 - {name: KRALH, pattern: C2F5F31F2045C2F5B9F94054CD05}
 # AK and AS. The F7 F8 word is 2F09 and the E6 FC word is 4F2F.
-- {name: FWFTBRTA, pattern: 443DD740E100F7F82F09E6FC4F2F, at: 12, frame: true, add: 15, cols: 14, xbits: 16}
+# AK and AS. The 14 points start 15 bytes before the body. The first point is 0.
+- {name: FWFTBRTA, pattern: 443DD740E100F7F82F09E6FC4F2F, at: 12, frame: true, add: 36, cols: 14}
 # AK and AS. The E6 FC word is 0820. KRANH is 17 bytes before that body.
 - {name: KRFKLN, pattern: 9A380DC0E6FC0820E6FD0602, at: 6, frame: true, xat: 18, also: [{name: KRANH, add: -17}]}
 # AK and AS. The F2 word is 148D and the far pointer is 9C4D.
