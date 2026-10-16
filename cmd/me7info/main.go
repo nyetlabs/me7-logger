@@ -125,7 +125,7 @@ func cmdGenerate(args []string) error {
 	fullPath := fs.String("full-xdf", "", "also write every located named map to this xdf `<file>`, - for stdout")
 	modelPath := fs.String("model", "", "full located model JSON `<file>`, - for stdout")
 	labelsPath := fs.String("labels", "", "Ghidra label TSV `<file>` (function entries, RAM, maps), - for stdout")
-	scale := fs.String("5120", "auto", "mbar scaling `<mode>`: auto, on, or off")
+	scale := fs.String("5120", "auto", "mbar scaling `<mode>`: auto reads located PUMN, PUMX, and PUE; on doubles; off leaves factors")
 	clock := fs.Int("clock", 0, "CPU clock `<MHz>`: 20, 24, 32, or 40; 0 uses config/names.yaml")
 	conn := fs.String("connect", "", "override Connect with `<mode>`, for example SLOW-0x11")
 	imgPath, img, userDir, err := image(fs, d, args)

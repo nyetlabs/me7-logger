@@ -221,6 +221,20 @@ func cmdCorpus(args []string) error {
 				}
 			}
 		}
+		if item.reason == "verified" {
+			loc, err := located(d, prepare, c, name)
+			if err != nil {
+				return err
+			}
+			merged, added := verifiedAdd(prev, loc)
+			if added > 0 {
+				annotateConfidence(merged, item.conf)
+				item.merged = merged
+				item.keepOrigin = true
+				delta = fmt.Sprintf("+%d", added)
+				item.reason = "verified, " + delta
+			}
+		}
 		if nKey > 0 && item.reason != "" && item.reason != "def unreadable" {
 			if item.merged == nil {
 				item.merged = clearedCopy(prev)
@@ -772,6 +786,58 @@ func applyMoves(prev, located *model.Model, notes []coverNote) *model.Model {
 		out.Objects = append(out.Objects, &c)
 	}
 	return out
+}
+
+// verifiedAdd appends located names the verified file does not have.
+// Addresses, conversions, and comments already in the file stay.
+func verifiedAdd(prev, located *model.Model) (*model.Model, int) {
+	_, added, notes := coverAll(prev, located)
+	if added == 0 {
+		return nil, 0
+	}
+	var add []coverNote
+	for _, n := range notes {
+		if n.op == "added" {
+			add = append(add, n)
+		}
+	}
+	out := applyMoves(prev, located, add)
+	for _, o := range out.Objects[len(prev.Objects):] {
+		o.Categories = adoptCats(out, located, o.Categories)
+	}
+	return out, added
+}
+
+// adoptCats files ids from src under the same names in dst. A name dst
+// does not have is added. The two files number their categories apart.
+func adoptCats(dst, src *model.Model, ids []int) []int {
+	var out []int
+	if src == nil {
+		return out
+	}
+	for _, id := range ids {
+		if id < 0 || id >= len(src.Categories) || src.Categories[id] == nil {
+			continue
+		}
+		out = append(out, ensureCat(dst, src.Categories[id].Name))
+	}
+	return out
+}
+
+func ensureCat(m *model.Model, name string) int {
+	for _, c := range m.Categories {
+		if c != nil && c.Name == name {
+			return c.ID
+		}
+	}
+	id := 0
+	for _, c := range m.Categories {
+		if c != nil && c.ID >= id {
+			id = c.ID + 1
+		}
+	}
+	m.Categories = append(m.Categories, &model.Category{ID: id, Name: name})
+	return id
 }
 
 // corrections is how many previous objects change description, comment,

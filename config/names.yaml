@@ -7,7 +7,8 @@
 #             20 and 40 MHz are 1/312.5, 24 MHz is 1/375, 32 MHz is 1/250.
 #             injection is the names that use the injection timer.
 #             KRKTE uses that factor divided by 24.
-# scale_5120  Pressure names checked against the 400–1200 mbar band.
+# scale_5120  Ambient constants. Auto doubles mbar factors when only the
+#             doubled value is inside the band. on and off override.
 # selector_*  Start bytes and end address of the result-type selector.
 #
 # Leave the top-level keys in this order. Sort injection and ambient by name,

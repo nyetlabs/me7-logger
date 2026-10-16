@@ -7,8 +7,9 @@
 #   D  stage 1: requested boost (LDRXN, KFLDHBN), the DPUPS throttle cut,
 #      I limit, timing, torque monitoring, knock, BTS and open loop fueling
 #   C  stage 2: injector and FPR changes, exhaust DTCs, KFTARX
-#   B  stage 3-: bigger turbos, and the underboost window
-#      (EDLDRP, SDLDRL, TDLDRA, NDLDRAPU)
+#   B  stage 3-: bigger turbos, the underboost window
+#      (EDLDRP, SDLDRL, TDLDRA, NDLDRAPU), and the 5120 ambient
+#      check (PUE, PUMN, PUMX)
 #   A  stage 3: MAF and intake, ARMD
 #   S  niceties, and boost codes left stock: overboost limp
 #      (KFDLULS, TULV1, LDORXN, KFLDRXO), the P1557 leak check
@@ -33,7 +34,7 @@ tiers:
     2: [KFDMDADP, KFDMDARO, KFKHFM, KFMLDMX, KFNW, KFNWWL, KFPBRK, KFPBRKNW,
         KFPRG, KFURL]
   B:
-    0: [DSLOFS, EDLDRP, LDEIAP, LDRQ0S, SDLDRL, TDLDRA, UMDYLDR]
+    0: [DSLOFS, EDLDRP, LDEIAP, LDRQ0S, PUE, PUMN, PUMX, SDLDRL, TDLDRA, UMDYLDR]
     1: [LDRQ0DY, LDRQ1DY, LDRQ1ST, NDLDRAPU, TLDIAPN, WDKUGDN]
     2: [KFLDRQ1, KFLDRQ2, KFMSNWDK, KFVPDKSD, KFVPDKSE, KFWDKMSN]
   C:

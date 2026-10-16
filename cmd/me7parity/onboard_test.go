@@ -502,6 +502,37 @@ func pubObj(key string, addr uint32, factor float64, units string) *model.Object
 	}
 }
 
+func TestVerifiedAdd(t *testing.T) {
+	prev := modelOf(
+		pubObj("KFZW", 0x100, 0.75, "grad"),
+		pubObj("OTHER", 0x180, 1, ""),
+	)
+	prev.Categories = []*model.Category{{ID: 22, Name: "Misfire recognition"}}
+	pue := pubObj("PUE", 0x1BE6C, 0.0390625, "hPa")
+	pue.Categories = []int{0}
+	loc := modelOf(
+		pubObj("KFZW", 0x200, 1, ""),
+		pue,
+	)
+	loc.Categories = []*model.Category{{ID: 0, Name: "Other"}}
+	got, n := verifiedAdd(prev, loc)
+	if n != 1 || got == nil || len(got.Objects) != 3 {
+		t.Fatalf("n=%d len=%d", n, len(got.Objects))
+	}
+	if got.Objects[0].Address != 0x100 || got.Objects[0].Value.Conversion.Factor != 0.75 {
+		t.Fatalf("kept %+v", got.Objects[0])
+	}
+	if got.Objects[2].ID != "PUE" || got.Objects[2].Address != 0x1BE6C {
+		t.Fatalf("added %+v", got.Objects[2])
+	}
+	if len(got.Categories) != 2 || got.Categories[1].Name != "Other" || got.Objects[2].Categories[0] != got.Categories[1].ID {
+		t.Fatalf("category %+v %+v", got.Categories, got.Objects[2].Categories)
+	}
+	if again, n := verifiedAdd(got, loc); again != nil || n != 0 {
+		t.Fatal("second add")
+	}
+}
+
 func TestMatchStems(t *testing.T) {
 	stems := []string{"8D0907551H-0003", "8D0907551M-0002", "4D1907558-0002", "4D1907558-0004"}
 	got, err := matchStems(stems, []string{"8D0907551H"})

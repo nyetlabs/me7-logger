@@ -9,6 +9,7 @@ import (
 	"os"
 	"slices"
 	"sort"
+	"strings"
 
 	"go.nyet.org/me7-logger/config"
 	"go.nyet.org/me7-logger/connect"
@@ -272,7 +273,9 @@ func Generate(opt Options) (*Result, error) {
 	if err != nil {
 		return nil, err
 	}
-	apply, note := ecu.Decide5120(mode, nil, names.Scale.Ambient, names.Scale.Low, names.Scale.High)
+	part := strings.TrimSpace(res.File.ID.PartNumber)
+	consts := pressureConsts(opt.Image, res.Maps, part, names.Scale.Ambient, names.Scale.Units, scales)
+	apply, note := ecu.Decide5120(mode, consts, names.Scale.Ambient, names.Scale.Low, names.Scale.High)
 	res.ScaleNote = note
 	if apply {
 		ecu.ScaleMbar(res.File.Items, names.Scale.Units)
@@ -633,6 +636,56 @@ func unnamedAt(maps []record.Map, addr uint32) int {
 		}
 	}
 	return -1
+}
+
+// pressureConsts reads each located ambient constant. A and B are the mbar
+// conversion for its cell width. A body past the image is left out.
+func pressureConsts(img []byte, maps []record.Map, part string, ambient map[string]bool, units []string, scales map[mapfile.ScaleKey]mapfile.Scale) []ecu.Const {
+	seen := map[string]struct{}{}
+	var out []ecu.Const
+	for _, m := range maps {
+		if m.Addr == 0 || !ambient[m.Name] {
+			continue
+		}
+		if _, ok := seen[m.Name]; ok {
+			continue
+		}
+		bits := m.Bits
+		if bits != 8 && bits != 16 {
+			if cell, ok := config.Storage(m.Name, part); ok {
+				bits = cell.Bits
+			}
+		}
+		n := bits / 8
+		if n != 1 && n != 2 {
+			continue
+		}
+		off := int(opcode.FileOffset(m.Addr))
+		if off < 0 || off+n > len(img) {
+			continue
+		}
+		seen[m.Name] = struct{}{}
+		raw := uint16(img[off])
+		if n == 2 {
+			raw = binary.LittleEndian.Uint16(img[off:])
+		}
+		a, b := 1.0, 0.0
+		for _, u := range units {
+			sc, ok := scales[mapfile.ScaleKey{Size: n, Unit: u}]
+			if !ok {
+				continue
+			}
+			if sc.SetA {
+				a = sc.A
+			}
+			if sc.SetB {
+				b = sc.B
+			}
+			break
+		}
+		out = append(out, ecu.Const{Name: m.Name, Raw: raw, A: a, B: b})
+	}
+	return out
 }
 
 func stubNote(ms []config.Measure) string {

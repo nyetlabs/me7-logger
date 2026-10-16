@@ -12,6 +12,8 @@ me7logger log -p /dev/tty.usbserial -o log.csv image.bin session.cfg
 
 `image.xdf` is the tuner XDF: the maps listed in `config/categories.json` (`testdata/parity/names/tuner.yaml`) plus the maps at their axis addresses, in tuner categories. `--full-xdf` also writes every located map, with the rest under `Other`.
 
+`--5120 auto` reads located PUMN, PUMX, and PUE and doubles mbar factors when only the doubled conversion sits in the 400–1200 mbar band. `--5120 on` doubles them. `--5120 off` leaves them.
+
 `place` keeps a body that still matches on `dst.bin`. One code pointer, found once, moves the object. Anything else is left out. `-o` names the model file. Its origin is `auto`.
 
 `session.cfg`:

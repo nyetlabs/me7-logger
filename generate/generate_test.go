@@ -1,11 +1,14 @@
 package generate
 
 import (
+	"encoding/binary"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
+	"go.nyet.org/me7-logger/config"
+	"go.nyet.org/me7-logger/ecu"
 	"go.nyet.org/me7-logger/internal/heximg"
 	"go.nyet.org/me7-logger/opcode"
 	"go.nyet.org/me7-logger/record"
@@ -350,5 +353,101 @@ func TestApplyAxesYOrd(t *testing.T) {
 	applyAxes(nil, [4]uint16{}, opcode.MapHit{Rows: 8, Cols: 6, YOrd: true, Bits: 16}, &m)
 	if m.Bits != 16 || m.Rows != 8 || m.Y == nil || m.Y.Addr != 0 || m.Y.Count != 8 {
 		t.Fatalf("%+v %+v", m, m.Y)
+	}
+}
+
+func TestPressureConsts(t *testing.T) {
+	names, err := config.LoadNames("")
+	if err != nil {
+		t.Fatal(err)
+	}
+	scales, err := config.LoadScales("", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	img := make([]byte, 0x20)
+	binary.LittleEndian.PutUint16(img[0x10:], 20000)
+	binary.LittleEndian.PutUint16(img[0x12:], 8000)
+	pue := record.Map{Name: "PUE", Addr: opcode.FlashBase + 0x10}
+	pumn := record.Map{Name: "PUMN", Addr: opcode.FlashBase + 0x12}
+	decide := func(maps []record.Map, mode ecu.ScaleMode) (bool, string, []ecu.Const) {
+		t.Helper()
+		cs := pressureConsts(img, maps, "", names.Scale.Ambient, names.Scale.Units, scales)
+		apply, note := ecu.Decide5120(mode, cs, names.Scale.Ambient, names.Scale.Low, names.Scale.High)
+		return apply, note, cs
+	}
+	apply, note, cs := decide([]record.Map{pue}, ecu.ScaleAuto)
+	if apply || !strings.Contains(note, "stock") || len(cs) != 1 || cs[0].Raw != 20000 || cs[0].A != 10.0/256 || cs[0].B != 0 {
+		t.Fatalf("stock %v %s %+v", apply, note, cs)
+	}
+	apply, note, cs = decide([]record.Map{pumn}, ecu.ScaleAuto)
+	if !apply || !strings.Contains(note, "doubled") || cs[0].Raw != 8000 {
+		t.Fatalf("doubled %v %s %+v", apply, note, cs)
+	}
+	apply, note, cs = decide([]record.Map{pue, pumn}, ecu.ScaleAuto)
+	if apply || !strings.Contains(note, "PUE") || !strings.Contains(note, "PUMN") || !strings.Contains(note, "stock") {
+		t.Fatalf("conflict %v %s %+v", apply, note, cs)
+	}
+	apply, note, cs = decide([]record.Map{{Name: "LAMFA", Addr: opcode.FlashBase + 0x10}}, ecu.ScaleAuto)
+	if apply || len(cs) != 0 || !strings.Contains(note, "no pressure constants") {
+		t.Fatalf("absent %v %s %+v", apply, note, cs)
+	}
+	if apply, note, _ = decide([]record.Map{pue}, ecu.ScaleOn); !apply || !strings.Contains(note, "override on") {
+		t.Fatal(note)
+	}
+	if apply, note, _ = decide([]record.Map{pumn}, ecu.ScaleOff); apply || !strings.Contains(note, "override off") {
+		t.Fatal(note)
+	}
+	if cs := pressureConsts(img, []record.Map{{Name: "PUE", Addr: opcode.FlashBase + 0x100}}, "", names.Scale.Ambient, names.Scale.Units, scales); len(cs) != 0 {
+		t.Fatalf("past image %+v", cs)
+	}
+	img[0] = 0x56
+	img[1] = 0xEE
+	bytePUE := pressureConsts(img, []record.Map{{Name: "PUE", Addr: opcode.FlashBase}}, "8D0907558E", names.Scale.Ambient, names.Scale.Units, scales)
+	if len(bytePUE) != 1 || bytePUE[0].Raw != 0x56 || bytePUE[0].A != 1 {
+		t.Fatalf("8-bit %+v", bytePUE)
+	}
+	dup := pressureConsts(img, []record.Map{pue, {Name: "PUE", Addr: opcode.FlashBase + 0x14}}, "", names.Scale.Ambient, names.Scale.Units, scales)
+	if len(dup) != 1 || dup[0].Raw != 20000 {
+		t.Fatalf("dup %+v", dup)
+	}
+}
+
+func TestScaleFlag(t *testing.T) {
+	dir := t.TempDir()
+	body := "measurements:\n  - name: pu_scale\n    unit: mbar\n    needle_hex: \"DE AD F2 F4 XX XX BE EF\"\n    back_up: -4\n    unique: true\n"
+	if err := os.WriteFile(filepath.Join(dir, "scale.yaml"), []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	img := []byte{0xDE, 0xAD, 0xF2, 0xF4, 0x34, 0x12, 0xBE, 0xEF}
+	want := map[string]struct {
+		a    float64
+		note string
+	}{
+		"auto": {10.0 / 256, "no pressure constants"},
+		"on":   {20.0 / 256, "override on"},
+		"off":  {10.0 / 256, "override off"},
+	}
+	for scale, exp := range want {
+		res, err := Generate(Options{Image: img, ImageName: "t.bin", Scale: scale, UserDir: dir})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !strings.Contains(res.ScaleNote, exp.note) {
+			t.Fatalf("%s %s", scale, res.ScaleNote)
+		}
+		var found bool
+		for _, it := range res.File.Items {
+			if it.Name != "pu_scale" {
+				continue
+			}
+			found = true
+			if it.A != exp.a || it.Unit != "mbar" {
+				t.Fatalf("%s %+v", scale, it)
+			}
+		}
+		if !found {
+			t.Fatalf("%s missing %+v", scale, res.File.Items)
+		}
 	}
 }

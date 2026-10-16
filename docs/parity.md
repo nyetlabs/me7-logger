@@ -35,7 +35,7 @@ status
 
 - `eligible`: stored. Origin becomes `auto`.
 - `identical`: same names, and the description, comment, and layout would stay.
-- `verified`: `provenance.verified` is set. Left in place.
+- `verified`: `provenance.verified` is set. Existing objects stay. A located name the file does not have is added (`verified, +N`).
 - `origin damos` / `origin a2l`: left in place. Added maps and wrong addresses are edited into that JSON by hand.
 - `origin unset`: no provenance origin. Left in place.
 - `manual short NAME`: that manual name was not located. When other names can move or be added, the status continues with the delta and `--submit` writes those. Origin stays `manual`.
