@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"go.nyet.org/xdfkit/canon"
 	"go.nyet.org/xdfkit/model"
 
 	"go.nyet.org/me7-logger/parity"
@@ -514,6 +515,46 @@ func pubObj(key string, addr uint32, factor float64, units string) *model.Object
 		Key: key, ID: key, Shape: "value", Address: model.Addr(addr),
 		Rows: 1, Cols: 1,
 		Value: model.Value{Units: units, Conversion: model.Conversion{Factor: factor}},
+	}
+}
+
+func TestApplyForce(t *testing.T) {
+	dir := t.TempDir()
+	same := modelOf(pubObj("KFZW", 0x100, 0.75, "grad KW"))
+	same.Provenance = &model.Provenance{Format: "image", Origin: "auto", SHA256: strings.Repeat("ab", 32)}
+	path := filepath.Join(dir, "same.json")
+	b, err := canon.MarshalStamped(same, "xdfkit 0.9.9-dirty")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, b, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	item := pubItem{reason: "identical", def: path, merged: same}
+	delta := "-"
+	if err := applyForce(&item, &delta); err != nil {
+		t.Fatal(err)
+	}
+	if item.reason != "identical" || delta != "-" {
+		t.Fatalf("tool version: %s %s", item.reason, delta)
+	}
+	changed := modelOf(pubObj("KFZW", 0x100, 0.5, "grad KW"))
+	changed.Provenance = same.Provenance
+	item = pubItem{reason: "identical", def: path, merged: changed}
+	delta = "-"
+	if err := applyForce(&item, &delta); err != nil {
+		t.Fatal(err)
+	}
+	if item.reason != "forced" || !item.keepOrigin || delta != "force" || item.merged != changed {
+		t.Fatalf("recalc: reason %s keep %v delta %s", item.reason, item.keepOrigin, delta)
+	}
+	item = pubItem{reason: "origin damos", def: path, merged: changed}
+	delta = "-"
+	if err := applyForce(&item, &delta); err != nil {
+		t.Fatal(err)
+	}
+	if item.reason != "origin damos" || delta != "-" {
+		t.Fatalf("held origin: %s %s", item.reason, delta)
 	}
 }
 

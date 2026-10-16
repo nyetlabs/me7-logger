@@ -25,7 +25,7 @@ open and block, printed for a NAME, are the names that did not hit. `absent` is 
 
 ## Corpus
 
-`me7parity corpus` lists every parity image and what `--submit` would store. `--submit` writes `defs/<stem>.json`, sets that row's `def` column, and does not commit, push, or upload. A stored object keeps the previous conversion, units, and layout. A raw value (factor 1, no offset, no units) is filled from the DAMOS and A2L conversion those files agree on for that name, role, and width (`config/units.yaml`). A clock name takes the factor for the image clock. A name they do not agree on stays raw. A `_1_A` name with no sample takes the `_0_A` scale for that role and width. The description becomes the name table and the comment the needle that located the map. On a raw located object whose body confidence is low, the comment adds a short phrase after the needle (`map_interp_table8: differs from 8D0907551L-0001 by 6/192 cells`). High confidence leaves the needle alone. A curve or map with no located axis adds `missing x axis` or `missing y axis`. A cell or image axis that stayed factor 1 with no units adds `no scale`, `no x scale`, or `no y scale`. A codeword, a configuration byte, and an error class are raw on purpose and do not get `no scale`. A manual pack keeps a non-empty comment; DAMOS and A2L are not rewritten. The corpus is `--corpus`, else `CORPUS`, else `../ecu-corpus` when that checkout exists, else `ecu-corpus/`.
+`me7parity corpus` lists every parity image and what `--submit` would store. `--submit` writes `defs/<stem>.json`, sets that row's `def` column, and does not commit, push, or upload. An identical row is stored when the merged model's stamp digests differ, and its origin stays. Those digests cover the document without its stamp, so `stamp.tool` is not part of the fingerprint: a tool name or version does not by itself change the file. A stored object keeps the previous conversion, units, and layout. A raw value (factor 1, no offset, no units) is filled from the DAMOS and A2L conversion those files agree on for that name, role, and width (`config/units.yaml`). A clock name takes the factor for the image clock. A name they do not agree on stays raw. A `_1_A` name with no sample takes the `_0_A` scale for that role and width. The description becomes the name table and the comment the needle that located the map. On a raw located object whose body confidence is low, the comment adds a short phrase after the needle (`map_interp_table8: differs from 8D0907551L-0001 by 6/192 cells`). High confidence leaves the needle alone. A curve or map with no located axis adds `missing x axis` or `missing y axis`. A cell or image axis that stayed factor 1 with no units adds `no scale`, `no x scale`, or `no y scale`. A codeword, a configuration byte, and an error class are raw on purpose and do not get `no scale`. A manual pack keeps a non-empty comment; DAMOS and A2L are not rewritten. The corpus is `--corpus`, else `CORPUS`, else `../ecu-corpus` when that checkout exists, else `ecu-corpus/`.
 
 Confidence has to pass on every row: high bodies are more than half the tuner names that scored. A zero denominator fails the row. xdfkit does not read tiers.
 
@@ -35,6 +35,7 @@ status
 
 - `eligible`: stored. Origin becomes `auto`.
 - `identical`: same names, and the description, comment, and layout would stay.
+- `forced`: the names match, and the stamp digests of the merged model do not. Origin stays.
 - `verified`: `provenance.verified` is set. Existing objects stay. A located name the file does not have is added (`verified, +N`).
 - `origin damos` / `origin a2l`: left in place. Added maps and wrong addresses are edited into that JSON by hand.
 - `origin unset`: no provenance origin. Left in place.
@@ -55,6 +56,7 @@ delta
 - `~N +N`: both, while a short name remains. Origin stays `manual`.
 - `layout N`: an auto file held back by another status. `--submit` writes only the located layouts onto its raw objects, and the origin stays.
 - `key N`: placeholder keys cleared. On an eligible row the origin still becomes `auto`.
+- `force`: the stamp digests differ, so `--submit` writes the merged model.
 
 `eligible` is a full cover: every current name at the same address and at least one new name, or an empty definition that passed the grade. That replaces the origin. A matching name set whose description or comment would change is also eligible, and its delta is `~N`. A name at a different address is the same kind of correction, and a located name the manual file does not have is added. A short key blocks neither. The status keeps the short and repeats the delta (`manual short KFWPFGR, +8`). `--submit` writes that row, keeps the manual conversion, and leaves the origin until the cover is complete.
 

@@ -26,6 +26,9 @@ import (
 const corpusHelp = `
 Lists every parity image and what --submit would store.
 --submit writes those rows and does not commit or upload.
+An identical row is stored when its stamp digests differ. stamp.tool
+is not one of those digests, so a tool name or version does not count.
+Origin stays.
 With no NAME, every image is listed. A named row also prints
 manual, open, and block.
 
@@ -269,6 +272,9 @@ func cmdCorpus(args []string) error {
 		}
 		if item.reason == "" && item.merged != nil && item.def == "" {
 			annotateConfidence(item.merged, item.conf)
+		}
+		if err := applyForce(&item, &delta); err != nil {
+			return err
 		}
 		if item.merged != nil && (item.reason == "" || item.keepOrigin) {
 			block, text, err := holdLint(c, name, item.merged)
@@ -1269,6 +1275,46 @@ func objKey(o *model.Object) string {
 		return o.Key
 	}
 	return o.ID
+}
+
+// applyForce stores an identical row when the merged model's stamp digests
+// differ from the file. Origin stays. stamp.tool is not a digest, so a
+// different tool name or version leaves the row identical.
+func applyForce(item *pubItem, delta *string) error {
+	if item.reason != "identical" || item.merged == nil || item.def == "" {
+		return nil
+	}
+	same, err := sameContent(item.def, item.merged)
+	if err != nil || same {
+		return err
+	}
+	item.keepOrigin = true
+	item.reason = "forced"
+	*delta = "force"
+	return nil
+}
+
+// sameContent reports whether m and the definition at path have the same
+// stamp digests. The digests cover the document without its stamp, so
+// stamp.tool is not compared.
+func sameContent(path string, m *model.Model) (bool, error) {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return false, err
+	}
+	var old model.Model
+	if err := canon.Unmarshal(b, &old); err != nil {
+		return false, err
+	}
+	a, err := canon.Digests(&old)
+	if err != nil {
+		return false, err
+	}
+	c, err := canon.Digests(m)
+	if err != nil {
+		return false, err
+	}
+	return slices.Equal(a, c), nil
 }
 
 func readModel(path string) (*model.Model, error) {

@@ -709,7 +709,8 @@ func run(dir string, images []string, defOf func(string) string, gen imageGen) (
 				})
 			}
 			var byName map[string]Conf
-			rep.Tuner[i].Confidence, byName = scoreConfidence(confTuner, axes, h.img, h.maps, h.oracle, peers, false)
+			p := rep.Tuner[i].Provenance
+			rep.Tuner[i].Confidence, byName = scoreConfidence(confTuner, axes, h.img, h.maps, h.oracle, peers, p != nil && p.Verified)
 			rep.Tuner[i].ConfByName = byName
 		}
 	}
