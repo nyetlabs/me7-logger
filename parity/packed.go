@@ -71,10 +71,7 @@ func GradePacked(dir string, packed []Packed) ([]Image, error) {
 		dims := publishedDims(h.maps, lists.dims)
 		scored := tunerMaps(lists.forBlock(blk), dims, h.maps, nil)
 		gone := absent[blk]
-		tier := nameGrade(lists.tier, lists.byBlock[blk], lists.any, func(n string) (bool, bool) {
-			_, located := scored[n]
-			return located || gone[n], located
-		})
+		tier := nameGrade(lists.tier, lists.byBlock[blk], lists.any, tierHit(scored, dims, gone))
 		out[i] = Image{
 			Name:       h.stem + ".bin",
 			Tier:       tier,

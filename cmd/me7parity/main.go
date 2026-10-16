@@ -83,6 +83,8 @@ xdf damos     DAMOS or A2L maps at the same address.
 xdf manual    the same columns for a manual definition.
 
 open and block are the misses. absent counts toward the grade.
+axis means the table was located and an axis it lists is not set.
+scale means the table was located and a cell or image axis has no scale.
 met by <form> means that family slot is already filled.
 lint lists xdfkit findings for the named images. They are not applied.
 

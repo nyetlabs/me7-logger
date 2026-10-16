@@ -313,10 +313,10 @@ func TestDetail(t *testing.T) {
 
 func TestOpenMetBy(t *testing.T) {
 	scored := map[string]record.Map{
-		"NFSM":      {Name: "NFSM"},
-		"KFPED":     {Name: "KFPED"},
-		"NLL2M_0_A": {Name: "NLL2M_0_A"},
-		"NLL2M_1_A": {Name: "NLL2M_1_A"},
+		"NFSM":      {Name: "NFSM", Unit: "x"},
+		"KFPED":     {Name: "KFPED", Unit: "x"},
+		"NLL2M_0_A": {Name: "NLL2M_0_A", Unit: "x"},
+		"NLL2M_1_A": {Name: "NLL2M_1_A", Unit: "x"},
 	}
 	families := []family{
 		{names: []string{"NFSM", "NFS2M", "NFS2M_0_A"}},
@@ -327,7 +327,7 @@ func TestOpenMetBy(t *testing.T) {
 	absent := map[string]bool{"KFZW2_0_A": true}
 	got := openNames([]string{"NFS2M", "KFPED_0_A", "KFPED_1_A", "NLL2M", "NLLM", "LAMFA", "KFZW2_0_A"},
 		map[string]string{"NFS2M": "C", "KFPED_0_A": "S", "KFPED_1_A": "S", "NLL2M": "S", "NLLM": "C", "LAMFA": "D", "KFZW2_0_A": "D"},
-		scored, absent, families)
+		scored, absent, families, nil)
 	by := map[string]OpenName{}
 	for _, n := range got {
 		by[n.Name] = n
@@ -346,6 +346,42 @@ func TestOpenMetBy(t *testing.T) {
 	}
 	if by["NFS2M"].Note() != "  met by NFSM" {
 		t.Fatalf("note %q", by["NFS2M"].Note())
+	}
+}
+
+func TestTierNeedsEveryAxis(t *testing.T) {
+	dims := map[string]int{"MAP": 2, "CURVE": 1}
+	tierOf := map[string]string{"MAP": "D", "CURVE": "C", "LATER": "B"}
+	x := &record.Axis{Addr: 0x10, Count: 4, Unit: "x"}
+	partial := map[string]record.Map{
+		"MAP":   {Name: "MAP", Unit: "x", X: x},
+		"CURVE": {Name: "CURVE", Unit: "x", X: x},
+	}
+	if got := nameGrade(tierOf, nil, nil, tierHit(partial, dims, nil)); got != "-" {
+		t.Fatalf("map missing a row axis: %s", got)
+	}
+	full := map[string]record.Map{
+		"MAP":   {Name: "MAP", Unit: "x", X: x, Y: &record.Axis{Count: 6}},
+		"CURVE": {Name: "CURVE", Unit: "x", X: x},
+	}
+	if got := nameGrade(tierOf, nil, nil, tierHit(full, dims, nil)); got != "C" {
+		t.Fatalf("ordinal row axis: %s", got)
+	}
+	got := openNames([]string{"MAP", "CURVE"}, tierOf, partial, nil, nil, dims)
+	if len(got) != 1 || got[0].Name != "MAP" || got[0].Note() != "  axis" {
+		t.Fatalf("open %+v", got)
+	}
+	raw := map[string]record.Map{"CURVE": {Name: "CURVE", X: x}}
+	if got := nameGrade(tierOf, nil, nil, tierHit(raw, dims, nil)); got != "-" {
+		t.Fatalf("curve with no scale: %s", got)
+	}
+	open := openNames([]string{"CURVE"}, tierOf, raw, nil, nil, dims)
+	if len(open) != 1 || open[0].Note() != "  scale" {
+		t.Fatalf("scale open %+v", open)
+	}
+	wide := record.Map{Name: "KFMIRL", X: x, Y: &record.Axis{Addr: 0x20, Unit: "y"}}
+	if !scaled(wide) {
+		t.Fatal("unset cell width")
 	}
 }
 

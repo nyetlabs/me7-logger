@@ -88,25 +88,37 @@ type Image struct {
 	BlockOpen  []OpenName
 }
 
-// OpenName is a tuner or block name the image did not locate.
-// Absent means the name is listed for this layout block, so the grade
-// still counts it. By is the located member that already fills the
-// slot, when this form is not absent.
+// OpenName is a tuner or block name the image did not locate, or a table
+// whose listed axes are not all set, or whose cell or image axis has no
+// scale. Absent means the name is listed for this layout block, so the
+// grade still counts it. By is the located member that already fills the
+// slot, when this form is not absent. Axis means the body is located and
+// an axis the table lists is missing. Scale means the body and axes are
+// set and a cell or image axis has no scale.
 type OpenName struct {
 	Name   string
 	Tier   string
 	Absent bool
 	By     string
+	Axis   bool
+	Scale  bool
 }
 
 // Note is the trailing mark on an open line. An absent name says so.
 // A family form whose slot is already located names that member.
+// A located table with a missing axis says so. A table with no scale says so.
 func (n OpenName) Note() string {
 	if n.Absent {
 		return "  absent"
 	}
 	if n.By != "" {
 		return "  met by " + n.By
+	}
+	if n.Axis {
+		return "  axis"
+	}
+	if n.Scale {
+		return "  scale"
 	}
 	return ""
 }
@@ -480,14 +492,12 @@ func (r *Report) selectStems(stems []string) *Report {
 	return out
 }
 
-// openNames is the wanted names that were not located, lowest tier first.
+// openNames is the wanted names that are not a complete hit, lowest tier first.
 // tier may be nil for a list that has no tier. An absent name is kept and marked.
 // A family form whose slot is already located records the member that fills it.
-func openNames(want []string, tier map[string]string, scored map[string]record.Map, absent map[string]bool, families []family) []OpenName {
-	hit := func(n string) (bool, bool) {
-		_, located := scored[n]
-		return located || absent[n], located
-	}
+// A located table missing an axis or a scale is kept and marked.
+func openNames(want []string, tier map[string]string, scored map[string]record.Map, absent map[string]bool, families []family, dims map[string]int) []OpenName {
+	hit := tierHit(scored, dims, absent)
 	filled := map[string]string{}
 	for _, f := range families {
 		why := metBy(f, hit)
@@ -506,10 +516,16 @@ func openNames(want []string, tier map[string]string, scored map[string]record.M
 		if n == "" {
 			continue
 		}
-		if _, ok := scored[n]; ok {
+		if _, full := hit(n); full {
 			continue
 		}
-		out = append(out, OpenName{Name: n, Tier: tier[n], Absent: absent[n], By: filled[n]})
+		on := OpenName{Name: n, Tier: tier[n], Absent: absent[n], By: filled[n]}
+		if m, ok := scored[n]; ok {
+			on.Absent, on.By = false, ""
+			on.Axis = !axesReady(m, dims, n)
+			on.Scale = !on.Axis
+		}
+		out = append(out, on)
 	}
 	slices.SortStableFunc(out, func(a, b OpenName) int {
 		return cmp.Or(tierRank(b.Tier)-tierRank(a.Tier), strings.Compare(a.Name, b.Name))
@@ -638,10 +654,7 @@ func run(dir string, images []string, defOf func(string) string, gen imageGen) (
 				rep.Disagree = append(rep.Disagree, disagreements(base, want, scored, xrows)...)
 			}
 			gone := absent[blk]
-			tier := nameGrade(ntier, lists.byBlock[blk], lists.any, func(n string) (bool, bool) {
-				_, located := scored[n]
-				return located || gone[n], located
-			})
+			tier := nameGrade(ntier, lists.byBlock[blk], lists.any, tierHit(scored, axes, gone))
 			rep.Tuner = append(rep.Tuner, Image{
 				Name: base, Fraction: countScored(tuner, scored),
 				Block:      countScored(lists.byBlock[blk], scored),
@@ -649,8 +662,8 @@ func run(dir string, images []string, defOf func(string) string, gen imageGen) (
 				NoDef:      noDef(tier, prov),
 				Provenance: prov,
 				Axis:       scoreAxes(scored, axes),
-				Open:       openNames(tuner, ntier, scored, gone, lists.any),
-				BlockOpen:  openNames(lists.byBlock[blk], nil, scored, gone, lists.any),
+				Open:       openNames(tuner, ntier, scored, gone, lists.any, axes),
+				BlockOpen:  openNames(lists.byBlock[blk], nil, scored, gone, lists.any, axes),
 			})
 			held = append(held, kept{base: base, stem: stem, img: img, maps: maps, oracle: oracle})
 		}
@@ -1197,6 +1210,7 @@ const beyondS = "S+"
 
 // nameGrade is the highest name tier complete, counted up from D, or "-"
 // when D is not. A tier is complete when each of its names is hit or absent.
+// The caller counts a table as hit only when its axes are set and scaled.
 // A family is one name: one member located, or every member absent.
 // A pair slot is the plain name, or both variants with the plain name absent.
 // rest is the untiered names, one level above S. hit reports (counts, located).
@@ -1389,6 +1403,63 @@ func countScored(want []string, scored map[string]record.Map) Fraction {
 func scoreTuner(want []string, dims map[string]int, maps []record.Map, rows []refRow) Fraction {
 	names, _ := tunerScore(want, dims, maps, rows)
 	return names
+}
+
+// tierHit is the nameGrade hit for one image. A located table counts when
+// every axis its list gives it is set and its cell and image axes have a
+// scale. An absent name counts and is not located.
+func tierHit(scored map[string]record.Map, dims map[string]int, absent map[string]bool) func(string) (bool, bool) {
+	return func(n string) (bool, bool) {
+		m, located := scored[n]
+		full := located && axesReady(m, dims, n) && scaled(m)
+		return full || absent[n], full
+	}
+}
+
+// axesReady is true when the table's listed axes are set. A scalar, and a
+// name the list does not size, are ready. An ordinal axis has a count and
+// no address, and that counts.
+func axesReady(m record.Map, dims map[string]int, name string) bool {
+	n, known := dims[name]
+	if !known || n <= 0 {
+		return true
+	}
+	if !axisSet(m.X) {
+		return false
+	}
+	return n < 2 || axisSet(m.Y)
+}
+
+func axisSet(a *record.Axis) bool {
+	return a != nil && (a.Addr != 0 || a.Count > 0)
+}
+
+// scaled is a cell, and each image axis, with a unit or an agreed conversion.
+// An ordinal axis is not an image axis. A width the locator left at 0 is the
+// storage width, then 8, the same width a raw object is written with.
+func scaled(m record.Map) bool {
+	if !hasScale(m.Name, "z", m.Bits, m.Unit) {
+		return false
+	}
+	if m.X != nil && m.X.Addr != 0 && !hasScale(m.Name, "x", m.X.Bits, m.X.Unit) {
+		return false
+	}
+	return m.Y == nil || m.Y.Addr == 0 || hasScale(m.Name, "y", m.Y.Bits, m.Y.Unit)
+}
+
+func hasScale(name, role string, bits int, unit string) bool {
+	if unit != "" {
+		return true
+	}
+	if bits == 0 {
+		if cell, ok := config.Storage(name, ""); ok && cell.Bits != 0 {
+			bits = cell.Bits
+		} else {
+			bits = 8
+		}
+	}
+	_, ok := config.Conversion(name, role, bits, 0)
+	return ok
 }
 
 func scoreAxes(scored map[string]record.Map, dims map[string]int) Fraction {
