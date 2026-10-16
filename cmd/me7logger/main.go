@@ -76,7 +76,7 @@ func cmdLog(args []string) error {
 	out := fs.StringP("output", "o", "", "csv output `<file>`, appended to (default stdout)")
 	one := fs.BoolP("one", "1", false, "read one sample and stop")
 	scale := fs.String("5120", "auto", "mbar scaling `<mode>`: auto reads located PUMN, PUMX, and PUE; on doubles; off leaves factors")
-	clock := fs.Int("clock", 0, "CPU clock `<MHz>`: 20, 24, 32, or 40; 0 uses config/names.yaml")
+	clock := fs.Int("clock", 0, "CPU clock `<MHz>`: 20, 24, 32, or 40; 0 uses config/units.yaml")
 	user := fs.StringP("user", "u", config.Path("ME7_USER", "user"), "`<dir>` of user needles, measurements, and conversions")
 	if err := fs.Parse(args); err != nil {
 		return err

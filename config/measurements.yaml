@@ -18,10 +18,10 @@
 # inverse     Omitted means false.
 # factor      Omitted means 1, unless a conversion fills it in.
 # offset      Omitted means 0.
-# conversion  A named scale in config/names.yaml: amp, half, retard, torque, twice.
+# conversion  A named scale in config/units.yaml: amp, half, retard, torque, twice.
 # stub        In config/user: drop the needle and keep the scale.
 #
-# A blank scale field is filled from config/names.yaml when size and unit
+# A blank scale field is filled from config/units.yaml when size and unit
 # match a conversion there. A field written on the row is kept. conversion
 # picks a named scale on its own, so that scale can have a blank unit.
 # A row with no needle is a stub and is left out. config/user can add a

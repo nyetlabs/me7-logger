@@ -24,12 +24,14 @@ import (
 	"go.nyet.org/me7-logger/needle"
 )
 
-//go:embed names.yaml needles.yaml measurements.yaml catalog aliases.yaml maps.yaml signatures.yaml mapsigs.yaml categories.json descriptions.yaml sets.yaml storage.yaml
+//go:embed units.yaml needles.yaml measurements.yaml catalog aliases.yaml maps.yaml signatures.yaml mapsigs.yaml categories.json descriptions.yaml sets.yaml storage.yaml
 var embedded embed.FS
 
 const (
-	// NamesFile is the ME7 name list.
-	NamesFile = "names.yaml"
+	// UnitsFile is connect, the clock, and the unit table.
+	// NamesFile is the same file. The old name was names.yaml.
+	UnitsFile = "units.yaml"
+	NamesFile = UnitsFile
 	// NeedlesFile is the byte-pattern list.
 	NeedlesFile = "needles.yaml"
 	// MeasuresFile is the measurement list. A row may carry the needle that locates it.

@@ -113,7 +113,7 @@ func TestShippedNames(t *testing.T) {
 	if n.Connect.SlowNeedle != "slow_init_table" || n.Connect.Key1 != 0xEF || n.Connect.Prefer != 0x11 {
 		t.Fatalf("%+v", n.Connect)
 	}
-	if !n.Clock.Injection["te_w"] || n.Clock.KRKTE != "KRKTE" || n.Clock.Factors[32] != 1.0/250 || n.Clock.Factors[20] != 1.0/312.5 || n.Clock.Factors[24] != 1.0/375 || n.Clock.Factors[40] != n.Clock.Factors[20] {
+	if !n.Clock.Injection["te_w"] || n.Clock.KRKTE != "KRKTE" || n.Clock.Factors[40] != 1.0/250 || n.Clock.Factors[20] != 1.0/312.5 || n.Clock.Factors[24] != 1.0/375 || n.Clock.Factors[32] != n.Clock.Factors[20] {
 		t.Fatalf("%+v", n.Clock)
 	}
 	if !n.Scale.Ambient["PUMX"] || n.Scale.Low != 400 || n.Scale.High != 1200 {

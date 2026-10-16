@@ -1,0 +1,217 @@
+# Units, clock, and connect. Edit this file.
+# Nothing here is compiled into the program.
+# A unit row is a width and a factor. The Bosch names that use it are z, x,
+# and y. A later row with the same width and unit and maps: true is only
+# those names; it does not replace the measurement factor.
+#
+# map_name    File name written for the catalog.
+# connect     Slow-init and fast-init needles, KWP keys, and the addresses to try.
+# clock       Milliseconds per timer tick, keyed by CPU megahertz.
+#             20 and 32 MHz are 1/312.5, 24 MHz is 1/375, 40 MHz is 1/250.
+#             injection is the names that use the injection timer.
+#             KRKTE is that tick divided by 24, in ms/%: 0.0001333, 0.0001111,
+#             and 0.0001666. A byte holds a sixteenth of the word, so its
+#             factor is 16 times the word factor. cc/min is a reciprocal
+#             alias of the same word, not a second scale.
+# scale_5120  Ambient constants. Auto doubles mbar factors when only the
+#             doubled value is inside the band. on and off override.
+# selector_*  Start bytes and end address of the result-type selector.
+#
+# Leave the top-level keys in this order. Sort injection and ambient by name,
+# and the megahertz factors by frequency.
+
+map_name: catalog.yaml
+
+connect:
+  slow_init_needle: slow_init_table
+  fast_init_needle: fast_init_physical
+  kwp_key1: "0xEF"
+  kwp_key2: "0x8F"
+  prefer_address: "0x11"
+  fallback_address: "0x01"
+  fast_targets: ["0x01", "0x10"]
+
+clock:
+  default_mhz: 24
+  krkte: KRKTE
+  injection:
+    - DTEPRU
+    - DTIABS
+    - te2_w
+    - te_w
+    - TEMIN
+    - TEMINVA
+    - ti_avg
+    - ti_b1
+    - ti_b2
+    - timx_w
+    - timxth_w
+    - TVTSPEP
+    - TVUB
+  factors:
+    "20": 1/312.5
+    "24": 1/375
+    "32": 1/312.5
+    "40": 1/250
+
+scale_5120:
+  units: [mbar, mBar]
+  ambient: [PUE, PUMN, PUMX]
+  low_mbar: 400
+  high_mbar: 1200
+
+selector_prefixes:
+  - "D440120066F40F00"
+  - "D440140066F40F00"
+selector_end: "0x3F7"
+
+# A row with no name matches a measurement, a catalog value, or a map by
+# bits and unit. bits is the cell width, 8 or 16. Omitted bits is 16.
+# Factor is a ratio. Offset is subtracted: physical is factor * raw - offset.
+# min and max are the physical span when the row is that unit.
+# A field set on the measurement or catalog row is kept.
+# A one-bit measurement bitmask skips this list.
+# A row with a name is used only when a measurement sets conversion. Its unit
+# can be blank. Sort unnamed rows by bits, then unit, and named rows by name.
+# z, x, and y are the tuner maps. maps: true keeps a second factor from
+# replacing the measurement row.
+units:
+- {bits: 8, unit: "", factor: 1/100}
+- {bits: 8, unit: "%", factor: 3/4, min: 0, max: 100, precision: 3, z: [
+    KFLDRXO, KRALH, LDORXN, RLSALULL, RLSALUN, SDLDRL], x: [
+    FZWWLRLN, KFFWLW, KFKHFM, KFLAFWL, KFLAMKR, KFLAMKRL, KFLF, KFNW, KFNWWL, KFTSRL, KFZW,
+    KFZW2], y: [
+    KFFWTBR, KFLBTS_0_A, KFMI_UM]}
+- {bits: 8, unit: "rpm", factor: 40, min: 0, max: 10200}
+- {bits: 8, unit: "°C", factor: 3/4, offset: 48, min: -48, max: 143.25}
+- {bits: 8, unit: "°KW", factor: 3/4, signed: true}
+- {bits: 8, unit: "-", factor: 1/128, precision: 4, z: [
+    DLAMFAW, DLAMTANS, DLBTS, FWFTBRTA, FZWWLRLN, KFFWL_0_A, KFFWL_1_A, KFFWTBR, KFKHFM,
+    KFLAFWL, KFLAMKR, KFLAMKRL, KFLBTS_0_A, KFLF, KFNW, KFNWWL, KFVPLGU, KFWPLGTA, LAMFA]}
+- {bits: 8, unit: "% PED", factor: 100/255, min: 0, max: 100, precision: 3, x: [
+    KFLDRAPP], y: [
+    KFMIZUFIL, KFMIZUNS]}
+- {bits: 8, unit: "Grad C", factor: 3/4, offset: 48, min: -48, max: 143.25, precision: 2, z: [
+    TMNSMN, TMOTNMX], x: [
+    DLAMTANS, FWFTBRTA, KFFLLDE, KFFWL_0_A, KFFWL_1_A, KFLDHBN, KFLDRXO, KFNLLNST, KFTARX,
+    KFTARXZK, KFWPLGTA, KFZWWLNM, LDHIA, LDIATA, NASNOTKL, NFS2M, NFS2M_0_A, NFS2M_1_A, NFSM,
+    NLL2M, NLL2M_0_A, NLL2M_1_A, NLL2M_2_A, NLL2M_3_A, NLLM, NLLM_0_A, NLLM_1_A, NLLM_2_A,
+    NLLM_3_A], y: [
+    KFFLLDE, KFFWL_0_A, KFFWL_1_A, KFLAFWL, KFTARX, KFTARXZK, KFWPLGTA]}
+- {bits: 8, unit: "Grad KW", factor: 3/4, precision: 3, z: [KRDWA]}
+- {bits: 8, unit: "Upm", factor: 40, min: 0, max: 10200, precision: 1, z: [
+    KRANH, LDHIA, NASNOTKL, NDLDRAPU, NLDIAPU, NWPMBBR], x: [
+    DWKRMSN, FKKVS, KFFWTBR, KFLBTS_0_A, KFLDRQ1, KFMDZOF_UM, KFMIZUFIL, KFMIZUNS, KFMIZUOF,
+    KFMI_UM, KFMPED_UM, KLDMASRL, KRALH, KRANH, KRFKLN, LAMFA, LDORXN, LDPBN, LDRQ0DY, LDRQ1DY,
+    LDRQ1ST, RLSALUN, TLDIAPN, WDKUGDN], y: [
+    FKKVS, FZWWLRLN, KFDLULS, KFFWLW, KFKHFM, KFLAMKR, KFLDHBN, KFLDIOPU, KFLDRAPP, KFLDRQ2,
+    KFLDRXO, KFLF, KFMLDMX, KFNW, KFNWWL, KFTSRL, KFVPDKLD, KFZW, KFZW2, KFZWWLNM, LAMFA]}
+- {bits: 8, unit: "grad C", factor: 3/4, offset: 48, min: -48, max: 143.25}
+- {bits: 8, unit: "grad KW", factor: 3/4, precision: 3, z: [
+    KFZW, KFZW2, KFZWOP, KFZWOP2, KFZWWLNM]}
+- {bits: 8, unit: "hPa", factor: 10, precision: 1, z: [
+    DPUPS, EDLDRP, LDEIAP, LDPBN, UMDYLDR], x: [
+    KFDLULS, KFLDRQ2], y: [
+    KFLDRQ1]}
+- {bits: 16, unit: "", factor: 1/4}
+- {bits: 16, unit: "%", factor: 100/0x10000, precision: 4, z: [
+    KFDMDADP, KFDMDARO, KFMIOP, KFWDKMSN, WDKUGDN], x: [
+    KFMIRL, KFMRES, KFMRESK], y: [
+    KFMSNWDK]}
+- {bits: 16, unit: "g/s", factor: 1/36}
+- {bits: 16, unit: "mbar", factor: 10/256}
+- {bits: 16, unit: "rpm", factor: 1/4, min: 0, max: 16383.75}
+- {bits: 16, unit: "U/min", factor: 1/4, min: 0, max: 16383.75, precision: 3, z: [
+    DNMAXH, NMAX, NMAXF, NMAXOG, SNM16OPUW], x: [
+    KFMLDMX, KFMSNWDK, KFPED, KFPEDR, KFPEDR_0_A, KFPEDR_1_A, KFPED_0_A, KFPED_1_A, KFPRG,
+    KFTARX, KFTARXZK, KFURL, KFWDKMSN, KFWPLGTA, LDRXN, LDRXNZK], y: [
+    KFFLLDE, KFLDIMX, KFLDRL, KFMIOP, KFMIRL, KFMRES, KFMRESK, KFPBRK, KFPBRKNW, KFTARX,
+    KFTARXZK, KFVPDKSD, KFVPDKSE, KFVPLGU, KFWPLGTA, KFZW, KFZW2, KFZWOP, KFZWOP2]}
+- {bits: 16, unit: "hPa", factor: 5/128, precision: 4, z: [
+    DSLOFS, KFPRG, KFVPLGU, PUE, PUMN, PUMX], x: [
+    KFLDIMX, KFVPLGU]}
+- {bits: 8, name: amp, unit: "", factor: 800/0x10000}
+- {bits: 8, name: half, unit: "%", factor: 1/2, precision: 3, x: [DLBTS]}
+- {bits: 8, name: retard, unit: "°KW", factor: -3/4}
+- {bits: 16, name: torque, unit: "", factor: 100/0x10000}
+- {bits: 16, name: twice, unit: "", factor: 200/0x10000}
+- {bits: 8, unit: "%", factor: 0.0976470588235294, precision: 3, maps: true, z: [KFMRES, KFMRESK]}
+- {bits: 8, unit: "%", factor: 50/128, precision: 3, maps: true, z: [
+    KFLDRAPP, KFMDZOF_UM, KFMIZUFIL, KFMIZUNS, KFMIZUOF, KFMI_UM, KFMPED_UM, KLDMASRL, MDIMX], y: [
+    KFMDZOF_UM, KFMIZUOF]}
+- {bits: 8, unit: "%", factor: 64/100, precision: 3, maps: true, z: [KFLDIOPU, LDIATA]}
+- {bits: 8, unit: "% DK", factor: 100/255, precision: 3, maps: true, x: [KFVPDKLD]}
+- {bits: 8, unit: "(kg/h)/(1/min)(%)", factor: 0.0000078125, precision: 9, maps: true, z: [KUMSRL]}
+- {bits: 8, unit: "-", factor: 1/256, precision: 4, maps: true, z: [FKHABMN, KFFWLW]}
+- {bits: 8, unit: "-", factor: 2/128, precision: 4, maps: true, z: [KFLDHBN, KFVPDKLD]}
+- {bits: 8, unit: "-", factor: 1/16, precision: 4, maps: true, z: [FKVA]}
+- {bits: 8, unit: "-", factor: 1, maps: true, z: [
+    ESKONF], x: [
+    KFDMDADP, KFDMDARO], y: [
+    KFDMDADP, KFDMDARO]}
+- {bits: 8, unit: "U/min", factor: 10, precision: 2, maps: true, z: [
+    KFNLLNST, NFS2M, NFS2M_0_A, NFS2M_1_A, NFSM, NLL2M, NLL2M_0_A, NLL2M_1_A, NLL2M_2_A,
+    NLL2M_3_A, NLLM, NLLM_0_A, NLLM_1_A, NLLM_2_A, NLLM_3_A]}
+- {bits: 8, unit: "V", factor: 5/256, precision: 4, maps: true, y: [KFMPED_UM]}
+- {bits: 8, unit: "V", factor: 22/312.5, precision: 4, maps: true, x: [TVUB]}
+- {bits: 8, unit: "cm^3/min", factor: 390/128, precision: 2, maps: true, z: [KVB]}
+- {bits: 8, unit: "dez", factor: 1, maps: true, z: [CDHSH, CDLSH, CDTES]}
+- {bits: 8, unit: "grad DK", factor: 0.4335460599334073, precision: 3, maps: true, x: [KFMLDMX]}
+- {bits: 8, unit: "grad KW", factor: -3/4, precision: 4, maps: true, z: [
+    DWKRMSN, KRFKLN], y: [
+    KFLAMKRL]}
+- {bits: 8, unit: "hPa", factor: 5, precision: 2, maps: true, z: [
+    KFDLULS], x: [
+    KFLDIOPU, KFVPLGU, NDLDRAPU, NLDIAPU]}
+- {bits: 8, unit: "kg/h", factor: 8, maps: true, z: [KFMLDMX]}
+- {bits: 8, unit: "km/h", factor: 5/4, precision: 2, maps: true, z: [VNMX, VWPMBBR]}
+- {bits: 8, unit: "mbar", factor: 2.2002200220022003, offset: -559.8459845984598, maps: true, z: [
+    PUE]}
+- {bits: 8, unit: "ms", factor: 0.010667, precision: 3, maps: true, z: [TVUB]}
+- {bits: 8, unit: "ms", factor: 10/100, precision: 3, maps: true, z: [KFTSRL]}
+- {bits: 8, unit: "ms/%", clock: krkte, precision: 2, maps: true, z: [KRKTE]}
+- {bits: 8, unit: "s", factor: 5/100, precision: 4, maps: true, z: [
+    TDLDRA, TDLDRA2, TLDIAPN, TULV1]}
+- {bits: 8, unit: "s", factor: 1, precision: 2, maps: true, y: [KFNLLNST]}
+- {bits: 8, unit: "s", factor: 2560/100, reciprocal: true, precision: 3, maps: true, z: [ZKWLAFWL]}
+- {bits: 16, unit: "", factor: 0.001, precision: 5, maps: true, z: [AIMVM]}
+- {bits: 16, unit: "%", factor: 200/0x10000, precision: 4, maps: true, z: [
+    KFPED, KFPEDR, KFPEDR_0_A, KFPEDR_1_A, KFPED_0_A, KFPED_1_A], x: [
+    KFDMDADP, KFDMDARO, LAMFA], y: [
+    KFDMDADP, KFDMDARO, LAMFA]}
+- {bits: 16, unit: "%", factor: 0.005, precision: 4, maps: true, z: [KFLDIMX, KFLDRL], x: [KFLDRL]}
+- {bits: 16, unit: "%", factor: 3/128, precision: 4, maps: true, z: [
+    KFMIRL, LDRXN, LDRXNZK], x: [
+    KFMIOP, KFPBRK, KFPBRKNW, KFZW, KFZW2, KFZWOP, KFZWOP2], y: [
+    KFLBTS_0_A]}
+- {bits: 16, unit: "%", factor: 12/128, precision: 3, maps: true, z: [WFRL]}
+- {bits: 16, unit: "% DK", factor: 1600/0x10000, precision: 4, maps: true, y: [KFMLDMX]}
+- {bits: 16, unit: "% PED", factor: 0.0015259021896696422, precision: 4, maps: true, y: [
+    KFPED, KFPEDR, KFPEDR_0_A, KFPEDR_1_A, KFPED_0_A, KFPED_1_A]}
+- {bits: 16, unit: "%/100hPa", factor: 5/100, precision: 4, maps: true, z: [
+    KFLDRQ1, KFLDRQ2, LDRQ0DY, LDRQ0S, LDRQ1DY, LDRQ1ST]}
+- {bits: 16, unit: "%/hPa", factor: 0.00000457763671875, precision: 7, maps: true, z: [KFURL]}
+- {bits: 16, unit: "-", factor: 1/0x10000, precision: 6, maps: true, z: [KISRM]}
+- {bits: 16, unit: "-", factor: 2/0x10000, precision: 6, maps: true, z: [
+    FBSTABGM, FKKVS, KFFLLDE, KFPBRK, KFPBRKNW, KFTARX, KFTARXZK, KFVPDKSD, KFVPDKSE]}
+- {bits: 16, unit: "-", factor: 4/0x10000, precision: 6, maps: true, z: [
+    FHOKH], x: [
+    KFVPDKSD, KFVPDKSE]}
+- {bits: 16, unit: "-", factor: 19/256, precision: 4, maps: true, z: [KIFZGHG]}
+- {bits: 16, unit: "Grad C", factor: 5/256, offset: 50, precision: 2, maps: true, z: [
+    TABGBTS, TABGSS, TABGSS2], x: [
+    FBSTABGM]}
+- {bits: 16, unit: "Grad KW", factor: 3/16, precision: 3, maps: true, x: [KFFLLDE]}
+- {bits: 16, unit: "cm**3/min", factor: 0.011902037188391277, precision: 4, maps: true, z: [KVB]}
+- {bits: 16, unit: "kg/h", factor: 10/100, precision: 3, maps: true, z: [
+    KFMLDMX, KFMSNWDK, MLHFM, MLMAX, MLOFS], y: [
+    KFWDKMSN]}
+- {bits: 16, unit: "km/h", factor: 1/128, precision: 4, maps: true, z: [VMAXNB]}
+- {bits: 16, unit: "ms", clock: injection, precision: 4, maps: true, z: [TEMIN, TEMINVA, TVUB]}
+- {bits: 16, unit: "ms", factor: 1/375, precision: 4, maps: true, y: [FKKVS]}
+- {bits: 16, unit: "ms", factor: 1/250, precision: 4, maps: true, x: [FKKVS]}
+- {bits: 16, unit: "ms/%", clock: krkte, precision: 5, maps: true, z: [KRKTE]}
+- {bits: 16, unit: "s", factor: 1/100, precision: 4, maps: true, z: [ITNMXH, TNMXH]}
+- {bits: 16, unit: "s", factor: 655360/100, reciprocal: true, precision: 3, maps: true, z: [
+    ZKLAMFAW]}
+- {bits: 16, unit: "°KW", factor: 128/0x10000, precision: 4, maps: true, y: [KFPRG, KFURL]}

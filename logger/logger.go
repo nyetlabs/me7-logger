@@ -58,7 +58,7 @@ func Run(ctx context.Context, opt Options, dial func() (kwp.Port, error), w io.W
 		}
 	}
 	if res.File.Connect == "" {
-		return fmt.Errorf("ecu has no Connect value; set Connect in the .ecu or add the slow-init needle from config/names.yaml")
+		return fmt.Errorf("ecu has no Connect value; set Connect in the .ecu or add the slow-init needle from config/units.yaml")
 	}
 	if strings.HasPrefix(res.File.Connect, "SLOW-0x00") {
 		return fmt.Errorf("SLOW-0x00 is the engine-stopped KW1281 detour and is not implemented")

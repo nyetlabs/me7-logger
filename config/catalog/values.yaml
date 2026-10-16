@@ -7,7 +7,7 @@
 # name      Bosch name.
 # scale     A scale from scales.yaml.
 # size      Width in bytes. Omitted means 0, and the image chooses the width.
-#           Size 1 and 2 also use a matching conversion in config/names.yaml.
+#           Size 1 and 2 also use a matching conversion in config/units.yaml.
 # unit, signed, inverse, factor, offset
 #           Omitted means blank, false, false, 1, and 0.
 #           A value written on the row is kept.

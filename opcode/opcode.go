@@ -202,7 +202,7 @@ func WalkSubSelector(data []byte, off int, base uint32, dpp [4]uint16) []Case {
 }
 
 // IsSelector reports whether data[off:] begins with one of the selector prefixes
-// from config/names.yaml.
+// from config/units.yaml.
 func IsSelector(data []byte, off int, prefixes [][]byte) bool {
 	return prefixLen(data, off, prefixes) > 0
 }
@@ -259,7 +259,7 @@ type Case struct {
 // matched as result type index<<4. The compares follow it. Result type is
 // (index<<4) | compare. endImm closes the walk and is not a variable.
 // index is the selector number; 0 uses the compare alone.
-// prefixes come from config/names.yaml. finish is the address scanResults
+// prefixes come from config/units.yaml. finish is the address scanResults
 // uses as both case limits. When it is 0, the end-compare branch is that limit.
 func WalkSelector(data []byte, off int, base uint32, dpp [4]uint16, index int, prefixes [][]byte, endImm int, finish uint32) []Case {
 	n := prefixLen(data, off, prefixes)

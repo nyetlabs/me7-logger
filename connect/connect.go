@@ -1,5 +1,5 @@
 // Package connect chooses the ME7Logger connect line from an image's 5-baud
-// address table. Needle names, key bytes, and addresses come from config/names.yaml.
+// address table. Needle names, key bytes, and addresses come from config/units.yaml.
 // Until the slow-init needle hits, generate leaves Connect unset.
 package connect
 
@@ -15,7 +15,7 @@ type Entry struct {
 
 const entryLen = 30
 
-// Policy is the connect rule from config/names.yaml.
+// Policy is the connect rule from config/units.yaml.
 type Policy struct {
 	Key1     byte
 	Key2     byte

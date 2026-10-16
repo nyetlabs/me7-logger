@@ -126,7 +126,7 @@ func cmdGenerate(args []string) error {
 	modelPath := fs.String("model", "", "full located model JSON `<file>`, - for stdout")
 	labelsPath := fs.String("labels", "", "Ghidra label TSV `<file>` (function entries, RAM, maps), - for stdout")
 	scale := fs.String("5120", "auto", "mbar scaling `<mode>`: auto reads located PUMN, PUMX, and PUE; on doubles; off leaves factors")
-	clock := fs.Int("clock", 0, "CPU clock `<MHz>`: 20, 24, 32, or 40; 0 uses config/names.yaml")
+	clock := fs.Int("clock", 0, "CPU clock `<MHz>`: 20, 24, 32, or 40; 0 uses config/units.yaml")
 	conn := fs.String("connect", "", "override Connect with `<mode>`, for example SLOW-0x11")
 	imgPath, img, userDir, err := image(fs, d, args)
 	if err != nil {
@@ -157,7 +157,7 @@ func cmdGenerate(args []string) error {
 		fmt.Fprintln(os.Stderr, res.StubNote)
 	}
 	if res.File.Connect == "" {
-		fmt.Fprintln(os.Stderr, "Connect was not set; add the slow-init needle named in config/names.yaml")
+		fmt.Fprintln(os.Stderr, "Connect was not set; add the slow-init needle named in config/units.yaml")
 	}
 	cats, err := config.LoadCategories("")
 	if err != nil {

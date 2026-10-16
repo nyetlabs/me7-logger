@@ -31,7 +31,7 @@ type Options struct {
 	MeasPath  string
 	MapPath   string
 	AliasPath string
-	// Clock is 20, 24, 32, or 40. 0 uses the default in config/names.yaml.
+	// Clock is 20, 24, 32, or 40. 0 uses the default in config/units.yaml.
 	Clock int
 	// Scale is auto, on, or off.
 	Scale string

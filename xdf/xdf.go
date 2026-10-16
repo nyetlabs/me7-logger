@@ -22,7 +22,9 @@ import (
 const Other = "Other"
 
 // Model returns the named maps of image as a model, with no categories.
-// Addresses are file offsets. Values are raw: factor 1, no decimals. title
+// Addresses are file offsets. A cell or axis takes the DAMOS conversion for
+// its name and width when the defs agree (config.Conversion); otherwise the
+// value stays factor 1. title
 // is the image file name. A constant at a table's axis address is that
 // axis's breakpoints and becomes a curve of its points, so the writer links
 // the axis to it. conflicts lists the constants left alone: the axes at
@@ -89,10 +91,10 @@ func aligned(m *model.Model, image []byte, pat map[string]string) (conflicts []s
 			o.Shape = "2d"
 		}
 		if r.X.Addr != 0 {
-			o.X = moved(o.X, r.X)
+			o.X = moved(objName(o), "x", o.X, r.X)
 		}
 		if r.Y.Addr != 0 {
-			o.Y = moved(o.Y, r.Y)
+			o.Y = moved(objName(o), "y", o.Y, r.Y)
 		} else {
 			o.Y = nil
 		}
@@ -128,10 +130,10 @@ func fitRecord(m *model.Model, image []byte, pat map[string]string, fromCall map
 			o.Shape = "2d"
 		}
 		if rec.X.Addr != 0 {
-			o.X = moved(o.X, rec.X)
+			o.X = moved(objName(o), "x", o.X, rec.X)
 		}
 		if rec.Y.Addr != 0 {
-			o.Y = moved(o.Y, rec.Y)
+			o.Y = moved(objName(o), "y", o.Y, rec.Y)
 		} else {
 			o.Y = nil
 		}
@@ -230,16 +232,28 @@ func signAxis(img []byte, a *model.Axis, n int) {
 }
 
 // moved is the record's axis r, keeping what old axis says it means.
-func moved(old *model.Axis, r record.Axis) *model.Axis {
+func moved(name, role string, old *model.Axis, r record.Axis) *model.Axis {
 	signed := false
 	if old != nil && old.Data != nil {
 		signed = old.Data.Signed
 	}
-	a := axis(&r, false, signed)
-	if old != nil {
+	a := axis(name, role, &r, false, signed)
+	if old != nil && !rawValue(old.Value) {
 		a.Value = old.Value
 	}
 	return a
+}
+
+func objName(o *model.Object) string {
+	if o.Key != "" {
+		return o.Key
+	}
+	return strings.TrimSpace(o.ID)
+}
+
+func rawValue(v model.Value) bool {
+	c := v.Conversion
+	return c.Factor == 1 && c.Offset == 0 && !c.Reciprocal && v.Units == ""
 }
 
 // breakpoints turns each constant at a table's axis address into a curve
@@ -330,7 +344,7 @@ func object(r record.Map, part string) *model.Object {
 		Rows:        1,
 		Cols:        1,
 		Data:        data(r.Bits, r.Signed),
-		Value:       value(r.Unit),
+		Value:       value(r.Name, "z", r.Bits, r.Unit),
 	}
 	rows, cols, ok := dims(r, cell, known)
 	if !ok {
@@ -340,9 +354,9 @@ func object(r record.Map, part string) *model.Object {
 	if rows == 1 {
 		o.Shape = "1d"
 	}
-	o.X = axis(r.X, cell.Ordinal, cell.XSigned)
+	o.X = axis(r.Name, "x", r.X, cell.Ordinal, cell.XSigned)
 	if rows > 1 {
-		o.Y = axis(r.Y, cell.Ordinal, false)
+		o.Y = axis(r.Name, "y", r.Y, cell.Ordinal, false)
 	}
 	return o
 }
@@ -381,16 +395,20 @@ func fits(a *record.Axis, n int) bool {
 // axis is an image axis. A located count with no address is ordinal. An
 // axis not located is ordinal when the DAMOS and A2L defs index it, and
 // unknown otherwise.
-func axis(a *record.Axis, ordinal, signed bool) *model.Axis {
+func axis(name, role string, a *record.Axis, ordinal, signed bool) *model.Axis {
+	bits, unit := 0, ""
+	if a != nil {
+		bits, unit = a.Bits, a.Unit
+	}
 	if a != nil && a.Addr == 0 && a.Count > 0 {
 		ordinal = true
 	}
 	if a == nil || a.Addr == 0 {
-		return &model.Axis{Source: map[bool]string{true: "ordinal", false: "unknown"}[ordinal], Value: value("")}
+		return &model.Axis{Source: map[bool]string{true: "ordinal", false: "unknown"}[ordinal], Value: value(name, role, bits, unit)}
 	}
 	addr := model.Addr(opcode.FileOffset(a.Addr))
 	d := data(a.Bits, signed)
-	return &model.Axis{Source: "image", Stored: "absolute", Address: &addr, Data: &d, Value: value(a.Unit)}
+	return &model.Axis{Source: "image", Stored: "absolute", Address: &addr, Data: &d, Value: value(name, role, a.Bits, unit)}
 }
 
 func data(bits int, signed bool) model.Data {
@@ -404,6 +422,9 @@ func data(bits int, signed bool) model.Data {
 	return d
 }
 
-func value(units string) model.Value {
+func value(name, role string, bits int, units string) model.Value {
+	if v, ok := config.Conversion(name, role, bits, 0); ok {
+		return v
+	}
 	return model.Value{Units: units, Conversion: model.Conversion{Factor: 1}}
 }

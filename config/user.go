@@ -33,7 +33,7 @@ func ResolveUserDir(dir string, explicit bool) (string, error) {
 }
 
 // LoadMeasures reads the measurement list, then user YAML in dir.
-// Conversions come from names.yaml, then this file, then user YAML.
+// Conversions come from units.yaml, then this file, then user YAML.
 // userDir empty skips the overlay. A non-empty missing directory is an error.
 // A row with an address is an error. Omitted size, bitmask, unit, signed,
 // inverse, factor, and offset are DefaultSize, 0, "", false, false, 1, and 0.
@@ -140,7 +140,7 @@ func configLabel(path, name string) string {
 	return path
 }
 
-// LoadScales reads the shared conversions from names.yaml, the measurement
+// LoadScales reads the shared conversions from units.yaml, the measurement
 // file, and user YAML. A catalog row uses a scale only when its size matches.
 func LoadScales(measPath, namesPath, userDir string) (map[mapfile.ScaleKey]mapfile.Scale, error) {
 	tab, err := conversionTable(measPath, namesPath, userDir)
@@ -168,7 +168,11 @@ func conversionTable(measPath, namesPath, userDir string) (convTable, error) {
 		return convTable{}, err
 	}
 	var tab convTable
-	if n, ok := namesDoc["conversions"]; ok {
+	n, ok := namesDoc["units"]
+	if !ok {
+		n, ok = namesDoc["conversions"]
+	}
+	if ok {
 		tab, err = applyConversions(tab, n, namesLabel, false)
 		if err != nil {
 			return convTable{}, err
@@ -292,7 +296,7 @@ type convKey struct {
 }
 
 type convSet struct {
-	size, unit, signed, inverse, factor, offset bool
+	size, unit, signed, inverse, factor, offset, min, max bool
 }
 
 // conversion is one scale. A name is selected by a row. A conversion
@@ -304,7 +308,11 @@ type conversion struct {
 	unit            string
 	signed, inverse bool
 	factor, offset  float64
+	min, max        float64
 	set             convSet
+	// scaleOnly is a second factor for tuner maps. It does not replace the
+	// measurement row for this width and unit.
+	scaleOnly bool
 }
 
 type convTable struct {
@@ -326,6 +334,9 @@ func applyConversions(dst convTable, n *yaml.Node, file string, allowDrop bool) 
 		key, conv, drop, err := parseConversion(item, file)
 		if err != nil {
 			return convTable{}, err
+		}
+		if conv.scaleOnly && conv.name == "" {
+			continue
 		}
 		if conv.name != "" {
 			if drop {
@@ -384,6 +395,14 @@ func mergeConversion(dst, src conversion) conversion {
 		dst.offset = src.offset
 		dst.set.offset = true
 	}
+	if src.set.min {
+		dst.min = src.min
+		dst.set.min = true
+	}
+	if src.set.max {
+		dst.max = src.max
+		dst.set.max = true
+	}
 	return dst
 }
 
@@ -394,7 +413,8 @@ func parseConversion(n *yaml.Node, file string) (convKey, conversion, bool, erro
 	}
 	for k := range fields {
 		switch k {
-		case "name", "size", "unit", "signed", "inverse", "factor", "offset", "drop":
+		case "name", "size", "bits", "unit", "signed", "inverse", "factor", "offset", "min", "max", "drop",
+			"z", "x", "y", "precision", "clock", "reciprocal", "maps":
 		default:
 			return convKey{}, conversion{}, false, fmt.Errorf("%s: conversion: unknown field %s", file, k)
 		}
@@ -410,7 +430,15 @@ func parseConversion(n *yaml.Node, file string) (convKey, conversion, bool, erro
 		return convKey{}, conversion{}, false, fmt.Errorf("%s: conversion needs a unit", file)
 	}
 	size := DefaultSize
-	if node, ok := fields["size"]; ok {
+	if node, ok := fields["bits"]; ok {
+		bits, berr := scalarInt(node)
+		if berr != nil || bits%8 != 0 {
+			return convKey{}, conversion{}, false, fmt.Errorf("%s: conversion bits must be a multiple of 8", file)
+		}
+		size = bits / 8
+		c.size = size
+		c.set.size = true
+	} else if node, ok := fields["size"]; ok {
 		size, err = scalarInt(node)
 		if err != nil {
 			return convKey{}, conversion{}, false, fmt.Errorf("%s: conversion size: %w", file, err)
@@ -429,6 +457,12 @@ func parseConversion(n *yaml.Node, file string) (convKey, conversion, bool, erro
 		c.set.unit = true
 	}
 	key := convKey{size: size, unit: c.unit}
+	if node, ok := fields["maps"]; ok {
+		c.scaleOnly, err = scalarBool(node)
+		if err != nil {
+			return convKey{}, conversion{}, false, fmt.Errorf("%s: conversion maps: %w", file, err)
+		}
+	}
 	if node, ok := fields["drop"]; ok {
 		drop, err := scalarBool(node)
 		if err != nil {
@@ -465,6 +499,20 @@ func parseConversion(n *yaml.Node, file string) (convKey, conversion, bool, erro
 			return convKey{}, conversion{}, false, fmt.Errorf("%s: conversion offset: %w", file, err)
 		}
 		c.set.offset = true
+	}
+	if node, ok := fields["min"]; ok {
+		c.min, err = scalarFloat(node)
+		if err != nil {
+			return convKey{}, conversion{}, false, fmt.Errorf("%s: conversion min: %w", file, err)
+		}
+		c.set.min = true
+	}
+	if node, ok := fields["max"]; ok {
+		c.max, err = scalarFloat(node)
+		if err != nil {
+			return convKey{}, conversion{}, false, fmt.Errorf("%s: conversion max: %w", file, err)
+		}
+		c.set.max = true
 	}
 	return key, c, false, nil
 }

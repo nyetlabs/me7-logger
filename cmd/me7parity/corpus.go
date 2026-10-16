@@ -197,6 +197,9 @@ func cmdCorpus(args []string) error {
 			if item.merged != nil {
 				clearPlaceholders(item.merged)
 				annotateConfidence(item.merged, item.conf)
+				if isAuto(item.merged) {
+					config.ApplyScales(item.merged)
+				}
 			}
 			switch reason {
 			case "":
@@ -214,6 +217,7 @@ func cmdCorpus(args []string) error {
 			if item.reason != "" && !item.keepOrigin && isAuto(prev) {
 				r := relayout(clearedCopy(prev), loc)
 				annotateConfidence(r, item.conf)
+				config.ApplyScales(r)
 				if n := corrections(prev, r); n > 0 {
 					item.merged, item.keepOrigin = r, true
 					delta = fmt.Sprintf("layout %d", n)

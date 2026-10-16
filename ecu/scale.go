@@ -8,7 +8,7 @@ import (
 )
 
 // ApplyClock replaces injection-time factors. mhz 0 leaves the catalog defaults.
-// injection is the name set from config/names.yaml. krkte is the constant that
+// injection is the name set from config/units.yaml. krkte is the constant that
 // uses factor/24. factor is the milliseconds-per-tick value for mhz.
 func ApplyClock(items []record.Item, mhz int, injection map[string]bool, krkte string, factor float64) {
 	if mhz == 0 || factor == 0 {
