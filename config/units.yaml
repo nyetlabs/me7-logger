@@ -202,6 +202,7 @@ units:
     TABGBTS, TABGSS, TABGSS2], x: [
     FBSTABGM]}
 - {bits: 16, unit: "Grad KW", factor: 3/16, precision: 3, maps: true, x: [KFFLLDE]}
+- {bits: 16, unit: "V", factor: 640/0x10000, precision: 4, maps: true, x: [MLHFM]}
 - {bits: 16, unit: "cm**3/min", factor: 0.011902037188391277, precision: 4, maps: true, z: [KVB]}
 - {bits: 16, unit: "kg/h", factor: 10/100, precision: 3, maps: true, z: [
     KFMLDMX, KFMSNWDK, MLHFM, MLMAX, MLOFS], y: [

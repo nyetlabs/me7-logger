@@ -154,7 +154,7 @@ func TestModelTableDims(t *testing.T) {
 	if o := m.Objects[1]; o.Shape != "1d" || o.Cols != 6 || o.X == nil || *o.X.Address != 0x11FFA {
 		t.Fatalf("%+v", o)
 	}
-	if o := m.Objects[2]; o.Shape != "1d" || o.Cols != 512 || o.Data.Bits != 16 || o.X.Source != "ordinal" || o.Y != nil {
+	if o := m.Objects[2]; o.Shape != "1d" || o.Cols != 512 || o.Data.Bits != 16 || o.X.Source != "ordinal" || o.X.Value.Units != "V" || o.X.Value.Conversion.Factor != 640.0/0x10000 || o.Y != nil {
 		t.Fatalf("%+v", o)
 	}
 	if o := m.Objects[3]; o.Shape != "value" || o.X != nil {

@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"go.nyet.org/me7-logger/internal/ecucorpus"
+	"go.nyet.org/xdfkit/model"
 )
 
 var update = flag.Bool("update", false, "rewrite config/descriptions.yaml, config/storage.yaml, and config/units.yaml from the corpus")
@@ -89,6 +90,9 @@ func TestScales(t *testing.T) {
 	if v, ok := Conversion("KFFWL_0_A", "x", 8, 0); !ok || v.Units != "Grad C" || v.Conversion.Factor != 0.75 {
 		t.Fatalf("KFFWL_0_A x %+v %v", v, ok)
 	}
+	if v, ok := Conversion("MLHFM", "x", 16, 0); !ok || v.Units != "V" || v.Conversion.Factor != 640.0/0x10000 {
+		t.Fatalf("MLHFM x %+v %v", v, ok)
+	}
 	if v, ok := Conversion("KRALH", "z", 8, 0); !ok || v.Units != "%" || v.Conversion.Factor != 0.75 || v.Min == nil || *v.Min != 0 || v.Max == nil || *v.Max != 100 {
 		t.Fatalf("KRALH %+v %v", v, ok)
 	}
@@ -134,6 +138,24 @@ func TestFillAuto(t *testing.T) {
 	_, dir := corpusDir(t)
 	if n, err := FillAuto(dir); err != nil || n == 0 {
 		t.Fatal(err)
+	}
+}
+
+func TestApplyScalesOrdinal(t *testing.T) {
+	m := &model.Model{Objects: []*model.Object{{
+		ID:   "MLHFM",
+		Data: model.Data{Bits: 16},
+		X:    &model.Axis{Source: "ordinal", Value: model.Value{Conversion: model.Conversion{Factor: 1}}},
+	}}}
+	if n := ApplyScales(m); n != 1 {
+		t.Fatalf("filled %d", n)
+	}
+	v := m.Objects[0].X.Value
+	if v.Units != "V" || v.Conversion.Factor != 640.0/0x10000 {
+		t.Fatalf("%+v", v)
+	}
+	if n := ApplyScales(m); n != 0 {
+		t.Fatalf("filled again %d", n)
 	}
 }
 

@@ -237,7 +237,7 @@ func moved(name, role string, old *model.Axis, r record.Axis) *model.Axis {
 	if old != nil && old.Data != nil {
 		signed = old.Data.Signed
 	}
-	a := axis(name, role, &r, false, signed)
+	a := axis(name, role, &r, false, signed, 0)
 	if old != nil && !rawValue(old.Value) {
 		a.Value = old.Value
 	}
@@ -354,9 +354,9 @@ func object(r record.Map, part string) *model.Object {
 	if rows == 1 {
 		o.Shape = "1d"
 	}
-	o.X = axis(r.Name, "x", r.X, cell.Ordinal, cell.XSigned)
+	o.X = axis(r.Name, "x", r.X, cell.Ordinal, cell.XSigned, r.Bits)
 	if rows > 1 {
-		o.Y = axis(r.Name, "y", r.Y, cell.Ordinal, false)
+		o.Y = axis(r.Name, "y", r.Y, cell.Ordinal, false, r.Bits)
 	}
 	return o
 }
@@ -395,13 +395,18 @@ func fits(a *record.Axis, n int) bool {
 // axis is an image axis. A located count with no address is ordinal. An
 // axis not located is ordinal when the DAMOS and A2L defs index it, and
 // unknown otherwise.
-func axis(name, role string, a *record.Axis, ordinal, signed bool) *model.Axis {
+func axis(name, role string, a *record.Axis, ordinal, signed bool, width int) *model.Axis {
 	bits, unit := 0, ""
 	if a != nil {
 		bits, unit = a.Bits, a.Unit
 	}
 	if a != nil && a.Addr == 0 && a.Count > 0 {
 		ordinal = true
+	}
+	// An ordinal index has no stored width. The scale row is keyed by the
+	// cell width, which is the only width the map has.
+	if bits == 0 && ordinal {
+		bits = width
 	}
 	if a == nil || a.Addr == 0 {
 		return &model.Axis{Source: map[bool]string{true: "ordinal", false: "unknown"}[ordinal], Value: value(name, role, bits, unit)}

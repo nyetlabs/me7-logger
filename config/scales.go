@@ -761,6 +761,43 @@ type scaleGroup struct {
 	z, x, y        []string
 }
 
+// heldMaps is a maps row the cluster did not store. A name the cluster
+// stores is left out, so the next rebuild keeps only the rows still written
+// by hand.
+func heldMaps(hands []handUnit, rows []scaleRow) []scaleRow {
+	have := map[scaleKey]bool{}
+	for _, r := range rows {
+		have[scaleKey{r.Name, r.Role, r.Bits}] = true
+	}
+	var out []scaleRow
+	for _, h := range hands {
+		if !h.maps {
+			continue
+		}
+		bits := handBits(h)
+		add := func(role string, names []string) {
+			for _, n := range names {
+				if have[scaleKey{n, role, bits}] {
+					continue
+				}
+				row := scaleRow{
+					Name: n, Role: role, Bits: bits, Units: h.unit,
+					Factor: h.factor, Precision: h.precision,
+					Reciprocal: h.recip, Clock: h.clock,
+				}
+				if h.offsetSet {
+					row.Offset = -h.offset
+				}
+				out = append(out, row)
+			}
+		}
+		add("z", h.z)
+		add("x", h.x)
+		add("y", h.y)
+	}
+	return out
+}
+
 func formatUnits(rows []scaleRow) ([]byte, error) {
 	root, err := ecucorpus.ModuleRoot()
 	if err != nil {
@@ -774,6 +811,9 @@ func formatUnits(rows []scaleRow) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	// A maps row the cluster did not store stays in the file. A name the
+	// cluster stores is left to that cluster.
+	rows = append(rows, heldMaps(hands, rows)...)
 	var keep []handUnit
 	for _, h := range hands {
 		if h.maps {
@@ -1320,7 +1360,8 @@ func clockTickFactor(kind string, tick float64, bits int) float64 {
 }
 
 // ApplyScales fills a raw value (factor 1, no offset, no units) from
-// Conversion. A value that already has a factor or units stays. It returns
+// Conversion. A value that already has a factor or units stays. An ordinal
+// axis has no stored width, so the lookup uses the cell width. It returns
 // how many values changed.
 func ApplyScales(m *model.Model) int {
 	n := 0
@@ -1332,21 +1373,26 @@ func ApplyScales(m *model.Model) int {
 		if fillRaw(&o.Value, name, "z", o.Data.Bits) {
 			n++
 		}
-		if fillAxis(name, "x", o.X) {
+		if fillAxis(name, "x", o.X, o.Data.Bits) {
 			n++
 		}
-		if fillAxis(name, "y", o.Y) {
+		if fillAxis(name, "y", o.Y, o.Data.Bits) {
 			n++
 		}
 	}
 	return n
 }
 
-func fillAxis(name, role string, a *model.Axis) bool {
-	if a == nil || a.Data == nil {
+func fillAxis(name, role string, a *model.Axis, bits int) bool {
+	if a == nil {
 		return false
 	}
-	return fillRaw(&a.Value, name, role, a.Data.Bits)
+	if a.Data != nil && a.Data.Bits != 0 {
+		bits = a.Data.Bits
+	} else if a.Source != "ordinal" {
+		return false
+	}
+	return fillRaw(&a.Value, name, role, bits)
 }
 
 func fillRaw(v *model.Value, name, role string, bits int) bool {
