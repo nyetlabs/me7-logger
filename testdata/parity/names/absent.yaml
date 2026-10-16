@@ -50,6 +50,9 @@ absent:
   # curves NLLM_0_A through NLLM_3_A, so the plain name is not listed.
   1.8T:
     - CDLSHV
+    # Not in the LQ, NL, BB, or CJ DTC index. The slot after CLAATS is
+    # 1479, not 1457. Images that have 1457 locate the class byte.
+    - CLAATS2
     - CLAHSHE2
     - CLALSH2
     - CLRHK
@@ -94,6 +97,36 @@ absent:
     - DLBTS
     - KFVPLGU
     - SNM16OPUW
+    # 67 F8 11 00 is not in this block, so the rear-O2 class bytes have no reader.
+    - CLRHK
+    - CLRHKA
+    - CLRKA
+    # The idle F2 word has no tmot breakpoint table. 06 18 40 5B, E6 FE 02 03,
+    # and E6 FE E2 02 are not in the block.
+    - KFNLLNST
+    - NFSM
+    - NFS2M
+    - NFS2M_0_A
+    - NFS2M_1_A
+    # The M tail 74 F4 BC 8C is not in the block. The A8 01 site is the class-bit test.
+    - RLSALULL
+    - RLSALUN
+    # DQ, AK, and AS have 9A F4 06 00 F3 F8, not the EXTP form. DC, DH, and AA locate the byte.
+    - CATR
+    # DC's call lands on an empty body. The others locate the 16 by 16 map.
+    - FKKVS
+    # DC has no 0C 00 0D 13 tail, and its page-0A02 bodies are the 0900 fill.
+    - KFTARX
+    # DC locates 1456, 1460, 1453, 1457, 1140, and 1110. DH locates 1140.
+    # AK, AS, and DQ do not have those words in the DTC index. 0156 is
+    # outside the index on all of them.
+    - CLAATR
+    - CLAATR2
+    - CLAATS
+    - CLAATS2
+    - CLAHSH2
+    - CLAHSHE2
+    - CLALSH2
   # No DAMOS export. 1037371702 is the naturally aspirated V8.
   # plsol, rlmx_w, and ldtvm are not in the routine table, so scanLdr,
   # scanLdrxn, and scanLdrapp do not open. The knock window does not
