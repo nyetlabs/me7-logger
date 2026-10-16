@@ -586,8 +586,8 @@ func readAxes(img []byte, dpp [4]uint16, h opcode.MapHit, m *record.Map) {
 
 // mergeMaps keeps a caller-slot name when both locators found it.
 // A pattern or an anchor supplies a name the caller list does not have.
-// An unnamed call to that body takes the name, and keeps the call's axes
-// when the hit decodes none.
+// An unnamed call to that body takes the name. An axis the hit does not
+// decode stays the one the call stored.
 // A packed header in front of that body fills the row and column counts.
 // A hit that decodes no axes on a body another name holds with axes is
 // that map seen from another call, and is dropped.
@@ -616,6 +616,14 @@ func mergeMaps(img []byte, dpp [4]uint16, maps []record.Map, hits []opcode.MapHi
 		have[h.Name] = struct{}{}
 		if i := unnamedAt(maps, h.Addr); i >= 0 {
 			if m.X != nil || m.Y != nil {
+				if m.X == nil && maps[i].X != nil {
+					m.X = maps[i].X
+					m.Cols = maps[i].Cols
+				}
+				if m.Y == nil && maps[i].Y != nil {
+					m.Y = maps[i].Y
+					m.Rows = maps[i].Rows
+				}
 				maps[i] = m
 			} else {
 				maps[i].Name = h.Name
