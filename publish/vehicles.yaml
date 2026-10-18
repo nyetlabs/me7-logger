@@ -29,14 +29,17 @@
 4B0906018DQ-0060: {engine: 1.8T, code: AWM, vehicle: Passat, year: 2003-2005, market: NA}
 4B0907551S-0001: {engine: 2.7T, code: AZA, vehicle: A6, year: 2001, market: EU}
 4B0907551T-0001: {engine: 2.7T, code: APB, vehicle: A6, year: 2001, gearbox: automatic, market: NA}
+
 4D1907558-0002: {engine: 4.2T, code: BCY, vehicle: RS6, year: 2002-2004, market: EU}
 4D1907558-0004: {engine: 4.2T, code: BCY, vehicle: RS6, year: 2002-2004, market: EU}
+
 4Z7907551AA-0010: {engine: 2.7T, code: BEL, vehicle: allroad, year: 2004, market: NA}
 4Z7907551R-0003: {engine: 2.7T, code: BEL, vehicle: "allroad, 04 A6", year: 2003, market: NA}
 # Bosch 0261208288, sw 1037368391 ident 030603. Tip and 6-speed.
 4Z7907551S-0020: {engine: 2.7T, code: BEL, vehicle: "allroad, 04 A6", year: 2003, market: NA}
 # Bosch 0261208484, sw 1037369096 ident 070404. Tip and 6-speed.
 4Z7907551T-0010: {engine: 2.7T, code: BEL, vehicle: allroad, year: 2003, market: NA}
+
 8D0907551F-0001: {engine: 2.7T, code: ASJ, vehicle: RS4, year: 2001, gearbox: manual, market: EU}
 8D0907551G-0002: {engine: 2.7T, code: AZB, vehicle: S4, year: 2001, gearbox: manual, market: EU}
 8D0907551H-0003: {engine: 2.7T, code: APB, vehicle: S4, year: 2001, gearbox: manual, market: NA}
@@ -49,8 +52,12 @@
 8D0907551T-0003: {engine: 2.7T, code: APB, vehicle: S4, year: 2002, gearbox: manual, market: NA}
 8D0907558E-D03: {engine: 1.8T, code: AEB, vehicle: A4, year: 1997-1999}
 8D0907558M-D01: {engine: 1.8T, code: AEB, vehicle: "A4, Passat", year: 1997-1999}
+
 8E0909518AK-0004: {engine: 1.8T, code: AVJ, vehicle: A4, year: 2002-2005}
-# 190 hp.
 8E0909518AS-0003: {engine: 1.8T, code: BEX, vehicle: A4, year: 2002-2004}
+
+# 190 HP
+8N0906018AL-0007: {engine: 1.8T, code: AWP, vehicle: TT, year: 2002, gearbox: manual, market: NA }
+# 225 HP
 8N0906018CB-0003: {engine: 1.8T, code: BAM, vehicle: TT, year: 2003-2006, gearbox: manual, market: EU}
 8N0906018CJ-0001: {engine: 1.8T, code: BEA, vehicle: TT, year: 2004+, gearbox: manual, market: NA}
