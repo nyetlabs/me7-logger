@@ -264,7 +264,6 @@ $cols = [
 	['ecu', 'ECU', false],
 	['engine', 'Engine', false],
 	['code', 'Code', false],
-	['vehicle', 'Vehicle', false],
 	['year', 'Year', false],
 	['gearbox', 'Gearbox', false],
 	['market', 'Market', false],
@@ -279,7 +278,7 @@ $cols = [
 <thead>
 <tr>
 <?php foreach ($cols as [$key, $label, $num]): ?>
-<th<?= $num ? ' class="num"' : '' ?> aria-sort="<?= $key === 'vehicle' ? 'ascending' : 'none' ?>"><button type="button" data-key="<?= $key ?>"><?= htmlspecialchars($label) ?></button></th>
+<th<?= $num ? ' class="num"' : '' ?> aria-sort="none"><button type="button" data-key="<?= $key ?>"><?= htmlspecialchars($label) ?></button></th>
 <?php endforeach ?>
 </tr>
 </thead>
@@ -292,8 +291,8 @@ $cols = [
 <?php endif ?>
 <tr data-image="<?= htmlspecialchars($name) ?>" data-ecu="<?= htmlspecialchars($cells[0]) ?>" data-engine="<?= htmlspecialchars($cells[1]) ?>" data-code="<?= htmlspecialchars($cells[2]) ?>" data-vehicle="<?= htmlspecialchars($cells[3]) ?>" data-year="<?= htmlspecialchars($cells[4]) ?>" data-gearbox="<?= htmlspecialchars($cells[5]) ?>" data-market="<?= htmlspecialchars($cells[6]) ?>" data-stage="<?= htmlspecialchars($cells[7]) ?>" data-confidence="<?= htmlspecialchars($cells[8]) ?>" data-source="<?= htmlspecialchars($cells[9]) ?>" data-maps="<?= $count === null ? '' : (string)$count ?>" data-date="<?= htmlspecialchars($date) ?>">
 <td><a href="<?= htmlspecialchars($file) ?>"><code><?= htmlspecialchars($name) ?></code></a></td>
-<?php foreach (array_slice($cells, 0, 8) as $cell): ?>
-<td><?= htmlspecialchars($cell) ?></td>
+<?php foreach ([0, 1, 2, 4, 5, 6, 7] as $i): ?>
+<td><?= htmlspecialchars($cells[$i]) ?></td>
 <?php endforeach ?>
 <td><?= htmlspecialchars($cells[9]) ?></td>
 <td class="num"><?= htmlspecialchars(percent($cells[8])) ?></td>
@@ -308,7 +307,7 @@ $cols = [
 	const tbody = document.getElementById('defs');
 	const heads = document.querySelectorAll('thead button');
 	const startDesc = {confidence: true, maps: true, date: true};
-	let key = 'vehicle';
+	let key = '';
 	let desc = false;
 
 	function val(row, k) {
@@ -395,6 +394,13 @@ $cols = [
 	function rebuild() {
 		const rows = [...tbody.querySelectorAll('tr[data-image]')];
 		rows.sort(function (a, b) {
+			const g = cmpPrimary(a, b, 'vehicle');
+			if (g) {
+				return g;
+			}
+			if (key === '') {
+				return tie(a, b);
+			}
 			if (key === 'stage' || key === 'confidence' || key === 'source') {
 				const ea = val(a, key) === '';
 				const eb = val(b, key) === '';
@@ -411,18 +417,16 @@ $cols = [
 		tbody.replaceChildren();
 		let prev = null;
 		for (const row of rows) {
-			if (key === 'vehicle') {
-				const v = val(row, 'vehicle');
-				if (v !== prev) {
-					const tr = document.createElement('tr');
-					tr.className = 'group';
-					const th = document.createElement('th');
-					th.colSpan = heads.length;
-					th.textContent = v;
-					tr.append(th);
-					tbody.append(tr);
-					prev = v;
-				}
+			const v = val(row, 'vehicle');
+			if (v !== prev) {
+				const tr = document.createElement('tr');
+				tr.className = 'group';
+				const th = document.createElement('th');
+				th.colSpan = heads.length;
+				th.textContent = v;
+				tr.append(th);
+				tbody.append(tr);
+				prev = v;
 			}
 			tbody.append(row);
 		}
