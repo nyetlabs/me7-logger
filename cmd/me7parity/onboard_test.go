@@ -335,25 +335,25 @@ func TestHandCover(t *testing.T) {
 	}
 	annotateConfidence(autoMerged, map[string]parity.Conf{
 		"KFZW": {High: true, Reason: "short"},
-	})
+	}, nil)
 	if autoMerged.Objects[0].Comment != "map_interp_table8: no scale" {
 		t.Fatalf("high keeps needle: %q", autoMerged.Objects[0].Comment)
 	}
 	annotateConfidence(autoMerged, map[string]parity.Conf{
 		"KFZW": {High: false, Reason: "peer-diff 6/192 peerA"},
-	})
+	}, nil)
 	if autoMerged.Objects[0].Comment != "map_interp_table8: differs from peerA by 6/192 cells: no scale" {
 		t.Fatalf("low annotate: %q", autoMerged.Objects[0].Comment)
 	}
 	annotateConfidence(autoMerged, map[string]parity.Conf{
 		"KFZW": {High: false, Reason: "peer-diff 6/192 peerA"},
-	})
+	}, nil)
 	if autoMerged.Objects[0].Comment != "map_interp_table8: differs from peerA by 6/192 cells: no scale" {
 		t.Fatalf("annotate twice: %q", autoMerged.Objects[0].Comment)
 	}
 	emptyNeedle := modelOf(pubObj("LAMFA", 0x200, 1, ""))
-	annotateConfidence(emptyNeedle, map[string]parity.Conf{"LAMFA": {High: false, Reason: "zeros"}})
-	annotateConfidence(emptyNeedle, map[string]parity.Conf{"LAMFA": {High: false, Reason: "zeros"}})
+	annotateConfidence(emptyNeedle, map[string]parity.Conf{"LAMFA": {High: false, Reason: "zeros"}}, nil)
+	annotateConfidence(emptyNeedle, map[string]parity.Conf{"LAMFA": {High: false, Reason: "zeros"}}, nil)
 	if emptyNeedle.Objects[0].Comment != "zero body with no zero peer: no scale" {
 		t.Fatalf("empty needle doubled: %q", emptyNeedle.Objects[0].Comment)
 	}
@@ -361,7 +361,7 @@ func TestHandCover(t *testing.T) {
 	keptConv.Objects[0].Comment = "hand"
 	annotateConfidence(keptConv, map[string]parity.Conf{
 		"KFZW": {High: false, Reason: "zeros"},
-	})
+	}, nil)
 	if keptConv.Objects[0].Comment != "hand" {
 		t.Fatalf("scaled keeps comment: %q", keptConv.Objects[0].Comment)
 	}
@@ -370,15 +370,27 @@ func TestHandCover(t *testing.T) {
 	curve.Objects[0].Cols = 4
 	curve.Objects[0].X = &model.Axis{Source: "unknown"}
 	curve.Objects[0].Comment = "map_interp_curve8"
-	annotateConfidence(curve, nil)
+	annotateConfidence(curve, nil, nil)
 	if curve.Objects[0].Comment != "map_interp_curve8: missing x axis" {
 		t.Fatalf("missing axis: %q", curve.Objects[0].Comment)
 	}
 	word := modelOf(pubObj("CWLAMFAW", 0x100, 1, ""))
 	word.Objects[0].Comment = "map_const"
-	annotateConfidence(word, nil)
+	annotateConfidence(word, nil, nil)
 	if word.Objects[0].Comment != "map_const" {
 		t.Fatalf("codeword scale note: %q", word.Objects[0].Comment)
+	}
+	implied := modelOf(pubObj("ZYLKOR", 0x55, 1, ""))
+	annotateConfidence(implied, nil, nil)
+	if implied.Objects[0].Comment != "" {
+		t.Fatalf("implied unity: %q", implied.Objects[0].Comment)
+	}
+	damosExpect := scaleExpect{expectKey("HANDRAW", "z", 8): true}
+	handRaw := modelOf(pubObj("HANDRAW", 0x66, 1, ""))
+	handRaw.Objects[0].Data.Bits = 8
+	annotateConfidence(handRaw, nil, damosExpect)
+	if handRaw.Objects[0].Comment != "no scale" {
+		t.Fatalf("DAMOS expect: %q", handRaw.Objects[0].Comment)
 	}
 	twoAddrs := []coverNote{{op: "disagrees", key: "KFZW", have: []model.Addr{0x300, 0x400}}}
 	if moveCount(twoAddrs) != 0 || applyMoves(manual, locatedMoved, twoAddrs).Objects[0].Address != 0x100 {

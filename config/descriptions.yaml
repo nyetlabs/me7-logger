@@ -34,6 +34,10 @@
   description: Schwelle Anzahl Starts mit Benzin im Öl für reduzierte LRA
 - name: ABOMX
   description: max. Anzahl Start-Zähler für Erkennung Benzin im Öl
+- name: ACSZNBM
+  description: BM-Zähler für Drehzahl=0 Erkennung nach Crashabschaltung
+- name: ACSZRPH
+  description: PH-Zähler für Drehzahl=0 Erkennung nach Crashabschaltung
 - name: ADCC_T_UM
   description: Fehlerzeit bei zueinander unplausiblen ADC-Werten für sp1s
 - name: ADEWG
@@ -186,6 +190,10 @@
   description: Anzahl NW-Umdr. für Heilung
 - name: ANWFOST
   description: Anzahl NW-Umdr. für Reaktivierung fuel-on/-off Adaption nach Ausblendung
+- name: ANZDCVIO
+  description: Mindestanzahl i.O.-Prüfungen für Aussage 'System iO'
+- name: ANZDCVNIO
+  description: Mindestanzahl n.i.O.-Prüfungen für Aussage 'System niO'
 - name: ANZDPVK
   description: Anzahl der Perioden für Ready-Flag der Usvk-Periodenüberwachung
 - name: ANZDYNSH
@@ -226,6 +234,8 @@
   description: Anzahl auszublendender Perioden für Periodendauerüberwachung
 - name: ANZTPMX
   description: Maximale Anzahl von hintereinander erlaubten Tips
+- name: ANZWDHMX
+  description: Maximale Anzahl von Diagnosewiederholungen innerhalb eines DCY
 - name: APDKGMN
   description: Anzahl Schritte zur Berechnung Minimalwert apdkg_w
 - name: APDTEFRE
@@ -242,8 +252,14 @@
   description: Maximale Anzahl der Prüfungen bei Katdiagnose
 - name: APULSMX
   description: Maximale Anzahl Impulse bei Einzelimpulsansteuerung
+- name: APULSMXA
+  description: Maximale Anzahl Impulse bei Einzelimpulsansteuerung
 - name: ASPUUKA
   description: Anzahl Sondensprünge für Verbot der ÜK-Adaption
+- name: ASRL_DAT_UC
+  description: ASRL_DAT_UC
+- name: ASRS_DAT_UC
+  description: ASRS_DAT_UC
 - name: ASUADWG
   description: Max. Anzahl Schubumluftventilansteuerungen nach LL für Diagn. Wast- Gate
 - name: ATISLATM
@@ -362,6 +378,8 @@
   description: FGR-Sollbeschleunigung im Zustand "Verzögern"
 - name: BFGRU
   description: Untere Schwelle für Beschleunigung im FGR-Betrieb
+- name: BFGR_DAT_UC
+  description: BFGR_DAT_UC
 - name: BGRA_T_UM
   description: 'Fehlerentprellung: Botschaftsfehler GRA'
 - name: BLDPMX
@@ -370,6 +388,8 @@
   description: Anzahl BM-Fehler (Zähler-Anfangswert)
 - name: BMFMX
   description: Zähler Maximalwert für BM-Fehler
+- name: BNOMSR_DAT_UC
+  description: BNOMSR_DAT_UC
 - name: BRABEVI
   description: Beschleunigung bei Rampe Beschleunigen
 - name: BRABEVI_0_A
@@ -418,16 +438,24 @@
   description: Zähler für Bus-off-Flanken bis Fehlerspeichereintrag
 - name: BUSOFFTIME
   description: Entprellzeit zum Rücksetzen von Bus-off-Fehler
+- name: BZMSRA_DAT_UC
+  description: BZMSRA_DAT_UC
+- name: BZMSR_DAT_UC
+  description: BZMSR_DAT_UC
 - name: BZ_MSR_UC
   description: BZ_MSR_UC
 - name: BZ_MSR_UM
   description: BZ_MSR_UM
+- name: BZ_ST_DAT_UC
+  description: BZ_ST_DAT_UC
 - name: CANVERS
   description: CAN-Versionsbezeichnung
 - name: CATR
   description: Konfigurationsbyte Abgastemperaturregelung
 - name: CBGRLP
   description: Codewort Konfiguration Funktion BGRLP
+- name: CBIT_DAT_UC
+  description: CBIT_DAT_UC
 - name: CCMKBI
   description: Kombiausgabe Hubraum
 - name: CDADLCK
@@ -450,6 +478,8 @@
   description: 'Dummy: Tabellenanfang'
 - name: CDCAATUN
   description: 'Codewort CARB: Tuningschutz'
+- name: CDCAAV
+  description: 'Codewort CARB: Absperrventil Aktivkohlefilter (Funktion)'
 - name: CDCAAVE
   description: 'Codewort CARB: Absperrventil Aktivkohlefilter (Endstufe)'
 - name: CDCAGRE
@@ -460,10 +490,16 @@
   description: CARB Code Abgastemperaturregelung
 - name: CDCATR2
   description: CARB Code Abgastemperaturregelung Bank 2
+- name: CDCATRD
+  description: CDCATRD
+- name: CDCATRD2
+  description: CDCATRD2
 - name: CDCATS
   description: CARB Code Abgastemperatursensor
 - name: CDCATS2
   description: CARB Code Abgastemperatursensor Bank 2
+- name: CDCBKVP
+  description: 'Codewort CARB: Bremskraftverstärker Pumpe'
 - name: CDCBKVPE
   description: 'Codewort CARB: BKVPE (Bremskraftverstärker Pumpe)'
 - name: CDCBM
@@ -492,6 +528,8 @@
   description: 'Codewort CARB: CAN-Schnittstelle, Timeout Klima'
 - name: CDCCLWS
   description: 'Codewort CARB: CAN-Schnittstelle, Timeout Botschaft Lenkwinkelsensor'
+- name: CDCCV
+  description: 'Codewort CARB: Diagnose Kurbelgehäuseentlüftung'
 - name: CDCDK
   description: "Codewort CARB:\tDK - Potentiometer"
 - name: CDCDK1P
@@ -516,16 +554,26 @@
   description: 'Codewort CARB: DV-E Endstufe'
 - name: CDCDVEF
   description: 'Codewort CARB: DV-E Fehler bei Federprüfung'
+- name: CDCDVEFO
+  description: CDCDVEFO
 - name: CDCDVEL
   description: 'Codewort CARB: DV-E Lageabweichung'
 - name: CDCDVEN
   description: 'Codewort CARB: DV-E Fehler bei Prüfung Notluftposition'
 - name: CDCDVER
   description: 'Codewort CARB: DV-E Regelbereich'
+- name: CDCDVET
+  description: CDCDVET
 - name: CDCDVEU
   description: 'Codewort CARB: DV-E Fehler beim UMA-Lernen'
+- name: CDCDVEUB
+  description: CDCDVEUB
+- name: CDCDVEUW
+  description: CDCDVEUW
 - name: CDCDVEV
   description: 'Codewort CARB: DV-E Fehler bei Verstärkerabgleich'
+- name: CDCECTS
+  description: 'Codewort CARB: Motortemperatur-Sensor'
 - name: CDCEGFE
   description: 'Codewort CARB: Lasterfassung'
 - name: CDCENWS
@@ -577,7 +625,7 @@
 - name: CDCHSH
   description: "Codewort CARB:\tLambdasonden-Heizung hinter Katalysator"
 - name: CDCHSH2
-  description: "Codewort CARB:\tLambdasonden-Heizung hinter Katalysator; (Bank2)"
+  description: 'Codewort CARB: Lambdasonden-Heizung hinter Katalysator; (Bank2)'
 - name: CDCHSHE
   description: 'Codewort CARB: Endstufe Heizung Sonde hinter Kat.'
 - name: CDCHSHE2
@@ -587,9 +635,9 @@
 - name: CDCHSV2
   description: "Codewort CARB:\tLambdasonden-Heizung vor Katalysator; (Bank2)"
 - name: CDCHSVSA
-  description: "Codewort CARB:\tLambdasonden-Heizung vor Katalysator"
+  description: 'Codewort CARB: Lambdasonden-Heizung vor Katalysator'
 - name: CDCHSVSA2
-  description: "Codewort CARB:\tLambdasonden-Heizung 2 vor Katalysator"
+  description: 'Codewort CARB: Lambdasonden-Heizung 2 vor Katalysator'
 - name: CDCKAT
   description: "Codewort CARB:\tKatalysator-Konvertierung"
 - name: CDCKPE
@@ -638,6 +686,8 @@
   description: "Codewort CARB:\tLambda-Sondenalterung TV"
 - name: CDCLATV2
   description: "Codewort CARB:\tLambda-Sondenalterung TV (Bank 2)"
+- name: CDCLAVH
+  description: 'Codewort CARB: Lambda-Sondenalterung (Vollast) hinter Kat.'
 - name: CDCLDE
   description: 'Codewort CARB: Ladedrucksteuerventil (Endstufe)'
 - name: CDCLDO
@@ -646,6 +696,8 @@
   description: 'Codewort CARB: Leckdiagnosepumpe'
 - name: CDCLDPE
   description: 'Codewort CARB: Leckdiagnosepumpe Endstufe'
+- name: CDCLDR
+  description: 'Codewort CARB: Ladedruckregelabweichung'
 - name: CDCLDRA
   description: "Codewort CARB:\tLadedruckregelabweichung"
 - name: CDCLDUV
@@ -778,6 +830,14 @@
   description: 'Codewort CARB: Wegfahrsperre'
 - name: CDCWFSRC
   description: 'Codewort CARB: Wegfahrsperre RC-Glied'
+- name: CDCZET1
+  description: CDCZET1
+- name: CDCZET2
+  description: CDCZET2
+- name: CDCZET3
+  description: CDCZET3
+- name: CDCZET4
+  description: CDCZET4
 - name: CDCZZZ
   description: 'Dummy: Tabellenende'
 - name: CDDSBKV
@@ -808,6 +868,10 @@
   description: Codewort Heizerdiagnose vor Kat im Schub (CDHSVsa = 0  => keine Diagnose)
 - name: CDKAAA
   description: 'Dummy: Tabellenanfang'
+- name: CDKAATUN
+  description: CDKAATUN
+- name: CDKAAV
+  description: 'Codewort Kunde: Absperrventil Aktivkohlefilter (Funktion)'
 - name: CDKAAVE
   description: 'Codewort Kunde: Absperrventil Aktivkohlefilter (Endstufe)'
 - name: CDKAGRE
@@ -820,6 +884,12 @@
   description: Codewort für B_lrka aktiv
 - name: CDKATR
   description: 'Codewort Kunde: Abgastemperaturregelung Bank 2'
+- name: CDKATR2
+  description: CDKATR2
+- name: CDKATRD
+  description: CDKATRD
+- name: CDKATRD2
+  description: CDKATRD2
 - name: CDKATS
   description: 'Codewort Kunde: Abgastemperaturesensor'
 - name: CDKATS2
@@ -828,6 +898,10 @@
   description: 'Codewort Katalysator-Diagnose im OBDII-Mode (invers: Europa-Mode)'
 - name: CDKATSPF
   description: Katdiagnose, Freigabe
+- name: CDKBKVP
+  description: CDKBKVP
+- name: CDKBKVPE
+  description: CDKBKVPE
 - name: CDKBM
   description: 'Codewort Kunde: Bezugsmarkengeber'
 - name: CDKBREMS
@@ -854,6 +928,8 @@
   description: 'Codewort Kunde: CAN-Schnittstelle, Timeout Klima'
 - name: CDKCLWS
   description: 'Codewort Kunde: CAN-Schnittstelle, Timeout Botschaft Lenkwinkelsensor'
+- name: CDKCV
+  description: 'Codewort Kunde: Diagnose Kurbelgehäuseentlüftung'
 - name: CDKDK
   description: 'Codewort Kunde: DK - Potentiometer'
 - name: CDKDK1P
@@ -878,16 +954,26 @@
   description: 'Codewort Kunde: DV-E Endstufe'
 - name: CDKDVEF
   description: 'Codewort Kunde: DV-E Fehler bei Federprüfung'
+- name: CDKDVEFO
+  description: CDKDVEFO
 - name: CDKDVEL
   description: 'Codewort Kunde: DV-E Lageabweichung'
 - name: CDKDVEN
   description: 'Codewort Kunde: DV-E Fehler bei Prüfung Notlufposition'
 - name: CDKDVER
   description: 'Codewort Kunde: DV-E Regelbereich'
+- name: CDKDVET
+  description: CDKDVET
 - name: CDKDVEU
   description: 'Codewort Kunde: DV-E Fehler beim UMA-Lernen'
+- name: CDKDVEUB
+  description: CDKDVEUB
+- name: CDKDVEUW
+  description: CDKDVEUW
 - name: CDKDVEV
   description: 'Codewort Kunde: DV-E Fehler bei Verstärkerabgleich'
+- name: CDKECTS
+  description: 'Codewort Kunde: Motortemperatur-Sensor'
 - name: CDKEGFE
   description: 'Codewort Kunde: Lasterfassung'
 - name: CDKENWS
@@ -934,10 +1020,12 @@
   description: 'Codewort Kunde: GRA Bedienhebelfehler'
 - name: CDKHLA
   description: 'Codeword Kunde: Heizleistungsanforderung'
+- name: CDKHRE
+  description: CDKHRE
 - name: CDKHSH
   description: "Codewort Kunde:\tLambdasonden-Heizung hinter Katalysator"
 - name: CDKHSH2
-  description: "Codewort Kunde:\tLambdasonden-Heizung hinter Katalysator, Bank 2"
+  description: 'Codewort Kunde: Lambdasonden-Heizung hinter Katalysator, Bank 2'
 - name: CDKHSHE
   description: 'Codewort Kunde: Endstufe Heizung Sonde hinter Kat.'
 - name: CDKHSHE2
@@ -946,6 +1034,10 @@
   description: 'Codewort Kunde: Lambdasonden-Heizung vor Katalysator'
 - name: CDKHSV2
   description: "Codewort Kunde:\tLambdasonden-Heizung vor Katalysator, Bank 2"
+- name: CDKHSVSA
+  description: CDKHSVSA
+- name: CDKHSVSA2
+  description: CDKHSVSA2
 - name: CDKKAT
   description: "Codewort Kunde:\tKatalysator-Konvertierung"
 - name: CDKKPE
@@ -994,6 +1086,8 @@
   description: "Codewort Kunde:\tLambda-Sondenalterung TV"
 - name: CDKLATV2
   description: "Codewort Kunde:\tLambda-Sondenalterung TV (Bank 2)"
+- name: CDKLAVH
+  description: CDKLAVH
 - name: CDKLDE
   description: 'Codeword Kunde: Ladedrucksteuerventil (Endstufe)'
 - name: CDKLDO
@@ -1002,6 +1096,8 @@
   description: 'Codewort Kunde: Leckdiagnosepumpe'
 - name: CDKLDPE
   description: 'Codewort Kunde: Leckdiagnosepumpe Endstufe'
+- name: CDKLDR
+  description: CDKLDR
 - name: CDKLDRA
   description: "Codewort Kunde:\tLadedruckregelabweichung"
 - name: CDKLDUV
@@ -1111,13 +1207,15 @@
 - name: CDKTMKI
   description: 'Codewort Kunde: Motortemperatur aus Kombiinstrument TMKI'
 - name: CDKTOL
-  description: "Codewort Kunde:\tÖltemperatur"
+  description: 'Codewort Kunde: Öltemperatur'
 - name: CDKTUM
   description: 'Codewort Kunde: Umgebungstemperatur'
 - name: CDKTUN
   description: 'Codewort Kunde: Tuningschutz'
 - name: CDKUB
   description: "Codewort Kunde:\tUB"
+- name: CDKUBR
+  description: CDKUBR
 - name: CDKUFMV
   description: 'Codewort Kunde: Funktionsüberwachung: Momentenvergleich'
 - name: CDKUFSKA
@@ -1138,6 +1236,14 @@
   description: 'Codewort Kunde: Wegfahrsperre'
 - name: CDKWFSRC
   description: 'Codewort Kunde: Wegfahrsperre RC-Glied'
+- name: CDKZET1
+  description: CDKZET1
+- name: CDKZET2
+  description: CDKZET2
+- name: CDKZET3
+  description: CDKZET3
+- name: CDKZET4
+  description: CDKZET4
 - name: CDKZZZ
   description: 'Dummy: Tabellenendeng'
 - name: CDLASH
@@ -1190,6 +1296,8 @@
   description: 'Dummy: Tabellenanfang'
 - name: CDTAATUN
   description: 'Codewort Tester: Tuningschutz'
+- name: CDTAAV
+  description: 'Codewort Tester: Absperrventil Aktivkohlefilter (Fkt)'
 - name: CDTAAVE
   description: 'Codewort Tester: Absperrventil Aktivkohlefilter (Endst.)'
 - name: CDTAGRE
@@ -1252,6 +1360,8 @@
   description: 'Codewort Tester: Lenkwinkel-Botschaft'
 - name: CDTCNIV
   description: 'Codewort Tester: Niveau-Botschaft'
+- name: CDTCV
+  description: 'Codewort Tester: Diagnose Kurbelgehäuseentlüftung'
 - name: CDTDK
   description: 'Codewort Tester: DK - Potentiometer'
 - name: CDTDK1P
@@ -1450,6 +1560,8 @@
   description: 'Codewort Tester: Lambda-Sondenalterung TV'
 - name: CDTLATV2
   description: 'Codewort Tester: Lambda-Sondenalterung TV (Bank 2)'
+- name: CDTLAVH
+  description: CDTLAVH
 - name: CDTLDE
   description: 'Codewort Tester: Ladedrucksteuerventil (Endstufe)'
 - name: CDTLDO
@@ -1458,6 +1570,8 @@
   description: 'Codewort Tester: Tankentlüftung; Leckdiagnosepumpe'
 - name: CDTLDPE
   description: 'Codewort Tester: Leckdiagnosepumpe Endstufe'
+- name: CDTLDR
+  description: 'Codewort Tester: Ladedruckregelabweichung'
 - name: CDTLDRA
   description: 'Codewort Tester: Ladedruckregelabweichung'
 - name: CDTLDUV
@@ -1726,6 +1840,8 @@
   description: 'Dummy: Tabellenanfang'
 - name: CLAAATUN
   description: 'Fehlerklasse: Tuningschutz'
+- name: CLAAAV
+  description: 'Fehlerklasse: Tankdiagnose, AAV verstopft'
 - name: CLAAAVE
   description: 'Fehlerklasse: Absperrventil Aktivkohlefilter (Endstufe)'
 - name: CLAAGRE
@@ -1778,6 +1894,8 @@
   description: 'Fehlerklasse: CAN-Schnittstelle, Timeout Botschaft Lenkwinkelsensor'
 - name: CLACNIV
   description: 'Fehlerklasse: Niveau-Botschaft'
+- name: CLACV
+  description: 'Fehlerklasse: Diagnose Kurbelgehäuseentlüftung'
 - name: CLADK
   description: 'Fehlerklasse: DK- Potentiometer'
 - name: CLADK1P
@@ -1946,6 +2064,8 @@
   description: 'Fehlerklasse: Lambda Sondenalterung vor Kat Tv'
 - name: CLALATV2
   description: 'Fehlerklasse: Lambda Sondenalterung vor Kat Tv Bank2'
+- name: CLALAVH
+  description: CLALAVH
 - name: CLALDE
   description: 'Fehlerklasse: LDR-Taktventil Endstufe'
 - name: CLALDO
@@ -1954,6 +2074,8 @@
   description: 'Fehlerklasse: Leckdiagnosepumpe'
 - name: CLALDPE
   description: 'Fehlerklasse: LDP  Endstufe'
+- name: CLALDR
+  description: CLALDR
 - name: CLALDRA
   description: 'Fehlerklasse: LDR Regelabweichungsfehler'
 - name: CLALDUV
@@ -2145,7 +2267,7 @@
 - name: CLRSHKA
   description: Codewort II für Freigabe LRSHK und Auswahl Initialisierung
 - name: CLRSHKEB
-  description: Codewort für Konfigurieren Freigabe LRSHKEB
+  description: Codewort für Freigabe LRSHKEB
 - name: CLRSKA
   description: Code-Wort Funktionsart Kat-Ausräumen
 - name: CLRVS
@@ -2154,6 +2276,8 @@
   description: Codewort Zwangseinschaltung LR gemäß CARB-Forderung
 - name: CLSDKH
   description: Codewort für LSD-Abschaltung bei Kat. heizen
+- name: CMSR_DAT_UC
+  description: CMSR_DAT_UC
 - name: CNFKUPPL
   description: Konfigurationsflag für die Auswertung des Kuplg.schalters in der LLR
 - name: CNFLLRNS
@@ -2238,6 +2362,8 @@
   description: Codewort für ASR-Schnittstelle
 - name: CWASR.3
   description: Codewort für ASR-Schnittstelle
+- name: CWATM
+  description: Codewort für Abgastemperaturmodell
 - name: CWBAESEL
   description: Codewort für Umschaltung Bergaberkennung usw.
 - name: CWBAESEL_0_A
@@ -2292,10 +2418,14 @@
   description: Codewort für Auswertung der CAN-Crash-Info
 - name: CWCSER
   description: Codewort für Auswertung der Airbag-Botschaft
+- name: CWDAAV
+  description: Codewort Diagnose Aktivkohlefilter-Absperrventil DAAV
 - name: CWDALA
   description: Codewort DMDMIL Dauerlaufzähler
 - name: CWDBKVP
   description: Codewort für Diagnose Bremskraftverstärker (DBKVP)
+- name: CWDCV
+  description: Codewort für KGE-Diagnose zur Einstellung der Diagnosevarianten
 - name: CWDDKV
   description: Codewort DDKV
 - name: CWDEGFE
@@ -2960,6 +3090,8 @@
   description: 'Codewort: Testereingriff Sekundärluftdiagnose'
 - name: CWFGRFULO
   description: Codewort FGRFULO
+- name: CWFGRGABED
+  description: CWFGRGABED
 - name: CWFGRGA_0_A
   description: Codewort für gangabhängiges FGR-Verbot
 - name: CWFGRGA_1_A
@@ -3140,6 +3272,8 @@
   description: Codewort zur Auswahl des Parametersatzes des P-Anteils
 - name: CWLREB
   description: Codewort für Lambda - Regelung  Einschaltbedingungen
+- name: CWLRMS
+  description: Codewort Magerschutz
 - name: CWLSHA
   description: Codewort für Lambdasonden hinter KAT Alterung in %DLSAHK
 - name: CWLUEKO
@@ -3386,6 +3520,28 @@
   description: größtes zulässiges Delta des Botschaftszählers
 - name: DBZ_NIV
   description: oberer Grenzwert für Botschaftszählerdifferenz
+- name: DCVFHOU
+  description: Mindesthöhenfaktor zur Diagnosebereitschaft
+- name: DCVFRMMN
+  description: frm-Schwellwert für Freigabe der Diagnosebereitschaft
+- name: DCVLAMSMN
+  description: Min-Schwelle für lamsbg zur Freigabe der Diagnosebereitschaft
+- name: DCVLAMSMX
+  description: Max-Schwelle für lamsbg zur Freigabe der Diagnosebereitschaft
+- name: DCVLAMSO
+  description: Obere Schwelle für Zylinderabschaltung
+- name: DCVMLO
+  description: Maximaler Motorluftmassenstrom zur Diagnosebereitschaft
+- name: DCVRLO
+  description: Maximale Motorlast zur Diagnosebereitschaft
+- name: DCVTAO
+  description: Maximale Ansauglufttemperatur zur Diagnosebereitschaft
+- name: DCVTMU
+  description: Mindestmotortemperatur zur Diagnosebereitschaft
+- name: DCVTNSTU
+  description: Mindestzeit nach Start bis Diagnosebereitschaft
+- name: DCVVFZGO
+  description: Maximale Fahrzeuggeschwindigkeit zur Diagnosebereitschaft
 - name: DDFDTEAB
   description: Schwelle für Abbruch der Diagnose wegen großer Änderung des Generatorsignals
 - name: DDFUELSAN
@@ -3546,6 +3702,8 @@
   description: 'Zündwinkeländerungsbereich 5: Anzahl Inkremente'
 - name: DINWN4
   description: 'ZWB4: Anzahl Inkremente nach WE weich'
+- name: DKAAVN
+  description: Maximaler Drosselklappenwinkel bei Leckdiagnose, DAAV
 - name: DKADP
   description: Wdk-Schwelle für LDR-TV-Adaption aktiv
 - name: DKATCW
@@ -3586,6 +3744,8 @@
   description: Untere Drehzahlschwelle für Ermittlung Offsetkompensationswert
 - name: DKTLMT
   description: Max. Dauer tL-/wdkbl- Grenzwertüberschreitung
+- name: DKTLMTA
+  description: Max. Dauer tL-/wdkbl- Grenzwertüberschreitung
 - name: DLAHINI
   description: Initwert Integrator dlahi der stetigen LRHK
 - name: DLAHISATO
@@ -3624,6 +3784,8 @@
   description: Schwelle Delta Lambda für Erkennung unplausible Bankabweichung ATR
 - name: DLBTS
   description: Delta desired lambda for component protection
+- name: DLBTSF
+  description: Delta Lambdasoll für Bauteileschutz (gefiltert)
 - name: DLDRN.0
   description: D - Anteil Ladedruckregler
 - name: DLDUVES
@@ -4168,6 +4330,8 @@
   description: Delta pressure value for signal comparison of pressure sensor with ambient pressure
 - name: DPDSVLU (5120 mbar)
   description: Delta pressure value for signal comparison of pressure sensor with ambient pressure
+- name: DPLPLGD
+  description: Abstand Ladesolldruck zu Grundladedruck für Diagnose
 - name: DPLSDWG
   description: Max. delta plsol for wastegate diagnosis
 - name: DPSBKV
@@ -4194,7 +4358,11 @@
   description: Maximale Schwelle für Delta-Umgebungsdruck, Bergaberkennung (0.5 mm - Diagnose)
 - name: DPUFVMN
   description: Spezifische Druckdifferenz für Saugrohrdrucküberwachung
+- name: DPUFVMNA
+  description: Spezifische Druckdifferenz für Saugrohrdrucküberwachung
 - name: DPUFVSMN
+  description: Soll-Druckdifferenz für Saugrohrdrucküberwachung
+- name: DPUFVSMNA
   description: Soll-Druckdifferenz für Saugrohrdrucküberwachung
 - name: DPULSUV
   description: Hysterese für Pulsationsschwelle Schubumluftventildiagnose beim Turbo
@@ -4472,6 +4640,8 @@
   description: Delta  Motortemperatur für Initialisierung Öltemperaturberechnung
 - name: DTMWUC
   description: Delta Motortemperaturschwelle für Erfüllung 'warm up cycle'
+- name: DTPAAV
+  description: Delta-Periodendauer zur Berechnung des Fensters bei Leckdiagnose
 - name: DTPATS
   description: Toleranz Periodendauer Abgastemperatursensor
 - name: DTPLDP
@@ -4956,10 +5126,16 @@
   description: Minimaler I-Anteil Tastverhältnis zur Ansteuerung elektr. Thermostatventil
 - name: ETRIMX
   description: Maximaler I-Anteil Tastverhältnis zur Ansteuerung elektr. Thermostatventil
+- name: EVDCVM
+  description: Einschaltverzögerung Bereitschaft zu Meßbeginn
+- name: EVDCVP
+  description: Mindestpause zwischen zwei folgenden Diagnosedurchl. im selben DCY
 - name: EVTMODMNDK
   description: min. Temperatur bei der Offset nicht zu DK-Kennlinie bei nmot=0 addiert wird
 - name: EVTMODO
   description: Offset für evtmod abhängig von gefilterter Motortemperatur
+- name: EVZ_DAT_UC
+  description: EVZ_DAT_UC
 - name: FABMDKO
   description: Anfangsfaktor Klimakompressor-Lastabregelung
 - name: FABMDWA
@@ -5082,6 +5258,8 @@
   description: 'Dummy: Tabellenanfang'
 - name: FFTAATUN
   description: 'Freeze Frame Tabelle: Tuningschutz'
+- name: FFTAAV
+  description: 'Freeze Frame Tabelle: Tankdiagnose, AAV verstopft'
 - name: FFTAAVE
   description: 'Freeze Frame Tabelle: Absperrventil Aktivkohlefilter (Endstufe)'
 - name: FFTAGRE
@@ -5092,10 +5270,18 @@
   description: Tabelle der Umweltbed. Abgastemperaturregelung
 - name: FFTATR2
   description: Tabelle der Umweltbed. Abgastemperaturregelung Bank 2
+- name: FFTATRD
+  description: FFTATRD
+- name: FFTATRD2
+  description: FFTATRD2
 - name: FFTATS
   description: Tabelle der Umweltbed. Abgastemperatursensor
 - name: FFTATS2
   description: Tabelle der Umweltbed. Abgastemperatursensor Bank 2
+- name: FFTBKVP
+  description: FFTBKVP
+- name: FFTBKVPE
+  description: FFTBKVPE
 - name: FFTBM
   description: 'Freeze Frame Tabelle: Bezugsmarkengeber'
 - name: FFTBREMS
@@ -5118,8 +5304,12 @@
   description: 'Freeze Frame Tabelle: CAN-Schnittstelle, interner Fehler'
 - name: FFTCINS
   description: 'Freeze Frame Tabelle: CAN-Timeout Instr.-Botschaft'
+- name: FFTCKLA
+  description: FFTCKLA
 - name: FFTCLWS
   description: 'Freeze Frame Tabelle: CAN-Schnittstelle, Timeout Botschaft Lenkwinkelsensor'
+- name: FFTCV
+  description: 'Freeze Frame Tabelle: Diagnose Kurbelgehäuseentlüftung'
 - name: FFTDK
   description: 'Freeze Frame Tabelle: DK- Potentiometer'
 - name: FFTDK1P
@@ -5144,16 +5334,26 @@
   description: 'Freeze Frame Tabelle: DV-E Endstufe'
 - name: FFTDVEF
   description: 'Freeze Frame Tabelle: DV-E Fehler bei Federprüfung'
+- name: FFTDVEFO
+  description: FFTDVEFO
 - name: FFTDVEL
   description: 'Freeze Frame Tabelle: DV-E Lageabweichung'
 - name: FFTDVEN
   description: 'Freeze Frame Tabelle: DV-E Fehler bei Prüfung Notluftposition'
 - name: FFTDVER
   description: 'Freeze Frame Tabelle: DV-E Regelbereich'
+- name: FFTDVET
+  description: FFTDVET
 - name: FFTDVEU
   description: 'Freeze Frame Tabelle: DV-E Fehler beim UMA-Lernen'
+- name: FFTDVEUB
+  description: FFTDVEUB
+- name: FFTDVEUW
+  description: FFTDVEUW
 - name: FFTDVEV
   description: 'Freeze Frame Tabelle: DV-E Fehler bei Verstärkerabgleich'
+- name: FFTECTS
+  description: 'Freeze Frame Tabelle: Motortemperatur-Sensor'
 - name: FFTEGFE
   description: 'Freeze Frame Tabelle: Lasterfassung'
 - name: FFTENWS
@@ -5200,6 +5400,8 @@
   description: 'Freeze Frame Tabelle: GRA- Bedienhebel'
 - name: FFTHLA
   description: 'Freeze Frame Tabelle: Heizleistungsanforderung'
+- name: FFTHRE
+  description: FFTHRE
 - name: FFTHSH
   description: Tabelle Umweltbedingungen Heizung Lambdasonde hinter Kat
 - name: FFTHSH2
@@ -5264,6 +5466,8 @@
   description: Tabelle Umweltbedingungen Lambda-Sondenalterung Tv vor Kat
 - name: FFTLATV2
   description: Tabelle Umweltbedingungen Lambda-Sondenalterung Tv vor Kat Bank2
+- name: FFTLAVH
+  description: FFTLAVH
 - name: FFTLDE
   description: 'Freeze Frame Tabelle: LDR Taktventil Endstufe'
 - name: FFTLDO
@@ -5272,6 +5476,8 @@
   description: 'Freeze Frame Tabelle: Leckdiagnosepumpe'
 - name: FFTLDPE
   description: 'Freeze Frame Tabelle: LDP Endstufe'
+- name: FFTLDR
+  description: FFTLDR
 - name: FFTLDRA
   description: 'Freeze Frame Tabelle: LDR Regelabweichungsfehler'
 - name: FFTLDUV
@@ -5404,6 +5610,14 @@
   description: 'Freeze Frame Tabelle: Wegfahrsperre'
 - name: FFTWFSRC
   description: 'Freeze Frame Tabelle: Wegfahrsperre RC-Glied'
+- name: FFTZET1
+  description: FFTZET1
+- name: FFTZET2
+  description: FFTZET2
+- name: FFTZET3
+  description: FFTZET3
+- name: FFTZET4
+  description: FFTZET4
 - name: FFTZZZ
   description: 'Dummy: Tabellenende'
 - name: FFWEKA
@@ -5988,12 +6202,18 @@
   description: Progression bei Spülratenaufsteuerung
 - name: FQTEVA.0
   description: Progression bei Spülratenaufsteuerung
+- name: FRADCVINI
+  description: fra Initialisierungswert für DCV
+- name: FRADCVSTO
+  description: Minimaler Wert des Gemischkorrekturfaktors zur Übernahme Adaptionswerte im Start
 - name: FRADN
   description: untere fra-Schwelle für Fehlererkennung im Kraftstoffversorgungssystem
 - name: FRADX
   description: obere fra-Schwelle für Fehlererkennung im Kraftstoffversorgungssystem
 - name: FRAE
   description: Delta-fra-Schwelle für Erkennung der eingeschwungenen Grundadaption
+- name: FRAKONST
+  description: Verhältnis stationärer Warm-LL-Luftmassenstrom MLO2 / (MLU4 - MLO2)
 - name: FRAMN
   description: untere Begrenzung des Korrekturfaktors fra
 - name: FRAMX
@@ -6130,6 +6350,14 @@
   description: untere Diagnoseschwelle (short test)
 - name: FRMSTTDX
   description: obere Diagnoseschwelle (short test)
+- name: FRMULTOE
+  description: Schwelle Kenngröße frmulti im nio Bereich f. Leckageerkennung nach Drosselklappe
+- name: FRMULTOZ
+  description: Schwelle Kenngröße frmulti im nio Bereich f. Leckageerkennung vor Drosselklappe
+- name: FRMULTUE
+  description: Schwelle Kenngröße frmulti im io Bereich f. Leckageerkennung nach Drosselklappe
+- name: FRMULTUZ
+  description: Schwelle Kenngröße frmulti im io Bereich f. Leckageerkennung vor Drosselklappe
 - name: FRTEMX
   description: obere Regelbereichsgrenze bei Fehler "offen klemmendes TEV"
 - name: FS1FO
@@ -6138,6 +6366,10 @@
   description: Filterfaktor Segmentzeit-Filter 2 der fuel-on/-off Adaption
 - name: FS2FSE
   description: Übernahmefaktor fs nach fse
+- name: FS2FSE2
+  description: FS2FSE2
+- name: FS2FSE3
+  description: FS2FSE3
 - name: FSBBHK
   description: Verlängerungsfaktor für die zweite Sondenbereitschaftszeit hinter Kat
 - name: FSBBVK
@@ -6542,6 +6774,8 @@
   description: Min. zul. Gang bei FGR-Betrieb
 - name: GANGFAW
   description: Gangschwelle für Deaktivierung Fahrerwunsch in der Höhe
+- name: GANGIO
+  description: Istgangschwelle für Aktivierung von KFTARXB
 - name: GDKLDOB
   description: Drosselklappengradientenschwelle für LDR-Overboost
 - name: GDV1.0
@@ -6846,6 +7080,8 @@
   description: Schwellwert integr. Luftmasse f. Einschaltverzögerung LR nach SA
 - name: IMLSLMN
   description: min. Verhältnisfaktor psum_w/mlsu für Einschaltung SLS
+- name: IMLSLMNTMS
+  description: min. Verhältnisfaktor für Einschaltung SLS in Abhängigkeit von tmst
 - name: IMLSLMNTMS_0_A
   description: min. Verhältnisfaktor für Einschaltung SLS in Abhängigkeit von tmst
 - name: IMLSLMNTMS_1_A
@@ -7402,6 +7638,8 @@
   description: Gewichtungsfaktor für maximalen stationären Antiruckel-Eingriff
 - name: KFFGDMAR_3_A
   description: Gewichtungsfaktor für maximalen stationären Antiruckel-Eingriff
+- name: KFFHOTMKO
+  description: Höhen- und Temperaturkorrektur der Kenngröße frmulti
 - name: KFFKRXTM
   description: Faktor zur Korrektur von rlmax bei hoher Motortemperatur
 - name: KFFLDEO
@@ -8154,6 +8392,8 @@
   description: AGR-Temperatur am Auslaßventil
 - name: KFTARX
   description: Maximum specified load IAT correction factor map
+- name: KFTARXB
+  description: Basiswerte Kennfeld Maximalfuellung Tans Korrekturfaktor
 - name: KFTARXZK
   description: Maximum specified load IAT correction factor map under continuous knock
 - name: KFTATM
@@ -8256,6 +8496,8 @@
   description: Sondenspannungssollwert für Regelung hinter Kat. Bank2
 - name: KFUSHK2_1_A
   description: Sondenspannungssollwert für Regelung hinter Kat. Bank2
+- name: KFUSHKA
+  description: Sondenspannungssollwert für Regelung hinter Kat. während Kurztest
 - name: KFUSHK_0_A
   description: Sondenspannungssollwert für Regelung hinter Kat. (statt KFUSRHK für Variantenk.)
 - name: KFUSHK_1_A
@@ -8750,6 +8992,8 @@
   description: Kennlinie integrierte Luftmassenschwelle für Thermostat-Monitoring THM
 - name: KLLAKHFH
   description: Umgebungsdruckkorrektur Lambda Katheizen
+- name: KLLAMKORR
+  description: Korrekturkennlinie des gefilterten lamsoni Wertes
 - name: KLLLRZU
   description: Kennlinie für zulässiges Moment der Leerlaufregelung
 - name: KLLLRZU_UC
@@ -8814,6 +9058,8 @@
   description: pedalsollwertabh. Drehzahlbegrenzung in der DK-Antrieb-Ersatzfunktion, Fktsüberw
 - name: KLNSTABMX
   description: Größtmöglicher Stabilisierungsfaktor in Momentenüberwachung
+- name: KLNSWLKORR
+  description: Korrekturkennlinie für Faktor Nachstart und Warmlauf
 - name: KLNWRLTM
   description: Wichtung von relativer Sollfüllung über Motortemp. zur Adressierung von KFNWS
 - name: KLOELD
@@ -8826,12 +9072,16 @@
   description: Abzuführende Wärme f. Klimakondensator
 - name: KLQVHDS
   description: Klimahochdruckanforderung in Abhängigkeit der Umgebungstemperatur
+- name: KLRKAKORR
+  description: Korrekturkennlinie zur Berechnung von frkadcv
 - name: KLRLSALULL
   description: Lastschwelle zur Schuberkennung für Ausblendung der Aussetzererkennung im LL
 - name: KLSDTHMS
   description: Kennlinie starttemp.-abh. Anpassung Steigungskonstante Thermostat-Temp.Modell
 - name: KLSZKLAMFA
   description: Schwelle für Zeitkonstante bei Filterung Anfettung auf Fahrerwunsch
+- name: KLTABGPRN
+  description: Prädizierte Anstiegszeit der Abgastemperatur für den Sensor Notlauf
 - name: KLTALUST
   description: Zeitdauer Ausblendung der Aussetzererkennung nach Motorstart
 - name: KLTDS
@@ -8996,6 +9246,10 @@
   description: Klopferkennungsabsolutschwelle
 - name: KRITFS
   description: kritischer fs Wert
+- name: KRITFS2
+  description: KRITFS2
+- name: KRITFS3
+  description: KRITFS3
 - name: KRKFKS
   description: Zuordnung der Kloperkennungskennlinie bei fehlender Zyl.-1-Erkennung
 - name: KRKTE
@@ -9078,6 +9332,8 @@
   description: Verstärkungsfaktor Zusatzamplitudenfilter
 - name: LADFIL
   description: Boost pressure filtering
+- name: LADIFFTHR
+  description: Schwelle für Lambda-Differenz für LRS Reset bei Magerschutz
 - name: LADIFFVA
   description: Schwelle für Wichtungsfaktor Verzögerungsabmagerung für Lambdaist > 1.0
 - name: LAERROR
@@ -9142,8 +9398,12 @@
   description: Lamdavorsteuerung bei rl < RLLAMMN zur Verbesserung der Brennbarkeit
 - name: LAMSKAMX
   description: Lambda-Ist vor Kat für Erkennung Magerbedingung Kat-Ausräumen
+- name: LAMSONMN
+  description: Lambda-Schwelle Min. für Auslösung Sperre I-Anteil
+- name: LAMSONMX
+  description: Lambda-Schwelle Max. für Auslösung Sperre I-Anteil
 - name: LAMSONSVL
-  description: Schwelle für Volllast Lambda-Betrieb bei der Sondenspannung überprüft wird
+  description: Schwelle für Vollast Lambda-Betrieb bei der Sondenspannung überprüft wird
 - name: LAMSOSOF
   description: Lambdasonde Soll Obergrenze für 1.0-Fenster
 - name: LAMSOSUF
@@ -9262,6 +9522,10 @@
   description: Lower regulation deviation threshold for negative adjustment
 - name: LDEIAU (5120 mbar)
   description: Lower regulation deviation threshold for negative adjustment
+- name: LDELDRAO
+  description: Obere Grenze für tiefpassgefilterte LDR-Regelabweichung
+- name: LDELDRAU
+  description: Untere Grenze für tiefpassgefilterte LDR-Regelabweichung f. Heilbedingung
 - name: LDESA
   description: 'Fehler -> Lampe: Fehler an unbenutzter Endstufe A'
 - name: LDESB
@@ -9502,6 +9766,8 @@
   description: Kennlinie Amplitude der LRS-Zwangsamplitude
 - name: LSAKTD
   description: Einfluß langsame Sonde v.K. auf Katdiagnose
+- name: LSONHMX
+  description: Fehlerschwelle lamsonh_w
 - name: LSUNAMN
   description: untere Schwelle für LSU nicht aktiv
 - name: LSUNAMX
@@ -9644,8 +9910,16 @@
   description: minimales Wandlermoment für Sperrung des Velustmomentfilters beim Kriechen (CVT)
 - name: MDWEDWDK
   description: Wiedereinsetzmoment nach Schubabschalten
+- name: MEBZA_DAT_UC
+  description: MEBZA_DAT_UC
+- name: MECS_DAT_UC
+  description: MECS_DAT_UC
 - name: MEESG
   description: Maske Fehler-Signal SG
+- name: MER_D1_UC
+  description: MER_D1_UC
+- name: MER_D2_UC
+  description: MER_D2_UC
 - name: MFG PCODE
   description: Manufacturer P code table
 - name: MIFABGMX
@@ -9662,6 +9936,8 @@
   description: Indiziertes Fahrerwunschmoment für Füllungspfad bei aktiver Gradientenbegrenzung
 - name: MIFAMXNOT
   description: maximales indiziertes Moment im PWG-Ersatzbetrieb
+- name: MIFA_DAT_UC
+  description: MIFA_DAT_UC
 - name: MIGSNLN
   description: inidiziertes Soll-Motormoment für Getriebe-Notlauf
 - name: MILANTI
@@ -9928,10 +10204,14 @@
   description: untere Schwelle für Plausibilitätsprüfung LSU
 - name: MSDKLMMN
   description: minimaler Massenstrom über Drosselklappe in TE
+- name: MSGS_DAT_UC
+  description: MSGS_DAT_UC
 - name: MSLBAS
   description: Ini.- Sekundärluftmasse
 - name: MSLG
   description: Massenstrom Leckluft gesamt
+- name: MSLGDCV
+  description: msndko-Initialisierungswert für DCV
 - name: MSLUB
   description: Sekundärluftmasse abhängig von der Batteriespannung
 - name: MSLVMX
@@ -9948,14 +10228,26 @@
   description: Kennlinie normierter Massenstrom durch TEV
 - name: MSNTEVO
   description: normierter, überkritischer Massenstrom durch das 100% offene TEV (8 Bit)
+- name: MSPSN_DAT_UC
+  description: MSPSN_DAT_UC
+- name: MSRC_D_UC
+  description: MSRC_D_UC
 - name: MSRC_T_UC
   description: Fehlerzeit für MSR-Eingriff-Überwachung des Befehlstests
 - name: MSRC_T_UM
   description: Fehlerzeit für MSR-Eingriff-Überwachung der Funktionsüberwachung
 - name: MSRMDTMX
   description: Größte zulässige Momenten-Zeit-Fläche bei der MSR-Topfplausibilisierung
+- name: MSTEAAV
+  description: Mindestluftmasse bei Fortsetzungsspülung
+- name: MSTEAAVI
+  description: Mindestluftmasse bei Initialspülung DAAV
 - name: MSTELDP
   description: Mindestluftmasse bei Initial- u. Fortsetzungsspülung
+- name: MSTPKTU
+  description: Kennlinie Massenstrom-Schwelle für Verzögerung Taupunktende hinter Kat
+- name: MVER_D_UC
+  description: MVER_D_UC
 - name: MVER_T_UC
   description: Fehlerzeit beim Momentenvergleich im Befehlstest
 - name: MVER_T_UM
@@ -10046,6 +10338,8 @@
   description: Filter-Zeitkonstante für verzögertes Moment im Befehlstest
 - name: MZFFIL_UM
   description: Filter-Zeitkonstante für verzögertes Moment in der Funktionsüberwachung
+- name: MZFPTR_DAT_UC
+  description: MZFPTR_DAT_UC
 - name: MZFREG_DAT_UC
   description: MZFREG_DAT_UC
 - name: MZFTV
@@ -10054,6 +10348,10 @@
   description: Verzugszeit für zulässiges Moment mz_um im Befehlstest
 - name: MZFTV_UM
   description: Verzugszeit für zulässiges Moment mz_um in der Funktionsüberwachg
+- name: MZF_DAT_UC
+  description: MZF_DAT_UC
+- name: MZL_DAT_UC
+  description: MZL_DAT_UC
 - name: N0
   description: Umrechnungskonstante für Einrechnung Gemischkorrektur rkat
 - name: N40_KF
@@ -10206,6 +10504,8 @@
   description: Solldrehzahl bei eingeschalteter Frontscheibenheizung
 - name: NFHZFS
   description: Solldrehzahl bei eingeschalteter Frontscheibenheizung und B_fs=1
+- name: NFLAGS_D_UC
+  description: NFLAGS_D_UC
 - name: NFLUV
   description: Drehzahlschwelle der Modifikation der Laufunruhe-Berechnung
 - name: NFLX.0
@@ -10548,6 +10848,8 @@
   description: Motordrehzahlschwelle zur Freigabe des Schnellstarts über PG Schnellstart
 - name: NMOTRDE
   description: Drehzahlschwelle zur Freigabe der Funktion RDE
+- name: NMOT_DAT_UC
+  description: NMOT_DAT_UC
 - name: NMV08_UC
   description: Stützstellenverteilung für Motordrehzahl im Befehlstest
 - name: NMV08_UM
@@ -11158,6 +11460,8 @@
   description: Ersatzwert Druck Klimaanlage für KMTR
 - name: PKODRCMX
   description: Kältemitteldruckschwelle zur Kompressorabschaltung
+- name: PLGRUELDD
+  description: Ersatzwert des Grundladedrucks für LDR-Diagnose
 - name: PLRHAV
   description: Wichtungsfaktor des P-Anteils in der LRHK über KAT-Alterung
 - name: PLRHAV2
@@ -11212,6 +11516,8 @@
   description: Pulsationskorrektur abhängig von Ansauglufttemperatur
 - name: PUKORRV
   description: Umgebungsdruckkorrektur abhängig von Fahrzeuggeschwindigkeit
+- name: PULDR
+  description: Schwelle Umgebungsdruck für Ladedruckdiagnose
 - name: PULSUV
   description: Pulsationsschwelle für Schubumluftventildiagnose beim Turbo
 - name: PUMN
@@ -11358,6 +11664,10 @@
   description: Belastungswiderstand für Pumpstrom-Erzeugung
 - name: RDUNDEF
   description: Winkelbereich in dem keine Plausibilisierung des Rückdrehverdachts möglich ist
+- name: REAC_D1_UC
+  description: REAC_D1_UC
+- name: REAC_D2_UC
+  description: REAC_D2_UC
 - name: REAC_T1_UC
   description: Fehlerzeit bei der Funktions-Fehlerreaktionsüberwachung im Befehlstest
 - name: REAC_T1_UM
@@ -11400,6 +11710,8 @@
   description: Stützstellenverteilung für Referenzpegelverhältnis der K-Faktoren KF
 - name: RESETMAX
   description: Schalter zum Resetieren von perfmax_w
+- name: RFLAGS_D_UC
+  description: RFLAGS_D_UC
 - name: RHSOH
   description: obere Diagnoseschwelle Sondenheizungswiderstand hinter Kat
 - name: RHSOV
@@ -11416,12 +11728,16 @@
   description: Schwelle für Reset Signalunterbrechung mit Ri-Diagnose hinter KAT
 - name: RISIGRESV
   description: Schwelle für Reset Signalunterbrechung mit Ri-Diagnose vor KAT
+- name: RKADCVINI
+  description: rka-Initialisierungswert für DCV
 - name: RKADTEVO
   description: obere rka Schwelle für passive Einschaltbedingungen Diagnose TEV
 - name: RKADTEVU
   description: untere rka Schwelle für passive Einschaltbedingungen Diagnose TEV
 - name: RKAE
   description: Delta rkat- bzw. rkaz-Schwelle für Erkennung der eingeschwungenen Grundadaption
+- name: RKAKONST
+  description: Verhältnis NO / stationäre Warm-LL-Drehzahl
 - name: RKATDDKVMN
   description: additive Gemischkorrektur (pro Zeit) der Gemischdaption Minimalwert
 - name: RKATDDKVMX
@@ -11494,6 +11810,8 @@
   description: RL-Kennlinie Bergaberkennung Gang 6 bei Feinstleckdiagnose
 - name: RL6GV
   description: RL - Kennlinie Bergaberkennung Gang 6
+- name: RLAAVMX
+  description: Maximale Last bei Diagnose AAV
 - name: RLBABMX
   description: Begrenzung Filter Bergaberkennung
 - name: RLC_T_UM
@@ -11558,6 +11876,10 @@
   description: Kennlinie über nmot, obere rL Regelgrenze für Regler hinter KAT
 - name: RLLRHON_1_A
   description: Kennlinie über nmot, obere rL Regelgrenze für Regler hinter KAT
+- name: RLLRHUAN_0_A
+  description: Kennlinie über nmot, untere rL Regelgrenze für Regler hinter KAT während Kurztes
+- name: RLLRHUAN_1_A
+  description: Kennlinie über nmot, untere rL Regelgrenze für Regler hinter KAT während Kurztes
 - name: RLLRHUFA
   description: rL Regelgrenze für Regler hinter KAT bei Funktionsanforderung B_fakat
 - name: RLLRHUFA_0_A
@@ -11620,6 +11942,8 @@
   description: untere rl - Schwelle Bereich 2
 - name: RLU2AC
   description: untere rl - Schwelle Bereich 2 mit Kompressor
+- name: RLU2FA
+  description: untere rl-Schwelle Bereich 2 bei Funktionsanforderung (B_falra)
 - name: RLU3
   description: untere rl - Schwelle Bereich 3
 - name: RLU4
@@ -11644,6 +11968,8 @@
   description: unterer Grenzwert Anpassung maximaler Ladedruck
 - name: RL_BO_UM
   description: Offset für Toleranzgerade f(rl_um) für rlipf_um in der Funktionsüberwachung
+- name: RL_DAT_UC
+  description: RL_DAT_UC
 - name: RL_MO_UM
   description: Steigung für Toleranzgerade f(rl_um) für rlipf_um in der Funktionsüberwachung
 - name: RMSLADA
@@ -11746,6 +12072,8 @@
   description: Stützstellenverteilung Zündwinkelwirkungsgrad für PD-Regler
 - name: SEZ06TMUB
   description: Stützstellenverteilung, Zündwinkelwirkungsgrad
+- name: SFLAGS_D_UC
+  description: SFLAGS_D_UC
 - name: SFONTM
   description: Schwellwert tmot für fuel-on Adaption aktiv
 - name: SFR05TEUB
@@ -11776,6 +12104,8 @@
   description: Sorte Hardware
 - name: SGIDK1_DAT
   description: Diagnose-Nummer
+- name: SGSC_D_UC
+  description: SGSC_D_UC
 - name: SHKNWMXE
   description: Maximale Anzahl Schüttelversuche Einlaßnockenwelle im Fahrzyklus
 - name: SIM06ESUW
@@ -11964,6 +12294,8 @@
   description: Stützstellenverteilung für Pedalwert im Befehlstest
 - name: SPSNV08_UM
   description: Stützstellenverteilung für Pedalwert in der Funktionsüberwachung
+- name: SPSN_DAT_UC
+  description: SPSN_DAT_UC
 - name: SPSVG_UM
   description: Vollgas-Sollwert-Schwelle zur Umschaltung der maximalen Differenz SP1S-SP2S
 - name: SPU08LDUB
@@ -12164,6 +12496,8 @@
   description: Schwelle Erkennung Fahrzeugstillstand für DK-Selbst-Reinigungsfunktion
 - name: SVP12LDUW
   description: Stützstellenverteilung für vpssplg bei LDR
+- name: SWDIVZERO
+  description: Wert zur Vermeidung einer Nulldivision
 - name: SWK08LDUW
   description: Stützstellenverteilung für Ladedruckregelung
 - name: SWK108LDUW
@@ -12192,6 +12526,12 @@
   description: Absteuerungsfaktorumschaltschwelle 2 für Nachstartfaktor
 - name: SpeedThreshold
   description: Limits the speed where AntiLag is active. If vehicle speed is < SpeedThreshold, the AntiLag is enabled
+- name: TAAV1SD
+  description: Zeitschwelle 1 für Erkennung AAV geschlossen
+- name: TAAV2SD
+  description: Zeitschwelle 2 für Erkennung AAV geschlossen
+- name: TAAVZMN
+  description: Minimale Zeit für TEV-zu vor Fortsetzung AAV-Diagnose
 - name: TABGBTS
   description: EGT threshold for component protection
 - name: TABGHSVO
@@ -12234,6 +12574,8 @@
   description: Abregelzeit für LDR-Overboost
 - name: TABMNTUM
   description: Mindest-Abstellzeit bis Abkühlung Motor für Aktualisierung Umgebungstemperatur
+- name: TABSDTMN
+  description: Minimale Abstellzeit zur Startdiagnose des Temp.-Sensors
 - name: TABSMADTM
   description: Abstellzeit bis Abkühlung Motor für Diagnose TMOT
 - name: TABSTHLSH
@@ -12258,6 +12600,8 @@
   description: obere Temperaturschwelle für die Heizerdiagnose
 - name: TADHMXH
   description: obere Temperaturschwelle für die Heizerdiagnose hinter Kat
+- name: TADLDUV
+  description: Ansauglufttemperautrschwelle zum Einschalten der Diagnose f. SUV
 - name: TADLLR
   description: Ansauglufttemperaturschwelle für Diagnose Leerlaufsteller
 - name: TADMM
@@ -12354,10 +12698,14 @@
   description: Ansauglufttemperaturschwelle zur Nachstartaufweitung in der Fkt.-Überwachung
 - name: TANSMX
   description: Ansauglufttemperaturschwelle für Erstbefüllung Kraftstoffsystem
+- name: TANSNVMX
+  description: Maximale Ansauglufttemperatur für die Startdiagnose
 - name: TANSVL
   description: Ansauglufttemperaturschwelle für Freigabe der Vollastbedingung
 - name: TANS_LD
   description: TANS Stützstellen LDR
+- name: TANUVMN
+  description: Ansaugluft-Temperaturschwelle für Ansteuerung des Schubumluftventils
 - name: TANW
   description: Ansauglufttemperaturschwelle für Nockenwellenverstellung
 - name: TAPVLTM
@@ -12432,6 +12780,8 @@
   description: Abgastemperaturkorrektur bei Kat warmhalten aktiv
 - name: TATMML
   description: stationaere Abgastemperatur abh. vom Luftdurchsatz
+- name: TATMRTPK
+  description: Zeitverzögerung zum Rücksetzten des Wärmemengen Integrators iwmatmk
 - name: TATMSA
   description: Abgastemperatur bei Schubabschneiden
 - name: TATMSAE
@@ -12466,6 +12816,8 @@
   description: Temperaturoffset  für Wärmemengenberechnung
 - name: TATMZML
   description: Abgastemperaturaenderung bei Zuendwinkel und Lambdaverstellung ml-abhaengig
+- name: TATNVMN
+  description: Minimale modellierte Abgastemperatur zur Ausführung der phys. Diagnose
 - name: TATSMN
   description: Temperaturschwelle für Min-Fehler Abgastemperatursensor
 - name: TATSMX
@@ -12578,6 +12930,10 @@
   description: Einschaltverzögerung  der Steuerbits der BKV-Funktion nach Startende
 - name: TDBKVSTEND
   description: Einschaltverzögerung BKV-Pumpe nach Startende
+- name: TDCVMN
+  description: Mindestmeßfensterlänge für die Bildung eines Ergebnisses
+- name: TDCVMX
+  description: Maximale Meßfensterlänge
 - name: TDDBKVP
   description: Zeit, in der das Druckdelta DPBKVP durch die Pumpe evakuiert werden kann
 - name: TDDEDBKVP
@@ -12616,6 +12972,12 @@
   description: Dauer Sekundärlufteinblasung für Adaptionsphase
 - name: TDDSLSFG
   description: Zeitverzögerung für Freigabe der Zusatzdiagnose SLS (Bank1)
+- name: TDDTATM
+  description: Maximale Temperaturdifferenz zum Abgastemperaturmodell
+- name: TDDTATMFA
+  description: Maximale Temperaturdifferenz zum Abgastemperaturmodell im Testbetrieb
+- name: TDDTRS
+  description: Temperaturdifferenz zur Referenzsensortemperatur beim Start
 - name: TDDVLM
   description: Entprellzeit Diagnose DVL-Motorleitungen (Endstufendiagnose)
 - name: TDDVLPMN
@@ -12702,6 +13064,8 @@
   description: Verzögerungszeit nach Gangwechsel bis erneute Gangwechselerk. möglich
 - name: TDLAMBTS
   description: einmalige Verzögerungszeit für Freigabe Lambda-Bauteileschutz
+- name: TDLDEUK
+  description: Zeitschwelle für Tiepass-filterung von LDR-Regelabweichung
 - name: TDLDPE
   description: Entprellzeit für Fehler setzen LDP-Endstufe
 - name: TDLDRA
@@ -12846,6 +13210,8 @@
   description: Zeitverzögerung für Rücksetzen der max.Auswahl rl über Lambda-Soll
 - name: TDRNLUBR
   description: Entprellzeit Rücksetzen Nachlauf-Anforderung von GGUBR
+- name: TDRSMX
+  description: Maximale Temperaturdifferenz zw. Wassertemperatur und Ansauglufttemperatur
 - name: TDSLKT
   description: Dauer Kurztest Sekundärluftdiagnose für Massenmessung
 - name: TDSLL
@@ -12958,6 +13324,8 @@
   description: Zeitschwelle für Einschwingen der Gemischadaption
 - name: TEKPUBN
   description: Mindestdauer EKP-Betrieb nach UBatt-Einbruch und Zahnsignal
+- name: TELLRSMV
+  description: Entprellzeit nach Bedingung B_llr zur Aktivierung des Sensor-Modell-Vergleich
 - name: TEMIN
   description: Minimum injector on time (TE)
 - name: TEMINVA
@@ -12974,6 +13342,10 @@
   description: Zeit ab Motorlauf bis EPCL-Testansteuerung Ende
 - name: TEPCLI
   description: Zeit ab INI bis EPCL-Testansteuerung Ende
+- name: TEPDNV
+  description: Entprellzeitkonstante für physikalische Diagnose nach dem Vorkatalysator
+- name: TEPDNVT
+  description: Entprellzeitkonstante für physikalische Diagnose nach dem Vorkatalysator, Tester
 - name: TEPFGRH
   description: Entprellzeit für FGR-Bedienhebel
 - name: TEPPBKV
@@ -13038,6 +13410,8 @@
   description: Zeitkonstante für mslv- Filter
 - name: TFIMSLVK
   description: Zeitkonstante für mslv- Filter bei Kurztest
+- name: TFLAGS_D_UC
+  description: TFLAGS_D_UC
 - name: TFLZLR
   description: Verzögerung des B_fpld_ok  während Lüfterdeaktivierung
 - name: TFMIZU
@@ -13096,6 +13470,8 @@
   description: Überwachungszeit Getriebeeingriff
 - name: TGGLS
   description: Zeitdauer für ADC nach Interrupt im Funktionsrechner (Asic)
+- name: TGLAAV
+  description: Schwelle zur Fehler AAV
 - name: TGRACMX
   description: Überwachungszähler für obere Grenze der Botschaftszählerdifferenz GRA
 - name: TGRACNU
@@ -13212,6 +13588,8 @@
   description: Temperaturkorrektur Kat ohne Exotherme tkatm
 - name: TKATMSHU
   description: Kat-Temperatur für ausreichende Sondenheizung
+- name: TKATMTPMN
+  description: minimale Abgastemperatur hinter HK, bei der Wasser im Leerlauf noch verdampft
 - name: TKATMTRP
   description: Kat-Modelltemperaturschwelle für Erkennung Ersatztrip
 - name: TKATSA
@@ -13232,6 +13610,8 @@
   description: Max. Temperatur Kühlerausgang
 - name: TKD
   description: Lernzeit für Kick-Down-Position
+- name: TKFTARX
+  description: Verzögerungszeit frxta
 - name: TKHABB
   description: Entprellzeit für Abbruchbedingungen der Funktion Katheizen
 - name: TKHFSAB
@@ -13364,6 +13744,8 @@
   description: Kennlinie tL-Schwelle für Anfettung bei ständig hohem tL
 - name: TLARUN
   description: Lastschwelle für Umschaltung AR-Parameter
+- name: TLDEUK
+  description: Zeitkonstante Tiefpass-Filterung für LDR-Regelabweichung
 - name: TLDFS
   description: Last-(tL-)Grenze für Diagnose Schalter Fahrstufe (S_FS)
 - name: TLDIAN
@@ -13384,6 +13766,14 @@
   description: Zeitschwelle 1 für Erkennung System dicht bei Leckdiagnosemodul
 - name: TLDP2SD
   description: Zeitschwelle 2 für Erkennung System dicht bei Leckdiagnosemodul
+- name: TLDPDISA1
+  description: Anfang Zeitfenster 1 für DLDP-Verbot
+- name: TLDPDISA2
+  description: Anfang Zeitfenster 2 für DLDP-Verbot
+- name: TLDPDISE1
+  description: Ende Zeitfenster 1 für DLDP-Verbot
+- name: TLDPDISE2
+  description: Ende Zeitfenster 2 für DLDP-Verbot
 - name: TLDPMN
   description: Wartezeit nach Start für Freigabe Leckdiagnose
 - name: TLDPMX
@@ -13392,6 +13782,8 @@
   description: Zeit für 'Reed-Kontakt zu'-Erkennung Closed Check
 - name: TLDPRKO
   description: Zeit für "Reed-Kontankt offen"-Erkennung bei Leckdiagnosemodul
+- name: TLDPRPDEL
+  description: Mindestwartezeit bis 1. Wiederholungsprüfung
 - name: TLDPSMN
   description: Minimale Spüldauer vor Fortsetzung Leckdiagnose
 - name: TLDPZMN
@@ -13446,6 +13838,10 @@
   description: Sperrzeit für Einschalten LR nach BA
 - name: TLRBAMW
   description: Sperrzeit für Einschalten LR nach BA (Wort)
+- name: TLRHFRXMOF
+  description: Turnoff Delay für Bedingung B_frmin OR B_frmax (Sperre P-Anteil)
+- name: TLRHFRXMON
+  description: Turnon Delay für Bedingung B_frmin OR B_frmax (Sperre P-Anteil)
 - name: TLRHKPAKT
   description: Verzögerungszeit für Bedingung B_lrhkp für Regler hinter KAT
 - name: TLRHS
@@ -13778,6 +14174,8 @@
   description: Aktivzeit für TE-Dichtheitsprüfung in Mode 8
 - name: TMODT
   description: Schwelle Temperaturdifferenz Wassertemperatur für Heißstart
+- name: TMOFFMX
+  description: Max. Zeit im Graubereich (außerhalb iO/niO-Bereich) zur Bildung des Zyklus-Flags
 - name: TMOHSMN
   description: Motortemperatur für Reduzierung Sondenheizung
 - name: TMOMIN
@@ -13788,6 +14186,8 @@
   description: Minimal plausible Motortemperatur
 - name: TMORSTE
   description: Obere Temperaturschwelle resetieren B_stendes bei B_stend = false
+- name: TMOTABATS
+  description: Schwellwert für Abstelltemperatur zur Teildiagnose START
 - name: TMOTDMD
   description: Schwelle zum Wiedereinschalten der DMD abhängig von tmot
 - name: TMOTDQMX
@@ -13806,6 +14206,8 @@
   description: Temperaturschwelle für Drehzahlgeber-Notlauf
 - name: TMOTNMX
   description: Motor temperature threshold for activating the raised maximum engine speed
+- name: TMOTNVMX
+  description: Maximale Motortemperatur für die Startdiagnose für Temperatursensor nVK
 - name: TMOTSH
   description: Motortemperaturschwelle für die Sondenheizung LSU
 - name: TMOTWRM
@@ -13886,6 +14288,10 @@
   description: Wartezeit für mslift-Filter (Aufbau Drehmomentenreserve) in Phase 1 während Kurz
 - name: TMSLOF
   description: Motortemperaturschwelle für Sperre Sekundärluft
+- name: TMSNDKLTMN
+  description: Schwellwert für den Vergleich mit der aufsummierte Freigabezeit tmsndklt
+- name: TMSNDKOMN
+  description: Mindestadaptionszeit Leckluftmassenstrom
 - name: TMSNOGA
   description: Schwelle tms für Dauerspülen nach Fahrzyklus mit erfolgter Gemischadaption
 - name: TMSO5INI
@@ -14166,6 +14572,8 @@
   description: Sperrzeit für die Phasensuche, wenn der geeignete Betriebsbereich verl. wurde
 - name: TPHSSP
   description: Sperrzeit für Phasensuche nach erfolgloser Suche
+- name: TPLGPLG
+  description: Zeitschwelle die Berechnung von ldeldra
 - name: TPLSUIV
   description: Anzahl der Fahrzyklen für Fehlerentprellung B_nplsv bei vermuteter HC-Vergiftung
 - name: TPLSUPWF
@@ -14197,6 +14605,8 @@
 - name: TPUKUKA
   description: Entprellzeit für Erkennung ÜK-Eingriff (ÜK-Adaption)
 - name: TPUPH
+  description: Kennlinie für die Pumpzeit abhängig von den vorherigen Durchläufen
+- name: TPUPHA
   description: Kennlinie für die Pumpzeit abhängig von den vorherigen Durchläufen
 - name: TPVL
   description: Zeit für Pumpenvorlauf
@@ -14256,6 +14666,8 @@
   description: Aktivierungszeit von rkat bis Setzen Zyklusflag, wenn B_gae = FALSE
 - name: TRKAUF
   description: Überwachungszeit Reedkontakt öffnet während Fast Pulse
+- name: TRKAUFA
+  description: Überwachungszeit Reedkontakt öffnet während Fast Pulse
 - name: TRKAZZ
   description: Aktivierungszeit von rkaz bis Setzen Zyklusflag, wenn B_gae = FALSE
 - name: TRSA
@@ -14282,6 +14694,8 @@
   description: 'Dummy: Tabellenanfang'
 - name: TSFAATUN
   description: 'Fehlersummenzeit: Tuningschutz'
+- name: TSFAAV
+  description: 'Fehlersummenzeit: Absperrventil Aktivkohlefilter (Funktion)'
 - name: TSFAAVE
   description: 'Fehlersummenzeit: Absperrventil Aktivkohlefilter (Endstufe)'
 - name: TSFAGRE
@@ -14342,6 +14756,8 @@
   description: 'Fehlersummenzeit: CAN-Schnittstelle, Timeout Botschaft Lenkwinkelsensor'
 - name: TSFCNIV
   description: 'Fehlersummenzeit: Niveau-Botschaft'
+- name: TSFCV
+  description: 'Fehlersummenzeit: Diagnose Kurbelgehäuseentlüftung'
 - name: TSFDK
   description: 'Fehlersummenzeit: DK - Potentiometer'
 - name: TSFDK1P
@@ -14548,6 +14964,8 @@
   description: 'Fehlersummenzeit: Lambda-Sondenalterung TV'
 - name: TSFLATV2
   description: 'Fehlersummenzeit: Lambda-Sondenalterung TV (Bank 2)'
+- name: TSFLAVH
+  description: TSFLAVH
 - name: TSFLDE
   description: 'Fehlersummenzeit: Ladedrucksteuerventil (Endstufe)'
 - name: TSFLDO
@@ -14556,6 +14974,8 @@
   description: 'Fehlersummenzeit: Leckdiagnosepumpe'
 - name: TSFLDPE
   description: 'Fehlersummenzeit: Leckdiagnosepumpe Endstufe'
+- name: TSFLDR
+  description: 'Fehlersummenzeit: Ladedruckregelabweichung'
 - name: TSFLDRA
   description: 'Fehlersummenzeit: Ladedruckregelabweichung'
 - name: TSFLDUV
@@ -14780,6 +15200,8 @@
   description: Zeitdauer für untere Stopposition (DK-Selbst-Reinigungsfunktion)
 - name: TSRFPAB
   description: Mindestschaltzeit Reed-Kontakt für Abbruch Fast Pulse
+- name: TSRFPABA
+  description: Mindestschaltzeit Reed-Kontakt für Abbruch Fast Pulse
 - name: TSTAW
   description: Zeit nach Kl50 ein für Anlasserfreigabe
 - name: TSTBB
@@ -14880,6 +15302,8 @@
   description: Motortemperaturstüzstellen für Wiedereinsetzdrehzahlkennfeld
 - name: TTMUMASTA
   description: Zeitdauer für Stationärzustand bei temp. UMA-Adaption
+- name: TTOTAAV
+  description: Totzeit LDP- Sofortansteuerung während Fast Pulse
 - name: TTOTLDP
   description: Totzeit LDP- Sofortansteuerung während Fast Pulse
 - name: TTRA
@@ -15026,10 +15450,14 @@
   description: Entprellzeit nach Start Startende bei ASR/MSR-Fehler
 - name: TVCJLSU
   description: Verzögerungszeit für Fehler CJ110
+- name: TVDCVLAM
+  description: Verzögerungszeit für Zylinderabschaltung
 - name: TVDFS
   description: Tastverhältnis für Diagnose Fahrstufe
 - name: TVDHS
   description: Verzögerungszeit für Eigendiagnose Heizung Lambda Sonde
+- name: TVDIAGDCV
+  description: Verzögerungszeit Diagnosebereitschaft
 - name: TVDK
   description: Verzögerungszeit nach Schließen der Drosselklappe
 - name: TVDLSN
@@ -15068,10 +15496,18 @@
   description: Verzögerungszeit für Erkennung fehlerfreier Abgastemperatursensor
 - name: TVEATSS
   description: Verzögerungszeit für Erkennung fehlerhafter Abgastemperatursensor
+- name: TVEDCV
+  description: Haltezeit für Bedingung B_edcv
+- name: TVEINGATS
+  description: Verzögerungszeit der Einschaltbedingung in der %GGATS
 - name: TVEKP
   description: Pumpeneinschaltdauer bei KL15 ein
 - name: TVERBR
   description: Verzögerungszeit für Bremsschalter-Plausibilitätsprüfung
+- name: TVERRDET
+  description: Verzögerungszeit für Fehlererkennung
+- name: TVERREN
+  description: Wartezeit bis Fehlereintrag möglich
 - name: TVESWER
   description: Verzögerungszeit für Erkennung fehlerfreies Schlechtwegsignal
 - name: TVESWES
@@ -15255,7 +15691,7 @@
 - name: TVLSUNP
   description: Verzögerungszeit für Fehler stetige Lambdasonde LSU
 - name: TVLSUOF
-  description: Verzögerungszeit für Fehler stetige Lambdasonde LSU "Offset"
+  description: Verzögerungszeit für Fehler stetige Lambdasonde LSU ""Offset""
 - name: TVLSUPER
   description: Verzögerungszeit für B_lsuftb und B_lsumrb
 - name: TVLSUSA
@@ -15269,7 +15705,7 @@
 - name: TVLSUTRIM
   description: Verzögerungszeit für Fehler LSU Abgleichleitung unterbrochen
 - name: TVLSUWU
-  description: maximale Zeit für "warm up" stetige Lambdasonde LSU
+  description: maximale Zeit für ""warm up"" stetige Lambdasonde LSU
 - name: TVLU1MN
   description: Festwert minimales Tastverhältnis Lüfter 1
 - name: TVLU1MX
@@ -15318,6 +15754,8 @@
   description: Ansteuerung elektr. Thermostatventil im Nachlauf für Hauptrelaisprüfung
 - name: TVNOLSU
   description: Verzögerungszeit für LSU OK
+- name: TVNOSIGATS
+  description: Verzögerungszeit der Bedingung B_nosigats
 - name: TVNST
   description: Zeit nach Start für LL-Integrationsverbot nach unten
 - name: TVNWF
@@ -15422,6 +15860,8 @@
   description: Festwert Tastverhältnis Lüfter 1 Zeitspanne nach Start
 - name: TVSTL2
   description: Festwert Tastverhältnis Lüfter 2 Zeitspanne nach Start
+- name: TVSTOST
+  description: Verzögerungszeit Übernahme Adaptionswerte im Start
 - name: TVSUST
   description: Sperrzeit für Freigabe SU nach Start
 - name: TVTANKL
@@ -15462,6 +15902,8 @@
   description: Injector on time offset voltage correction
 - name: TVUBATS
   description: Ausschaltverzögerung für Ubatt-Betriebsbereitschaft Abgastemperatursensor
+- name: TVUBGATS
+  description: Ausschaltverzögerung für Ubatt-Betriebsbereitschaft Abgastemperatursensor
 - name: TVUBNSU.0
   description: Entrpellzeit Ubatt-Schwelle für Solddrehzahlanhebung unterschritten
 - name: TVUBNSU.1
@@ -15482,6 +15924,10 @@
   description: Verzögerungszeit für Drosselklappen-Sollwinkel
 - name: TVZMSE
   description: Zeitgrenze für Rücksetzen Überwachungszähler ZMS- Resonanz
+- name: TVZTANV
+  description: Zeitkonstante für Pt1-Glied zur Verzögerung der gemessenen und modellierten Temp
+- name: TVZTANVT
+  description: Zeitkonstante für Pt1-Glied zur Verzögerung der gem. und mod. Temp, Tester
 - name: TVZWMSA
   description: Zeit bis zum Übergehen auf Dauerspätbegrenzung
 - name: TVZWMSE
@@ -15784,6 +16230,8 @@
   description: 'DVL: Batteriespannungsschwelle für Anschlagsadaption'
 - name: UBDVLD
   description: 'DVL: Batteriespannungsschwelle für Diagnose'
+- name: UBGATSMN
+  description: Mindestbatteriespannung für Abgastemperatursensor
 - name: UBGGLSU
   description: Batteriespannungsschwelle zur Freigabe B_sbbvk LSU
 - name: UBHFM
@@ -15930,6 +16378,8 @@
   description: min. Spannungswert für Diagnose DS Bremskraftverstärker
 - name: UDSBKVMX
   description: max. Spannungswert für Diagnose DS Bremskraftverstärker
+- name: UEFKTGETU
+  description: untere Schwelle  fktget für Aktivierung von KFTARXB
 - name: UEVERG
   description: Übersetzungsverhältnis abh. vom eingelegten Gang
 - name: UEVERG_0_A
@@ -16067,11 +16517,11 @@
 - name: USHKAMXW
   description: Sondenspannung hinter Kat für Abbruch Kat-Ausräumen (Word)
 - name: USHKFT
-  description: Sondenspannungs-Schwelle für Erkennung "Abgas fett" hinter Kat
+  description: Sondenspannungs-Schwelle für Erkennung ""Abgas fett"" hinter Kat
 - name: USHKHZK
   description: Schwelle für Überprüfung Heizereinkopplung auf Sondensignal (hinter KAT)
 - name: USHKMR
-  description: Sondenspannungs-Schwelle für Erkennung "Abgas mager" hinter Kat
+  description: Sondenspannungs-Schwelle für Erkennung ""Abgas mager"" hinter Kat
 - name: USHKTDM
   description: Magerschwelle hintere Sondenspannung für Sauerstoffmessung bei Katalysatordiagno
 - name: USHKTDR
@@ -16083,7 +16533,7 @@
 - name: USHKVERTU
   description: Untere Spannungsschwelle zur Erkennung vrtauschte Sonden hinter KAT
 - name: USHKVL
-  description: Schwellwert für Sondenspannung hinter KAT im Volllast-Betrieb
+  description: Schwellwert für Sondenspannung hinter KAT im Vollast-Betrieb
 - name: USHLEAN
   description: Schwelle für Magerspannung für Reset Dynamikmessung der Sonde hinter KAT
 - name: USHOV
@@ -16234,6 +16684,10 @@
   description: untere Fz-Geschwindigkeitsschwelle für Bedingung Kühlleistung niedrig
 - name: VDASH
   description: Mindestgeschwindigkeit für Dashpot
+- name: VDCVMXE
+  description: Fehlerschwelle für Leckageerkennung nach Drosselklappe
+- name: VDCVMXZ
+  description: Fehlerschwelle für Leckageerkennung vor Drosselklappe
 - name: VDKUPPLMN
   description: min. vfzg-Schwelle für Diagnose Kupplungsschalter
 - name: VDMN
@@ -16264,6 +16718,8 @@
   description: KMTR-Ersatzwert f. Fahrzeuggeschwindigkeit
 - name: VFZGSCH
   description: Schwelle für Fahrzeuggeschwindigkeit
+- name: VFZG_DAT_UC
+  description: VFZG_DAT_UC
 - name: VFZMN
   description: Erkennen Fahren-Stehen
 - name: VFZMN.0
@@ -16344,6 +16800,8 @@
   description: Min. Geschwindigkeit für Grobleckverifikation
 - name: VLDPO
   description: Obere vfz-Schwelle für 0.5 mm - Diagnose
+- name: VLDPTEV
+  description: Geschwindigkeitsschwelle bei Deaktivierung im DTEV-Zeitfenster
 - name: VLDPU
   description: Untere vfz-Schwelle für 0.5 mm - Diagnose
 - name: VLLR
@@ -16770,12 +17228,14 @@
   description: Max. Anzahl Wiederholversuche nach Unterbrechung insgesamt
 - name: WZLDPMX
   description: Max. Anzahl Wiederholversuche nach Unterbrechung bei erkanntem Leck
+- name: WZLDPMXA
+  description: Max. Anzahl Wiederholversuche nach Unterbrechung bei erkanntem Leck
 - name: WZLDPRO
   description: Max. Anzahl Wiederholversuche Reed-Switch Close to Open Check
 - name: XIMAX
   description: ObererSchranke interne Reglerzustände stetige Lambdaregelung
 - name: XIMIN
-  description: Untere Schranke interne Reglerzustaende stetige Lambdaregelung
+  description: Untere [Bhranke interne Reglerzustaende stetige Lambdaregelung
 - name: Y2MAX
   description: Obere Schranke Integralanteil LRS
 - name: ZASMASK
@@ -16870,6 +17330,8 @@
   description: Zeitkonstante Dynamikanteil Brennraumtemperaturmodell für negative Gradienten
 - name: ZDBTMP
   description: Zeitkonstante Dynamikanteil Brennraumtemperaturmodell für positive Gradienten
+- name: ZDCVLAM
+  description: Zeitkonstante zur Filterung von lamsoni_w
 - name: ZDDVLX
   description: Diagnoseschwelle für Schwingungszähler zddvlp
 - name: ZDELBMSRCH
@@ -16966,6 +17428,8 @@
   description: Anzahl Zahnflanken im oberen Geschwindigkeitsbereich
 - name: ZFDUSVK
   description: Filterzeitkonstante für LSU-Spannungsabgleich vor Kat
+- name: ZFLAGS_D_UC
+  description: ZFLAGS_D_UC
 - name: ZFLASKH
   description: Zeitkonstante für Übergang auf Lambda-Abgas-Vorgabe
 - name: ZFLLRPL
@@ -17198,6 +17662,8 @@
   description: Zeitkonstante für PT1-Filter des Pseudo-Lambda hinter Kat, Bank 2
 - name: ZLBTS
   description: Zeitkonstante Lambda Bauteileschutz
+- name: ZLBTSNEG
+  description: Zeitkonstante Lambda Bauteileschutz (abgesteuert)
 - name: ZLIBG
   description: Filterzeitkonstante für die Nachführung der Integratorgrenzen
 - name: ZLRFRI
@@ -17388,6 +17854,8 @@
   description: Aufregelkonstante zylinderselektive WE-Mehrmenge
 - name: ZWFUBAMN
   description: Endwinkel der Mehrfachfunkenzündung, falls konfiguriert
+- name: ZWOUT_DAT_UC
+  description: ZWOUT_DAT_UC
 - name: ZWSPTIP
   description: Zeit für Freischalten des TIPIN-Offsets auf den spätesten Zündwinkel
 - name: ZYLANZB

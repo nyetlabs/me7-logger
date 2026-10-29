@@ -135,6 +135,10 @@ func cmdCorpus(args []string) error {
 	if _, err := mapSets(); err != nil {
 		return err
 	}
+	expect, err := loadScaleExpect(dir)
+	if err != nil {
+		return err
+	}
 	var eligible []pubItem
 	var lines []pubLine
 	for _, im := range rep.Tuner {
@@ -199,10 +203,7 @@ func cmdCorpus(args []string) error {
 			}
 			if item.merged != nil {
 				clearPlaceholders(item.merged)
-				annotateConfidence(item.merged, item.conf)
-				if isAuto(item.merged) {
-					config.ApplyScales(item.merged)
-				}
+				finishScales(item.merged, item.conf, expect)
 			}
 			switch reason {
 			case "":
@@ -219,8 +220,7 @@ func cmdCorpus(args []string) error {
 			}
 			if item.reason != "" && !item.keepOrigin && isAuto(prev) {
 				r := relayout(clearedCopy(prev), loc)
-				annotateConfidence(r, item.conf)
-				config.ApplyScales(r)
+				finishScales(r, item.conf, expect)
 				if n := corrections(prev, r); n > 0 {
 					item.merged, item.keepOrigin = r, true
 					delta = fmt.Sprintf("layout %d", n)
@@ -235,7 +235,7 @@ func cmdCorpus(args []string) error {
 			}
 			merged, added := verifiedAdd(prev, loc)
 			if added > 0 {
-				annotateConfidence(merged, item.conf)
+				finishScales(merged, item.conf, expect)
 				item.merged = merged
 				item.keepOrigin = true
 				delta = fmt.Sprintf("+%d", added)
@@ -271,7 +271,7 @@ func cmdCorpus(args []string) error {
 			item.merged = loc
 		}
 		if item.reason == "" && item.merged != nil && item.def == "" {
-			annotateConfidence(item.merged, item.conf)
+			finishScales(item.merged, item.conf, expect)
 		}
 		if err := applyForce(&item, &delta); err != nil {
 			return err
@@ -341,7 +341,7 @@ func cmdCorpus(args []string) error {
 		}
 		switch {
 		case item.merged != nil:
-			annotateConfidence(item.merged, item.conf)
+			finishScales(item.merged, item.conf, expect)
 			if err := writePublished(dst, item.merged, item.keepOrigin, item.ref); err != nil {
 				return err
 			}
@@ -371,7 +371,7 @@ func cmdCorpus(args []string) error {
 			if m == nil || len(m.Objects) == 0 {
 				return fmt.Errorf("%s: no located maps", item.name)
 			}
-			annotateConfidence(m, item.conf)
+			finishScales(m, item.conf, expect)
 			if err := writePublished(dst, m, false, nil); err != nil {
 				return err
 			}
@@ -919,11 +919,23 @@ func isAuto(m *model.Model) bool {
 	return m != nil && m.Provenance != nil && m.Provenance.Origin == "auto"
 }
 
-// annotateConfidence notes low body confidence, a missing axis, and a value
-// that stayed factor 1 with no units. High confidence keeps the needle, then
-// the gap notes. A name without a Conf still gets the gap notes. A bitmap
-// stays raw and does not get a no-scale note.
-func annotateConfidence(m *model.Model, byName map[string]parity.Conf) {
+// finishScales fills agreed scales on auto packs, then annotates confidence
+// and scale gaps.
+func finishScales(m *model.Model, byName map[string]parity.Conf, expect scaleExpect) {
+	if m == nil {
+		return
+	}
+	if isAuto(m) {
+		config.ApplyScales(m)
+	}
+	annotateConfidence(m, byName, expect)
+}
+
+// annotateConfidence notes low body confidence, a missing axis, and a cell or
+// image axis that is still raw when a scale is expected. High confidence
+// keeps the needle, then the gap notes. A bitmap never gets a scale note.
+// Implied unity (raw with no expected scale) is silent.
+func annotateConfidence(m *model.Model, byName map[string]parity.Conf, expect scaleExpect) {
 	if m == nil {
 		return
 	}
@@ -935,15 +947,17 @@ func annotateConfidence(m *model.Model, byName map[string]parity.Conf) {
 		if !rawValue(o) {
 			c = parity.Conf{}
 		}
-		o.Comment = parity.JoinComment(o.Comment, c, gapNotes(o))
+		o.Comment = parity.JoinComment(o.Comment, c, gapNotes(o, expect))
 	}
 }
 
-// gapNotes is a missing image axis, or a cell or image axis left at factor 1
-// with no units. An ordinal axis is not a missing scale. A codeword, a
+// gapNotes is a missing image axis, or a cell or image axis left raw when a
+// scale is expected (units.yaml or an explicit DAMOS/A2L scale, including
+// unity with units). An ordinal axis is not a missing scale. A codeword, a
 // configuration byte, or an error class is raw on purpose.
-func gapNotes(o *model.Object) []string {
+func gapNotes(o *model.Object, expect scaleExpect) []string {
 	var g []string
+	key := objKey(o)
 	for _, ax := range []struct {
 		w string
 		a *model.Axis
@@ -955,14 +969,112 @@ func gapNotes(o *model.Object) []string {
 		if ax.n && (ax.a == nil || ax.a.Source == "" || ax.a.Source == "unknown") {
 			g = append(g, "missing "+ax.w+" axis")
 		}
-		if ax.a != nil && ax.a.Source == "image" && rawScale(ax.a.Value) {
+		if ax.a != nil && ax.a.Source == "image" && rawScale(ax.a.Value) &&
+			expect.scale(key, ax.w, axisBits(ax.a, o.Data.Bits)) {
 			g = append(g, "no "+ax.w+" scale")
 		}
 	}
-	if rawValue(o) && !config.Bitmap(objKey(o)) {
+	if rawValue(o) && !config.Bitmap(key) && expect.scale(key, "z", cellBits(o)) {
 		g = append(g, "no scale")
 	}
 	return g
+}
+
+func cellBits(o *model.Object) int {
+	if o.Data.Bits != 0 {
+		return o.Data.Bits
+	}
+	if cell, ok := config.Storage(objKey(o), ""); ok && cell.Bits != 0 {
+		return cell.Bits
+	}
+	return 8
+}
+
+func axisBits(a *model.Axis, cell int) int {
+	if a != nil && a.Data != nil && a.Data.Bits != 0 {
+		return a.Data.Bits
+	}
+	if cell != 0 {
+		return cell
+	}
+	return 8
+}
+
+// scaleExpect is names that should have a scale: units.yaml, or an explicit
+// conversion on a DAMOS/A2L corpus object (including unity with units).
+type scaleExpect map[string]bool
+
+func loadScaleExpect(dir string) (scaleExpect, error) {
+	e := scaleExpect{}
+	ents, err := os.ReadDir(filepath.Join(dir, "defs"))
+	if err != nil {
+		if os.IsNotExist(err) {
+			return e, nil
+		}
+		return nil, err
+	}
+	for _, ent := range ents {
+		if ent.IsDir() || !strings.HasSuffix(ent.Name(), ".json") {
+			continue
+		}
+		b, err := os.ReadFile(filepath.Join(dir, "defs", ent.Name()))
+		if err != nil {
+			return nil, err
+		}
+		var pack model.Model
+		if err := canon.Unmarshal(b, &pack); err != nil {
+			continue
+		}
+		if pack.Provenance == nil || (pack.Provenance.Origin != "damos" && pack.Provenance.Origin != "a2l") {
+			continue
+		}
+		for _, o := range pack.Objects {
+			if o == nil {
+				continue
+			}
+			k := objKey(o)
+			if k == "" {
+				continue
+			}
+			addExpect(e, k, "z", o.Data.Bits, o.Value)
+			if o.X != nil {
+				bits := 0
+				if o.X.Data != nil {
+					bits = o.X.Data.Bits
+				}
+				addExpect(e, k, "x", bits, o.X.Value)
+			}
+			if o.Y != nil {
+				bits := 0
+				if o.Y.Data != nil {
+					bits = o.Y.Data.Bits
+				}
+				addExpect(e, k, "y", bits, o.Y.Value)
+			}
+		}
+	}
+	return e, nil
+}
+
+func addExpect(e scaleExpect, name, role string, bits int, v model.Value) {
+	if bits == 0 || config.BlankScale(v) {
+		return
+	}
+	e[expectKey(name, role, bits)] = true
+}
+
+func expectKey(name, role string, bits int) string {
+	return name + "\x00" + role + "\x00" + fmt.Sprint(bits)
+}
+
+func (e scaleExpect) scale(name, role string, bits int) bool {
+	if bits == 0 {
+		bits = 8
+	}
+	if _, ok := config.Conversion(name, role, bits, 0); ok {
+		return true
+	}
+	return e != nil && e[expectKey(name, role, bits)]
 }
 
 // relayout gives each object of out that has a raw value the shape,
@@ -1001,8 +1113,7 @@ func rawValue(o *model.Object) bool {
 }
 
 func rawScale(v model.Value) bool {
-	c := v.Conversion
-	return c.Factor == 1 && c.Offset == 0 && !c.Reciprocal && v.Units == ""
+	return config.BlankScale(v)
 }
 
 // sameLayout is the same shape, storage, and axes.

@@ -254,7 +254,17 @@ func addSample(by map[scaleKey][]sample, k scaleKey, file string, v model.Value)
 }
 
 func rawSample(s sample) bool {
-	return closeF(s.factor, 1) && closeF(s.offset, 0) && !s.recip && s.units == ""
+	return BlankScale(model.Value{
+		Units:      s.units,
+		Conversion: model.Conversion{Factor: s.factor, Offset: s.offset, Reciprocal: s.recip},
+	})
+}
+
+// BlankScale is implied unity: factor 1, offset 0, no reciprocal, no units.
+// An explicit scale may still be unity (1*x) when units are set.
+func BlankScale(v model.Value) bool {
+	c := v.Conversion
+	return closeF(c.Factor, 1) && closeF(c.Offset, 0) && !c.Reciprocal && v.Units == ""
 }
 
 // rpmLoadMajority picks a scale when the defs only disagree by swapping the
