@@ -27,7 +27,7 @@ func TestStageLabel(t *testing.T) {
 		{"D*", ""},
 	}
 	for _, c := range cases {
-		if got := stageLabel(c.tier); got != c.want {
+		if got := parity.StageLabel(c.tier); got != c.want {
 			t.Errorf("stageLabel(%q) = %q, want %q", c.tier, got, c.want)
 		}
 	}
@@ -227,7 +227,7 @@ func TestSourceClass(t *testing.T) {
 		{&model.Provenance{Origin: "auto", Reference: partial}, "auto"},
 		{&model.Provenance{Origin: "auto"}, "auto"},
 	} {
-		if got := sourceClass(c.p); got != c.want {
+		if got := parity.SourceClass(c.p); got != c.want {
 			t.Errorf("%+v: %s, want %s", c.p, got, c.want)
 		}
 	}

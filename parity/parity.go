@@ -389,6 +389,30 @@ func stemName(name string) string {
 	return strings.TrimSuffix(name, ".bin")
 }
 
+// StageLabel is the publish Stage column for a tuner grade. D through A are
+// the tuning stages. S is 3+, the list past those stages. An open D is -.
+func StageLabel(tier string) string {
+	return map[string]string{"": "-", "-": "-", "D": "1", "C": "2", "B": "3-", "A": "3", "S": "3+", "S+": "S+"}[tier]
+}
+
+// SourceClass is the publish Source column: verified, DAMOS, matched, manual,
+// or auto.
+func SourceClass(p *model.Provenance) string {
+	switch {
+	case p == nil:
+		return "auto"
+	case p.Verified:
+		return "verified"
+	case p.Origin == "damos" || p.Origin == "a2l":
+		return "DAMOS"
+	case p.Origin == "manual":
+		return "manual"
+	case p.Reference.Agreed():
+		return "matched"
+	}
+	return "auto"
+}
+
 // Detail is the report for stems, plus the tuner and block names those
 // images did not locate. stems are image names without .bin.
 func (r *Report) Detail(stems []string) string {

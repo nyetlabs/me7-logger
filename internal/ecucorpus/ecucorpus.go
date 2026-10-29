@@ -19,10 +19,11 @@ import (
 var ErrUnavailable = errors.New("corpus not available")
 
 // Corpus is an opened corpus: its directory and the names in its manifest,
-// each with its def column.
+// each with its def and family columns.
 type Corpus struct {
 	Dir  string
 	defs map[string]string
+	fams map[string]string
 }
 
 // Dir is XDFKIT_CORPUS, else ecu-corpus under root.
@@ -44,27 +45,33 @@ func Load(dir string) (*Corpus, error) {
 		return nil, err
 	}
 	lines := strings.Split(strings.TrimSuffix(string(b), "\n"), "\n")
-	col, defCol := -1, -1
+	col, defCol, famCol := -1, -1, -1
 	for i, h := range strings.Split(lines[0], "\t") {
 		switch h {
 		case "name":
 			col = i
 		case "def":
 			defCol = i
+		case "family":
+			famCol = i
 		}
 	}
 	if col < 0 {
 		return nil, fmt.Errorf("%s: no name column", path)
 	}
-	c := &Corpus{Dir: dir, defs: map[string]string{}}
+	c := &Corpus{Dir: dir, defs: map[string]string{}, fams: map[string]string{}}
 	for n, line := range lines[1:] {
 		f := strings.Split(line, "\t")
 		if len(f) <= col {
 			return nil, fmt.Errorf("%s:%d: no name", path, n+2)
 		}
-		c.defs[f[col]] = ""
+		name := f[col]
+		c.defs[name] = ""
 		if defCol >= 0 && defCol < len(f) && f[defCol] != "-" {
-			c.defs[f[col]] = f[defCol]
+			c.defs[name] = f[defCol]
+		}
+		if famCol >= 0 && famCol < len(f) {
+			c.fams[name] = f[famCol]
 		}
 	}
 	return c, nil
@@ -78,6 +85,28 @@ func (c *Corpus) Names() []string {
 	}
 	sort.Strings(out)
 	return out
+}
+
+// WithDefs returns the sorted names that have a definition.
+func (c *Corpus) WithDefs() []string {
+	var out []string
+	for n, d := range c.defs {
+		if d != "" {
+			out = append(out, n)
+		}
+	}
+	sort.Strings(out)
+	return out
+}
+
+// DefRel is the corpus.tsv def cell for name, or "" when it has none.
+func (c *Corpus) DefRel(name string) string {
+	return c.defs[name]
+}
+
+// Family is the corpus.tsv family cell for name.
+func (c *Corpus) Family(name string) string {
+	return c.fams[name]
 }
 
 // Def returns the path of a manifest name's definition, defs/<name>.json, or

@@ -475,15 +475,9 @@ func printGrades(rep *parity.Report, want map[string]bool) error {
 		if len(want) > 0 && !want[name] {
 			continue
 		}
-		fmt.Printf("%s\t%s\t%d/%d\t%s\n", name, stageLabel(im.Tier), im.Confidence.Hit, im.Confidence.Total, sourceClass(im.Provenance))
+		fmt.Printf("%s\t%s\t%d/%d\t%s\n", name, parity.StageLabel(im.Tier), im.Confidence.Hit, im.Confidence.Total, parity.SourceClass(im.Provenance))
 	}
 	return nil
-}
-
-// stageLabel is the publish column for a tuner grade. D through A are the
-// tuning stages. S is 3+, the list past those stages. An open D is -.
-func stageLabel(tier string) string {
-	return map[string]string{"": "-", "-": "-", "D": "1", "C": "2", "B": "3-", "A": "3", "S": "3+", "S+": "S+"}[tier]
 }
 
 func printPublish(lines []pubLine) {
@@ -1447,24 +1441,6 @@ func peerListed(idx setIndex, listed map[string]bool, k string) bool {
 		}
 	}
 	return false
-}
-
-// sourceClass is the publish Source column: verified, DAMOS, matched, manual,
-// or auto.
-func sourceClass(p *model.Provenance) string {
-	switch {
-	case p == nil:
-		return "auto"
-	case p.Verified:
-		return "verified"
-	case p.Origin == "damos" || p.Origin == "a2l":
-		return "DAMOS"
-	case p.Origin == "manual":
-		return "manual"
-	case p.Reference.Agreed():
-		return "matched"
-	}
-	return "auto"
 }
 
 func writePublished(path string, m *model.Model, keepOrigin bool, ref *model.Reference) error {

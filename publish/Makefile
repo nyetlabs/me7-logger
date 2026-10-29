@@ -26,56 +26,12 @@ all: stage
 
 stage:
 	@if test -d $(XDFKIT_ROOT); then $(MAKE) --no-print-directory -C $(XDFKIT_ROOT) build; fi
-	@mkdir -p $(STAGE) $(OUT)/work
-	@set -eu -o pipefail; \
-	xdfkit=$(XDFKIT_ROOT)/build/xdfkit; \
-	if ! test -x "$$xdfkit"; then xdfkit=$$(command -v xdfkit) || { echo "xdfkit: not found" >&2; exit 1; }; fi; \
-	keep=$(OUT)/keep; : > $$keep; \
-	php index.php $$(awk -F '\t' 'NR > 1 && $$10 != "-" { print $$1 }' $(CORPUS)/corpus.tsv); \
-	awk -F '\t' 'NR > 1 && $$10 != "-" { print $$1, $$4, $$10 }' $(CORPUS)/corpus.tsv | \
-	while read -r name family def; do \
-		part=$${name%%-*}; base=$$(printf '%.9s' "$$part"); \
-		src=$(CORPUS)/$$def; img=$(CORPUS)/images/$$base/$$name.bin; \
-		d=$$(git -C $(CORPUS) log -1 --format=%cd --date=format:%Y%m%d --invert-grep --grep='^chore(schema):' -- $$def); \
-		if test -z "$$d"; then d=$$(stat -f %Sm -t %Y%m%d $$src 2>/dev/null || date -r $$src +%Y%m%d); fi; \
-		tuner=; \
-		case $$family in ME7*) tuner=1; \
-			c=$$(git -C $(CORPUS) log -1 --format=%cd --date=format:%Y%m%d --invert-grep --grep='^chore(schema):' -- categories.json); \
-			if test -z "$$c"; then c=$$(stat -f %Sm -t %Y%m%d $(CORPUS)/categories.json 2>/dev/null || date -r $(CORPUS)/categories.json +%Y%m%d); fi; \
-			if test "$$c" \> "$$d"; then d=$$c; fi ;; esac; \
-		zip=$(STAGE)/$$name-$$d.zip; echo $$zip >> $$keep; \
-		if test -f $$zip && test $$zip -nt $$src && test $$zip -nt $$img && test $$zip -nt $$xdfkit \
-			&& { test -z "$$tuner" || test $$zip -nt $(CORPUS)/categories.json; }; then continue; fi; \
-		w=$(OUT)/work/$$name; rm -rf $$w; mkdir -p $$w; cp -p $$src $$w/$$name.json; \
-		lintst=0; \
-		lint=$$($$xdfkit lint -i $$img $$w/$$name.json) || lintst=$$?; \
-		if test $$lintst -eq 2; then printf '%s\n' "$$lint" >&2; exit 2; fi; \
-		if test $$lintst -ne 0 && test $$lintst -ne 1; then printf '%s\n' "$$lint" >&2; exit $$lintst; fi; \
-		printf '%s\n' "$$lint" | awk -v name="$$name" ' \
-			/^R[0-9]+@/ { r = $$1; sub(/@.*/, "", r); c[r]++; n++ } \
-			END { \
-				if (n == 0) { print "lint " name ": 0"; exit } \
-				printf "lint %s:", name; \
-				for (r in c) printf " %s=%d", r, c[r]; \
-				print ""; \
-			}'; \
-		$$xdfkit --force $$w/$$name.json $$w/$$name.kp; \
-		$$xdfkit -f csv --force -i $$img $$w/$$name.json $$w/$$name.csv; \
-		$$xdfkit -f xdf --force -i $$img $$w/$$name.json $$w/$$name.xdf; \
-		set -- $$name.json $$name.kp $$name.csv $$name.xdf $$name.meta.json; \
-		if test -n "$$tuner"; then \
-			$$xdfkit -f csv --force --tuner $(CORPUS)/categories.json -i $$img $$w/$$name.json $$w/$$name-tuner.csv; \
-			$$xdfkit -f xdf --force --tuner $(CORPUS)/categories.json -i $$img $$w/$$name.json $$w/$$name-tuner.xdf; \
-			set -- "$$@" $$name-tuner.csv $$name-tuner.xdf $$name-tuner.meta.json; \
-		fi; \
-		(cd $$w && zip -qX $$zip "$$@"); \
-	done; \
-	for z in $(STAGE)/*.zip; do test -e $$z || continue; grep -qxF "$$z" $$keep || rm "$$z"; done; \
-	rm -rf $(STAGE)/full; \
-	find $(STAGE) -maxdepth 1 -type f ! -name '*.zip' -delete; \
-	(cd $(LOGGER) && go run ./cmd/me7parity corpus --grades --corpus $(CORPUS)) > $(OUT)/grades.tsv; \
-	GRADES=$(OUT)/grades.tsv php index.php --out=$(STAGE)/vehicles.json; \
-	cp index.php $(STAGE)/
+	@cd $(LOGGER) && go run ./cmd/me7publish stage \
+		--corpus $(CORPUS) \
+		--stage $(STAGE) \
+		--work $(OUT)/work \
+		--publish $(CURDIR) \
+		--xdfkit $(XDFKIT_ROOT)/build/xdfkit
 
 upload: stage
 	$(if $(UPLOAD_DEST),,$(error set UPLOAD_DEST in local.mk))
