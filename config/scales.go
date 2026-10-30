@@ -1204,7 +1204,9 @@ func emitHand(h handUnit) string {
 	var b strings.Builder
 	b.WriteString(head)
 	for _, r := range lists {
-		b.WriteString(", " + r.k + ": [\n")
+		b.WriteString(", ")
+		b.WriteString(r.k)
+		b.WriteString(": [\n")
 		col := 0
 		for i, n := range r.n {
 			piece := n

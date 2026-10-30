@@ -457,7 +457,8 @@ func emitGroup(k cellKey, names []string) (string, error) {
 		return one, nil
 	}
 	var b strings.Builder
-	b.WriteString(head + ", names: [\n")
+	b.WriteString(head)
+	b.WriteString(", names: [\n")
 	col := 0
 	for i, n := range qs {
 		piece := n
