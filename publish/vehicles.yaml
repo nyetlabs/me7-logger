@@ -59,6 +59,7 @@
 # 190 HP
 8N0906018AL-0007: {engine: 1.8T, code: AWP, vehicle: TT, year: 2002, gearbox: manual, market: NA }
 # 225 HP
+8N0906018BB-0002: {engine: 1.8T, code: BEA, vehicle: TT, year: 2003-2006, market: NA}
 8N0906018BB-0003: {engine: 1.8T, code: BEA, vehicle: TT, year: 2003-2006, market: NA}
 8N0906018CB-0003: {engine: 1.8T, code: BAM, vehicle: TT, year: 2003-2006, gearbox: manual, market: EU}
 8N0906018CJ-0001: {engine: 1.8T, code: BEA, vehicle: TT, year: 2004+, gearbox: manual, market: NA}

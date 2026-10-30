@@ -124,7 +124,7 @@ func BuildDescriptions(dir string) ([]byte, error) {
 			if name == "" {
 				name = strings.TrimSpace(o.ID)
 			}
-			desc := strings.TrimSpace(o.Description)
+			desc := strings.TrimSpace(strings.ReplaceAll(o.Description, "\t", " "))
 			if name == "" || desc == "" {
 				continue
 			}

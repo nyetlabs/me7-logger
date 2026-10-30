@@ -101,9 +101,9 @@ units:
 - {bits: 8, unit: "Grad KW", factor: 3/4, precision: 3, z: [KRDWA]}
 - {bits: 8, unit: "Upm", factor: 40, min: 0, max: 10200, precision: 1, z: [
     KRANH, LDHIA, NASNOTKL, NDLDRAPU, NLDIAPU, NWPMBBR], x: [
-    DWKRMSN, FKKVS, KFFWTBR, KFLBTS_0_A, KFMDZOF_UM, KFMIZUFIL, KFMIZUNS, KFMIZUOF, KFMI_UM,
-    KFMPED_UM, KLDMASRL, KRALH, KRANH, KRFKLN, LAMFA, LDORXN, LDPBN, LDRQ0DY, LDRQ1DY, LDRQ1ST,
-    RLSALUN, TLDIAPN, WDKUGDN], y: [
+    DWKRMSN, FKKVS, KFFWTBR, KFLBTS_0_A, KFLDRQ1, KFMDZOF_UM, KFMIZUFIL, KFMIZUNS, KFMIZUOF,
+    KFMI_UM, KFMPED_UM, KLDMASRL, KRALH, KRANH, KRFKLN, LAMFA, LDORXN, LDPBN, LDRQ0DY, LDRQ1DY,
+    LDRQ1ST, RLSALUN, TLDIAPN, WDKUGDN], y: [
     FKKVS, FZWWLRLN, KFDLULS, KFFWLW, KFKHFM, KFLAMKR, KFLDHBN, KFLDIOPU, KFLDRAPP, KFLDRQ2,
     KFLDRXO, KFLF, KFMLDMX, KFNW, KFNWWL, KFTSRL, KFVPDKLD, KFZW, KFZW2, KFZWWLNM, LAMFA]}
 - {bits: 8, unit: "grad C", factor: 3/4, offset: 48, min: -48, max: 143.25}
@@ -111,7 +111,8 @@ units:
     KFZW, KFZW2, KFZWOP, KFZWOP2, KFZWWLNM]}
 - {bits: 8, unit: "hPa", factor: 10, precision: 1, z: [
     DPUPS, EDLDRP, LDEIAP, LDPBN, UMDYLDR], x: [
-    KFDLULS, KFLDRQ2]}
+    KFDLULS, KFLDRQ2], y: [
+    KFLDRQ1]}
 - {bits: 16, unit: "", factor: 1/4}
 - {bits: 16, unit: "%", factor: 100/0x10000, precision: 4, z: [
     KFDMDADP, KFDMDARO, KFMIOP, KFWDKMSN, WDKUGDN], x: [
@@ -168,7 +169,7 @@ units:
     PUE]}
 - {bits: 8, unit: "ms", factor: 0.010667, precision: 3, maps: true, z: [TVUB]}
 - {bits: 8, unit: "ms", factor: 10/100, precision: 3, maps: true, z: [KFTSRL]}
-- {bits: 8, unit: "ms/%", clock: krkte, precision: 2, maps: true, z: [KRKTE]}
+- {bits: 8, unit: "ms/%", clock: krkte, precision: 3, maps: true, z: [KRKTE]}
 - {bits: 8, unit: "s", factor: 5/100, precision: 4, maps: true, z: [
     TDLDRA, TDLDRA2, TLDIAPN, TULV1]}
 - {bits: 8, unit: "s", factor: 1, precision: 2, maps: true, y: [KFNLLNST]}
@@ -183,7 +184,7 @@ units:
     KFMIRL, LDRXN, LDRXNZK], x: [
     KFMIOP, KFPBRK, KFPBRKNW, KFZW, KFZW2, KFZWOP, KFZWOP2], y: [
     KFLBTS_0_A]}
-- {bits: 16, unit: "%", factor: 12/128, precision: 2, maps: true, z: [WFRL]}
+- {bits: 16, unit: "%", factor: 12/128, precision: 3, maps: true, z: [WFRL]}
 - {bits: 16, unit: "% DK", factor: 1600/0x10000, precision: 4, maps: true, y: [KFMLDMX]}
 - {bits: 16, unit: "% PED", factor: 0.0015259021896696422, precision: 4, maps: true, y: [
     KFPED, KFPEDR, KFPEDR_0_A, KFPEDR_1_A, KFPED_0_A, KFPED_1_A]}

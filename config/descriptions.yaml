@@ -483,7 +483,7 @@
 - name: CDCAAVE
   description: 'Codewort CARB: Absperrventil Aktivkohlefilter (Endstufe)'
 - name: CDCAGRE
-  description: "Codewort CARB:\tÜberwachung AGR-Endstufe"
+  description: 'Codewort CARB: Überwachung AGR-Endstufe'
 - name: CDCAGRF
   description: 'Codewort CARB: Überwachung AGR-FLOW'
 - name: CDCATR
@@ -531,7 +531,7 @@
 - name: CDCCV
   description: 'Codewort CARB: Diagnose Kurbelgehäuseentlüftung'
 - name: CDCDK
-  description: "Codewort CARB:\tDK - Potentiometer"
+  description: 'Codewort CARB: DK - Potentiometer'
 - name: CDCDK1P
   description: 'Codewort CARB: Drosselklappe 1. Poti'
 - name: CDCDK2P
@@ -539,7 +539,7 @@
 - name: CDCDKVM
   description: 'Codewort CARB: Drosselklappenverschmutzung'
 - name: CDCDPL
-  description: "Codewort CARB:\tDauerplus"
+  description: 'Codewort CARB: Dauerplus'
 - name: CDCDSBKV
   description: 'Codewort CARB: BKV'
 - name: CDCDSL
@@ -623,7 +623,7 @@
 - name: CDCHRE
   description: 'Codewort CARB: Hauptrelais Endstufe'
 - name: CDCHSH
-  description: "Codewort CARB:\tLambdasonden-Heizung hinter Katalysator"
+  description: 'Codewort CARB: Lambdasonden-Heizung hinter Katalysator'
 - name: CDCHSH2
   description: 'Codewort CARB: Lambdasonden-Heizung hinter Katalysator; (Bank2)'
 - name: CDCHSHE
@@ -631,15 +631,15 @@
 - name: CDCHSHE2
   description: 'Codewort CARB: Endstufe Heizung Sonde Hinter Kat. Bank 2'
 - name: CDCHSV
-  description: "Codewort CARB:\tLambdasonden-Heizung vor Katalysator"
+  description: 'Codewort CARB: Lambdasonden-Heizung vor Katalysator'
 - name: CDCHSV2
-  description: "Codewort CARB:\tLambdasonden-Heizung vor Katalysator; (Bank2)"
+  description: 'Codewort CARB: Lambdasonden-Heizung vor Katalysator; (Bank2)'
 - name: CDCHSVSA
   description: 'Codewort CARB: Lambdasonden-Heizung vor Katalysator'
 - name: CDCHSVSA2
   description: 'Codewort CARB: Lambdasonden-Heizung 2 vor Katalysator'
 - name: CDCKAT
-  description: "Codewort CARB:\tKatalysator-Konvertierung"
+  description: 'Codewort CARB: Katalysator-Konvertierung'
 - name: CDCKPE
   description: 'Codewort CARB: EKP-Relais Endstufe'
 - name: CDCKRA01
@@ -659,39 +659,39 @@
 - name: CDCKRA08
   description: 'Codewort CARB: Klopfregelanschlag Zylinder 8'
 - name: CDCKRNT
-  description: "Codewort CARB:\tKlopfregelung Nulltest"
+  description: 'Codewort CARB: Klopfregelung Nulltest'
 - name: CDCKROF
   description: 'Codewort CARB: Klopfregelung Offset'
 - name: CDCKRTP
   description: 'Codewort CARB: Klopfregelung Testimpulse'
 - name: CDCKS1
-  description: "Codewort CARB:\tKlopfsensor 1"
+  description: 'Codewort CARB: Klopfsensor 1'
 - name: CDCKS2
-  description: "Codewort CARB:\tKlopfsensor 2"
+  description: 'Codewort CARB: Klopfsensor 2'
 - name: CDCKS3
-  description: "Codewort CARB:\tKlopfsensor 3"
+  description: 'Codewort CARB: Klopfsensor 3'
 - name: CDCKS4
-  description: "Codewort CARB:\tKlopfsensor 4"
+  description: 'Codewort CARB: Klopfsensor 4'
 - name: CDCKUPPL
   description: 'Codewort CARB: Kupplungspedalwertgeber'
 - name: CDCLASH
-  description: "Codewort CARB:\tLambda-Sondenalterung hinter Kat."
+  description: 'Codewort CARB: Lambda-Sondenalterung hinter Kat.'
 - name: CDCLASH2
-  description: "Codewort CARB:\tLambda-Sondenalterung hinter Kat. (Bank 2)"
+  description: 'Codewort CARB: Lambda-Sondenalterung hinter Kat. (Bank 2)'
 - name: CDCLATP
-  description: "Codewort CARB:\tLambda-Sondenalterung TP"
+  description: 'Codewort CARB: Lambda-Sondenalterung TP'
 - name: CDCLATP2
-  description: "Codewort CARB:\tLambda-Sondenalterung TP (Bank 2)"
+  description: 'Codewort CARB: Lambda-Sondenalterung TP (Bank 2)'
 - name: CDCLATV
-  description: "Codewort CARB:\tLambda-Sondenalterung TV"
+  description: 'Codewort CARB: Lambda-Sondenalterung TV'
 - name: CDCLATV2
-  description: "Codewort CARB:\tLambda-Sondenalterung TV (Bank 2)"
+  description: 'Codewort CARB: Lambda-Sondenalterung TV (Bank 2)'
 - name: CDCLAVH
   description: 'Codewort CARB: Lambda-Sondenalterung (Vollast) hinter Kat.'
 - name: CDCLDE
   description: 'Codewort CARB: Ladedrucksteuerventil (Endstufe)'
 - name: CDCLDO
-  description: "Codewort CARB:\tLadedruckkennlinie; oberer Wert überschritten"
+  description: 'Codewort CARB: Ladedruckkennlinie; oberer Wert überschritten'
 - name: CDCLDP
   description: 'Codewort CARB: Leckdiagnosepumpe'
 - name: CDCLDPE
@@ -699,7 +699,7 @@
 - name: CDCLDR
   description: 'Codewort CARB: Ladedruckregelabweichung'
 - name: CDCLDRA
-  description: "Codewort CARB:\tLadedruckregelabweichung"
+  description: 'Codewort CARB: Ladedruckregelabweichung'
 - name: CDCLDUV
   description: 'Codewort CARB: Schubumluftventil-Endstufe'
 - name: CDCLKVDK
@@ -707,9 +707,9 @@
 - name: CDCLLR
   description: 'Codewort CARB: Leerlaufregelung am Anschlag'
 - name: CDCLM
-  description: "Codewort CARB:\tLMM/HLM/HFM"
+  description: 'Codewort CARB: LMM/HLM/HFM'
 - name: CDCLSH
-  description: "Codewort CARB:\tLambda-Sonde hinter Kat"
+  description: 'Codewort CARB: Lambda-Sonde hinter Kat'
 - name: CDCLSV
   description: 'Codewort CARB: Lambda-Sonde vor Kat'
 - name: CDCLUES1E
@@ -753,7 +753,7 @@
 - name: CDCNWSE
   description: 'Codewort CARB: Nockenwellensteuerungsventil Endstufe'
 - name: CDCNX
-  description: "Codewort CARB:\tNMAX - Überschreitung"
+  description: 'Codewort CARB: NMAX - Überschreitung'
 - name: CDCPH
   description: 'Codewort CARB: Phasensensor'
 - name: CDCRKAT
@@ -763,7 +763,7 @@
 - name: CDCSCR
   description: 'Codewort CARB: Überwachung Crashsignal'
 - name: CDCSGEEP
-  description: "Codewort CARB:\tSteuergerät defekt (EEPROM)"
+  description: 'Codewort CARB: Steuergerät defekt (EEPROM)'
 - name: CDCSGEEW
   description: 'Codewort CARB: Steuergerät defekt (EEPROM WFS-Bereich)'
 - name: CDCSLPE
@@ -779,7 +779,7 @@
 - name: CDCSUE
   description: 'Codewort Carb: Endstufe Saugrohrumschaltung'
 - name: CDCSWE
-  description: "Codewort CARB:\tBeschleunigungssensor der Schlechtwegeerkennung"
+  description: 'Codewort CARB: Beschleunigungssensor der Schlechtwegeerkennung'
 - name: CDCTA
   description: 'Codewort CARB: TANS'
 - name: CDCTANKL
@@ -791,9 +791,9 @@
 - name: CDCTESG
   description: 'Codewort CARB: Tankentlüftungssystem Grobleck'
 - name: CDCTEVE
-  description: "Codewort CARB:\tTankentlüftungsventil Endstufe"
+  description: 'Codewort CARB: Tankentlüftungsventil Endstufe'
 - name: CDCTEVE2
-  description: "Codewort CARB:\tTankentlüftungsventil Endstufe  Bank2"
+  description: 'Codewort CARB: Tankentlüftungsventil Endstufe  Bank2'
 - name: CDCTHM
   description: 'Codewort CARB: Thermostat-Diagnose THM'
 - name: CDCTKA
@@ -1023,7 +1023,7 @@
 - name: CDKHRE
   description: CDKHRE
 - name: CDKHSH
-  description: "Codewort Kunde:\tLambdasonden-Heizung hinter Katalysator"
+  description: 'Codewort Kunde: Lambdasonden-Heizung hinter Katalysator'
 - name: CDKHSH2
   description: 'Codewort Kunde: Lambdasonden-Heizung hinter Katalysator, Bank 2'
 - name: CDKHSHE
@@ -1033,13 +1033,13 @@
 - name: CDKHSV
   description: 'Codewort Kunde: Lambdasonden-Heizung vor Katalysator'
 - name: CDKHSV2
-  description: "Codewort Kunde:\tLambdasonden-Heizung vor Katalysator, Bank 2"
+  description: 'Codewort Kunde: Lambdasonden-Heizung vor Katalysator, Bank 2'
 - name: CDKHSVSA
   description: CDKHSVSA
 - name: CDKHSVSA2
   description: CDKHSVSA2
 - name: CDKKAT
-  description: "Codewort Kunde:\tKatalysator-Konvertierung"
+  description: 'Codewort Kunde: Katalysator-Konvertierung'
 - name: CDKKPE
   description: 'Codewort Kunde: EKP-Relais Endstufe'
 - name: CDKKRA01
@@ -1059,39 +1059,39 @@
 - name: CDKKRA08
   description: 'Codewort Kunde: Klopfregelanschlag Zylinder 8'
 - name: CDKKRNT
-  description: "Codewort Kunde:\tKlopfregelung Nulltest"
+  description: 'Codewort Kunde: Klopfregelung Nulltest'
 - name: CDKKROF
-  description: "Codewort Kunde:\tKlopfregelung Offset"
+  description: 'Codewort Kunde: Klopfregelung Offset'
 - name: CDKKRTP
   description: 'Codewort Kunde: Klopfregelung Testimpuls'
 - name: CDKKS1
-  description: "Codewort Kunde:\tKlopfsensor 1"
+  description: 'Codewort Kunde: Klopfsensor 1'
 - name: CDKKS2
-  description: "Codewort Kunde:\tKlopfsensor 2"
+  description: 'Codewort Kunde: Klopfsensor 2'
 - name: CDKKS3
-  description: "Codewort Kunde:\tKlopfsensor 3"
+  description: 'Codewort Kunde: Klopfsensor 3'
 - name: CDKKS4
-  description: "Codewort Kunde:\tKlopfsensor 4"
+  description: 'Codewort Kunde: Klopfsensor 4'
 - name: CDKKUPPL
   description: 'Codewort Kunde: Pedalwertgeber Kupplung'
 - name: CDKLASH
   description: 'Codewort Kunde: Lambda-Sondenalterung hinter Kat.'
 - name: CDKLASH2
-  description: "Codewort Kunde:\tLambda-Sondenalterung hinter Kat. (Bank 2)"
+  description: 'Codewort Kunde: Lambda-Sondenalterung hinter Kat. (Bank 2)'
 - name: CDKLATP
-  description: "Codewort Kunde:\tLambda-Sondenalterung TP"
+  description: 'Codewort Kunde: Lambda-Sondenalterung TP'
 - name: CDKLATP2
-  description: "Codewort Kunde:\tLambda-Sondenalterung TP (Bank 2)"
+  description: 'Codewort Kunde: Lambda-Sondenalterung TP (Bank 2)'
 - name: CDKLATV
-  description: "Codewort Kunde:\tLambda-Sondenalterung TV"
+  description: 'Codewort Kunde: Lambda-Sondenalterung TV'
 - name: CDKLATV2
-  description: "Codewort Kunde:\tLambda-Sondenalterung TV (Bank 2)"
+  description: 'Codewort Kunde: Lambda-Sondenalterung TV (Bank 2)'
 - name: CDKLAVH
   description: CDKLAVH
 - name: CDKLDE
   description: 'Codeword Kunde: Ladedrucksteuerventil (Endstufe)'
 - name: CDKLDO
-  description: "Codewort Kunde:\tLadedruckkennlinie; oberer Wert überschritten"
+  description: 'Codewort Kunde: Ladedruckkennlinie; oberer Wert überschritten'
 - name: CDKLDP
   description: 'Codewort Kunde: Leckdiagnosepumpe'
 - name: CDKLDPE
@@ -1099,7 +1099,7 @@
 - name: CDKLDR
   description: CDKLDR
 - name: CDKLDRA
-  description: "Codewort Kunde:\tLadedruckregelabweichung"
+  description: 'Codewort Kunde: Ladedruckregelabweichung'
 - name: CDKLDUV
   description: 'Codewort Kunde: Schubumluftventil-Endstufe'
 - name: CDKLKVDK
@@ -1107,11 +1107,11 @@
 - name: CDKLLR
   description: 'Codewort Kunde: Leerlaufregelung am Anschlag'
 - name: CDKLM
-  description: "Codewort Kunde:\tLMM/HLM/HFM"
+  description: 'Codewort Kunde: LMM/HLM/HFM'
 - name: CDKLSH
   description: 'Codewort Kunde: Lambda-Sonde hinter Kat'
 - name: CDKLSV
-  description: "Codewort Kunde:\tLambda-Sonde vor Kat"
+  description: 'Codewort Kunde: Lambda-Sonde vor Kat'
 - name: CDKMD
   description: 'Codewort Kunde: Aussetzer, Summenfehler (multiple)'
 - name: CDKMD00
@@ -1151,7 +1151,7 @@
 - name: CDKNWSE
   description: 'Codewort Kunde: Nockenwellensteuerungsventil Endstufe'
 - name: CDKNX
-  description: "Codewort Kunde:\tNMAX - Überschreitung"
+  description: 'Codewort Kunde: NMAX - Überschreitung'
 - name: CDKPH
   description: 'Codewort Kunde: Phasensensor'
 - name: CDKRKAT
@@ -1167,7 +1167,7 @@
 - name: CDKSCR
   description: 'Codewort Kunde: CRAS-Signal'
 - name: CDKSGEEP
-  description: "Codewort Kunde:\tSteuergerät defekt (EEPROM)"
+  description: 'Codewort Kunde: Steuergerät defekt (EEPROM)'
 - name: CDKSGEEW
   description: 'Codewort Kunde: Steuergerät defekt (EEPROM WFS-Bereich)'
 - name: CDKSLPE
@@ -1175,17 +1175,17 @@
 - name: CDKSLS
   description: 'Codewort Kunde: Sekundärluft-System'
 - name: CDKSLV
-  description: "Codewort Kunde:\tSekundärluftventil"
+  description: 'Codewort Kunde: Sekundärluftventil'
 - name: CDKSLVE
-  description: "Codewort Kunde:\tSekundärluftventil (Endstufe)"
+  description: 'Codewort Kunde: Sekundärluftventil (Endstufe)'
 - name: CDKSLWG
   description: 'Codewort Kunde: Waste- Gate- Ansteurung'
 - name: CDKSUE
   description: 'Codewort Kunde: Endstufe Saugrohrumschaltung'
 - name: CDKSWE
-  description: "Codewort Kunde:\tBeschleunigungssensor der Schlechtwegeerkennung"
+  description: 'Codewort Kunde: Beschleunigungssensor der Schlechtwegeerkennung'
 - name: CDKTA
-  description: "Codewort Kunde:\tTANS"
+  description: 'Codewort Kunde: TANS'
 - name: CDKTANKL
   description: 'Codewort Kunde: OBDII Fehler auf Grund eines leeren Tanks'
 - name: CDKTES
@@ -1193,9 +1193,9 @@
 - name: CDKTESF
   description: 'Codewort Kunde: Tankentlüftungssystem Feinleck'
 - name: CDKTESG
-  description: "Codewort Kunde:\tTankentlüftungssystem Grobleck"
+  description: 'Codewort Kunde: Tankentlüftungssystem Grobleck'
 - name: CDKTEVE
-  description: "Codewort Kunde:\tTankentlüftungsventil Endstufe"
+  description: 'Codewort Kunde: Tankentlüftungsventil Endstufe'
 - name: CDKTEVE2
   description: 'Codewort Kunde: Tankentlüftungsventil Endstufe Bank 2'
 - name: CDKTHM
@@ -1213,7 +1213,7 @@
 - name: CDKTUN
   description: 'Codewort Kunde: Tuningschutz'
 - name: CDKUB
-  description: "Codewort Kunde:\tUB"
+  description: 'Codewort Kunde: UB'
 - name: CDKUBR
   description: CDKUBR
 - name: CDKUFMV
@@ -1229,7 +1229,7 @@
 - name: CDKUVSE
   description: 'Codeword Kunde: Endstufe Umluftventil turbo'
 - name: CDKVFZ
-  description: "Codewort Kunde:\tFahrzeug-Geschwindigkeit"
+  description: 'Codewort Kunde: Fahrzeug-Geschwindigkeit'
 - name: CDKVS
   description: 'Codeword: DKVS active/inactive, CD..=0 -> no Diag'
 - name: CDKWFS
@@ -7275,9 +7275,9 @@
 - name: KDLASHKP2
   description: Kennlinie über dlashkm, Bewertungsfaktor für P-Anteil in der LRHK, Bank 2
 - name: KDLASHKP_0_A
-  description: Kennlinie über dlashkm, Bewertungsfaktor für P-Anteil in der LRHK
+  description: Kennlinie über dlashkm_w, Bewertungsfaktor für P-Anteil in der LRHK
 - name: KDLASHKP_1_A
-  description: Kennlinie über dlashkm, Bewertungsfaktor für P-Anteil in der LRHK
+  description: Kennlinie über dlashkm_w, Bewertungsfaktor für P-Anteil in der LRHK
 - name: KDLRIDDVE
   description: Identifizierung des DLR-Parametersatzes zu DV-E-Typ
 - name: KDYNFA
@@ -8933,7 +8933,7 @@
 - name: KLDLDIA
   description: Diagnosewert LDR - Adaption
 - name: KLDLUL
-  description: Schwelle negative Regelabweichung für Überladefehler (KLDLUL)
+  description: Schwelle negative Regelabweichung für Überladefehler
 - name: KLDMASRL
   description: Stellreserve bei ASR-Eingriff
 - name: KLDMKH
@@ -15691,7 +15691,7 @@
 - name: TVLSUNP
   description: Verzögerungszeit für Fehler stetige Lambdasonde LSU
 - name: TVLSUOF
-  description: Verzögerungszeit für Fehler stetige Lambdasonde LSU ""Offset""
+  description: Verzögerungszeit für Fehler stetige Lambdasonde LSU "Offset"
 - name: TVLSUPER
   description: Verzögerungszeit für B_lsuftb und B_lsumrb
 - name: TVLSUSA
@@ -15705,7 +15705,7 @@
 - name: TVLSUTRIM
   description: Verzögerungszeit für Fehler LSU Abgleichleitung unterbrochen
 - name: TVLSUWU
-  description: maximale Zeit für ""warm up"" stetige Lambdasonde LSU
+  description: maximale Zeit für "warm up" stetige Lambdasonde LSU
 - name: TVLU1MN
   description: Festwert minimales Tastverhältnis Lüfter 1
 - name: TVLU1MX
@@ -16517,11 +16517,11 @@
 - name: USHKAMXW
   description: Sondenspannung hinter Kat für Abbruch Kat-Ausräumen (Word)
 - name: USHKFT
-  description: Sondenspannungs-Schwelle für Erkennung ""Abgas fett"" hinter Kat
+  description: Sondenspannungs-Schwelle für Erkennung "Abgas fett" hinter Kat
 - name: USHKHZK
   description: Schwelle für Überprüfung Heizereinkopplung auf Sondensignal (hinter KAT)
 - name: USHKMR
-  description: Sondenspannungs-Schwelle für Erkennung ""Abgas mager"" hinter Kat
+  description: Sondenspannungs-Schwelle für Erkennung "Abgas mager" hinter Kat
 - name: USHKTDM
   description: Magerschwelle hintere Sondenspannung für Sauerstoffmessung bei Katalysatordiagno
 - name: USHKTDR

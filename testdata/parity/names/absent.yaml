@@ -60,9 +60,10 @@ absent:
     - CLRKA
     - DLBTS
     - FKHABMN
-    # Not in the LP or NL code. Both go from the boost loads straight to
-    # KFVPDKLD, where HF calls KFDLULS in between. No DAMOS export for
-    # either. To do: look for it by hand in WinOLS.
+    # Not in the 06A906032LP DAMOS (kp) export. HF and HS list KFDLULS at
+    # 0x1F135 before KFVPDKLD; LP has KFVPDKLD (0x1F6BF) and KLDLUL
+    # (0x1F741) only. NL is the same 4013.00 line and generate matches LP:
+    # KFVPDKLD and NDLDRAPU, no KFDLULS.
     - KFDLULS
     - KFLBTS_0_A
     - KFMIZUNS
