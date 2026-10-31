@@ -174,7 +174,7 @@ func TestStorage(t *testing.T) {
 		{"KFTARX", "", Cell{16, false, 0, 0, false, false}, true}, // unsized: defs disagree on shape
 		{"KRKTE", "06A906032S", Cell{8, false, 1, 1, false, false}, true},
 		{"KRKTE", "8D0907551M", Cell{16, false, 1, 1, false, false}, true},
-		{"KFDMDADP", "8D0907551L", Cell{16, false, 8, 6, false, true}, true},
+		{"KFDMDADP", "8D0907551L", Cell{16, false, 0, 0, false, true}, true}, // unsized: LP 6x8 vs HF 8x6
 		{"KFDMDADP", "06A906032HF", Cell{16, false, 8, 6, false, false}, true},
 		{"KFWDKPP", "4D1907558", Cell{8, false, 12, 12, false, true}, true},
 		{"KFMIZUFIL", "", Cell{8, false, 8, 8, false, false}, true},

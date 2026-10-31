@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 	"sync"
@@ -125,6 +126,7 @@ func BuildDescriptions(dir string) ([]byte, error) {
 				name = strings.TrimSpace(o.ID)
 			}
 			desc := strings.TrimSpace(strings.ReplaceAll(o.Description, "\t", " "))
+			desc = stripNameParen(name, desc)
 			if name == "" || desc == "" {
 				continue
 			}
@@ -162,12 +164,43 @@ func BuildDescriptions(dir string) ([]byte, error) {
 
 // sentence is M's wording, or the DAMOS sentence that appears most often,
 // then the longest, then the lexicographically first. A sentence that is
-// only the bare name loses to any other DAMOS sentence.
+// only the bare name, or only (NAME), loses to any other DAMOS sentence.
 func sentence(name string, m, damos map[string]int) string {
 	if s := fromM(m, damos); s != "" {
 		return s
 	}
 	return ranked(name, damos)
+}
+
+// leadingBoschParen is a DAMOS/KP English tag: "(ID) rest".
+var leadingBoschParen = regexp.MustCompile(`^\([A-Z][A-Z0-9_]*\)\s+`)
+
+// stripNameParen drops a leading Bosch (ID) tag, a trailing (NAME) that
+// repeats this object's id, and a description that is only that parenthetical.
+func stripNameParen(name, desc string) string {
+	if desc == "" {
+		return desc
+	}
+	if name != "" {
+		wrap := "(" + name + ")"
+		if desc == wrap {
+			return ""
+		}
+	}
+	if loc := leadingBoschParen.FindStringIndex(desc); loc != nil {
+		desc = strings.TrimSpace(desc[loc[1]:])
+	}
+	if name == "" || desc == "" {
+		return desc
+	}
+	wrap := "(" + name + ")"
+	if strings.HasSuffix(desc, " "+wrap) {
+		return strings.TrimSpace(desc[:len(desc)-len(wrap)-1])
+	}
+	if strings.HasSuffix(desc, wrap) {
+		return strings.TrimSpace(desc[:len(desc)-len(wrap)])
+	}
+	return desc
 }
 
 func fromM(m, damos map[string]int) string {
@@ -205,13 +238,16 @@ func ranked(name string, counts map[string]int) string {
 	if name != "" && len(rows) > 1 {
 		var real []row
 		for _, r := range rows {
-			if r.s != name {
+			if r.s != name && r.s != "("+name+")" {
 				real = append(real, r)
 			}
 		}
 		if len(real) > 0 {
 			rows = real
 		}
+	}
+	if name != "" && len(rows) == 1 && (rows[0].s == name || rows[0].s == "("+name+")") {
+		return ""
 	}
 	if len(rows) == 0 {
 		return ""
