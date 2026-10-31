@@ -25,13 +25,13 @@
 # rows      Row-axis point count, when the axes sit in front of the body.
 # cols      Column-axis point count. A curve sets cols and leaves rows out.
 # plain     Keep that count when no axis is stored in front of the body.
-# xbits     Column breakpoint width, 8 or 16. Omitted means 8 when cols is set.
-# ybits     Row breakpoint width, 8 or 16. Omitted means 8 when rows is set.
+# xbits     Column axis-point width, 8 or 16. Omitted means 8 when cols is set.
+# ybits     Row axis-point width, 8 or 16. Omitted means 8 when rows is set.
 # xat, yat  Bytes from the hit to the F2 that loads that axis header from RAM.
 #           The count byte at the header has to match cols or rows.
 # yord      The lookup indexes the rows directly: an ordinal row axis of rows points.
 # bits      Cell width the lookup reads, 8 or 16.
-# table     The hit is the count byte of a breakpoint table.
+# table     The hit is the count byte of an axis-point table.
 # xtable    Column table, by name. Its count has to match cols.
 # ytable    Row table, by name. Its count has to match rows.
 # also      More maps from the same hit. Each copies this row with its own
@@ -576,7 +576,7 @@ mapsigs:
 - {name: KFLDRXO, pattern: [5300E6FCXXXXE6FDXXXXC2FE9CF8, 5300E6FCXXXXE6FDXXXXC2FEA2F8], at: 4, frame: true, add: 14, cols: 4, rows: 8}
 - {name: KFLDRXO, pattern: 3600E6FCXXXXE6FDXXXXC2FE9EF8, at: 4, frame: true, add: 14, cols: 4, rows: 8}
 - {name: KFMIZUFIL, pattern: E10CE6FCXXXXE6FD8E00, at: 4, cols: 8, rows: 8}
-# Breakpoint tables shared by several curves. The hit is the count byte.
+# Axis-point tables shared by several curves. The hit is the count byte.
 # SGA06MDUB is the gear axis of KFDMDADP and KFDMDARO. The caller reads it
 # from RAM 0x8EBE. That word is stored as 0x0500, then copied from RAM 0x8AF8.
 # The store of the header address itself has not turned up, so the table is

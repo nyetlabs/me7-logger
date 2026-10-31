@@ -270,7 +270,7 @@ func BlankScale(v model.Value) bool {
 // rpmLoadMajority picks a scale when the defs only disagree by swapping the
 // rpm axis with the other one. The 8-bit rpm scale is factor 40. The 16-bit
 // rpm scale is factor 0.25. The larger set wins. KFMIZUOF is an even split;
-// its rpm axis is X, matching the breakpoints.
+// its rpm axis is X, matching the axis points.
 func rpmLoadMajority(k scaleKey, ss []sample) (scaleRow, bool) {
 	var rpm, other []sample
 	for _, s := range ss {
@@ -306,7 +306,7 @@ func rpmLoadMajority(k scaleKey, ss []sample) (scaleRow, bool) {
 }
 
 // rpmPair is the 16-bit maps whose defs swap a percent axis with the
-// factor 0.25 rpm axis. The published breakpoints follow the larger set.
+// factor 0.25 rpm axis. The published axis points follow the larger set.
 var rpmPair = map[string]bool{
 	"KFZW": true, "KFZWOP": true, "KFZWOP2": true, "KFMIOP": true, "KFMIRL": true,
 }

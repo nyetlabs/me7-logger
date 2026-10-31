@@ -45,13 +45,13 @@ type CallWords struct {
 // address word is wild. At is the byte distance from the hit to that word.
 // Omitted, At is 2. Add is the byte distance from the decoded pointer to the map body.
 // Anchor names a map already located; Add is then the distance from that map.
-// Rows and Cols are the axis point counts. XBits and YBits are the breakpoint
+// Rows and Cols are the axis point counts. XBits and YBits are the axis point
 // widths, 8 when that count is set and the width is omitted. When the axes
 // are prepended, the distance from the counts to the body is the length of
 // that axis data. XAt and YAt are byte distances from the pattern hit to an
 // F2 operand: the RAM word whose setup stored that header. Nil means this
 // row does not name that word. Cols 0 means this row does not give the dimensions.
-// Table means the pattern is the breakpoint table: the address is the hit,
+// Table means the pattern is the axis-point table: the address is the hit,
 // and the row is not a map. XTable and YTable name such a row. The count
 // there has to match Cols or Rows.
 type MapSig struct {
@@ -336,7 +336,7 @@ func parseSigDoc(b []byte) (SigDoc, error) {
 			return SigDoc{}, fmt.Errorf("mapsig %s: count is searched in the open window", d.Name)
 		}
 		if d.Table && (d.Pattern == "" || d.Anchor != "" || d.XTable != "" || d.YTable != "") {
-			return SigDoc{}, fmt.Errorf("mapsig %s: a breakpoint table is a pattern, not a map", d.Name)
+			return SigDoc{}, fmt.Errorf("mapsig %s: an axis-point table is a pattern, not a map", d.Name)
 		}
 		at := 0
 		if d.Pattern != "" && !d.Table {
@@ -353,7 +353,7 @@ func parseSigDoc(b []byte) (SigDoc, error) {
 			ybits = 8
 		}
 		if d.Table && patLen(d.Pattern) == 0 {
-			return SigDoc{}, fmt.Errorf("mapsig %s: a breakpoint table pattern is a byte string", d.Name)
+			return SigDoc{}, fmt.Errorf("mapsig %s: an axis-point table pattern is a byte string", d.Name)
 		}
 		if d.Frame && d.Far {
 			return SigDoc{}, fmt.Errorf("mapsig %s: frame and far are different pointers", d.Name)
@@ -435,10 +435,10 @@ func parseSigDoc(b []byte) (SigDoc, error) {
 			}
 		}
 		if row.XTable != "" && !tables[row.XTable] {
-			return SigDoc{}, fmt.Errorf("mapsig %s: xtable %s is not a breakpoint table", row.Name, row.XTable)
+			return SigDoc{}, fmt.Errorf("mapsig %s: xtable %s is not an axis-point table", row.Name, row.XTable)
 		}
 		if row.YTable != "" && !tables[row.YTable] {
-			return SigDoc{}, fmt.Errorf("mapsig %s: ytable %s is not a breakpoint table", row.Name, row.YTable)
+			return SigDoc{}, fmt.Errorf("mapsig %s: ytable %s is not an axis-point table", row.Name, row.YTable)
 		}
 	}
 	return doc, nil

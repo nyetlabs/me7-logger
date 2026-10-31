@@ -52,7 +52,7 @@ func UserDir(fs *pflag.FlagSet, dir string) (string, error) {
 
 // Model is the model of the maps for the tuner XDF (the table's maps and
 // their axes) or the full XDF (every map, unlisted ones under xdf.Other),
-// and the constants xdf.Model couldn't make breakpoint curves.
+// and the constants xdf.Model couldn't make axis-point curves.
 func Model(imgPath string, img []byte, maps []record.Map, cats *model.CategoryTable, tuner bool) (*model.Model, []string, error) {
 	m, conflicts := xdf.Model(maps, img, filepath.Base(imgPath))
 	if tuner {

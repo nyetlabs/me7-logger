@@ -102,7 +102,7 @@ absent:
     - CLRHK
     - CLRHKA
     - CLRKA
-    # The idle F2 word has no tmot breakpoint table. 06 18 40 5B, E6 FE 02 03,
+    # The idle F2 word has no tmot axis-point table. 06 18 40 5B, E6 FE 02 03,
     # and E6 FE E2 02 are not in the block.
     - KFNLLNST
     - NFSM

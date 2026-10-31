@@ -417,7 +417,7 @@ mapsigs:
 	}
 }
 
-func TestMapSigBreakpointTable(t *testing.T) {
+func TestMapSigAxisPointTable(t *testing.T) {
 	body := []byte(`
 mapsigs:
 - name: TAB
@@ -462,10 +462,10 @@ mapsigs:
 		t.Fatalf("later row %+v", got)
 	}
 	if _, err := ParseSigs([]byte("mapsigs:\n- name: A\n  pattern: AA\n  xtable: TAB\n  cols: 2\n")); err == nil {
-		t.Fatal("accepted an xtable that is not a breakpoint table")
+		t.Fatal("accepted an xtable that is not an axis-point table")
 	}
 	if _, err := ParseSigs([]byte("mapsigs:\n- name: A\n  anchor: B\n  add: 1\n  table: true\n")); err == nil {
-		t.Fatal("accepted a breakpoint table that is an anchor")
+		t.Fatal("accepted an axis-point table that is an anchor")
 	}
 }
 

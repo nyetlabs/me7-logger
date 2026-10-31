@@ -187,7 +187,7 @@ func RamAxis(data []byte, dpp [4]uint16, ram uint16, bits int) (record.Axis, boo
 		return record.Axis{}, false
 	}
 	if bits == 8 || bits == 16 {
-		return Breakpoints(data, hdr, bits)
+		return AxisPoints(data, hdr, bits)
 	}
 	return axisAt(data, hdr)
 }
@@ -211,13 +211,13 @@ func memoRam(data []byte, dpp [4]uint16) func(uint16) (record.Axis, bool) {
 	}
 }
 
-// Breakpoints reads a breakpoint table that is not in front of the map.
+// AxisPoints reads an axis-point table that is not in front of the map.
 // addr is the count. bits 8 keeps a one-byte count, which may be odd, and
 // the values start on the next byte. bits 16 keeps a count word whose high
 // byte is zero. A count word on an odd address is the pad in front of it,
 // so the word is the next even byte, and the values start two bytes after
-// that. The axis address is the first breakpoint.
-func Breakpoints(data []byte, addr uint32, bits int) (record.Axis, bool) {
+// that. The axis address is the first axis point.
+func AxisPoints(data []byte, addr uint32, bits int) (record.Axis, bool) {
 	addr, ok := inImage(data, addr)
 	if !ok {
 		return record.Axis{}, false
@@ -546,11 +546,11 @@ func axisAt(data []byte, addr uint32) (record.Axis, bool) {
 		return record.Axis{}, false
 	}
 	if data[off+1] == 0 && addr%2 == 0 {
-		wide, ok16 := Breakpoints(data, addr, 16)
+		wide, ok16 := AxisPoints(data, addr, 16)
 		if ok16 && axisOrdered(data, wide) {
 			return wide, true
 		}
-		narrow, ok8 := Breakpoints(data, addr, 8)
+		narrow, ok8 := AxisPoints(data, addr, 8)
 		if ok8 && axisOrdered(data, narrow) {
 			return narrow, true
 		}
@@ -558,10 +558,10 @@ func axisAt(data []byte, addr uint32) (record.Axis, bool) {
 			return wide, true
 		}
 	}
-	return Breakpoints(data, addr, 8)
+	return AxisPoints(data, addr, 8)
 }
 
-// axisOrdered is true when the breakpoint values rise or fall without a turn.
+// axisOrdered is true when the axis-point values rise or fall without a turn.
 // A flat list is not ordered. Signed and unsigned readings both count.
 func axisOrdered(data []byte, a record.Axis) bool {
 	if a.Count < 2 {

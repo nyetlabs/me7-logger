@@ -458,7 +458,7 @@ func loadAlias(path string) (map[string]string, error) {
 	return nil, err
 }
 
-// applyCallTables fills a row the call left unset from the breakpoint table
+// applyCallTables fills a row the call left unset from the axis-point table
 // that caller row names. A row the call already stored stays. The table count
 // has to match the row count on that caller.
 func applyCallTables(img []byte, maps []record.Map, calls []record.Call, tabs map[string]uint32) {
@@ -477,7 +477,7 @@ func applyCallTables(img []byte, maps []record.Map, calls []record.Call, tabs ma
 		if !ok {
 			continue
 		}
-		y, ok := interp.Breakpoints(img, addr, c.YBits)
+		y, ok := interp.AxisPoints(img, addr, c.YBits)
 		if !ok || y.Count != c.Rows {
 			continue
 		}
@@ -541,13 +541,13 @@ func readAxes(img []byte, dpp [4]uint16, h opcode.MapHit, m *record.Map) {
 	}
 	if h.XTab != 0 || h.YTab != 0 {
 		if h.XTab != 0 {
-			if x, ok := interp.Breakpoints(img, h.XTab, h.XBits); ok && (h.Cols == 0 || x.Count == h.Cols) {
+			if x, ok := interp.AxisPoints(img, h.XTab, h.XBits); ok && (h.Cols == 0 || x.Count == h.Cols) {
 				m.Cols = x.Count
 				m.X = &x
 			}
 		}
 		if h.YTab != 0 {
-			if y, ok := interp.Breakpoints(img, h.YTab, h.YBits); ok && (h.Rows == 0 || y.Count == h.Rows) {
+			if y, ok := interp.AxisPoints(img, h.YTab, h.YBits); ok && (h.Rows == 0 || y.Count == h.Rows) {
 				m.Rows = y.Count
 				m.Y = &y
 			}

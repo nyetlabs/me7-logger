@@ -26,7 +26,7 @@ const Other = "Other"
 // its name and width when the defs agree (config.Conversion); otherwise the
 // value stays factor 1. title
 // is the image file name. A constant at a table's axis address is that
-// axis's breakpoints and becomes a curve of its points, so the writer links
+// axis's points and becomes a curve of those points, so the writer links
 // the axis to it. conflicts lists the constants left alone: the axes at
 // their address disagree on count or storage, the points read from image
 // don't strictly increase, or the curve would run into the next object.
@@ -50,7 +50,7 @@ func Model(maps []record.Map, image []byte, title string) (m *model.Model, confl
 		pat[r.Name] = r.Pattern
 		fromCall[r.Name] = r.Rows > 0
 	}
-	conflicts = breakpoints(m, image, pat)
+	conflicts = axisPoints(m, image, pat)
 	conflicts = append(conflicts, aligned(m, image, pat)...)
 	conflicts = append(conflicts, fitRecord(m, image, pat, fromCall)...)
 	signAxes(m, image)
@@ -106,7 +106,7 @@ func aligned(m *model.Model, image []byte, pat map[string]string) (conflicts []s
 // fitRecord emits the one image record at an even body when its rows, cols,
 // or axis widths or addresses differ from the call or from config.Storage.
 // A call keeps its shape when the inline record is a curve that rises only
-// signed and the call's own axes are ordered breakpoint tables. Any other
+// signed and the call's own axes are ordered axis-point tables. Any other
 // disagreement takes the record.
 func fitRecord(m *model.Model, image []byte, pat map[string]string, fromCall map[string]bool) (conflicts []string) {
 	for _, o := range m.Objects {
@@ -154,7 +154,7 @@ func signedOnlyCurve(image []byte, rec interp.Record) bool {
 	return config.SignedOnly(image, int(addr), rec.Cols, rec.X.Bits, "little")
 }
 
-// axesHold is a call shape whose image axes are ordered breakpoint runs of
+// axesHold is a call shape whose image axes are ordered axis-point runs of
 // the call's counts. An axis with no address does not count. One that turns
 // or is flat means the inline record is the shape to publish.
 func axesHold(image []byte, o *model.Object) bool {
@@ -256,10 +256,10 @@ func rawValue(v model.Value) bool {
 	return c.Factor == 1 && c.Offset == 0 && !c.Reciprocal && v.Units == ""
 }
 
-// breakpoints turns each constant at a table's axis address into a curve
+// axisPoints turns each constant at a table's axis address into a curve
 // holding that axis's points, unless the axes there disagree, the points
 // don't strictly increase, or another object starts inside the curve.
-func breakpoints(m *model.Model, image []byte, pat map[string]string) (conflicts []string) {
+func axisPoints(m *model.Model, image []byte, pat map[string]string) (conflicts []string) {
 	type points struct {
 		n int
 		d model.Data
@@ -288,7 +288,7 @@ func breakpoints(m *model.Model, image []byte, pat map[string]string) (conflicts
 		case len(ps) > 1:
 			why = fmt.Sprintf("axes of %d different shapes", len(ps))
 		case !increasing(image, o.Address, ps[0].n, ps[0].d.Bits/8):
-			why = "breakpoints not increasing"
+			why = "axis points not increasing"
 		default:
 			end := o.Address + model.Addr(ps[0].n*ps[0].d.Bits/8)
 			for _, t := range m.Objects {
@@ -299,7 +299,7 @@ func breakpoints(m *model.Model, image []byte, pat map[string]string) (conflicts
 			}
 		}
 		if why != "" {
-			conflicts = append(conflicts, withPat(o, pat, fmt.Sprintf("%s at 0x%X: not a breakpoint curve: %s", o.Key, uint32(o.Address), why)))
+			conflicts = append(conflicts, withPat(o, pat, fmt.Sprintf("%s at 0x%X: not an axis-point curve: %s", o.Key, uint32(o.Address), why)))
 			continue
 		}
 		o.Shape, o.Cols, o.Data = "1d", ps[0].n, ps[0].d

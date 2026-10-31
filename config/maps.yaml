@@ -7,7 +7,7 @@
 #         A list is several calls in that function that share one interpolator.
 #         Each binary matches one offset in the list.
 # interp  Interpolator needle, such as map_interp_curve8 or map_interp_table8.
-# ytable  Breakpoint table for the row axis, when the call leaves that axis blank.
+# ytable  Axis-point table for the row axis, when the call leaves that axis blank.
 # rows    How many points that table has. Set this together with ytable.
 # ybits   Width of those points, 8 or 16. With a table and no width, this is 8.
 #

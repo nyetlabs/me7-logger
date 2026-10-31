@@ -24,7 +24,7 @@ func TestLocateMapFromCall(t *testing.T) {
 	copy(img[sib:], pro)
 	copy(img[entry:], pro)
 	copy(img[entryB:], proB)
-	// 8-bit axis: count 4, then the breakpoints.
+	// 8-bit axis: count 4, then the axis points.
 	copy(img[0x10110:], []byte{4, 1, 2, 3, 4})
 	// 16-bit axis: count, a zero marker, then values.
 	copy(img[0x10120:], []byte{4, 0, 0x10, 0, 0x20, 0, 0x30, 0, 0x40, 0})
@@ -73,9 +73,9 @@ func TestRowAxis(t *testing.T) {
 		0xE6, 0xF4, 0xFF, 0x7F, 0x0D, 0x03, 0x6D, 0x02,
 		0xE6, 0xF4, 0x00, 0x80,
 	})
-	// Column header: count 4, then the breakpoints. R13 is 0x0110.
+	// Column header: count 4, then the axis points. R13 is 0x0110.
 	copy(img[0x10110:], []byte{4, 1, 2, 3, 4})
-	// Row header: count 16, then the breakpoints. The setup's R12 is 0x00C0.
+	// Row header: count 16, then the axis points. The setup's R12 is 0x00C0.
 	row := make([]byte, 17)
 	row[0] = 16
 	row[1] = 0x0B
@@ -175,7 +175,7 @@ func TestPageCallAxis(t *testing.T) {
 	const entry = 0x80
 	img := make([]byte, 0x10400)
 	copy(img[entry:], []byte{0xD4, 0xA0, 0x00, 0x00, 0xD4, 0xB0, 0x02, 0x00, 0xDC, 0x4F, 0xA9, 0x4E})
-	// Column axis: count 4, then the breakpoints. Page 0x0204, low 0x0110.
+	// Column axis: count 4, then the axis points. Page 0x0204, low 0x0110.
 	copy(img[0x10110:], []byte{4, 1, 2, 3, 4})
 	// R12 low 0x0200 and R13 page 0x0204 select the body. R14/R15 select the axis.
 	at := 0x200
@@ -385,7 +385,7 @@ func TestRamAxis(t *testing.T) {
 	const entry = 0x80
 	img := make([]byte, 0x10400)
 	copy(img[entry:], []byte{0xF0, 0x3E, 0xC0, 0x72, 0x00, 0xC2, 0xDC, 0x4D})
-	// DPP0 header: count 8, then the breakpoints. Low 14 bits are 0x0084.
+	// DPP0 header: count 8, then the axis points. Low 14 bits are 0x0084.
 	copy(img[0x10084:], []byte{8, 1, 2, 3, 4, 5, 6, 7, 8})
 	// A header on an explicit page. Low 14 bits are 0x0110, page 0x0204.
 	copy(img[0x10110:], []byte{4, 9, 8, 7, 6})
@@ -480,9 +480,9 @@ functions:
 	}
 }
 
-func TestRamAxisZeroBreakpoint(t *testing.T) {
+func TestRamAxisZeroPoint(t *testing.T) {
 	img := make([]byte, 0x80)
-	// Count 6, then a zero breakpoint. The zero is a point, not a 16-bit marker.
+	// Count 6, then a zero axis point. The zero is a point, not a 16-bit marker.
 	copy(img[0x10:], []byte{6, 0, 0x0f, 0x32, 0x64, 0xc8, 0xfa})
 	copy(img[0x40:], []byte{
 		0xE6, 0xFC, 0x10, 0x00,
@@ -505,7 +505,7 @@ func TestRamAxisZeroBreakpoint(t *testing.T) {
 
 func TestPackedSkipsOddPad(t *testing.T) {
 	// The decoded pointer is the pad. Counts start on the next byte: 2 rows
-	// of 8-bit breakpoints, then 2 columns of 16-bit breakpoints.
+	// of 8-bit axis points, then 2 columns of 16-bit axis points.
 	img := []byte{
 		0xFF,
 		0x00,
@@ -521,8 +521,8 @@ func TestPackedSkipsOddPad(t *testing.T) {
 }
 
 func TestPackedPadsWideAxis(t *testing.T) {
-	// One 8-bit row breakpoint leaves the column axis on an odd address.
-	// The pad byte is skipped and the two column breakpoints are 16-bit.
+	// One 8-bit row axis point leaves the column axis on an odd address.
+	// The pad byte is skipped and the two column axis points are 16-bit.
 	img := []byte{5, 2, 1, 2, 3, 4, 5, 0x00, 0x10, 0x00, 0x20, 0x00, 0xBB}
 	rows, cols, x, y, ok := Packed(img, opcode.FlashBase, opcode.FlashBase+12)
 	if !ok || rows != 5 || cols != 2 || y.Bits != 8 || x.Bits != 16 || y.Addr != opcode.FlashBase+2 || x.Addr != opcode.FlashBase+8 {
@@ -536,7 +536,7 @@ func TestCurve(t *testing.T) {
 	if !ok || cols != 4 || x.Bits != 8 || x.Addr != opcode.FlashBase+1 {
 		t.Fatalf("ok=%v cols=%d x=%+v", ok, cols, x)
 	}
-	// Odd header. The word count is the next even address, then four 16-bit breakpoints.
+	// Odd header. The word count is the next even address, then four 16-bit axis points.
 	wide := []byte{0xFF, 0x02, 0x04, 0x00, 0x10, 0x00, 0x20, 0x00, 0x30, 0x00, 0x40, 0x00, 0xBB}
 	cols, x, ok = Curve(wide, opcode.FlashBase+1, opcode.FlashBase+12)
 	if !ok || cols != 4 || x.Bits != 16 || x.Addr != opcode.FlashBase+4 {
@@ -696,22 +696,22 @@ func putCall(img []byte, at, entry int, r12, r13 uint16) {
 	img[at+19] = byte(entry >> 8)
 }
 
-func TestBreakpoints(t *testing.T) {
+func TestAxisPoints(t *testing.T) {
 	img := make([]byte, 16)
 	img[2] = 3
 	copy(img[3:], []byte{1, 2, 3})
-	ax, ok := Breakpoints(img, opcode.FlashBase+2, 8)
+	ax, ok := AxisPoints(img, opcode.FlashBase+2, 8)
 	if !ok || ax.Addr != opcode.FlashBase+3 || ax.Count != 3 || ax.Bits != 8 {
 		t.Fatalf("%v %+v", ok, ax)
 	}
 	img[6] = 2
 	copy(img[8:], []byte{0x10, 0x00, 0x20, 0x00})
-	ax, ok = Breakpoints(img, opcode.FlashBase+6, 16)
+	ax, ok = AxisPoints(img, opcode.FlashBase+6, 16)
 	if !ok || ax.Addr != opcode.FlashBase+8 || ax.Count != 2 || ax.Bits != 16 {
 		t.Fatalf("word %v %+v", ok, ax)
 	}
 	img[2] = 0
-	if _, ok := Breakpoints(img, opcode.FlashBase+2, 8); ok {
+	if _, ok := AxisPoints(img, opcode.FlashBase+2, 8); ok {
 		t.Fatal("accepted a zero count")
 	}
 	// The odd byte is the pad. The count word is the next even address.
@@ -719,7 +719,7 @@ func TestBreakpoints(t *testing.T) {
 	img[2] = 2
 	img[3] = 0
 	copy(img[4:], []byte{0x10, 0x00, 0x20, 0x00})
-	ax, ok = Breakpoints(img, opcode.FlashBase+1, 16)
+	ax, ok = AxisPoints(img, opcode.FlashBase+1, 16)
 	if !ok || ax.Addr != opcode.FlashBase+4 || ax.Count != 2 || ax.Bits != 16 {
 		t.Fatalf("pad %v %+v", ok, ax)
 	}
@@ -742,7 +742,7 @@ func TestOddHeaderIsBytes(t *testing.T) {
 		if !ok || ax.Bits != 8 || ax.Count != int(c.hdr[0]) || ax.Addr != opcode.FlashBase+uint32(c.at)+1 {
 			t.Errorf("0x%x: ok=%v %+v", c.at, ok, ax)
 		}
-		if _, ok := Breakpoints(img, opcode.FlashBase+uint32(c.at), 16); ok {
+		if _, ok := AxisPoints(img, opcode.FlashBase+uint32(c.at), 16); ok {
 			t.Errorf("0x%x: accepted a count word at an odd address", c.at)
 		}
 	}

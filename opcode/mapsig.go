@@ -37,7 +37,7 @@ type MapHit struct {
 	YBits int
 	XRam  uint16
 	YRam  uint16
-	// XTab and YTab are breakpoint tables named by the row. Each is the CPU
+	// XTab and YTab are axis-point tables named by the row. Each is the CPU
 	// address of that table's count byte. Zero means this hit does not name one.
 	// Plain means Rows and Cols are the shape when no axis sits in front of the body.
 	XTab  uint32
@@ -54,7 +54,7 @@ type MapHit struct {
 // MapAddrs runs the mapsig rows. A pattern with no window is kept only when
 // it occurs once and the address word decodes inside this image. A row with
 // open searches the DB00 window around that opener and keeps the first hit
-// there. A table row is the breakpoint table: its address is the hit, and it
+// there. A table row is the axis-point table: its address is the hit, and it
 // is not a map. An anchor is a byte distance from a map this pass already
 // located. A later row with the same name fills it only when an earlier
 // window missed. These addresses are flash maps, so the RAM filter used by
@@ -318,7 +318,7 @@ func segPtr(img []byte, addr uint32, pageAt int) uint32 {
 	return offset | page<<14
 }
 
-// TableAddrs is the CPU address of each breakpoint table whose pattern occurs
+// TableAddrs is the CPU address of each axis-point table whose pattern occurs
 // once. The address is the hit. A table is not a map.
 func TableAddrs(img []byte, rows []MapSig) map[string]uint32 {
 	tabs := map[string]uint32{}

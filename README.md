@@ -60,7 +60,7 @@ flowchart TD
 - Each Bosch map name and the bytes that locate it are a row in `config/mapsigs.yaml`. A RAM address other rows splice is a row in `config/signatures.yaml`.
 - `image.xdf` holds the maps named in `config/categories.json`, filed under its categories, plus the maps at their axis addresses. `--full-xdf` writes every located map, with the rest under `Other`.
 - `--labels labels.tsv` writes the `addr`, `name`, `size`, `comment` TSV that `ME7ImportLabelsScript` in [ghidra-me7-analyzer](../ghidra-me7-analyzer) reads: needle function entries (0x800000 plus the file offset), the `.ecu` RAM items, and each named map body and axis. A needle with several entries is `NAME_ADDR`.
-- `me7info probe image.bin` reports what was found without writing files. With `--maps`, it also prints how many maps each XDF would hold, and any axis constant it couldn't turn into a breakpoint curve.
+- `me7info probe image.bin` reports what was found without writing files. With `--maps`, it also prints how many maps each XDF would hold, and any axis constant it couldn't turn into an axis-point curve.
 - `--5120 auto` reads located PUMN, PUMX, and PUE. The stock conversion is the mbar scale for that cell. When the doubled value is inside 400–1200 mbar and the stock value is outside it, every mbar factor is doubled. `on` doubles them. `off` leaves them.
 
 ## How `me7logger` reads RAM

@@ -162,7 +162,7 @@ func plausible(img []byte, m record.Map, axes int) (bool, string) {
 }
 
 // axisFail is empty when the axis is ordered, "axis-zeros" when the
-// breakpoint bytes are all zero, or "axis" for any other turn or flat run.
+// axis-point bytes are all zero, or "axis" for any other turn or flat run.
 func axisFail(img []byte, a *record.Axis) string {
 	if a.Addr == 0 || a.Count < 2 {
 		return ""

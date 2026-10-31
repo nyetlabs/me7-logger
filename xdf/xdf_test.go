@@ -62,7 +62,7 @@ func TestModelConstantAndTable(t *testing.T) {
 	}
 }
 
-// TestModelLinkedAxis: a row axis at a curve holding its breakpoints links to
+// TestModelLinkedAxis: a row axis at a curve holding its axis points links to
 // it and keeps its own location.
 func TestModelLinkedAxis(t *testing.T) {
 	m, _ := Model([]record.Map{
@@ -78,10 +78,10 @@ func TestModelLinkedAxis(t *testing.T) {
 	}
 }
 
-// TestModelBreakpoints: a constant at table axis addresses becomes a curve of
+// TestModelAxisPoints: a constant at table axis addresses becomes a curve of
 // their points and is linked, unless the axes there disagree, the points
 // don't strictly increase, or the curve runs into another object.
-func TestModelBreakpoints(t *testing.T) {
+func TestModelAxisPoints(t *testing.T) {
 	img := make([]byte, 0x20000)
 	copy(img[0x10010:], []byte{100, 0, 200, 0, 0x2C, 1, 0x90, 1})
 	copy(img[0x10300:], []byte{1, 2, 3, 4})
@@ -101,7 +101,7 @@ func TestModelBreakpoints(t *testing.T) {
 	if o := m.Objects[0]; o.Shape != "1d" || o.Rows != 1 || o.Cols != 4 || o.Data.Bits != 16 || o.Data.Endian != "little" {
 		t.Fatalf("SNM %+v", o)
 	}
-	want := []string{"SNX at 0x10100: not a breakpoint curve: axes of 2", "SNZ at 0x10200: not a breakpoint curve: breakpoints not increasing", "SNO at 0x10300: not a breakpoint curve: overlaps NEXT"}
+	want := []string{"SNX at 0x10100: not an axis-point curve: axes of 2", "SNZ at 0x10200: not an axis-point curve: axis points not increasing", "SNO at 0x10300: not an axis-point curve: overlaps NEXT"}
 	if len(conflicts) != len(want) {
 		t.Fatalf("conflicts %q", conflicts)
 	}

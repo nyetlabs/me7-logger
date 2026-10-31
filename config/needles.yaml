@@ -130,7 +130,7 @@ functions:
     unique: false
 
   # 16-bit curve. R12 is the DPP pointer, not a page. Callers also pass axis
-  # breakpoints this way.
+  # axis points this way.
   - name: map_interp_curve16_direct
     needle_hex: "E7 F2 80 00 75 F2 C2 8F"
 

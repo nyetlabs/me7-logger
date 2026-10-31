@@ -322,7 +322,7 @@ func hexAddr(s string) uint32 {
 
 // rpmOnScale applies factor 40 to the rpm role and factor 0.75 to the other.
 // A swapped pair still lands in both ranges, so the address check above is
-// the gate. This rejects an axis whose bytes are not an 8-bit breakpoint.
+// the gate. This rejects an axis whose bytes are not an 8-bit axis point.
 func rpmOnScale(img []byte, m record.Map) bool {
 	xv, xok := config.Conversion(m.Name, "x", 8, 0)
 	yv, yok := config.Conversion(m.Name, "y", 8, 0)
