@@ -1,11 +1,10 @@
-# Test and build on every push and PR. The work is in the Makefile.
+# Test and build on pushes to master and on PRs. The work is in the Makefile.
 name: Build
 
 on:
   push:
-    branches: [ '**' ]
+    branches: [ master ]
   pull_request:
-    branches: [ '**' ]
   workflow_call:
 
 permissions:
