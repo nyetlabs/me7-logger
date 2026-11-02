@@ -40,7 +40,7 @@ Stage new originals under `testdata/parity/incoming/` (gitignored except its REA
 
 `me7info` (`generate`, `probe`, `place`), `me7parity` (the report, plus `onboard` and `corpus`), and `me7logger` (`log`) share one Go module. `me7parity` reads `testdata/parity` and is not in the release. `generate` and `me7logger` locate items in the image as `record.Item` and `record.Map`. The `.ecu` writer reads those. `xdf.Model` converts the maps to an xdfkit model (file offsets, provenance origin `auto`). A cell and each axis take the DAMOS or A2L conversion for that name, role (cells, X, or Y), and storage width when those defs agree (`config/units.yaml`). A `_1_A` name with no sample takes the `_0_A` scale for that role and width. A clock name takes the factor for the image clock from `config/units.yaml`. A name those files do not agree on stays factor 1. xdfkit files the model with `Tuner` or `Categorize` and writes the XDF. `parity` reads the corpus definitions with xdfkit `canon` and `model`. me7-logger imports xdfkit; xdfkit never imports me7-logger.
 
-`me7info place ref.json ref.bin dst.bin` writes a model for the destination image (`-o`, or stdout). A body that still matches is kept. One code pointer, found once, moves the object. Anything else is omitted. Provenance is format `image`, origin `auto`. The report on stderr is the kept, moved, and omitted counts.
+`me7info place` and `--5120`: [QUICKSTART.md](QUICKSTART.md) / [README.md](README.md).
 
 The generator is a masked byte search plus a few opcodes (selector, case bounds, `EXTP`), not a disassembler. A RAM address located by bytes is a row in `config/signatures.yaml`. A flash body is a row in `config/mapsigs.yaml`. Neither name, pattern, nor offset is a literal in Go. A row should match a code layout, not one image; check it across the corpus.
 
@@ -52,7 +52,7 @@ Out of scope: `.kp`, OLS, DAMOS, WinOLS, ecuxplot, `mapdump`. Do not copy NefMot
 
 ## Config
 
-Each file in `config/` documents its fields in its header. `config/user/*.yaml` overlays them in filename order; a row of the same name replaces the shipped one, and `drop: true` removes a needle. `--user`/`ME7_USER` picks another directory. `config/examples/needles.yaml` is not loaded.
+Each file in `config/` documents its fields in its header. `units.yaml`, `storage.yaml`, and `sets.yaml` group conversions, cell shapes, and map forms of one Bosch name; tier and axis count stay in `testdata/parity/names/tuner.yaml`. `config/user/*.yaml` overlays them in filename order; a row of the same name replaces the shipped one, and `drop: true` removes a needle. `--user`/`ME7_USER` picks another directory. `config/examples/needles.yaml` is not loaded.
 
 Files load from `config/` beside the executable (symlinks resolved) when present, else the embedded copy. `make build` mirrors `config/` into `build/config/` with `rsync --delete`, leaving `build/config/user/` alone, so edits reach `build/me7info` on the next build. `go run` and `go test` binaries have no `config/` beside them and use the embedded copy. `--core`, `--names`, `--meas`, `--map`, `--alias` (or `ME7_*`) replace one file.
 
@@ -62,19 +62,17 @@ Flags use pflag (`internal/cli`): a long name takes two hyphens (`--user`), its 
 
 `config/categories.json` is the corpus `categories.json` (xdfkit `docs/corpus.md`), copied by `make corpus-bump`; a test fails when they differ. It files each XDF map under a category. The tuner XDF holds only its names plus the maps at their axis addresses; `--full-xdf` holds every named map, with the rest under `Other`. `--model` writes that full model as JSON for the corpus (`publish/README.md`).
 
-`--5120` is `auto`, `on`, or `off`. `auto` reads located PUMN, PUMX, and PUE. The stock conversion is the shared mbar scale for that cell width (`config/units.yaml`). When the doubled value is inside the 400–1200 mbar band and the stock value is outside it, mbar factors on the `.ecu` rows are doubled. `on` doubles them. `off` leaves them. A constant the image does not hold leaves the factors unchanged.
-
 Cell width is the mapsig `bits`, else `config/storage.yaml`: the majority width, sign, and shape of that name in the corpus DAMOS and A2L defs. Names that share a cell are one row, and a row with parts replaces it for those part numbers (`go test ./config -update`). `unsized` means those defs disagree on shape. A table the locator did not fully size takes that shape unless a count it read disagrees. Which axis is x comes only from the lookup call (`xat`, `yat`, `yord`, the caller's column header, or the header order), never from the counts. An axis not read is `ordinal` when the table says so, else `unknown`.
 
 A constant at a table axis address becomes a 1d axis-point curve with that axis's count and data, so xdfkit links the axis to it. That happens only when every axis there has the same shape, the image values strictly increase, and no other map starts inside the curve. Otherwise it stays a constant. `probe --maps` prints each conflict as `xdf: KEY at 0xADDR: ...`, for an axis point left as a constant, an alignment drop or move, and a shape taken from the image record. The line names the mapsig pattern that stored the map.
 
 ### Axes on an interpolator call
 
-The body is R12, or R13 page plus R12 low bits. The column header is the first of: an R13 immediate; R15 page with R14 low bits; a RAM load of R14 or R13; the header immediate stored through R12 before `MOV [ram], R4`. A second header loaded near the call is the row; conflicting or missing rows stay unset for `ytable` to fill. A `CALLS` into segment 0 outside the flash image uses the row's own `interp`.
+The body is R12, or R13 page plus R12 low bits. The column header is the first of: an R13 immediate; R15 page with R14 low bits; a RAM load of R14 or R13; the header immediate stored through R12 before `MOV [ram], R4`. A second header loaded near the call is the row; conflicting or missing rows stay unset for `ytable` to fill. A caller may name an axis-point table with `ytable` (and `rows`) when that header store is unset; the table is a `table: true` mapsig whose address is the pattern hit. A `CALLS` into segment 0 outside the flash image uses the row's own `interp`.
 
 ## Logging
 
-KWP `$23` reads at 10400 baud, up to 254 contiguous bytes per request, 55 ms apart, so scattered addresses cut the sample rate. `SamplesPerSecond` is 1 to 50, default 10.
+Baud, request size, and `SamplesPerSecond`: [README.md](README.md) / [QUICKSTART.md](QUICKSTART.md).
 
 ## Parity
 
@@ -83,6 +81,16 @@ Images are in the private [ecu-corpus](https://github.com/nyetlabs/ecu-corpus) s
 `me7parity --data testdata/parity` prints the report from shipped config only. `make test` fails only when an image is below 100% against its legacy `ecu/me7info/<image>.ecu`; every other score is coverage.
 
 Each image's definition is its corpus model JSON. Fix definitions in the corpus, not here. `provenance.origin` `damos`/`a2l` is the reference, and a different address is a miss. `manual` or unset is an oracle only: disagreements still hit and are listed under `manual xdf disagrees`. `auto` is read and left out of both sections. Hits, tiers, and confidence are in `docs/parity.md`.
+
+## Documentation
+
+| Document | Covers |
+| --- | --- |
+| [docs/parity.md](docs/parity.md) | `me7parity` report, corpus, and onboard marks |
+| [docs/tuner-stages.md](docs/tuner-stages.md) | Tuner tier meanings (D–S) |
+| [docs/layout-blocks.md](docs/layout-blocks.md) | Code-layout blocks and finder priority |
+| [publish/README.md](publish/README.md) | Definition zip stage and upload |
+| [QUICKSTART.md](QUICKSTART.md) | Commands, `session.cfg`, user overrides |
 
 ## Version
 
