@@ -71,7 +71,7 @@ func TestLocatedAligned(t *testing.T) {
 			continue
 		}
 		for _, f := range rep.Findings {
-			if f.Rule == "R9" || f.Rule == "R10" {
+			if f.Rule == "RC01" || f.Rule == "RC02" {
 				t.Errorf("%s: %s %s", name, f.Rule, f.Message)
 				continue
 			}

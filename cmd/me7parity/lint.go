@@ -122,7 +122,7 @@ func mapKey(f lint.Finding) string {
 }
 
 // holdLint lints the model --submit would store. A missing image is no
-// finding. R1 and R3 are the block. Other findings are the text. Nothing
+// finding. DS01 and DS03 are the block. Other findings are the text. Nothing
 // in a finding is applied.
 func holdLint(c *ecucorpus.Corpus, name string, m *model.Model) (block, text string, err error) {
 	if c == nil || m == nil || len(m.Objects) == 0 {
@@ -155,25 +155,25 @@ func lintModel(m *model.Model, img []byte) ([]lint.Finding, error) {
 	return rep.Findings, nil
 }
 
-// lintStatus is "lint R1", "lint R3", or "lint R1 R3" when those rules
-// fired. Any other rule is empty.
+// lintStatus is "lint DS01", "lint DS03", or "lint DS01 DS03" when those
+// rules fired. Any other rule is empty.
 func lintStatus(findings []lint.Finding) string {
-	var r1, r3 bool
+	var ds01, ds03 bool
 	for _, f := range findings {
 		switch f.Rule {
-		case "R1":
-			r1 = true
-		case "R3":
-			r3 = true
+		case "DS01":
+			ds01 = true
+		case "DS03":
+			ds03 = true
 		}
 	}
 	switch {
-	case r1 && r3:
-		return "lint R1 R3"
-	case r1:
-		return "lint R1"
-	case r3:
-		return "lint R3"
+	case ds01 && ds03:
+		return "lint DS01 DS03"
+	case ds01:
+		return "lint DS01"
+	case ds03:
+		return "lint DS03"
 	}
 	return ""
 }

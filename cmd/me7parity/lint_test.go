@@ -11,23 +11,23 @@ import (
 
 func TestLintLines(t *testing.T) {
 	got := lintLines(true, "stem", []lint.Finding{{
-		Rule: "R6", ID: "R6@0x100:4", Message: "all values identical: wrong address or size",
+		Rule: "XR01", ID: "XR01@0x100:4", Message: "all values identical: wrong address or size",
 	}})
-	want := "  R6   R6@0x100:4  all values identical: wrong address or size\n"
+	want := "  XR01 XR01@0x100:4  all values identical: wrong address or size\n"
 	if got != want {
 		t.Fatalf("%q", got)
 	}
 	got = lintLines(true, "stem", []lint.Finding{
-		{Rule: "R9", ID: "R9@0x10:2", Message: "odd", Cause: "shape"},
-		{Rule: "R6", ID: "R6@0x20:4", Message: "same"},
-		{Rule: "R10", ID: "R10@0x30:2", Message: "start", Cause: "record-start"},
+		{Rule: "RC01", ID: "RC01@0x10:2", Message: "odd", Cause: "shape"},
+		{Rule: "XR01", ID: "XR01@0x20:4", Message: "same"},
+		{Rule: "RC02", ID: "RC02@0x30:2", Message: "start", Cause: "record-start"},
 	})
-	want = "  shape\n  R9   R9@0x10:2  odd\n  record-start\n  R10  R10@0x30:2  start\n  R6   R6@0x20:4  same\n"
+	want = "  shape\n  RC01 RC01@0x10:2  odd\n  record-start\n  RC02 RC02@0x30:2  start\n  XR01 XR01@0x20:4  same\n"
 	if got != want {
 		t.Fatalf("%q", got)
 	}
 	got = lintLines(true, "stem", []lint.Finding{{
-		Rule: "R3", ID: "R3@0x20:4", Message: "monotonic only with the opposite signedness",
+		Rule: "DS03", ID: "DS03@0x20:4", Message: "monotonic only with the opposite signedness",
 		Maps: []lint.AxisRef{{Key: "KFDMDARO", Axis: "x"}},
 	}})
 	if !strings.Contains(got, "KFDMDARO x") {
@@ -49,16 +49,16 @@ func TestLintFinding(t *testing.T) {
 		t.Fatal(err)
 	}
 	text := lintLines(true, "stem", rep.Findings)
-	if !strings.Contains(text, "R6") || !strings.Contains(text, "R6@0x100:4") {
+	if !strings.Contains(text, "XR01") || !strings.Contains(text, "XR01@0x100:4") {
 		t.Fatalf("%q", text)
 	}
 	if lintStatus(rep.Findings) != "" {
-		t.Fatalf("R6 blocked: %s", lintStatus(rep.Findings))
+		t.Fatalf("XR01 blocked: %s", lintStatus(rep.Findings))
 	}
 }
 
 func TestLintHold(t *testing.T) {
-	if got := lintStatus([]lint.Finding{{Rule: "R3"}, {Rule: "R1"}, {Rule: "R6"}}); got != "lint R1 R3" {
+	if got := lintStatus([]lint.Finding{{Rule: "DS03"}, {Rule: "DS01"}, {Rule: "XR01"}}); got != "lint DS01 DS03" {
 		t.Fatalf("%q", got)
 	}
 	img := make([]byte, 0x40)
@@ -81,7 +81,7 @@ func TestLintHold(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := lintStatus(findings); got != "lint R3" {
+	if got := lintStatus(findings); got != "lint DS03" {
 		t.Fatalf("%s %#v", got, findings)
 	}
 	if !strings.Contains(lintLines(true, "stem", findings), "KFDMDARO") {

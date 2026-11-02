@@ -76,7 +76,7 @@ open and block are the names that did not hit. `absent` is listed for this layou
 | `axis NAME` | axis turns and is not all zeros |
 | `body NAME` | body unreadable |
 | `keys` | blank-id keys `obj-N`; `--submit` clears them |
-| `lint R1` / `lint R3` | would-be definition has that finding; row left in place. R4–R6, R9, R10 print only |
+| `lint DS01` / `lint DS03` | would-be definition has that finding; row left in place. Other lint codes print only (`autocorrect.md` in xdfkit) |
 | `def unreadable` | definition file could not be read |
 
 ### delta

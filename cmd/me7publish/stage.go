@@ -278,7 +278,7 @@ func runLint(xdfkit, img, def, name string) error {
 	return nil
 }
 
-var lintRule = regexp.MustCompile(`^(R[0-9]+)@`)
+var lintRule = regexp.MustCompile(`^([A-Z]{2}[0-9]{2})@`)
 
 func lintSummary(name, out string) string {
 	counts := map[string]int{}
