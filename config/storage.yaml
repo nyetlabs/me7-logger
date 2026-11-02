@@ -261,8 +261,8 @@
 - {bits: 8, rows: 8, cols: 12, names: [KFTVLBTS]}
 - {bits: 8, rows: 8, cols: 16, ordinal: true, names: [MZFREG_DAT_UC]}
 - {bits: 8, rows: 9, cols: 7, names: [
-    KFABAK, KFAVAK, KFBAKL_0_A, KFBAKL_1_A, KFBAKL_2_A, KFBAKL_3_A, KFVAKL_0_A, KFVAKL_1_A,
-    KFVAKL_2_A, KFVAKL_3_A, KFZVAKM]}
+    KFABAK, KFAVAK, KFBAKL, KFBAKL_0_A, KFBAKL_1_A, KFBAKL_2_A, KFBAKL_3_A, KFVAKL, KFVAKL_0_A,
+    KFVAKL_1_A, KFVAKL_2_A, KFVAKL_3_A, KFZVAKM]}
 - {bits: 8, rows: 9, cols: 10, names: [KFTSRL]}
 - {bits: 8, rows: 10, cols: 4, names: [PVLDNEZV_0_A, PVLDNEZV_1_A, PVLDNEZ_0_A, PVLDNEZ_1_A]}
 - {bits: 8, rows: 10, cols: 6, names: [KFTATX]}
@@ -291,11 +291,10 @@
 - {bits: 8, rows: 16, cols: 16, names: [KFFA, KFLFLAV]}
 - {bits: 8, unsized: true, names: [
     FNSSM, FNWTME, KFATMABKA, KFATMABKA_0_A, KFATMABKA_1_A, KFATMABKK, KFATMABKK_0_A,
-    KFATMABKK_1_A, KFBAKL, KFBBLSU, KFHSTT_0_A, KFHSTT_1_A, KFLRSTAU, KFNSA_0_A, KFNSA_1_A,
-    KFNSWRL_0_A, KFNSWRL_1_A, KFNWEGM_0_A, KFNWEGM_1_A, KFVAKL, KFWDKSST, KFWKSTT_0_A,
-    KFWKSTT_1_A, KFWWLML, LRSZAML, MLOAKEV, MLUAKEV, NSTOEL, PVLDNEZKH, SGIDB1, SGIDB2, SGIDB3,
-    SGIDB4, SGIDB5, SGIDB6, SGIDB7, SGIDB8, SGIDB9, SGIDK1_DAT, SNM05NWUB, STA10LDUB, STW08MDUB,
-    SUV07MDUB, TVPLMSA]}
+    KFATMABKK_1_A, KFBBLSU, KFHSTT_0_A, KFHSTT_1_A, KFLRSTAU, KFNSA_0_A, KFNSA_1_A, KFNSWRL_0_A,
+    KFNSWRL_1_A, KFNWEGM_0_A, KFNWEGM_1_A, KFWDKSST, KFWKSTT_0_A, KFWKSTT_1_A, KFWWLML, LRSZAML,
+    MLOAKEV, MLUAKEV, NSTOEL, PVLDNEZKH, SGIDB1, SGIDB2, SGIDB3, SGIDB4, SGIDB5, SGIDB6, SGIDB7,
+    SGIDB8, SGIDB9, SGIDK1_DAT, SNM05NWUB, STA10LDUB, STW08MDUB, SUV07MDUB, TVPLMSA]}
 - {bits: 8, signed: true, names: [
     ATVINI, ATVINI2, ATVMN, ATVMX, ATVVHO, ATVVHU, DELTATA, DFTEAHB, DLAMATRD, DLAMATS, DLAMKRM,
     DLATRNP, DLUL, DMDGENAB, DMTSMN, DMTSMX, DMXRDL, DMXRFL, DMXRLU, DNDLLRU, DNDTEO, DNDTEU,
@@ -843,7 +842,7 @@
 - {bits: 8, rows: 1, cols: 3, parts: [4B0906018CM], names: [FKAXAVKAT]}
 - {bits: 8, rows: 1, cols: 3, parts: [4B0906018CM, 8N0906018BB], names: [
     SDZ03DMUB, SDZ03DMUB2, SDZ03DMUB3, SRL03KRUB]}
-- {bits: 8, rows: 1, cols: 3, parts: [8D0907558E, 8D0907558M], names: [ATMTANS]}
+- {bits: 8, rows: 1, cols: 3, parts: [8D0907558E], names: [ATMTANS]}
 - {bits: 8, rows: 1, cols: 3, ordinal: true, parts: [06A906032HF], names: [
     FNWSKRE, KLTNRDE, NNSTA, NSTNM, TMODT]}
 - {bits: 8, rows: 1, cols: 3, ordinal: true, parts: [8D0907551F], names: [
@@ -854,9 +853,8 @@
 - {bits: 8, rows: 1, cols: 4, parts: [4B0906018CM, 8N0906018BB], names: [
     FHO04ESUB, SEZ04LLUB, SLD04LDUB, SRL04KRUB, STK04SAUB, STM04FEUB, STM04SAUB]}
 - {bits: 8, rows: 1, cols: 4, parts: [8D0907551F], names: [NSTOEL]}
-- {bits: 8, rows: 1, cols: 4, parts: [8D0907558E], names: [WPHN, ZATMKML]}
-- {bits: 8, rows: 1, cols: 4, parts: [8D0907558E, 8D0907558M], names: [
-    FATMRML, TLRBAM, TLRTMS, TLRVAM, WEESTM, ZATMAML, ZATMRML, ZBALM, ZVALM]}
+- {bits: 8, rows: 1, cols: 4, parts: [8D0907558E], names: [
+    FATMRML, TLRBAM, TLRTMS, TLRVAM, WEESTM, WPHN, ZATMAML, ZATMKML, ZATMRML, ZBALM, ZVALM]}
 - {bits: 8, rows: 1, cols: 4, ordinal: true, parts: [06A906032HF], names: [
     FKRXTOL, FLTEFUEL, FMRFAZTE, FNSHO, FNWTME, FSTHO, FSWALUV, FTMLAKH, KLDNFHO, KLFRTMKI,
     KLITHMS, LASTMOT, LMSTMOT, LURKH, NASNOTKL, NSLPP, NSLPPFS, NZHDTL, NZHITL, RLSLSMN,
@@ -868,7 +866,7 @@
 - {bits: 8, rows: 1, cols: 5, parts: [06A906032S, 8D0907551G], names: [TVSATM]}
 - {bits: 8, rows: 1, cols: 5, parts: [4B0906018CM, 8N0906018BB], names: [
     SFR05TEUB, SNM05NWUB, SQM05TEUB, STM05SAUB, STM05TMUB, STU05TMUB]}
-- {bits: 8, rows: 1, cols: 5, parts: [8D0907558E, 8D0907558M], names: [TVUB, WEAN]}
+- {bits: 8, rows: 1, cols: 5, parts: [8D0907558E], names: [TVUB, WEAN]}
 - {bits: 8, rows: 1, cols: 5, parts: [8N0906018BB], names: [
     SML05DKUB_0_A, SML05DKUB_1_A, SNM05DKUB_0_A, SNM05DKUB_1_A]}
 - {bits: 8, rows: 1, cols: 5, ordinal: true, parts: [06A906032HF], names: [
@@ -888,7 +886,7 @@
     SRL06GKUB, SRL06KOUB, SRL06KRUB, STA06ESUB, STA06LLUB, STM06LLUB, STM06__UB, STN06LLUB,
     SVF06D_UB]}
 - {bits: 8, rows: 1, cols: 6, parts: [8D0907551F], names: [PVDNKH]}
-- {bits: 8, rows: 1, cols: 6, parts: [8D0907558E, 8D0907558M], names: [REDZEM, WEEM, WEESTN]}
+- {bits: 8, rows: 1, cols: 6, parts: [8D0907558E], names: [REDZEM, WEEM, WEESTN]}
 - {bits: 8, rows: 1, cols: 6, ordinal: true, parts: [06A906032HF], names: [
     DKLDPN, DKTLMT, DMARMX, DMDLWS, FABMDWA, FBTEB, FBTEVA, FKZDPTM, FMDGENTA, FMDPUBKV,
     FNSSTKM, FNSSTM, FPLMRM, FPUPT, FQTEVA, FUKNSTHO, FVERMN, FWEMRFA, KLFNWA, KLFNWE, LAMFAS,
@@ -898,7 +896,7 @@
 - {bits: 8, rows: 1, cols: 7, parts: [4B0906018CM], names: [RLLAMMN, SUV07MDUB]}
 - {bits: 8, rows: 1, cols: 7, parts: [4B0906018CM, 8N0906018BB], names: [
     SNM07ESUB, ST107TMUB, ST307TMUB]}
-- {bits: 8, rows: 1, cols: 7, parts: [8D0907558E, 8D0907558M], names: [FUKNSTM]}
+- {bits: 8, rows: 1, cols: 7, parts: [8D0907558E], names: [FUKNSTM]}
 - {bits: 8, rows: 1, cols: 7, ordinal: true, parts: [4Z7907551R], names: [SUV07MDUB]}
 - {bits: 8, rows: 1, cols: 7, ordinal: true, parts: [8N0906018BB], names: [SGIDB6]}
 - {bits: 8, rows: 1, cols: 8, parts: [06A906032S], names: [
@@ -1063,7 +1061,7 @@
     KFHSTT_0_A, KFHSTT_1_A, KFNSA_0_A, KFNSA_1_A]}
 - {bits: 8, rows: 6, cols: 4, parts: [4B0906018CM], names: [KFWLHO]}
 - {bits: 8, rows: 6, cols: 4, parts: [4B0906018CM, 8N0906018BB], names: [KFDETATE]}
-- {bits: 8, rows: 6, cols: 4, parts: [8D0907558E, 8D0907558M], names: [KFWEE]}
+- {bits: 8, rows: 6, cols: 4, parts: [8D0907558E], names: [KFWEE]}
 - {bits: 8, rows: 6, cols: 4, ordinal: true, parts: [06A906032HF], names: [KFDETATE]}
 - {bits: 8, rows: 6, cols: 5, parts: [06A906032HS, 06A906032LP], names: [
     KFATMABKA_0_A, KFATMABKA_1_A, KFATMABKK_0_A, KFATMABKK_1_A]}
@@ -1071,7 +1069,7 @@
 - {bits: 8, rows: 6, cols: 5, ordinal: true, parts: [06A906032HF], names: [KFMDGEN]}
 - {bits: 8, rows: 6, cols: 6, parts: [4Z7907551R], names: [KFUSHK_0_A, KFUSHK_1_A]}
 - {bits: 8, rows: 6, cols: 6, parts: [4Z7907551R, 8D0907551F], names: [KFFWLW]}
-- {bits: 8, rows: 6, cols: 6, parts: [8D0907558E, 8D0907558M], names: [KFMLDMX]}
+- {bits: 8, rows: 6, cols: 6, parts: [8D0907558E], names: [KFMLDMX]}
 - {bits: 8, rows: 6, cols: 6, ordinal: true, parts: [06A906032HF], names: [
     KFBALB, KFGNSOL, KFKSWF_0_A, KFKSWF_1_A, KFWHSTT_0_A, KFWHSTT_1_A]}
 - {bits: 8, rows: 6, cols: 6, ordinal: true, parts: [4Z7907551R, 8D0907551F], names: [REDABM]}
@@ -1090,7 +1088,7 @@
 - {bits: 8, rows: 6, cols: 15, ordinal: true, parts: [06A906032HF], names: [LAMFA]}
 - {bits: 8, rows: 7, cols: 9, parts: [06A906032HF, 4B0906018CM, 8N0906018BB], names: [
     KFABAK, KFAVAK]}
-- {bits: 8, rows: 7, cols: 9, parts: [06A906032HF, 8D0907558E, 8D0907558M, 8N0906018BB], names: [
+- {bits: 8, rows: 7, cols: 9, parts: [06A906032HF, 8D0907558E, 8N0906018BB], names: [
     KFBAKL, KFVAKL]}
 - {bits: 8, rows: 7, cols: 9, parts: [4B0906018CM], names: [
     KFBAKL_0_A, KFBAKL_1_A, KFVAKL_0_A, KFVAKL_1_A]}
@@ -1104,7 +1102,7 @@
 - {bits: 8, rows: 8, cols: 6, parts: [06A906032HS, 4B0906018CM, 8N0906018BB], names: [KFMDWMX]}
 - {bits: 8, rows: 8, cols: 6, parts: [4B0906018CM], names: [KFWHSTT_0_A, KFWHSTT_1_A, KFWWLML]}
 - {bits: 8, rows: 8, cols: 6, parts: [4Z7907551R], names: [KFNSWRL_0_A, KFNSWRL_1_A]}
-- {bits: 8, rows: 8, cols: 6, parts: [8D0907558E, 8D0907558M], names: [KFTSDYN]}
+- {bits: 8, rows: 8, cols: 6, parts: [8D0907558E], names: [KFTSDYN]}
 - {bits: 8, rows: 8, cols: 6, parts: [8N0906018BB], names: [KFFRTMKI]}
 - {bits: 8, rows: 8, cols: 6, ordinal: true, parts: [06A906032HF], names: [
     KFDFBTMN, KFDFBTMP, KFMDWMX]}
@@ -1122,8 +1120,6 @@
 - {bits: 8, rows: 9, cols: 5, parts: [06A906032LP], names: [KFVALDIF]}
 - {bits: 8, rows: 9, cols: 5, parts: [4B0906018CM, 8N0906018BB], names: [KFTEVP]}
 - {bits: 8, rows: 9, cols: 5, ordinal: true, parts: [06A906032HF], names: [KFTEVP]}
-- {bits: 8, rows: 9, cols: 7, parts: [06A906032HS, 06A906032LP, 06A906032S, 8D0907551F], names: [
-    KFBAKL, KFVAKL]}
 - {bits: 8, rows: 10, cols: 4, parts: [06A906032HS, 06A906032LP], names: [PVLDNEZ, PVLDNEZV]}
 - {bits: 8, rows: 10, cols: 4, parts: [06A906032HS, 06A906032LP, 4Z7907551R], names: [PVLDNEZKH]}
 - {bits: 8, rows: 10, cols: 5, parts: [8D0907558E], names: [KFKEF1, KFKEF2, KFKEF3, KFKEF4]}
@@ -1157,7 +1153,7 @@
 - {bits: 8, rows: 16, cols: 12, parts: [06A906032HS, 4B0906018CM, 8N0906018BB], names: [KFLF]}
 - {bits: 8, rows: 16, cols: 12, ordinal: true, parts: [06A906032HF], names: [KFLF]}
 - {bits: 8, rows: 16, cols: 16, parts: [4B0906018CM], names: [KFDYMNT]}
-- {bits: 8, rows: 16, cols: 16, parts: [8D0907558E, 8D0907558M], names: [KFLF]}
+- {bits: 8, rows: 16, cols: 16, parts: [8D0907558E], names: [KFLF]}
 - {bits: 8, xsigned: true, rows: 8, cols: 8, parts: [4D1907558], names: [KFMIZUFIL, KFMIZUNS]}
 - {bits: 8, xsigned: true, rows: 12, cols: 12, parts: [4D1907558], names: [KFWDKPP]}
 - {bits: 8, signed: true, parts: [06A906032S, 8D0907551F, 8D0907551G], names: [

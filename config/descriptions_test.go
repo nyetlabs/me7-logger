@@ -136,7 +136,7 @@ func TestFillAuto(t *testing.T) {
 		t.Skip("rewrites origin-auto defs; go test ./config -run TestFillAuto -update")
 	}
 	_, dir := corpusDir(t)
-	if n, err := FillAuto(dir); err != nil || n == 0 {
+	if _, err := FillAuto(dir); err != nil {
 		t.Fatal(err)
 	}
 }

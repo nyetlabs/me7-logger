@@ -156,7 +156,11 @@ function joined(string $name, array $vehicles, array $families, array $grades): 
 		return null;
 	}
 	$v = $vehicles[$name];
-	$g = $grades[$name] ?? ['', '', ''];
+	$g = $grades[$name] ?? ['-', '-', ''];
+	if (($g[2] ?? '') === 'DAMOS') {
+		$g[0] = '-';
+		$g[1] = '-';
+	}
 	return [$fam, $v['engine'], $v['code'], $v['vehicle'], $v['year'], $v['gearbox'], $v['market'], $g[0], $g[1], $g[2]];
 }
 
@@ -455,7 +459,7 @@ $cols = [
 </script>
 <h2>Stage</h2>
 <ul>
-<li>1, 2, 3-, 3, then 3+. An open stage 1 is <code>-</code>. Blank when the image is not in the locate set (for example M3.8 / M5.9). <code>-</code> for <code>DAMOS</code>.</li>
+<li>1, 2, 3-, 3, then 3+. An open stage 1 is <code>-</code>. <code>-</code> when the image is not in the locate set (for example M3.8 / M5.9), and for <code>DAMOS</code>.</li>
 </ul>
 <h2>Source</h2>
 <ul>
@@ -467,8 +471,8 @@ $cols = [
 </ul>
 <h2>Confidence</h2>
 <ul>
-<li>How many located tuner bodies hold up (monotonic axes, peer agreement). Shown for <code>auto</code>, <code>matched</code>, <code>manual</code>, and <code>verified</code>.</li>
-<li><code>-</code> for <code>DAMOS</code>: that file is the oracle; stage and confidence are not locate scores for it.</li>
+<li>How many located tuner bodies hold up (monotonic axes, peer agreement). Shown for <code>auto</code>, <code>matched</code>, <code>manual</code>, and <code>verified</code> in the locate set.</li>
+<li><code>-</code> outside that set, and for <code>DAMOS</code>: those columns are not a locate score.</li>
 </ul>
 <h2>Inside a zip</h2>
 <ul>

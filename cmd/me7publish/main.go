@@ -54,7 +54,7 @@ Usage:
 
 stage builds one IMAGE-DATE.zip per corpus definition into --stage, and
 writes vehicles.json for the download page. Source comes from each
-definition's provenance. Stage and confidence are - for DAMOS. See publish/README.md.
+definition's provenance. Stage and confidence are - outside the locate set, and for DAMOS. See publish/README.md.
 
 `, version)
 }

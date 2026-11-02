@@ -26,7 +26,7 @@ index.php, and writes vehicles.json. DATE is YYYYMMDD from the last
 non-chore(schema) commit of the definition (and categories.json for ME7),
 else the file mtime. KP, CSV, and XDF come from xdfkit. Source is each
 definition's provenance. Stage and confidence are locate grades; both
-are - for DAMOS.
+are - outside the locate set, and for DAMOS.
 `
 
 func cmdStage(args []string) error {
@@ -406,14 +406,15 @@ func writeVehiclesJSON(path string, c *ecucorpus.Corpus, vehicles map[string]veh
 			missing = true
 			continue
 		}
-		g := grades[name]
+		g, scored := grades[name]
 		// Source is always the definition's provenance, including images
-		// me7info cannot score. Stage and confidence are locate grades;
-		// "-" for DAMOS (canonical), where those are not trust of the file.
+		// me7info cannot score. Stage and confidence are locate grades.
+		// "-" outside the locate set, and for DAMOS (canonical): those
+		// columns are not a locate score.
 		if p, err := readProvenance(c.Def(name)); err == nil && p != nil {
 			g.source = parity.SourceClass(p)
 		}
-		if g.source == "DAMOS" {
+		if !scored || g.source == "DAMOS" {
 			g.stage = "-"
 			g.conf = "-"
 		}
