@@ -90,6 +90,24 @@ func TestScales(t *testing.T) {
 	if v, ok := Conversion("KFFWL_0_A", "x", 8, 0); !ok || v.Units != "Grad C" || v.Conversion.Factor != 0.75 {
 		t.Fatalf("KFFWL_0_A x %+v %v", v, ok)
 	}
+	if v, ok := Conversion("KFFWL_0_A", "x", 16, 0); !ok || v.Units != "U/min" || v.Conversion.Factor != 0.25 {
+		t.Fatalf("KFFWL_0_A x 16 %+v %v", v, ok)
+	}
+	if v, ok := Conversion("KFFWL_1_A", "x", 16, 0); !ok || v.Units != "U/min" || v.Conversion.Factor != 0.25 {
+		t.Fatalf("KFFWL_1_A x 16 %+v %v", v, ok)
+	}
+	if _, ok := Conversion("KFFWL_0_A", "y", 16, 0); ok {
+		t.Fatal("KFFWL_0_A y 16")
+	}
+	if _, ok := Conversion("KFFWL_0_A", "z", 16, 0); ok {
+		t.Fatal("KFFWL_0_A z 16")
+	}
+	if _, ok := Conversion("KFFWL", "x", 16, 0); ok {
+		t.Fatal("KFFWL x 16")
+	}
+	if _, ok := Conversion("KFFWL", "z", 16, 0); ok {
+		t.Fatal("KFFWL z 16")
+	}
 	if v, ok := Conversion("MLHFM", "x", 16, 0); !ok || v.Units != "V" || v.Conversion.Factor != 640.0/0x10000 {
 		t.Fatalf("MLHFM x %+v %v", v, ok)
 	}
@@ -171,7 +189,7 @@ func TestStorage(t *testing.T) {
 		{"KFLDRL", "", Cell{16, true, 16, 10, false, false}, true},
 		{"LDRXN", "", Cell{16, false, 1, 16, false, false}, true},
 		{"MLHFM", "", Cell{16, false, 1, 512, true, false}, true},
-		{"KFTARX", "", Cell{16, false, 0, 0, false, false}, true}, // unsized: defs disagree on shape
+		{"KFTARX", "", Cell{16, false, 12, 10, false, false}, true},
 		{"KRKTE", "06A906032S", Cell{8, false, 1, 1, false, false}, true},
 		{"KRKTE", "8D0907551M", Cell{16, false, 1, 1, false, false}, true},
 		{"KFDMDADP", "8D0907551L", Cell{16, false, 6, 8, false, true}, true}, // x axis monotonic only when signed

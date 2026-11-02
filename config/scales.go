@@ -771,9 +771,9 @@ type scaleGroup struct {
 	z, x, y        []string
 }
 
-// heldMaps is a maps row the cluster did not store. A name the cluster
-// stores is left out, so the next rebuild keeps only the rows still written
-// by hand.
+// heldMaps is a name the cluster did not store. A maps row stays a maps
+// row. A name on a unit row is merged back onto that row. A name the
+// cluster stores is left out.
 func heldMaps(hands []handUnit, rows []scaleRow) []scaleRow {
 	have := map[scaleKey]bool{}
 	for _, r := range rows {
@@ -781,9 +781,6 @@ func heldMaps(hands []handUnit, rows []scaleRow) []scaleRow {
 	}
 	var out []scaleRow
 	for _, h := range hands {
-		if !h.maps {
-			continue
-		}
 		bits := handBits(h)
 		add := func(role string, names []string) {
 			for _, n := range names {
@@ -821,8 +818,8 @@ func formatUnits(rows []scaleRow) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	// A maps row the cluster did not store stays in the file. A name the
-	// cluster stores is left to that cluster.
+	// A name the cluster did not store stays. A name the cluster stores is
+	// left to that cluster.
 	rows = append(rows, heldMaps(hands, rows)...)
 	var keep []handUnit
 	for _, h := range hands {

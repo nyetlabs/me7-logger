@@ -102,16 +102,17 @@ units:
 - {bits: 8, unit: "Upm", factor: 40, min: 0, max: 10200, precision: 1, z: [
     KRANH, LDHIA, NASNOTKL, NDLDRAPU, NLDIAPU, NWPMBBR], x: [
     DWKRMSN, FKKVS, KFFWTBR, KFLBTS_0_A, KFMDZOF_UM, KFMIZUFIL, KFMIZUNS, KFMIZUOF, KFMI_UM,
-    KFMPED_UM, KLDMASRL, KRALH, KRANH, KRFKLN, LAMFA, LDORXN, LDPBN, LDRQ0DY, LDRQ1DY, LDRQ1ST,
-    RLSALUN, TLDIAPN, WDKUGDN], y: [
-    FKKVS, FZWWLRLN, KFDLULS, KFFWLW, KFKHFM, KFLAMKR, KFLDHBN, KFLDIOPU, KFLDRAPP, KFLDRQ2,
-    KFLDRXO, KFLF, KFMLDMX, KFNW, KFNWWL, KFTSRL, KFVPDKLD, KFZW, KFZW2, KFZWWLNM, LAMFA]}
+    KFMLDMX, KFMPED_UM, KLDMASRL, KRALH, KRANH, KRFKLN, LAMFA, LDORXN, LDPBN, LDRQ0DY, LDRQ1DY,
+    LDRQ1ST, RLSALUN, TLDIAPN, WDKUGDN], y: [
+    FKKVS, FZWWLRLN, KFDLULS, KFFWLW, KFKHFM, KFLAMKR, KFLDHBN, KFLDIOPU, KFLDRAPP, KFLDRQ1,
+    KFLDRQ2, KFLDRXO, KFLF, KFMLDMX, KFNW, KFNWWL, KFTSRL, KFVPDKLD, KFZW, KFZW2, KFZWWLNM,
+    LAMFA]}
 - {bits: 8, unit: "grad C", factor: 3/4, offset: 48, min: -48, max: 143.25}
 - {bits: 8, unit: "grad KW", factor: 3/4, precision: 3, z: [
     KFZW, KFZW2, KFZWOP, KFZWOP2, KFZWWLNM]}
 - {bits: 8, unit: "hPa", factor: 10, precision: 1, z: [
     DPUPS, EDLDRP, LDEIAP, LDPBN, UMDYLDR], x: [
-    KFDLULS, KFLDRQ2]}
+    KFDLULS, KFLDRQ1, KFLDRQ2]}
 - {bits: 16, unit: "", factor: 1/4}
 - {bits: 16, unit: "%", factor: 100/0x10000, precision: 4, z: [
     KFDMDADP, KFDMDARO, KFMIOP, KFWDKMSN, WDKUGDN], x: [
@@ -122,8 +123,8 @@ units:
 - {bits: 16, unit: "rpm", factor: 1/4, min: 0, max: 16383.75}
 - {bits: 16, unit: "U/min", factor: 1/4, min: 0, max: 16383.75, precision: 3, z: [
     DNMAXH, NMAX, NMAXF, NMAXOG, SNM16OPUW], x: [
-    KFMLDMX, KFMSNWDK, KFPED, KFPEDR, KFPEDR_0_A, KFPEDR_1_A, KFPED_0_A, KFPED_1_A, KFPRG,
-    KFTARX, KFTARXZK, KFURL, KFWDKMSN, KFWPLGTA, LDRXN, LDRXNZK], y: [
+    KFFWL_0_A, KFMLDMX, KFMSNWDK, KFPED, KFPEDR, KFPEDR_0_A, KFPEDR_1_A, KFPED_0_A, KFPED_1_A,
+    KFPRG, KFTARX, KFTARXZK, KFURL, KFWDKMSN, KFWPLGTA, LDRXN, LDRXNZK], y: [
     KFFLLDE, KFLDIMX, KFLDRL, KFMIOP, KFMIRL, KFMRES, KFMRESK, KFPBRK, KFPBRKNW, KFTARX,
     KFTARXZK, KFVPDKSD, KFVPDKSE, KFVPLGU, KFWPLGTA, KFZW, KFZW2, KFZWOP, KFZWOP2]}
 - {bits: 16, unit: "hPa", factor: 5/128, precision: 4, z: [
@@ -155,7 +156,6 @@ units:
 - {bits: 8, unit: "V", factor: 22/312.5, precision: 4, maps: true, x: [TVUB]}
 - {bits: 8, unit: "cm^3/min", factor: 390/128, precision: 2, maps: true, z: [KVB]}
 - {bits: 8, unit: "dez", factor: 1, maps: true, z: [CDHSH, CDLSH, CDTES]}
-- {bits: 8, unit: "grad DK", factor: 0.4335460599334073, precision: 3, maps: true, x: [KFMLDMX]}
 - {bits: 8, unit: "grad KW", factor: -3/4, precision: 4, maps: true, z: [
     DWKRMSN, KRFKLN], y: [
     KFLAMKRL]}

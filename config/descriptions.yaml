@@ -26,6 +26,8 @@
   description: Abgastemperaturschwelle für Signalunterbrechung mit Ri-Diagnose hinter KAT
 - name: ABGMSIGV
   description: Abgastemperaturschwelle für Signalunterbrechung mit Ri-Diagnose vor KAT
+- name: ABKKATTAB
+  description: Abkühlkurve in Abhängigkeit von der Abstellzeit
 - name: ABOINI
   description: Init-Wert  Start-Zähler für Erkennung Benzin im Öl
 - name: ABOLRAR
@@ -1659,9 +1661,9 @@
 - name: CDWKOB
   description: 'Codewort : Auswahl zur Gangerkennung für KO-Auschalten ( gangi oder nmot/vfzw)'
 - name: CDWKOB_0_A
-  description: 'Codewort: Auswahl zur Gangerkennung für KO-Ausschalten (gangi oder nmot/vfzw)'
+  description: 'Codewort : Auswahl zur Gangerkennung für KO-Auschalten ( gangi oder nmot/vfzw)'
 - name: CDWKOB_1_A
-  description: 'Codewort: Auswahl zur Gangerkennung für KO-Ausschalten (gangi oder nmot/vfzw)'
+  description: 'Codewort : Auswahl zur Gangerkennung für KO-Auschalten ( gangi oder nmot/vfzw)'
 - name: CDWVERAD
   description: 'Codeword: blocking of adaptation requirements dmvadll for AG'
 - name: CFRA
@@ -2154,6 +2156,8 @@
   description: Codewort Zwangseinschaltung LR gemäß CARB-Forderung
 - name: CLSDKH
   description: Codewort für LSD-Abschaltung bei Kat. heizen
+- name: CMVKAT
+  description: Produkt aus Masse und Wärmekapazität des Frontkats
 - name: CNFKUPPL
   description: Konfigurationsflag für die Auswertung des Kuplg.schalters in der LLR
 - name: CNFLLRNS
@@ -2313,7 +2317,7 @@
 - name: CWDHLSH
   description: Codewort in DHLSHK
 - name: CWDKATSP
-  description: Codewort Katalysatordiagnose %DKATSP
+  description: Codewort Katalysardiagnose, funktionsintern
 - name: CWDKRNT
   description: 'Codewort: KR-Diagnose Integratorsteigung'
 - name: CWDKROF
@@ -3017,7 +3021,7 @@
 - name: CWGGFGRH
   description: Codewort  GGFGRH
 - name: CWGGLSH
-  description: Codeword für Ri-Auswertung für Sonde hinter KAT (Heizung nicht voll ein)
+  description: Codeword für Ri-Auswertung für Sonde hinter KAT
 - name: CWGGLSU
   description: Codewort für GGLSU
 - name: CWGGLSV
@@ -3228,6 +3232,8 @@
   description: Codewort BGRBS
 - name: CWREFI
   description: 'Codewort: Neuinitialisierung von rkr mit REFINI bei Dynamik'
+- name: CWREGDS
+  description: Codewort Dauerstrichregelung
 - name: CWRLAPPL
   description: Codewort Vorgabe rlsol_w während Applikationsphase
 - name: CWRLMX
@@ -3623,7 +3629,7 @@
 - name: DLAHISATU
   description: untere Grenze für dlahisa, CARB-Tester, DLSSALRS
 - name: DLAHPPLMN
-  description: minimale DLAHP-Schwelle zum Setzen des Plausfehlers ""B""
+  description: minimale DLAHP-Schwelle zum Setzen des Plausfehlers "B"
 - name: DLAMATRD
   description: Offset Delta-Lambda bei Bankdifferenz
 - name: DLAMATS
@@ -4001,7 +4007,7 @@
 - name: DNBURN1_1_A
   description: Minimaler Drehzahlanstieg für erkannte Verbrennung im Bereich 1
 - name: DNBURN2
-  description: Minimaler Drehzahlanstieg für erkannte Verbrennung
+  description: Minimaler Drehzahlanstieg für erkannte Verbrennung im Bereich 2
 - name: DNBURN2_0_A
   description: Minimaler Drehzahlanstieg für erkannte Verbrennung im Bereich 2
 - name: DNBURN2_1_A
@@ -4013,9 +4019,9 @@
 - name: DNDLLRMX
   description: Nsoll-Nist-Schwelle bei Unterdrehzahl für Diagnose Leerlaufsteller
 - name: DNDLLRO
-  description: Maxmimale Drehzahlabweichung (Unterdrehzahl) für Diagnose LLR
+  description: Maximale Drehzahlabweichung (Unterdrehzahl) für Diagnose LLR
 - name: DNDLLRU
-  description: Maxmimale Drehzahlabweichung (Überdrehzahl) für Diagnose LLR
+  description: Maximale Drehzahlabweichung (Überdrehzahl) für Diagnose LLR
 - name: DNDTEO
   description: obere Nsoll-Nist-Schwelle für Abbruch Diagnose TEV
 - name: DNDTEU
@@ -5635,7 +5641,7 @@
 - name: FKTDFET
   description: Faktor Fetteintrag für Referenzmessung der Katalysatordiagnose, Testerbetrieb
 - name: FKTDGTV
-  description: 'Katdiagnose: Faktor für temperaturgradientenabhängige Verzugszeit'
+  description: 'Katdiagnose: Faktor für Temperaturgradientenabhängige Verzugszeit'
 - name: FKTU.0
   description: Start (B2) Abregelung (Faktor < 1)
 - name: FKTU.1
@@ -6463,7 +6469,7 @@
 - name: FWL_AUG
   description: unterer Grenzwert Anpassung Faktor Warmlauf
 - name: FWMABGW
-  description: Faktor für Wärmemengen bei Wiederholstart Abgas
+  description: Faktor für Wärmemengen bei Wiederholstart für Taupunktende Abgas vor Vorkat
 - name: FWMABGW2
   description: Faktor für Wärmemengen bei Wiederholstart Abgas Bank2
 - name: FWMABGW_0_A
@@ -6471,7 +6477,7 @@
 - name: FWMABGW_1_A
   description: Faktor für Wärmemengen bei Wiederholstart für Taupunktende Abgas vor Vorkat
 - name: FWMKATW
-  description: Faktor für Wärmemengen bei Wiederholstart Kat für Taupunktende
+  description: Faktor für Wärmemengen bei Wiederholstart für Taupunktende hinter Hauptkat
 - name: FWMKATW2
   description: Faktor für Wärmemengen bei Wiederholstart Kat für Taupunktende Bank2
 - name: FWMKATW_0_A
@@ -7109,7 +7115,7 @@
 - name: KDLASHKI_1_A
   description: Kennlinie über dlashkm, Bewertungsfaktor für I-Anteil in der LRHK
 - name: KDLASHKP
-  description: Kennlinie über dlashkm, Bewertungsfaktor für P-Anteil in der LRHK
+  description: Kennlinie über dlashkm_w, Bewertungsfaktor für P-Anteil in der LRHK
 - name: KDLASHKP2
   description: Kennlinie über dlashkm, Bewertungsfaktor für P-Anteil in der LRHK, Bank 2
 - name: KDLASHKP_0_A
@@ -8070,10 +8076,14 @@
   description: Relatives Fahrerwunschmoment aus Fahrpedal für Rückwärtsgang
 - name: KFPEDR_1_A
   description: Relatives Fahrerwunschmoment aus Fahrpedal für Rückwärtsgang
+- name: KFPEDR_VAR1
+  description: KFPEDR for coding variant 1 (FA2E=1, coding 4th digit 8) - pointer table 0x17090[1]
 - name: KFPED_0_A
   description: Relatives Fahrerwunschmoment aus Fahrpedal
 - name: KFPED_1_A
   description: Relatives Fahrerwunschmoment aus Fahrpedal
+- name: KFPED_VAR1
+  description: KFPED for coding variant 1 (FA2E=1, coding 4th digit 8) - pointer table 0x1708C[1]
 - name: KFPLGUB
   description: Grundladedruck  für Basishöhe (Umgebungsdruck)
 - name: KFPLMR
@@ -10066,6 +10076,8 @@
   description: Mindestluftmasse bei Initial- u. Fortsetzungsspülung
 - name: MSTPKTU
   description: Kennlinie Massenstrom-Schwelle für Verzögerung Taupunktende hinter Kat
+- name: MTABGKH
+  description: mittlere Abgastemperatur während des Katheizens
 - name: MVER_T_UC
   description: Fehlerzeit beim Momentenvergleich im Befehlstest
 - name: MVER_T_UM
@@ -11189,7 +11201,7 @@
 - name: OPBKVUKPUB
   description: Offset zu DPBKVUKPU bei betätigter Bremse
 - name: OSCKTD
-  description: Diagnoseschwelle Sauerstoffspeicherfähigkeit des Katalysators
+  description: Schwelle Sauerstoffspeicherfähigkeit des Kats für Gut-Erkennung
 - name: OSCKTDNG
   description: Messbereich der normierten Sauerstoffspeicherfähigkeit des Katalysators
 - name: OSCKTDT
@@ -12816,6 +12828,8 @@
   description: Zeit für DK-Poti-Auswahl
 - name: TDKPWM
   description: Zeitdauer für TMOT-Ausgabe PWM-Ausgang
+- name: TDKUPNLLKH
+  description: Zeitverzug für umschalten auf seperate LL-Drehzahl nach Freigabe der Kupplung
 - name: TDKUPNOG
   description: Verzögerungszeit nach Gangwechsel bis erneute Gangwechselerk. möglich
 - name: TDLAMBTS
@@ -12988,6 +13002,8 @@
   description: Zeitverzögerung für Umschalten von Haupt- auf Nebenlastsignal
 - name: TDTA
   description: Entprellzeit Fehlererkennung TANS
+- name: TDTABGMK
+  description: Zeitverzögerung für modellierte Abgastemperatur bei Eintritt in den Katalysator
 - name: TDTAL
   description: TANS Fehlererkennung / Zeitsperre ab B_LL = 1
 - name: TDTAPL
@@ -13462,6 +13478,8 @@
   description: maximale Ausschaltzeit bei Vollast (über wped)
 - name: TKRF
   description: Flugzeit von Einspritzventil bis Einlassventil
+- name: TKSDLRSCTR
+  description: Entprellzeit Rücksetzen des Fehlerzählers
 - name: TKSTBFA
   description: Modell-Temperatur hinter Hauptkat Startwert bei B_faatm Anforderun
 - name: TKTDGRA
@@ -14238,6 +14256,8 @@
   description: Unterdrückungszeit des Kompressors nach dem Start
 - name: TNSTTL
   description: Zeit nach Start für Umschaltung auf HFM
+- name: TNSTZWG
+  description: Zeit nach Start bis zur Freigabe des Zündwinkels für NWS-Verstellung
 - name: TNSUB.0
   description: Wartezeit bis Freigabe Ubatt-Überwachung für Solldrehzahlanhebung
 - name: TNSUB.1
@@ -14962,6 +14982,10 @@
   description: Zeit bis Setzwertkorrektur nach Ende Verzögern
 - name: TSWKR
   description: Totzeit für Summen-ZW-Spätverstellabfrage
+- name: TSWZK
+  description: Entprellzeit für Erkennung Niederoktankraftstoff
+- name: TSWZKR
+  description: Entprellzeit für Erkennun !Nideroktankraftstoff
 - name: TTAPLC
   description: Frist für Plausibilitätscheck der Ansauglufttemperatur
 - name: TTBMH
@@ -17260,6 +17284,8 @@
   description: Zeitkonstante für die Abregelung des D-Anteils
 - name: ZKLSU
   description: Filterzeitkonst.für Nachbildung Dynamik der LSU-Keramiktemp. aus Abgastemp.v.Kat
+- name: ZKMDGEN
+  description: Zeitkonstante Generator-Lastabregelung
 - name: ZKMDKH
   description: Filterzeitkonstante bei Wechsel von Teillast nach LL und umgekehrt
 - name: ZKMDKO
