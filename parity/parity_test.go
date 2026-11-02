@@ -165,9 +165,13 @@ func TestReferenceHitPad(t *testing.T) {
 	if !referenceHit(record.Map{Name: "LAMFA", Addr: 0x2C}, []refRow{row}) {
 		t.Fatal("pad shifted body did not match")
 	}
+	// 8D0907551G: even X ends on our body; DAMOS listed the prior byte.
 	row.axes["x"] = axisSig{id: "x", addr: 0x20, count: 6, bits: 16}
+	if !referenceHit(record.Map{Name: "LAMFA", Addr: 0x2C}, []refRow{row}) {
+		t.Fatal("even axis ending on body did not match")
+	}
 	if referenceHit(record.Map{Name: "LAMFA", Addr: 0x2D}, []refRow{row}) {
-		t.Fatal("even axis matched one byte later")
+		t.Fatal("body past the axis end matched")
 	}
 }
 

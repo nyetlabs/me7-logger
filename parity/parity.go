@@ -1550,9 +1550,8 @@ type refRow struct {
 // referenceHit is true when this image has no XDF row of that name, or one row
 // has this body address. A DAMOS export lists a table whose axes are stored in
 // front of the body with no axis addresses, at the count header in front of
-// the first axis. A row whose 16-bit axis starts on the odd pad byte and whose
-// body starts where that axis ends is one byte early. The axes are scored on
-// their own.
+// the first axis. A row whose 16-bit axis ends on the DAMOS body, or on the
+// next byte (our body), is one byte early. The axes are scored on their own.
 func referenceHit(m record.Map, rows []refRow) bool {
 	if len(rows) == 0 {
 		return true
@@ -1564,18 +1563,25 @@ func referenceHit(m record.Map, rows []refRow) bool {
 			continue
 		}
 		seen = true
-		if row.addr == off || len(row.axes) == 0 && countHeader(m) == row.addr || padShifted(row) && row.addr+1 == off {
+		if row.addr == off || len(row.axes) == 0 && countHeader(m) == row.addr || earlyBody(row, off) {
 			return true
 		}
 	}
 	return !seen
 }
 
-// padShifted is true when a 16-bit axis of row starts on an odd address and
-// ends at the row body.
-func padShifted(row refRow) bool {
+// earlyBody is true when the DAMOS body is one byte before ours and a 16-bit
+// axis ends on either address (odd pad start, or even axis ending on ours).
+func earlyBody(row refRow, off uint32) bool {
+	if row.addr+1 != off {
+		return false
+	}
 	for _, a := range row.axes {
-		if a.bits == 16 && a.addr%2 == 1 && a.addr+uint32(2*a.count) == row.addr {
+		if a.bits != 16 {
+			continue
+		}
+		end := a.addr + uint32(2*a.count)
+		if end == row.addr || end == off {
 			return true
 		}
 	}
