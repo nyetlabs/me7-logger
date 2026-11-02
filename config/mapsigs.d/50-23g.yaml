@@ -1,0 +1,150 @@
+mapsigs:
+# 23g. F already stores KFZW from the caller. K and Q use DA00 B878.
+- {name: KFZW, pattern: 3D0FE6FCXXXXE6FDXXXXF2FE988DF2FFXXXXDA00B878, at: 4, xat: 16, yat: 12, also: [{name: SNS04ZUSB, add: -7}]}
+# 23g KFFLLDE. The E6 FC word and the DA80 slot differ on K and Q.
+- {name: KFFLLDE, pattern: F2F5888D8850E6FCXXXXE6FD0702E6FEXXXXE6FF0402DA80XXXX0804, at: 8, frame: true, yat: 2, also: [{name: KFFLDEO, add: -128}]}
+# 23g K and Q. The 42 F4 word after 74 F5 is 3CA3.
+- {name: FBSTABGM, pattern: 070242F4XXXX3D04E08574F53CA3, at: 4, add: 58, cols: 4, xbits: 16, also: [{name: SRL12GKUW, add: 114}]}
+# 23g. The caller names LDPBN on F. K and Q use this call.
+- {name: LDPBN, pattern: E6FCXXXXE6FD0602F2FE868DDA80XXXXF0945C89, frame: true, xat: 10, also: [{name: LDORXN, add: -8}, {name: LDRAPP, add: 145}, {name: NLLM, add: 648}]}
+# 23g K and Q. The prefix is 7455 and the second C2 word is 8118.
+- {name: KRALH, pattern: 7455C2F4A0F7E0154C54D7400602C2F48118, at: 16, add: 68}
+# 23g K and Q. The F7 word is 76A6. F keeps 70A6 on the row above.
+- {name: KFLDHBN, pattern: 060243F8XXXX9D040981F7F876A60D01BE4F, at: 4, add: 54, rows: 8, cols: 8}
+# 23g K and Q. The F2 word is EA0A and the two 42 F4 words are E60B and E40B.
+- {name: TABGBTS, pattern: EA0AD740070242F4E60BDD05D740070242F4E40BAD029F, at: 8, add: 94}
+# 23g K and Q. The jump-table words moved by 17F8. DPUPS is 29 bytes after the middle word.
+- {name: KUMSRL, pattern: 6224EA24842468255225, at: 4, add: 3, also: [{name: DPUPS, add: 29}]}
+# 23g. The C2 word is the MRESLL body. The cluster sits at fixed distances on F, K, and Q.
+- {name: MRESLL, pattern: C2F5XXXX5C65F6F5XXA7, at: 2, also: [{name: TDMRESLL, add: 1}, {name: MDSLPE, add: 8}, {name: TDMKO, add: 9}, {name: ZKMDKO, add: 10}, {name: ZKMDSLP, add: 11}, {name: NSLFAKAT, add: 12}, {name: NARAO, add: 19}, {name: NARASTG, add: 20}, {name: TVARSS, add: 30}, {name: TVKUPAR, add: 31}, {name: TVKUPHS, add: 32}, {name: TVKUPRS, add: 38}, {name: TZSPINI, add: 44}, {name: VARAU, add: 45}, {name: FGMIFAL, add: 47}, {name: FGZLSD, add: 55}, {name: KFWMIFAL, add: 73}, {name: KFWZLSD, add: 99}, {name: VLSD, add: 118}, {name: CWMDKOG, add: 119}, {name: CWTEZW, add: 120}, {name: CWZWVMX, add: 121}, {name: DELRL, add: 122}, {name: ETADZW, add: 127}, {name: ETALAM, add: 203}, {name: KFMRESTA, add: -32}]}
+# 23g. The second C2 F4 call is LDRXN. LDRXNZK is 66 bytes after that body.
+- {name: LDRXN, pattern: 0D12C2F4XXXX5C848840E6FCXXXXE6FD0702F2FE02F8DA80XXXX9820, at: 12, frame: true, add: 34, also: [{name: LDRXNZK, add: 100}]}
+# 23g. The third 928D call is LDRQ1ST. STV10LDSW is 34 bytes after it.
+- {name: STV10LDSW, pattern: E6FCXXXXE6FD0702F2FE928DDA80XXXXF6F4XXXXDA87, at: 2, frame: true, add: 34}
+# 23g K and Q. The C6 A7 call is the one F does not have. The body is KFDMDADP.
+# The frame 0x50 before it is KFDMDARO.
+- {name: KFDMDADP, pattern: F6F4C6A7D740E100F2F5E80B8850D740E100F2F24A098820E6FCXXXXE6FD0702, at: 26, frame: true}
+- {name: KFDMDARO, pattern: D740E100F2F54A098850E6FCD02AE6FD0702, at: 12, frame: true}
+# 23g K and Q. The F2 word is the axis.
+- {name: KIFZGAWG, pattern: 'F2F5[10/37][23/F3]F6F5[68/ED]A7F3F8[A8/FC]8A', at: 2}
+- {name: KIFZGHG_2_A, pattern: F2F59C2BF6F578A7F3F8AB8A, at: 2}
+# 23g K and Q. F keeps 80 DF on the row above. The F2 word is MLOFS and KFMSNWDK is 88 bytes later.
+- {name: KFMSNWDK, pattern: D8E8F2F3F8F842F368A09D10E003F062F073F2F45646E0052064, at: 20, add: 88, rows: 16, cols: 6, ybits: 16, xbits: 16}
+# 23g K and Q. The C2 word is KUMSRL. KFKHFM is 201 bytes before it. F keeps 8F 0C.
+- {name: KFKHFM, pattern: C2F4740C5C84F2F5084D1B54F2F20CFEB820A840, at: 2, add: -201, rows: 14, cols: 14}
+# 23g K and Q. The word is ADRONLOGIN. The other two logins are the next words.
+- {name: ADRONLOGIN, pattern: DA88DAE9DA88FCDEF2F48280F2F58480DC55, at: 16, also: [{name: GRAOFLOGIN, add: 2}, {name: GRAONLOGIN, add: 4}]}
+# C2 F4 word, then 6841 2D1B, then the F2 word.
+- {name: DWKRMSN, pattern: 'C2F4[00/48][1C/FC]68412D1BF2F4[22/B3][8A/EA]', add: 1}
+# AK and AS. The E6 FC word is 830C and the C2 FE word is B9F9.
+- {name: KFFWTBR, pattern: 8870E6FC830CE6FD0602C2FEB9F9, at: 4, frame: true, add: 20, cols: 8, rows: 10}
+# AK and AS. The E6 FC word is A723 and the C2 FF word is CE89.
+- {name: KFLDRAPP, pattern: 13B0E6FCA723E6FD0602C2FE9CF8C2FFCE89, at: 4, frame: true, add: 18, rows: 8, cols: 8}
+# 7C 14/15 call. The E6 FC word and the F2 word differ.
+- {name: LDPBN, pattern: '7C[14/FE]88[40/EF]E6FC[09/1F][22/FE]E6FD0602F2FE[58/7B]8C', at: 6, frame: true, xat: 14}
+# AK and AS. The E6 FC word is F216 and the C2 FE word is 7408.
+- {name: NLDIAPU, pattern: B980E6FCF216E6FD0A02D740E100C2FE7408, at: 4, frame: true, add: 3}
+# AK and AS. LDHIA is the byte before LDIATA. The E6 FC word is 1723 and the F2 word is 0C8D.
+- {name: LDIATA, pattern: D0848840E6FC1723E6FD0602F2FE0C8D, at: 6, frame: true, xat: 14, also: [{name: LDHIA, add: -1}]}
+# AK and AS. E6FD is 0080. The C2 FC word is 7B16.
+- {name: ZKWLAFWL, pattern: C2FC7B165C8CE6FD0080F0E4F2FFCAA2}
+# Page 0A02. The E6 FC, C2 FE, and C2 FF words differ.
+- {name: KFLDHBN, pattern: 'E6FC[02/0B]1XE6FD0A02C2FE[00/41]F8D740E100C2FF[0E/0E][08/EE]', frame: true, add: 18, rows: 8, cols: 8}
+# AK and AS. The 43 F8 word is 070F.
+- {name: DPUPS, pattern: 43F8070FFD03E11A75FA9EA1}
+# AK and AS. The E6 FC word is 681C.
+- {name: LDRXN, pattern: 0D0CE6FC681CE6FD0A02F2FE9EF8, at: 4, frame: true, add: 34, cols: 16, xbits: 16}
+# AK and AS. The E6 FC word is E51D. Page is 8E00.
+- {name: KFMIZUNS, pattern: 0C20E6FCE51DE6FD8E00, at: 4, xat: 12, yat: 16}
+# AK and AS. The E6 FC word is A51D and the F2 word is 1C8D.
+- {name: KFMIZUFIL, pattern: 0D0BE6FCA51DE6FD8E00F2FE1C8D, at: 4, xat: 12, yat: 16}
+# AK and AS. The E6 FC word is 251E.
+- {name: KFMIZUOF, pattern: B8A8E6FC251EE6FD8E00, at: 4, xat: 14}
+# AK and AS. The 43 F8 word is 821E.
+- {name: TMNSMN, pattern: 43F8821EED05F3FA718A}
+# AK and AS. The C2 F5 words are F31F and B9F9.
+- {name: KRALH, pattern: C2F5F31F2045C2F5B9F94054CD05}
+# AK and AS. The F7 F8 word is 2F09 and the E6 FC word is 4F2F.
+# AK and AS. The 14 points start 15 bytes before the body. The first point is 0.
+- {name: FWFTBRTA, pattern: 443DD740E100F7F82F09E6FC4F2F, at: 12, frame: true, add: 36, cols: 14}
+# AK and AS. The E6 FC word is 0820. KRANH is 17 bytes before that body.
+- {name: KRFKLN, pattern: 9A380DC0E6FC0820E6FD0602, at: 6, frame: true, xat: 18, also: [{name: KRANH, add: -17}]}
+# AK and AS. F2 F5 is the 12-point row. F2 F4 in front of it is the column.
+- {name: KFWPLGTA, pattern: F2F4188D8840F2F5148D8850C2F22EFA5C12C2F336FA00325C23D4C39C4DD4D39E4DE6FE3801, at: 28, deref: 1, dereffar: true, cols: 12, rows: 12, xat: 2, yat: 8}
+# Page 0702. The C2 FC, E6 FD, and F6 F4 words differ.
+# 551H and 551J. 4Z7 B and C share the word. CLAHSHE is 63 bytes past CLAATR.
+# 551H and 551J. 4Z7 B and C share the word. Page is 0702.
+- {name: KRKTE, pattern: D7400702C2FC3C02, at: 6}
+# AK and AS. The first call is KFMRESK. Both name a 6 by 4 map.
+- {name: KFMRESK, pattern: 9D0CE6FC931AE6FD2C38F2FED68CF2FFD08CDA00CC2A, at: 4}
+- {name: KFMRES, pattern: 0D0BE6FC7B1AE6FD2C38F2FED68CF2FFD08CDA00CC2A, at: 4}
+# AK and AS. The E6 FC word is B50D. The body is 30 bytes past the frame.
+- {name: KFLF, pattern: 06F480018840E6FCB50DE6FD0602C2FE9CF8C2FFB9F9DA83243F, at: 8, frame: true, add: 30, rows: 12, cols: 16}
+# The D4 C2 word is the far-pointer table. The F2 F4 word is the axis.
+- {name: KFFWL_0_A, pattern: 'F2F4XXXX8840F2F5XXXX8850C2F2[33/F3]FA5C22D4C2XXXXD4D2XXXXE6FEXXXXE6FF0602DA834445', at: 20, deref: 1, dereffar: true, xat: 2, rows: 8, cols: 6, xbits: 16, yord: true, bits: 16}
+- {name: KFFWL_1_A, pattern: 'F2F4XXXX8840F2F5XXXX8850C2F2[33/F3]FA5C22D4C2XXXXD4D2XXXXE6FEXXXXE6FF0602DA834445', at: 20, deref: 1, derefat: 4, dereffar: true, xat: 2, rows: 8, cols: 6, xbits: 16, yord: true, bits: 16}
+# AK, AS, and AA. The frame is the 12 by 10 map.
+- {name: KFTARX, pattern: '[91/91][00/C0]E6FF0602DA8344450804C4400C000D13F2F4[00/65][A4/FC]8840F2F5[C0/D1]8C8850E6FC[00/05][00/E0]', at: 32, frame: true}
+# AK and AS class bits. Page is 0602. CDLSH is bit 0x10, CDHSHE is bit 0x80, CDLSHV is the next byte.
+- {name: CDLSH, pattern: 64F4168CD7400602C2F4AB0168412D05E6F41000, at: 10}
+- {name: CDHSHE, pattern: 64F4168CD7400602C2F49D0168412D05E6F48000, at: 10}
+- {name: CDLSHV, pattern: 64F4148CD7400602C2F4AC0168412D04E084, at: 10}
+# A0. The E6 FC word is 0D52. The body is 20 bytes past the frame.
+- {name: KFFWTBR, pattern: 8870E6FC520DE6FD0602C2FE95F4, at: 4, frame: true, add: 20, cols: 8, rows: 10}
+# A0. The E6 F4 word is 3793. Page is 0902.
+- {name: DLAMTANS, pattern: 5C548840C2F4C9878840E6F49337, at: 12, frame: true, cols: 4}
+# A0. LDHIA is the byte before LDIATA. The E6 FC word is 23A8 and the F2 word is 0EA4.
+- {name: LDIATA, pattern: D0848840E6FCA823E6FD0702D740E100F2FEA40E, at: 6, frame: true, xat: 18, also: [{name: LDHIA, add: -1}]}
+# A0. The E6 FC word is 22D9. The scalar is 3 bytes past the frame.
+- {name: NLDIAPU, pattern: B980E6FCD922E6FD0602D740E100F2FEEA0C, at: 4, frame: true, add: 3}
+# A0. fnwue is present, so the first slot-17 call is KFZWOP2 and the next is KFZWOP.
+- {name: KFZWOP2, pattern: F6F4AE98E6FC9C10E6FD946AF2FEF28BF2FFAA98DA00242B, at: 6, xat: 18, yat: 14}
+- {name: KFZWOP, pattern: F1E8E6FC4C11E6FD946AF2FEF28BF2FFAA98DA00242B, at: 4, xat: 16, yat: 12}
+# A0 lamfa window. The first E6 FC call is KFLAMKRL, then KFLAMKR, then KFLAFWL. The F2 word is the axis.
+- {name: KFLAMKRL, pattern: F2F5241188508840E6FC8614E6FD0602E6FEBF14E6FF0602DA80, at: 10, frame: true, xat: 2}
+- {name: KFLAMKR, pattern: F2F522118850E6FC6214E6FD0602E6FEBF14E6FF0602DA80, at: 8, frame: true, yat: 2}
+- {name: KFLAFWL, pattern: F2F526118850E6FC3214E6FD0602E6FEBF14E6FF0602DA80, at: 8, frame: true, yat: 2}
+# A0. The 8880 call is KFZW. The 47FA call is KFZW2. Both F2 words are the axes.
+- {name: KFZW, pattern: 8880887088602804E6FCC41DE6FD9C36F2FEF48BF2FFFE8BDA00242B, at: 10, xat: 22, yat: 18}
+- {name: KFZW2, pattern: 47FAFF003D0EE6FC4B1FE6FD9C36F2FEF48BF2FFFE8BDA00242B, at: 8, xat: 20, yat: 16}
+# A0. The C2 F5 word is 1C46. Page is 0602. The E1 38 copy is KRALH.
+- {name: KRALH, pattern: D7400602C2F5461C2045C2F595F44054CD05E138, at: 6}
+# A0. KRANH is 17 bytes before KRFKLN. The E6 FC word is 1C5C and the F2 word is 0CC0.
+- {name: KRFKLN, pattern: 9A4D0DA0E6FC5C1CE6FD0602D740E100F2FEC00C, at: 6, frame: true, xat: 18, also: [{name: KRANH, add: -17}]}
+# The 43 F8 word is the body. A0 and DC share the FD03 tail.
+- {name: DPUPS, pattern: '[D3/DB][40/47][06/3F][02/77]43F8[08/3B][0A/FB]FD03E11A75FA[C0/F1][85/E5]', at: 6}
+# A0. The 43 F8 word is 1357. The block is the DH TMNSMN call with that immediate.
+- {name: TMNSMN, pattern: 8A5734A0F3F8DF8743F85713ED05F3FAC987, at: 10}
+# A0 lbts window. The first 42 F4 word is 3950. Page is 0902.
+- {name: TABGBTS, pattern: D740090242F45039FD04E11875F8C187, at: 6}
+# A0. The E6 FC word is 38EC. Page is 0902. The body is 10 bytes past the frame.
+- {name: FBSTABGM, pattern: F6F47211E6FCEC38E6FD0902D740E100F2FE7E11, at: 6, frame: true, add: 10, cols: 4, xbits: 16}
+# A0 knock window. The first call is KFMIZUNS and the next is KFMIZUFIL. The F2 words are 952A and 952C.
+- {name: KFMIZUNS, pattern: 9A3D0C60E6FCDA09E6FDAC0AF2FE2A95F2FF2C95DA00, at: 6, xat: 14, yat: 18}
+- {name: KFMIZUFIL, pattern: CC2AF1C80D0BE6FC1A0AE6FDAC0AF2FE2A95F2FF2C95DA00, at: 8, xat: 16, yat: 20}
+# The short twin-call function. F2 F4 is the column and F2 F5 is the row.
+- {name: KFWPLGTA, pattern: 'F2F4[C4/E7][88/FC]8840D740E100F2F5[00/33][08/F9]8850E6FC[01/17]24E6FD0602E6FE5F00E6FF0402', at: 18, frame: true, xat: 2, yat: 12}
+# A0. The E6 FC word is 1B24. Page is 0A02. The F2 word is 8BF2.
+- {name: KFLDIMX, pattern: F2F4AA988840F2F5F28B8850E6FC241BE6FD0A02E6FE942AE6FF0502, at: 14, frame: true, xat: 2, yat: 8}
+# A0. The C2 F4 word is 1205. The 5C 74 tail is the DH MDIMX load.
+- {name: MDIMX, pattern: F68E4C980D0DC2F405125C744074, at: 8}
+# The body is 15 bytes past the frame.
+- {name: FWFTBRTA, pattern: 'D740E100F7F8[45/C7][08/FC]E6FC[00/81][08/FA]E6FD0602', at: 10, frame: true, add: 15, cols: 14}
+# A0 etazwbm window. The E6 FC word is 50AE. The body is 68 bytes past that pointer.
+- {name: KFMIRL, pattern: E6FCAE50F2FD72F3F2FE9694DA008C26, at: 2, add: 68, rows: 16, cols: 16, xbits: 16, ybits: 16}
+# 23g K and Q. The C2 F4 word is 0652. CLAATS2 is 64 bytes past that pointer.
+# 23g K and Q. The F7 F8 word is 8DEC. CLAHSHE is 82 bytes past it.
+# 23g K and Q. The E6 FC word is 1A92. The F2 word is 8D86, 8 points.
+- {name: TLDIAPN, pattern: E6FC921AE6FD0602F2FE868DDA80C643, at: 2, frame: true, xat: 10}
+# 23g K and Q. The third call in the 920-byte function. The F2 word is 099A, 6 points.
+- {name: NFSM, pattern: E6FCCE1DE6FD0602D740E100F2FE9A09, at: 2, frame: true, xat: 14}
+# 23g K and Q. The sixth call. The F2 words are 09A8 and 099A, both 6 points.
+- {name: KFNLLNST, pattern: E6FC971DE6FD0602E6FEE202E6FF0602, frame: true, rows: 6, cols: 6, xat: -4, yat: -14}
+# 23g K and Q. The E6 F4 word is 4FA4. The 5-point curve is 74 bytes past it.
+- {name: TVUB, pattern: F6F24CA2DB008860C2F409F98840C2F400F88840E6F4A44F, at: 22, add: 74, cols: 5}
+# 23g K and Q. The two 0x55 checks are bytes 8 and 10. ESKONF starts 8 before the first.
+- {name: ESKONF, pattern: 8880887088602804F3F8780B47F855003D06F3F87A0B47F85500, at: 10, add: -8}
+# 23g F. The two 0x55 checks are bytes 8 and 10. ESKONF starts 8 before the first.
+- {name: ESKONF, pattern: 8880887088602804F3F8930B47F855003D06F3F8950B47F85500, at: 10, add: -8}
+# 4B0906018DQ-0060. Same skeleton as 0010, different immediates.
+- {name: LDIATA, pattern: 'D0848840E6FC[45/45][21/FD]E6FD0602F2FE[08/7D][88/FA]', at: 6, frame: true, xat: 14, also: [{name: LDHIA, add: -1}]}

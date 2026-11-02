@@ -1,7 +1,7 @@
 # Byte patterns that locate a RAM address.
 # Rows run from top to bottom. A row can splice in a name an earlier row
 # already found, so add it below that name. A flash body is a row in
-# mapsigs.yaml.
+# mapsigs.d/.
 #
 # calls
 #   Bootrom call-table words. The outer key is the slot. The inner keys are

@@ -236,11 +236,11 @@ func Generate(opt Options) (*Result, error) {
 	if err != nil {
 		return nil, err
 	}
-	mapBody, err := config.Read("", config.MapSigFile)
+	mapParts, err := config.ReadMapSigs("")
 	if err != nil {
 		return nil, err
 	}
-	sigs, err := opcode.ParseSigs(sigBody, mapBody)
+	sigs, err := opcode.ParseSigs(append([][]byte{sigBody}, mapParts...)...)
 	if err != nil {
 		return nil, err
 	}

@@ -2,14 +2,19 @@ package config
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
+	"io/fs"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"testing"
 
 	"go.nyet.org/me7-logger/internal/ecucorpus"
 	"go.nyet.org/me7-logger/mapfile"
 	"go.nyet.org/me7-logger/needle"
+	"go.nyet.org/me7-logger/opcode"
 )
 
 // TestDirFor: config/ sits beside the executable's real path, so a symlink
@@ -65,12 +70,62 @@ func TestShippedSignatures(t *testing.T) {
 	if !strings.Contains(string(b), "frkte_w") || !strings.Contains(string(b), "zwgru") {
 		t.Fatalf("signature list missing rows: %s", b)
 	}
-	maps, err := Read("", MapSigFile)
+	parts, err := ReadMapSigs("")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(maps), "name: LDRQ0S") || !strings.Contains(string(maps), "name: KFPRG") {
-		t.Fatal("map signature list missing rows")
+	sigs, err := opcode.ParseSigs(parts...)
+	if err != nil {
+		t.Fatal(err)
+	}
+	haveLDRQ0S, haveKFPRG := false, false
+	var fp strings.Builder
+	for _, m := range sigs.Maps {
+		fp.WriteString(m.Name)
+		fp.WriteByte('|')
+		fp.WriteString(m.Pattern)
+		fp.WriteByte('\n')
+		if m.Name == "LDRQ0S" {
+			haveLDRQ0S = true
+		}
+		if m.Name == "KFPRG" {
+			haveKFPRG = true
+		}
+	}
+	if !haveLDRQ0S || !haveKFPRG {
+		t.Fatal("map signature list missing LDRQ0S or KFPRG")
+	}
+	sum := sha256.Sum256([]byte(fp.String()))
+	got := hex.EncodeToString(sum[:])
+	// Stable sequence of expanded mapsig rows (name|pattern). Bump when
+	// intentionally adding, removing, or reordering mapsigs.d rows.
+	const want = "afad9bac1d99fe21cdb26c76d8f6db0022970f36194263c71a49302a3af6e9a3"
+	if got != want {
+		t.Fatalf("mapsig fingerprint %s (rows %d); update want after intentional change", got, len(sigs.Maps))
+	}
+}
+
+func TestMapSigsDirOrder(t *testing.T) {
+	ents, err := fs.ReadDir(embedded, MapSigDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var names []string
+	for _, e := range ents {
+		if !e.IsDir() && strings.HasSuffix(e.Name(), ".yaml") {
+			names = append(names, e.Name())
+		}
+	}
+	sort.Strings(names)
+	if len(names) == 0 || !strings.HasPrefix(names[0], "10-") || !strings.HasPrefix(names[len(names)-1], "80-") {
+		t.Fatalf("shard names want 10-..80-, got %v", names)
+	}
+	parts, err := ReadMapSigs("")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(parts) != len(names) {
+		t.Fatalf("ReadMapSigs parts %d != files %d", len(parts), len(names))
 	}
 }
 
