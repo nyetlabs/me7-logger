@@ -272,7 +272,9 @@ func runLint(xdfkit, img, def, name string) error {
 	if st != 0 && st != 1 {
 		return fmt.Errorf("xdfkit lint: exit %d\n%s", st, strings.TrimSuffix(string(out), "\n"))
 	}
-	fmt.Println(lintSummary(name, string(out)))
+	if s := lintSummary(name, string(out)); s != "" {
+		fmt.Println(s)
+	}
 	return nil
 }
 
@@ -290,7 +292,7 @@ func lintSummary(name, out string) string {
 		n++
 	}
 	if n == 0 {
-		return "lint " + name + ": 0"
+		return ""
 	}
 	var b strings.Builder
 	fmt.Fprintf(&b, "lint %s:", name)
