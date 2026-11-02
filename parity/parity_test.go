@@ -581,7 +581,7 @@ func TestSetFamilies(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(lists.any) != 6 {
+	if len(lists.any) != 7 {
 		t.Fatalf("%d families", len(lists.any))
 	}
 	by := map[string]family{}
@@ -591,7 +591,7 @@ func TestSetFamilies(t *testing.T) {
 	if !by["KFPED"].pair || by["KFPED"].tier != "S" || by["KFPEDR"].tier != "S" {
 		t.Fatalf("pedal %+v %+v", by["KFPED"], by["KFPEDR"])
 	}
-	if by["KFZW2"].pair || by["KFZW2"].tier != "D" || by["NLLM"].tier != "C" || by["NLL2M"].tier != "S" || by["NFSM"].tier != "C" {
+	if by["KFZW2"].pair || by["KFZW2"].tier != "D" || by["KFZWOP"].tier != "D" || by["NLLM"].tier != "C" || by["NLL2M"].tier != "S" || by["NFSM"].tier != "C" {
 		t.Fatalf("any %+v", by)
 	}
 }

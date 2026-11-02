@@ -139,7 +139,7 @@ func TestShippedNeedles(t *testing.T) {
 	if strings.Contains(string(b), "function:") {
 		t.Fatal("function is the list, not a field")
 	}
-	if len(ns) != 68 {
+	if len(ns) != 69 {
 		t.Fatalf("needles %d", len(ns))
 	}
 	if ns[0].Name != "slow_init_table" {
@@ -193,7 +193,7 @@ func TestShippedMaps(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(calls) != 120 {
+	if len(calls) != 125 {
 		t.Fatalf("maps %d", len(calls))
 	}
 	ns, err := LoadNeedles("", "")
@@ -480,7 +480,7 @@ func TestSets(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(sets) != 9 {
+	if len(sets) != 10 {
 		t.Fatalf("%d sets", len(sets))
 	}
 	seen := map[string]bool{}

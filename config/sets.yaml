@@ -10,6 +10,8 @@ sets:
   - {rule: both, names: [KFPED, KFPED_0_A, KFPED_1_A]}
   - {rule: both, names: [KFPEDR, KFPEDR_0_A, KFPEDR_1_A]}
   - {rule: any, names: [KFZW2, KFZW2_0_A, KFZW2_1_A]}
+  # One ignition-timing op map closes the slot. S/Q keep KFZWOP2 only.
+  - {rule: any, names: [KFZWOP, KFZWOP2]}
   - {rule: any, names: [NFSM, NFS2M, NFS2M_0_A, NFS2M_1_A]}
   - {rule: any, names: [NLLM, NLLM_0_A, NLLM_1_A, NLLM_2_A, NLLM_3_A]}
   - {rule: any, names: [NLL2M, NLL2M_0_A, NLL2M_1_A, NLL2M_2_A, NLL2M_3_A]}

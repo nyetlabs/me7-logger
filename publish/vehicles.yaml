@@ -48,6 +48,7 @@
 8D0907551K-0001: {engine: 2.7T, code: AZR, vehicle: RS4, year: 2001, gearbox: manual, market: EU}
 8D0907551Q-0001: {engine: 2.7T, code: AZR, vehicle: RS4, year: 2002, gearbox: manual, market: EU}
 8D0907551L-0001: {engine: 2.7T, code: APB, vehicle: S4, year: 2001.5, gearbox: automatic, market: NA}
+8D0907551M-0001: {engine: 2.7T, code: APB, vehicle: S4, year: 2001.5, gearbox: manual, market: NA}
 8D0907551M-0002: {engine: 2.7T, code: APB, vehicle: S4, year: 2001.5, gearbox: manual, market: NA}
 8D0907551N-0001: {engine: 2.7T, code: AZB, vehicle: S4, year: 2001, gearbox: manual, market: EU}
 8D0907551T-0003: {engine: 2.7T, code: APB, vehicle: S4, year: 2002, gearbox: manual, market: NA}

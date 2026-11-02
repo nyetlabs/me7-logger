@@ -20,8 +20,8 @@ github.com/stretchr/testify v1.12.1 h1:EuwCh5fleGS7H32xRwO3wRGT7DxrDhLAT6FF8MpWD
 github.com/stretchr/testify v1.12.1/go.mod h1:MDEgiDPPsNp5cuIrHPPCyornHKgEVbtFUmoNlxoYthg=
 go.bug.st/serial v1.8.0 h1:ZtnmN8aYXtPlTghwSvDWPHKBHL9TM6oFDa+KpSn4SQE=
 go.bug.st/serial v1.8.0/go.mod h1:d0MmS16Qt9b1m06yoYRNUXhRRTJV5Qg2S5EKqQtnayQ=
-go.nyet.org/xdfkit v0.1.1-0.20261102181031-f9bad34ad29a h1:lKsFVddCimtTzpuTQR+exQsNINyFngq15qEDIJZjy1o=
-go.nyet.org/xdfkit v0.1.1-0.20261102181031-f9bad34ad29a/go.mod h1:qXPB2K2vsiwhDHhNh4BEWtZp1fm8oekpQ2iEYsPbLN0=
+go.nyet.org/xdfkit v0.1.1-0.20261102210821-0a4ec5e833ce h1:kwwkePRT3R2Fy2zswvcDmdkT5eHpDCwl00jy6ATxMSw=
+go.nyet.org/xdfkit v0.1.1-0.20261102210821-0a4ec5e833ce/go.mod h1:qXPB2K2vsiwhDHhNh4BEWtZp1fm8oekpQ2iEYsPbLN0=
 go.yaml.in/yaml/v3 v3.0.5 h1:N6y/pJk8buWs9NY5ERU2HSMfm+IuD/OtfdAnq6kESPw=
 go.yaml.in/yaml/v3 v3.0.5/go.mod h1:HVTZu1O7/Vkt2N+BFy8Zza+lnLsABggaTM2ZpNIGuKg=
 golang.org/x/sys v0.48.0 h1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=

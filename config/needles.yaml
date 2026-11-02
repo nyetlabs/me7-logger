@@ -235,9 +235,12 @@ functions:
 
   - name: MDBAS_kfzwop
     needles:
-      - needle_hex: "{push:9876} {sub:4} E6 FC XX XX F2 FD 90 F9"
-      - needle_hex: "{push:9876} {sub:4} E6 FC XX XX F2 FD 0E F9"
-      - needle_hex: "{push:9876} {sub:4} E6 FC XX XX F2 FD 92 F9"
+      # [90/FD] is 90/92; [0E/7F] is 0E/8E (selector-sub A/B).
+      - needle_hex: "{push:9876} {sub:4} E6 FC XX XX F2 FD [90/FD] F9"
+      - needle_hex: "{push:9876} {sub:4} E6 FC XX XX F2 FD [0E/7F] F9"
+      # selector-sub S/Q: push 9/8/6 only, no SUB R0,#4. 9C/AA share no tight mask.
+      - needle_hex: "{push:986} E6 FC XX XX F2 FD 9C F9"
+      - needle_hex: "{push:986} E6 FC XX XX F2 FD AA F9"
 
   # 25A entry. 0x28 is KFMIOP. 0x40 passes the KFZWOP body, which the 22m row names KFZWOP2.
   - name: MDBAS_kfzwop_b

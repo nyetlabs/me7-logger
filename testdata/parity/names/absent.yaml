@@ -89,6 +89,9 @@ absent:
     - RLSALULL
     - TABGSS
     - TABGSS2
+    # 4Z7907551R.kp (DAMOS) has VMAXNB_0_A and VMAXNB_1_A only. AA.kp
+    # (manual) matches.
+    - VMAXNB
   # No DAMOS export yet. No image in this block has the DA 00 42 76 call,
   # so KFVPLGU and SNM16OPUW have no reader. DLBTS is only stored from the
   # scanLbts arm that starts with 42 F4 FD 02. DH misses that chain. DQ
@@ -98,6 +101,9 @@ absent:
     - DLBTS
     - KFVPLGU
     - SNM16OPUW
+    # 4B0906018DH-0002.A2L lists NMAX and VMAXNB, and it does not list
+    # NMAXF. DC still locates the DB00+FD10 row.
+    - NMAXF
     # 67 F8 11 00 is not in this block, so the rear-O2 class bytes have no reader.
     - CLRHK
     - CLRHKA
@@ -146,6 +152,9 @@ absent:
     - LDPBN
     - LDRXN
     - SNM16OPUW
+    # No DAMOS export. No D867 / F6F5 DB00 NMAX pack and no XX02 VMAXNB.
+    - NMAX
+    - VMAXNB
   # Not in the 8D0907551F DAMOS export. That export has KFDLBTS, ZDLBTS,
   # and TABGBTS, and it does not have these. It also has no FKKVS or KFTARX.
   # ESKONF is not in that export either; the 0x55 check is still in the image.
@@ -167,3 +176,7 @@ absent:
     - DLBTS
     - KFVPLGU
     - SNM16OPUW
+    # No DAMOS export. 4D1907558.kp (manual) has neither name. The D740E100
+    # F2F5 48906D05 site decodes to page 0xE1 (0x384xxx), outside flash.
+    - NMAX
+    - VMAXNB

@@ -109,12 +109,18 @@ maps:
   interp: map_interp_table8_b
 - name: KFMIOP
   caller: MDBAS_kfzwop
-  at: '0x28'
+  # 0x28 is N/A; 0x24 is selector-sub S/Q (shorter push, no SUB #4).
+  at: ['0x28', '0x24']
   interp: map_interp_table16
 - name: KFZWOP2
   caller: MDBAS_kfzwop
   at: '0x40'
   interp: map_interp_table8
+- name: KFZWOP2
+  caller: MDBAS_kfzwop
+  # selector-sub S/Q: shorter push; CALLS lands on table8_twin.
+  at: '0x3C'
+  interp: map_interp_table8_twin
 - name: KFMIOP
   caller: MDBAS_kfzwop_b
   at: '0x28'
@@ -133,15 +139,18 @@ maps:
   interp: map_interp_table8_twin
 - name: KFLAMKRL
   caller: LAMFAW_lamkr
-  at: ['0x26A', '0x2B0', '0x2B2']
+  # 0x26A is N/Q; 0x1D0 is selector-sub A/B.
+  at: ['0x26A', '0x2B0', '0x2B2', '0x1D0']
   interp: map_interp_table8_page
 - name: KFLAMKR
   caller: LAMFAW_lamkr
-  at: ['0x2F0', '0x33E', '0x342']
+  # 0x2F0 is N/Q; 0x256 is selector-sub A/B.
+  at: ['0x2F0', '0x33E', '0x342', '0x256']
   interp: map_interp_table8_page
 - name: KFLAFWL
   caller: LAMFAW_lamkr
-  at: ['0x3A0', '0x3DC', '0x3E2', '0x444', '0x44C']
+  # 0x3A0 is N/Q; 0x306 is selector-sub A/B.
+  at: ['0x3A0', '0x3DC', '0x3E2', '0x444', '0x44C', '0x306']
   interp: map_interp_table8_page
 - name: KFFLLDE
   caller: LDRLMX_ldhbn

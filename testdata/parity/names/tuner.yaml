@@ -5,7 +5,8 @@
 # Opinion, not measurement. Boost split follows https://s4wiki.com/wiki/Tuning:
 # LDRXN is the primary specified-load limit. KFMIRL stays in D with it.
 #   D  stage 1: requested boost (LDRXN, KFLDHBN), the DPUPS throttle cut,
-#      I limit, timing, torque monitoring, knock, BTS and open loop fueling
+#      I limit, timing, torque monitoring, knock, BTS and open loop fueling,
+#      and the main cutoffs (NMAX, NMAXF, VMAXNB)
 #   C  stage 2: injector and FPR changes, exhaust DTCs, KFTARX
 #   B  stage 3-: bigger turbos, the underboost window
 #      (EDLDRP, SDLDRL, TDLDRA, NDLDRAPU), and the 5120 ambient
@@ -14,7 +15,8 @@
 #   S  niceties, and boost codes left stock: overboost limp
 #      (KFDLULS, TULV1, LDORXN, KFLDRXO), the P1557 leak check
 #      (KFVPDKLD, TDLDRA2), LDRXNZK, KFTARXZK, the _UM maps,
-#      KFMIZUFIL, KFMIZUOF, and KFMIZUNS
+#      KFMIZUFIL, KFMIZUOF, KFMIZUNS, and the raised-NMAX path
+#      (NMAXOG, VNMX, TMOTNMX, TNMXH, ITNMXH, DNMAXH, CWDNMAX)
 # config/sets.yaml groups forms of one map. any is one slot: one form
 # located, or every form absent. both is the plain name, or every later
 # form when the plain name is not located. The tier is the one here.
@@ -22,8 +24,8 @@
 tiers:
   S:
     0: [AIMVM, CDLDP, CDTES, CWDNMAX, CWMSRCAN, DNMAXH, ITNMXH, KISRM, KUMSRL,
-        NMAX, NMAXF, NMAXOG, NWPMBBR, TDLDRA2, TMOTNMX, TNMXH, TULV1, VMAXNB,
-        VNMX, VWPMBBR, WFRL, ZKLAMFAW]
+        NMAXOG, NWPMBBR, TDLDRA2, TMOTNMX, TNMXH, TULV1, VNMX, VWPMBBR, WFRL,
+        ZKLAMFAW]
     1: [KLDMASRL, LDORXN, LDRXNZK, NASNOTKL, NLL2M, NLL2M_0_A, NLL2M_1_A,
         NLL2M_2_A, NLL2M_3_A]
     2: [FZWWLRLN, KFDLULS, KFFWLW, KFLDRXO, KFMDZOF_UM, KFMI_UM, KFMIZUFIL,
@@ -48,7 +50,7 @@ tiers:
     2: [FKKVS, KFFWL_0_A, KFFWL_1_A, KFLF, KFMRES, KFMRESK, KFNLLNST, KFTARX]
   D:
     0: [CWLAMFAW, CWMDAPP, DLAMFAW, DPUPS, KRALH, KRANH, KRDWA, LDHIA, MDIMX,
-        NLDIAPU, SNM16OPUW, TABGBTS, TMNSMN, ZKWLAFWL]
+        NMAX, NMAXF, NLDIAPU, SNM16OPUW, TABGBTS, TMNSMN, VMAXNB, ZKWLAFWL]
     1: [DLAMTANS, DLBTS, DWKRMSN, FBSTABGM, FWFTBRTA, KRFKLN, LDIATA, LDPBN,
         LDRXN]
     2: [KFFLLDE, KFFWTBR, KFLAFWL, KFLAMKR, KFLAMKRL, KFLBTS_0_A, KFLDHBN,

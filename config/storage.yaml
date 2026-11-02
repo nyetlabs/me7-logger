@@ -1457,7 +1457,7 @@
 - {bits: 16, rows: 16, cols: 12, parts: [06A906032HS, 06A906032LP, 4B0906018DH], names: [KFPEDR]}
 - {bits: 16, rows: 16, cols: 12, parts: [06A906032S, 8D0907551G], names: [KFMIRL]}
 - {bits: 16, rows: 16, cols: 16, ordinal: true, parts: [06A906032HF], names: [FKKVS, KFMIRL]}
-- {bits: 16, xsigned: true, rows: 6, cols: 8, parts: [4B0907551S, 4B0907551T, 8D0907551AA, 8D0907551H, 8D0907551K, 8D0907551L, 8D0907551N, 8D0907551Q, 8D0907551T], names: [
+- {bits: 16, xsigned: true, rows: 6, cols: 8, parts: [4B0907551S, 4B0907551T, 8D0907551AA, 8D0907551H, 8D0907551K, 8D0907551L, 8D0907551M, 8D0907551N, 8D0907551Q, 8D0907551T], names: [
     KFDMDADP, KFDMDARO]}
 - {bits: 16, signed: true, parts: [4B0906018CM, 4B0906018DH, 4Z7907551R], names: [MLHFMMN]}
 - {bits: 16, signed: true, parts: [8D0907551F], names: [DWNWADRPE]}
