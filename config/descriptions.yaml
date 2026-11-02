@@ -4417,7 +4417,7 @@
 - name: DTATEH
   description: Delta Tastverhältnis für Hysterese Periodendauerumschaltung
 - name: DTATMSTOL
-  description: Delta  Ansauglufttemperatur zu Starttemperatur des Motors
+  description: Delta Ansauglufttemperatur zu Starttemperatur des Motors
 - name: DTBTS
   description: Temperaturhysterese für Bauteileschutz
 - name: DTDTHM
@@ -4471,7 +4471,7 @@
 - name: DTMABSDTA
   description: Schwelle Motortemperaturdiff. zw. Abstellen u. Start des Motors für TANS-Diagn.
 - name: DTMABSTOL
-  description: Delta  Motortemperatur nach Abstellen zu Start des Motors
+  description: Delta Motortemperatur nach Abstellen zu Start des Motors
 - name: DTMDMA
   description: Abstand Motortemperaturmodell zur Starttemperatur
 - name: DTMDMA_0_A
@@ -4517,7 +4517,7 @@
 - name: DTMTMRW
   description: Temperaturdiff.-Schwelle für die Prüfung, ob Zwangseinschaltung LR nötig (CARB)
 - name: DTMTOLOFF
-  description: Delta  Motortemperatur für Initialisierung Öltemperaturberechnung
+  description: Delta Motortemperatur für Initialisierung Öltemperaturberechnung
 - name: DTMWUC
   description: Delta Motortemperaturschwelle für Erfüllung 'warm up cycle'
 - name: DTPAAV
@@ -6433,7 +6433,7 @@
 - name: FWEAUF
   description: Rekursionskonstante Wiedereinsetzfaktor zunehmend
 - name: FWEHT
-  description: Faktor Wiedereinsetzmenge  temperaturabhängig (hartes WE)
+  description: Faktor Wiedereinsetzmenge temperaturabhängig (hartes WE)
 - name: FWEMRFA
   description: Faktor Wiedereinsetzmenge über Fahrerwunschmoment
 - name: FWEMX.0
@@ -8741,7 +8741,7 @@
 - name: KLAHEW
   description: Ersatzwert Kühlleistungsanhebung
 - name: KLAHTMSMX1
-  description: Kühlleistungsanhebung bei 1.  max. Motorsolltemperatur
+  description: Kühlleistungsanhebung bei 1. max. Motorsolltemperatur
 - name: KLAHTMSMX2
   description: Kühlleistungsanhebung bei 2. max. Motorsolltemperatur
 - name: KLAHTVLUE1
@@ -8749,7 +8749,7 @@
 - name: KLAHTVLUE2
   description: Tastverhältnis Lüfteransteuerung 2 bei max. Kühlleistungsanhebung
 - name: KLANFVFZ
-  description: Korrekturkennlinie Lüfteransteuerung in Abhängigkeit  vom Anfahrverhalten
+  description: Korrekturkennlinie Lüfteransteuerung in Abhängigkeit vom Anfahrverhalten
 - name: KLATMILAE
   description: Exotherme Temperaturabnahme bei Anfettung tikatm
 - name: KLATMILAE2
@@ -8867,7 +8867,7 @@
 - name: KLMIMIN_UM
   description: Kennlinie minimales indiziertes Moment
 - name: KLMIMNH
-  description: höhenabhängige Korrektur des minimalen  Moments
+  description: höhenabhängige Korrektur des minimalen Moments
 - name: KLMLDSLAMX
   description: max. Luftmasse für Bedingung Adaption/Zusatzdiagnose (16 Bit)
 - name: KLMLDSLKMX
@@ -9257,9 +9257,9 @@
 - name: LAMSSAMX
   description: obere Grenze für lamsosa und lamsisa, CARB-Tester, DLSSALRS
 - name: LAMSSMN
-  description: Minimales Lambdasoll für  stöchiometrischen Betrieb
+  description: Minimales Lambdasoll für stöchiometrischen Betrieb
 - name: LAMSSMX
-  description: Maximales Lambdasoll für  stöchiometrischen Betrieb
+  description: Maximales Lambdasoll für stöchiometrischen Betrieb
 - name: LAMSTEIG
   description: I-Faktor  für  Rampensteigung lamlash für Testfunktion hinter KAT
 - name: LAMTEMN
@@ -10579,7 +10579,7 @@
 - name: NM1VN
   description: Untere kleinste Lüfterdrehzahlschwelle geschwindigkeitsabhängig
 - name: NM1VP
-  description: Obere kleinste  Lüfterdrehzahlschwelle geschwindigkeitsabhängig
+  description: Obere kleinste Lüfterdrehzahlschwelle geschwindigkeitsabhängig
 - name: NM2MN1
   description: untere Grenze Ausblendbereich 1 für Solldrehzahl Lüfter 2
 - name: NM2MN2
@@ -10597,7 +10597,7 @@
 - name: NM2VN
   description: Untere kleinste Lüfterdrehzahlschwelle geschwindigkeitsabhängig
 - name: NM2VP
-  description: Obere kleinste  Lüfterdrehzahlschwelle geschwindigkeitsabhängig
+  description: Obere kleinste Lüfterdrehzahlschwelle geschwindigkeitsabhängig
 - name: NMAX
   description: Maximum engine speed
 - name: NMAXAL
@@ -13183,7 +13183,7 @@
 - name: TFIMSLVK
   description: Zeitkonstante für mslv- Filter bei Kurztest
 - name: TFLZLR
-  description: Verzögerung des B_fpld_ok  während Lüfterdeaktivierung
+  description: Verzögerung des B_fpld_ok während Lüfterdeaktivierung
 - name: TFMIZU
   description: Filterzeitkonstante zur Filterung des zulässigen Moments
 - name: TFPWG2
@@ -13867,7 +13867,7 @@
 - name: TMLIM
   description: TMOT Schwelle für  KSTAA aktiv im Nachstart
 - name: TMLLAMN
-  description: Entprellzeit für Erkennung  Bedingung lamsons_w > 1
+  description: Entprellzeit für Erkennung Bedingung lamsons_w > 1
 - name: TMLLX
   description: Kochschutzschwelle
 - name: TMLLX.0
@@ -15061,7 +15061,7 @@
 - name: TUHEMX
   description: Maximale Solltemperatur abhängig vom Heizungspoti
 - name: TUHKFH
-  description: Verzögerungszeit für Ausgabe Fehler Heizer-Einkopplung  hinter KAT
+  description: Verzögerungszeit für Ausgabe Fehler Heizer-Einkopplung hinter KAT
 - name: TULV
   description: Verzögerung Überladeabschneiden
 - name: TULV1
@@ -15137,7 +15137,7 @@
 - name: TUSHZFV
   description: Zeitfenster für Messung Heizertakt-Einkopplung  auf Sondensignal vor KAT
 - name: TUSHZMFH
-  description: Zeitfenster für Messung Heizertakt-Einkopplung  auf Sondensignal hinter  KAT
+  description: Zeitfenster für Messung Heizertakt-Einkopplung auf Sondensignal hinter KAT
 - name: TUSKS
   description: Verzögerungszeit bei Kurzschlußerkennung der Lambdasonde
 - name: TUSLASH
