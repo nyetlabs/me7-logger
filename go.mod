@@ -5,7 +5,7 @@ go 1.26.4
 require (
 	github.com/spf13/pflag v1.0.10
 	go.bug.st/serial v1.8.0
-	go.nyet.org/xdfkit v0.1.1-0.20261102210821-0a4ec5e833ce
+	go.nyet.org/xdfkit v0.1.1-0.20261102214750-c79ffacf049c
 	gopkg.in/yaml.v3 v3.0.1
 )
 

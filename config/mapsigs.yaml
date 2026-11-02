@@ -101,7 +101,7 @@ mapsigs:
 - {name: DSLOFS, pattern: E6FCFFFFF2F4XXXX6D05004C, at: 6}
 - {name: PUE, pattern: 2D0AD740XX02F2F8XXXX, at: 8, also: [{name: PUMN, add: 2}, {name: PUMX, add: 4}]}
 - {name: MLOFS, pattern: F062F073F2F4XXXXE0052064, at: 6}
-# NMAX sits six bytes after DNMAXH on the D867 pack (F/N and 1.8T).
+# NMAX sits six bytes after DNMAXH on the D867 pack (F/N and 24BCD).
 # The 4Z A1B pack stores a different word at +6; DAMOS NMAX is the F6F5xx8A load.
 - {name: DNMAXH, pattern: F2FDXXXXDA00D86742F4XXF8, also: [{name: NMAX, add: 6}]}
 - {name: DNMAXH, pattern: F2FDXXXXDA002A1BF09442F98AF89D02}
@@ -425,7 +425,7 @@ mapsigs:
 - {name: CWKONLS, pattern: 4A880060D7400602C2F4XXXX68413A8888364A880264, at: 10}
 - {name: KRALH, pattern: D7400602F3F8XXXXD740E100F3FA5F09, at: 6}
 - {name: KFVPLGU, pattern: DB00F2F4XXXX8840F2F5XXXX8850E6FCXXXXE6FD0902E6FEXXXXE6FFXXXXDA80XXXX08048840F2F4, at: 16, frame: true, rows: 16, cols: 8, ybits: 16, xat: 4, yat: 10}
-# 1.8T rows, each checked against every 1.8T reference XDF it hits.
+# 24BCD rows, each checked against every 24BCD reference XDF it hits.
 - {name: CATR, pattern: 01E00D08D7400602F3F8XXXX, at: 10}
 - {name: CATR, pattern: 8A3301200D08D7400602F3F8XXXX, at: 12}
 - {name: CATR, pattern: 2804E6FCXXXXE6FDXXXXC2FE9AF8, at: 4, frame: true}

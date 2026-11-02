@@ -3,7 +3,7 @@
 # is not the CB-0003 software, so its addresses are not used: each name
 # only has to be located as a plausible map on the images in block.
 # Keys are axis counts, as in tuner.yaml, which wins when both list a name.
-block: 1.8T
+block: 24BCD
 names:
   0: [A0, A1, A2, ABGMSIGH, ABOINI, ABOLRAR, ABOMX, ADCC_T_UM, ADKATNF,
       ADRONLOGIN, AFNTOL, AGANGW, AGRRMAX, AGR_AOG, AGR_AUG, AHEAGWS_0_A,

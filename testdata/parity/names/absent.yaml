@@ -24,7 +24,7 @@ absent:
   22N:
     - KFVPLGU
   # Not in the 4B0906018CM DAMOS export.
-  1.8T-CM:
+  24bH:
     - CDLSHV
     - CLAHSHE2
     - CLALSH2
@@ -48,7 +48,7 @@ absent:
     - TABGSS2
   # Not in the 06A906032HF DAMOS export. The NLLM family is the split
   # curves NLLM_0_A through NLLM_3_A, so the plain name is not listed.
-  1.8T:
+  24BCD:
     - CDLSHV
     # Not in the LQ, NL, BB, or CJ DTC index. The slot after CLAATS is
     # 1479, not 1457. Images that have 1457 locate the class byte.

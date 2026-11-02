@@ -7,9 +7,9 @@
 # APB.
 - 22N
 # AWP, AUM, AUQ, BAM, BEA.
-- 1.8T
+- 24BCD
 # AWM, AZA, APB.
-- 1.8T-CM
+- 24bH
 # AWT, AWM, AVJ, BEX.
 - 24EGKS
 # BEL. T is dataset 25B.
@@ -19,6 +19,6 @@
 # BCY.
 - 25C
 # APH, AZB.
-- selector-sub
+- X22
 # Spyker 4.2. No engine code.
 - 05A
