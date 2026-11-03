@@ -1,6 +1,5 @@
 mapsigs:
 # 4Z7907551AA-0010. R's DAMOS names the LDRXN body; the table word is the header.
-- {name: ESKONF, pattern: 888088708860F3F86B1F47F85500, at: 8}
 - {name: LDRXN, pattern: 0B0058040A029A040A02, at: 2, far: true, add: 34, cols: 16, xbits: 16}
 # 4D1907558-0004. The 3D0F KFZW arm is a page-0702 load. These calls are the maps.
 - {name: KFZW2, pattern: E6FCED17E6FDC42CF2FEF488F2FF0289DA00242B}
@@ -32,8 +31,6 @@ mapsigs:
 - {name: DWKRMSN, pattern: D7400602C2F4381A68412D1BF2F43291, at: 6, add: 1, xat: 14}
 - {name: DPUPS, pattern: 43F81A06FD03E11A75FA6898}
 - {name: LDPBN, pattern: F6F48A0DE6FCB723E6FD0602F2FEDE88, at: 6, frame: true, xat: 14}
-# 4D1907558-0004. The 0x55 check. Word 153E, DPP0.
-- {name: ESKONF, pattern: 888088708860F3F83E1547F85500, at: 8}
 # 4D1907558-0004. The page-0702 call 54 bytes before CLAATR. Same cluster as 0002.
 # 4D1907558-0004. Same call as 0002, through the byte that changed.
 - {name: KFLF, pattern: 06F480018840E6FCA00EE6FD0602C2FE1AF8C2FF6BF9DA83243FC084D7400602C2F59F0E0B45F2F40EFE98501B45F2F90CFEC2F4A686, at: 8, frame: true, add: 30, rows: 12, cols: 16}
@@ -111,10 +108,8 @@ mapsigs:
 - {name: KFFLLDE, pattern: F2F5BA8C8850F2F2B48C8820E6FC5E0FE6FD0602E6FE6701E6FF0402, at: 14, frame: true, cols: 12, rows: 12, xat: 2, yat: 8}
 # DC KFLDHBN. Indexed by nmot and tsel. The header is 08 08.
 - {name: KFLDHBN, pattern: E6FC481BE6FD0602C2FE9CF8D740E100C2FFC708, frame: true, add: 18, rows: 8, cols: 8}
-# 4B0906018DC and DH. The DQ 0x55 check, with the word that changed.
-- {name: ESKONF, pattern: '888088708860F3F8[38/B8][20/F9]47F85500', at: 8}
 # DC and DH class bits. Page 0602. CDLSHV is the byte after CDLSH. CDHSHE is bit 0x80.
-- {name: CDLSH, pattern: [64F4B48BD7400602C2F4AB0168412D05E6F41000, 64F4F28BD7400602C2F4AB0168412D05E6F41000], at: 10, also: [{name: CDLSHV, add: 1}]}
+- {name: CDLSH, pattern: 64F4XX8BD7400602C2F4AB0168412D05E6F41000, at: 10, also: [{name: CDLSHV, add: 1}]}
 - {name: CDHSHE, pattern: '64F4[B0/B9]8BD7400602C2F49D0168412D05E6F48000', at: 10}
 # DC and DH. KFMRESK is the call before KFMRES. The two F2 words are the axes.
 - {name: KFMRESK, pattern: '9D0CE6FC[0C/8D][18/F9]E6FD[54/F5][30/F1]F2FE[30/3D]8CF2FF[28/39]8C', at: 4, xat: 16, yat: 12}
@@ -129,10 +124,10 @@ mapsigs:
 # DC and DH. Same CWDLSAHK call as DQ. Page 0602, the FD 09 byte.
 - {name: CWDLSAHK, pattern: '8AF41000F3F8[15/9D][B1/FD]D740060243F8[01/95]06FD09', at: 14}
 # DC, DH, and both DQ. First D4C5 load. The F2 word is the 6-point axis.
-- {name: NLLM_0_A, pattern: [D4C5363ED4D5383ED740E100F2FE9009DA837043F7F81DA0, D4C5D25BD4D5D45BD740E100F2FEBE09DA837043F7F829A1, D4C5DC52D4D5DE52D740E100F2FE0019DA837043F7F8E9A0, D4C5E052D4D5E252D740E100F2FE1419DA837043F7F8DDA0], at: 2, deref: 1, dereffar: true, xat: 14, cols: 6}
-- {name: NLLM_1_A, pattern: [D4C5363ED4D5383ED740E100F2FE9009DA837043F7F81DA0, D4C5D25BD4D5D45BD740E100F2FEBE09DA837043F7F829A1, D4C5DC52D4D5DE52D740E100F2FE0019DA837043F7F8E9A0, D4C5E052D4D5E252D740E100F2FE1419DA837043F7F8DDA0], at: 2, deref: 1, derefat: 4, dereffar: true, xat: 14, cols: 6}
-- {name: NLLM_2_A, pattern: [D4C5363ED4D5383ED740E100F2FE9009DA837043F7F81DA0, D4C5D25BD4D5D45BD740E100F2FEBE09DA837043F7F829A1, D4C5DC52D4D5DE52D740E100F2FE0019DA837043F7F8E9A0, D4C5E052D4D5E252D740E100F2FE1419DA837043F7F8DDA0], at: 2, deref: 1, derefat: 8, dereffar: true, xat: 14, cols: 6}
-- {name: NLLM_3_A, pattern: [D4C5363ED4D5383ED740E100F2FE9009DA837043F7F81DA0, D4C5D25BD4D5D45BD740E100F2FEBE09DA837043F7F829A1, D4C5DC52D4D5DE52D740E100F2FE0019DA837043F7F8E9A0, D4C5E052D4D5E252D740E100F2FE1419DA837043F7F8DDA0], at: 2, deref: 1, derefat: 12, dereffar: true, xat: 14, cols: 6}
+- {name: NLLM_0_A, pattern: D4C5XXXXD4D5XXXXD740E100F2FEXXXXDA83XXXXF7F8XXXX, at: 2, deref: 1, dereffar: true, xat: 14, cols: 6}
+- {name: NLLM_1_A, pattern: D4C5XXXXD4D5XXXXD740E100F2FEXXXXDA83XXXXF7F8XXXX, at: 2, deref: 1, derefat: 4, dereffar: true, xat: 14, cols: 6}
+- {name: NLLM_2_A, pattern: D4C5XXXXD4D5XXXXD740E100F2FEXXXXDA83XXXXF7F8XXXX, at: 2, deref: 1, derefat: 8, dereffar: true, xat: 14, cols: 6}
+- {name: NLLM_3_A, pattern: D4C5XXXXD4D5XXXXD740E100F2FEXXXXDA83XXXXF7F8XXXX, at: 2, deref: 1, derefat: 12, dereffar: true, xat: 14, cols: 6}
 # DC and DH. The DQ KFFWL far table, with the words that changed.
 - {name: KFFWL_0_A, pattern: 'F2F4[08/09]098840F2F5[20/39]8C8850C2F2[10/DD]FA5C22D4C2[08/49][61/ED]D4D2[20/75][61/ED]E6FE[90/97][21/E5]E6FF0602DA834445', at: 20, deref: 1, dereffar: true, xat: 2, rows: 8, cols: 6, xbits: 16, yord: true, bits: 16}
 - {name: KFFWL_1_A, pattern: 'F2F4[08/09]098840F2F5[20/39]8C8850C2F2[10/DD]FA5C22D4C2[08/49][61/ED]D4D2[20/75][61/ED]E6FE[90/97][21/E5]E6FF0602DA834445', at: 20, deref: 1, derefat: 4, dereffar: true, xat: 2, rows: 8, cols: 6, xbits: 16, yord: true, bits: 16}
@@ -145,8 +140,6 @@ mapsigs:
 - {name: TVUB, pattern: 'E6FE[00/8B][40/E0]C2FF[22/62][88/FE]DA00982D', cols: 5}
 # DC. Page 0602. TABGSS2 is two bytes later.
 - {name: TABGSS, pattern: 0D08F2F40E9DD740060242F4183DFD01, at: 12, also: [{name: TABGSS2, add: 2}]}
-# AK-0004 and AS. The 0x55 check. Word C222, DPP0.
-- {name: ESKONF, pattern: 888088708860F3F8C22247F85500, at: 8}
 # AK-0004 and AS. The F2 operand is the tmot byte, so xat cannot read it.
 # The count byte is in front of these six points. The four far pointers are the curves.
 - {name: bp_nllm, pattern: 90ABC5D3E0ED, table: true, add: -1}
@@ -154,3 +147,8 @@ mapsigs:
 - {name: NLLM_1_A, pattern: D4C5684DD4D56A4DD740E100F2FEDE09DA837043F7F80FA2, at: 2, deref: 1, derefat: 4, dereffar: true, cols: 6, xtable: bp_nllm}
 - {name: NLLM_2_A, pattern: D4C5684DD4D56A4DD740E100F2FEDE09DA837043F7F80FA2, at: 2, deref: 1, derefat: 8, dereffar: true, cols: 6, xtable: bp_nllm}
 - {name: NLLM_3_A, pattern: D4C5684DD4D56A4DD740E100F2FEDE09DA837043F7F80FA2, at: 2, deref: 1, derefat: 12, dereffar: true, cols: 6, xtable: bp_nllm}
+# 4B0906018CM. Far table entry for the 12x12 body; axes are shared flash tables.
+- {name: bp_kffwl_x, pattern: 0C181F252C36404D5B7590ABB8, table: true}
+# Count is odd; the points sit on an even address.
+- {name: bp_kffwl_y, pattern: 181F252C364054617590ABB8, table: true, add: -1}
+- {name: KFFWL_0_A, pattern: 410B06024D0B0602, at: 4, far: true, rows: 12, cols: 12, xtable: bp_kffwl_x, ytable: bp_kffwl_y, also: [{name: KFFWL_1_A, add: 144}]}

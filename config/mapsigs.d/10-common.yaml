@@ -21,18 +21,22 @@ mapsigs:
 - {name: CLAATS2, anchor: fcm_cla, index: fcm_dtc, code: '1457'}
 # 22N fault path class table, read as [Rw + 0x073B]. 22N has one more path
 # before these than 22m, so each index is one past the 22m index. The rows
-# come first because the 22m rows below also hit 22N at other addresses.
-# 22N T/AA. Bytes 8 and 10 (110D/130D); before 510D — that hit is empty 0x80.
 # DAMOS often omits ESKONF; the checks are still in the image.
+# Dual 0x55 checks; ESKONF starts 8 before the first. Keep these before the
+# single-check 2804 row — that pattern is a prefix. Do not XX the dual: HF
+# repeats one word twice, and add -8 would miss.
+# 22N T/AA. Bytes 8 and 10 (110D/130D); before 510D — that hit is empty 0x80.
 - {name: ESKONF, pattern: 8880887088602804F3F8110D47F855003D06F3F8130D47F85500, at: 10, add: -8}
 - {name: ESKONF, pattern: 510DBD0C8D0CXXXX8711E310, at: 6}
-# Every ME7 checks one ESKONF byte against 0x55 this way. The byte is the
-# first of ESKONF only on these 06A images.
-- {name: ESKONF, pattern: 8880887088602804F3F84F0C47F85500, at: 10}
-# 22m G/N. Bytes 8 and 10 (890C/8B0C); ESKONF starts 8 before the first.
-# Same dual skeleton as 06A, but those reuse one word (first byte) — do not XX.
-# DAMOS often omits ESKONF; the checks are still in the image.
+# 22m G/N. Bytes 8 and 10 (890C/8B0C).
 - {name: ESKONF, pattern: 8880887088602804F3F8890C47F855003D06F3F88B0C47F85500, at: 10, add: -8}
+# 23g K/Q then F.
+- {name: ESKONF, pattern: 8880887088602804F3F8780B47F855003D06F3F87A0B47F85500, at: 10, add: -8}
+- {name: ESKONF, pattern: 8880887088602804F3F8930B47F855003D06F3F8950B47F85500, at: 10, add: -8}
+# Single 0x55 check with 2804. The compared byte is the start.
+- {name: ESKONF, pattern: 8880887088602804F3F8XXXX47F85500, at: 10}
+# Single 0x55 check without 2804.
+- {name: ESKONF, pattern: 888088708860F3F8XXXX47F85500, at: 8}
 - {name: KLDMASRL, pattern: C2F4XXXX66F480002D034AXXXXXX0D01XXXXF3F8XXXXF7F8XXXX8AXX1C, add: 9, cols: 5}
 - {name: KLDMASRL, pattern: 060242F474359D02XXXX0D0FF2F46A9D, at: 8, cols: 5}
 - {name: MLHFM, pattern: 7C145C14D454XXXXXXXXXXXXF2XXXXXXXXXXXXXXXXXXXXXXXXXXXXFF, at: 6}

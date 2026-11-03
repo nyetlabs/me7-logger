@@ -19,8 +19,6 @@ mapsigs:
 - {name: TABGBTS, pattern: '42F4[90/95][00/C1]FD04E11875F8[01/A3][88/FC]'}
 - {name: DPUPS, pattern: 43F86C10FD03E11A75FA66A0}
 - {name: DLAMTANS, pattern: 5C548840C2F42B898840E6F46F39, at: 12, frame: true, cols: 4}
-# DQ. The compared byte is the start. Both images use word 2724.
-- {name: ESKONF, pattern: 888088708860F3F8272447F85500, at: 8}
 # DQ class bits. Page is 0602. CDLSHV is the byte after CDLSH. CDHSHE is bit 0x80.
 - {name: CDLSH, pattern: 64F4XXXXD7400602C2F4AE0168412D05E6F41000, at: 10}
 - {name: CDHSHE, pattern: '64F4[80/E5]8BD7400602C2F49E0168412D05E6F48000', at: 10}
@@ -33,7 +31,6 @@ mapsigs:
 # DQ. Page is 0602. The 4A88 tail is 0168.
 - {name: CWKONABG, pattern: D7400602C2F4B90168413A8888364A880168, at: 6}
 # 06A906032HN-0002. Same calls as 0001, with the immediates that changed.
-- {name: ESKONF, pattern: 8880887088602804F3F84D0C47F85500, at: 10}
 - {name: KFMRES, pattern: 0D0BE6FC3B14E6FDC82F, at: 4}
 - {name: KFZW, pattern: 3D0FE6FCEB20E6FDE030, at: 4}
 - {name: KFFLLDE, pattern: 8820E6FC842DE6FD0702E6FEAA32, at: 4, frame: true}

@@ -142,9 +142,5 @@ mapsigs:
 - {name: KFNLLNST, pattern: E6FC971DE6FD0602E6FEE202E6FF0602, frame: true, rows: 6, cols: 6, xat: -4, yat: -14}
 # 23g K and Q. The E6 F4 word is 4FA4. The 5-point curve is 74 bytes past it.
 - {name: TVUB, pattern: F6F24CA2DB008860C2F409F98840C2F400F88840E6F4A44F, at: 22, add: 74, cols: 5}
-# 23g K and Q. The two 0x55 checks are bytes 8 and 10. ESKONF starts 8 before the first.
-- {name: ESKONF, pattern: 8880887088602804F3F8780B47F855003D06F3F87A0B47F85500, at: 10, add: -8}
-# 23g F. The two 0x55 checks are bytes 8 and 10. ESKONF starts 8 before the first.
-- {name: ESKONF, pattern: 8880887088602804F3F8930B47F855003D06F3F8950B47F85500, at: 10, add: -8}
 # 4B0906018DQ-0060. Same skeleton as 0010, different immediates.
 - {name: LDIATA, pattern: 'D0848840E6FC[45/45][21/FD]E6FD0602F2FE[08/7D][88/FA]', at: 6, frame: true, xat: 14, also: [{name: LDHIA, add: -1}]}
