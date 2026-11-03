@@ -21,9 +21,12 @@ absent:
     - NLLM_3_A
   # No DAMOS export yet. No map_interp_table8_b call with M's arguments on T,
   # and the 8D0907551H manual XDF does not have it.
+  # Same KFLDRQ1 arm as 22m: LDRQ1DY and LDRQ1ST are located; the Q1
+  # integrator is not the map.
   22N:
+    - KFLDRQ1
     - KFVPLGU
-  # Not in the 4B0906018CM DAMOS export.
+  # Not in the 4B0906018CM DAMOS export. 4B0907551 S/T and 8D N are in 22m.
   24bH:
     - CDLSHV
     - CLAHSHE2
@@ -68,6 +71,10 @@ absent:
     - KFLBTS_0_A
     - KFMIZUNS
     - KFVPLGU
+    # HF/HS DAMOS has LDRQ0S and LDRQ1ST beside KFLDRQ2, and no LDRQ0DY or
+    # LDRQ1DY. The ldrq window stores those two curves only.
+    - LDRQ0DY
+    - LDRQ1DY
     - RLSALULL
     - RLSALUN
     # The HF DAMOS export lists it at 0x130A6, the count word, and the

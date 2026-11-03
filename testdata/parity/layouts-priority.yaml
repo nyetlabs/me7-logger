@@ -1,24 +1,27 @@
 # Finder order for the blocks in layouts.yaml. Opinion, not a stage.
 # Highest first. Every block is listed once.
 # Engine codes are the ones publish/vehicles.yaml lists for that block.
-# APB, AWM, and AZB each sit in more than one block.
-# APB, AZB. H is project 22l.
+# AWM sits in more than one block. AZB: G/N here; A/B are X22ka.
+# 2.7T APB/AZB/AZA. H is project 22l. 4B0907551 S/T and 8D N match G.
 - 22m
-# APB.
+# 2.7T APB. 8D0907551 T/AA only; separate needles from 22m. Not 1.8T.
 - 22N
-# AWP, AUM, AUQ, BAM, BEA.
+# 1.8T AWP, AUM, AUQ, BAM, BEA.
 - 24BCD
-# AWM, AZA, APB.
+# 1.8T AWM, AVJ. CH/CM only.
 - 24bH
-# AWT, AWM, AVJ, BEX.
+# 1.8T AWT, AWM, AVJ, BEX.
 - 24EGKS
-# BEL. T is dataset 25B.
+# 2.7T BEL. T is dataset 25B.
 - 25A
-# ASJ, AZR.
+# 2.7T AZB. Early MAF A/B; not with APH.
+- X22ka
+# 2.7T ASJ, AZR.
 - 23g
-# BCY.
+# 4.2T BCY.
 - 25C
-# APH, AZB.
+# 1.8T APH. S/Q only.
 - X22
 # Spyker 4.2. No engine code.
 - 05A
+

@@ -235,7 +235,7 @@ functions:
 
   - name: MDBAS_kfzwop
     needles:
-      # [90/FD] is 90/92; [0E/7F] is 0E/8E (X22 A/B).
+      # [90/FD] is 90/92; [0E/7F] is 0E/8E (X22ka A/B).
       - needle_hex: "{push:9876} {sub:4} E6 FC XX XX F2 FD [90/FD] F9"
       - needle_hex: "{push:9876} {sub:4} E6 FC XX XX F2 FD [0E/7F] F9"
       # X22 S/Q: push 9/8/6 only, no SUB R0,#4. 9C/AA share no tight mask.

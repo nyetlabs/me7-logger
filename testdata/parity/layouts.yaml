@@ -8,13 +8,16 @@
 # The blocks come from which variant of each needle hits. A near match stays in
 # the block: 8D0907551F with 8D0907551K and 8D0907551Q, 4Z7907551T (dataset
 # 25B) with 4Z7907551S, 4Z7907551AA, and 4Z7907551R, 06A906032LP and
-# 8N0906018CB with 06A906032HF and 06A906032HS, and 06A906032S and 4B0906018Q
-# with 8D0907551A and 8D0907551B. 24bH is the 24BCD code without maps its
-# DAMOS export does not have.
+# 8N0906018CB with 06A906032HF and 06A906032HS, and 06A906032S with
+# 4B0906018Q. 8D0907551A/B are X22ka (2.7T), not the S/Q 1.8T block.
+# 24bH is the 24BCD code without maps its DAMOS export does not have.
 # datasets.yaml is a different grouping: calibration contents, not code.
 22m:
+  - "1037354144" # 4B0907551S
   - "1037354145" # 8D0907551L
+  - "1037354146" # 4B0907551T
   - "1037354774" # 8D0907551H
+  - "1037354823" # 8D0907551N
   - "1037354837" # 8D0907551M
   - "1037360855" # 8D0907551G
   - "1037360857" # 8D0907551M
@@ -74,21 +77,20 @@
   - "1037368009" # 06A906032DL
   - "1037371739" # 06A906032RP
   - "1037378104" # 06A906032TL
-# 4B0906018CH is 24b and 4B0906018CM is 24H.
-# 4B0907551S and 4B0907551T are dataset 22m.
+# 4B0906018CH is 24b and 4B0906018CM is 24H. Both 1.8T.
+# 4B0907551S (AZA) and T (APB) sit in 22m; needles match G.
 24bH:
-  - "1037354144" # 4B0907551S
-  - "1037354146" # 4B0907551T
   - "1037360101" # 4B0906018CH
   - "1037378160" # 4B0906018CM
 25C:
   - "1037366304" # 4D1907558
   - "1037367724" # 4D1907558
-# 8D0907551A and 8D0907551B are X22ka. 8D0907551N is 22m,
-# 06A906032S is F21dz, and 4B0906018Q is F22ig.
-X22:
+# 8D0907551A/B are dataset X22ka (early AZB). N is in 22m with G.
+# Both hit result_selector_sub; maps.yaml call distances differ from S/Q.
+X22ka:
   - "1037352738" # 8D0907551B
   - "1037352741" # 8D0907551A
+# 06A906032S is F21dz, and 4B0906018Q is F22ig. 1.8T only.
+X22:
   - "1037352760" # 06A906032S
   - "1037352805" # 4B0906018Q
-  - "1037354823" # 8D0907551N

@@ -99,7 +99,7 @@ func TestShippedSignatures(t *testing.T) {
 	got := hex.EncodeToString(sum[:])
 	// Stable sequence of expanded mapsig rows (name|pattern). Bump when
 	// intentionally adding, removing, or reordering mapsigs.d rows.
-	const want = "5a67dc61b391047d30bd8c01355278bf7df511c5f794a56e6651d08bced03e62"
+	const want = "5d791e65208f28c0a58a5a3963fd0fc6f926f4ded61b2bc8dbf589f64839784e"
 	if got != want {
 		t.Fatalf("mapsig fingerprint %s (rows %d); update want after intentional change", got, len(sigs.Maps))
 	}
