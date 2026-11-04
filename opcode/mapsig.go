@@ -55,10 +55,10 @@ type MapHit struct {
 // it occurs once and the address word decodes inside this image. A row with
 // open searches the DB00 window around that opener and keeps the first hit
 // there. A table row is the axis-point table: its address is the hit, and it
-// is not a map. An anchor is a byte distance from a map this pass already
-// located. A later row with the same name fills it only when an earlier
-// window missed. These addresses are flash maps, so the RAM filter used by
-// the logging signatures does not apply.
+// is not a map. An anchor is a byte distance from a map or axis-point table
+// this pass already located. A later row with the same name fills it only
+// when an earlier window missed. These addresses are flash maps, so the RAM
+// filter used by the logging signatures does not apply.
 func MapAddrs(img []byte, dpp [4]uint16, rows []MapSig) []MapHit {
 	return mapHits(img, dpp, rows, nil, func(string) (string, bool) { return "", false })
 }
@@ -179,15 +179,21 @@ func mapHits(img []byte, dpp [4]uint16, rows []MapSig, known map[string]uint32, 
 			if _, ok := have[row.Name]; ok {
 				continue
 			}
-			base, ok := have[row.Anchor]
-			if !ok {
+			var baseAddr uint32
+			var xram, yram uint16
+			if idx, ok := have[row.Anchor]; ok {
+				baseAddr = out[idx].Addr
+				xram, yram = out[idx].XRam, out[idx].YRam
+			} else if a, ok := tabs[row.Anchor]; ok {
+				baseAddr = a
+			} else {
 				continue
 			}
-			addr, _ := shift(img, out[base].Addr, row.Add)
+			addr, _ := shift(img, baseAddr, row.Add)
 			if addr == 0 {
 				continue
 			}
-			add(row.Name, addr, 0, row, out[base].XRam, out[base].YRam)
+			add(row.Name, addr, 0, row, xram, yram)
 			again = true
 		}
 	}

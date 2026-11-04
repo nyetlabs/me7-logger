@@ -1,27 +1,18 @@
 # Finder order for the blocks in layouts.yaml. Opinion, not a stage.
 # Highest first. Every block is listed once.
-# Engine codes are the ones publish/vehicles.yaml lists for that block.
-# AWM sits in more than one block. AZB: G/N here; A/B are X22ka.
-# 2.7T APB/AZB/AZA. H is project 22l. 4B0907551 S/T and 8D N match G.
-- 22m
-# 2.7T APB. 8D0907551 T/AA only; separate needles from 22m. Not 1.8T.
-- 22N
-# 1.8T AWP, AUM, AUQ, BAM, BEA.
-- 24BCD
-# 1.8T AWM, AVJ. CH/CM only.
-- 24bH
-# 1.8T AWT, AWM, AVJ, BEX.
-- 24EGKS
-# 2.7T BEL. T is dataset 25B.
-- 25A
-# 2.7T AZB. Early MAF A/B; not with APH.
-- X22ka
-# 2.7T ASJ, AZR.
-- 23g
-# 4.2T BCY.
-- 25C
-# 1.8T APH. S/Q only.
-- X22
-# Spyker 4.2. No engine code.
-- 05A
-
+# 2.7T/RS6 codes: files.s4wiki.com/stock/part-numbers.txt.
+# 1.8T codes: publish/vehicles.yaml (compiled from that list plus other
+# sources; confirm independently, do not treat as ground truth alone).
+# Block names are needle families (layouts.yaml), not the ID-string token after //
+# in the Bosch banner (datasets.yaml). That token can differ and still sit here.
+- 22m    # 2.7T APB, AZB, AZA. 8D0907551H banner is //22l//; needles still match G.
+- 22N    # 2.7T APB. 8D0907551 T/AA only; separate needles from 22m.
+- 24BCD  # 1.8T AWP, AUM, AUQ, BAM, BEA.
+- 24bH   # 1.8T AVJ, AWM. CH/CM only.
+- 24EGKS # 1.8T AWT, AWM, AVJ, BEX.
+- 23g    # 2.7T ASJ, AZR. 8D0907551 F/K/Q.
+- 25A    # 2.7T BEL; 4Z7907551Q is BES. 4Z7907551T banner is //25B//; needles stay here.
+- X22ka  # 2.7T APB. 8D0907551 A/B only.
+- 25C    # 4.2T BCY.
+- X22    # 1.8T APH. 06A906032S / 4B0906018Q.
+- 05A    # Spyker 4.2. No engine code on the part list.

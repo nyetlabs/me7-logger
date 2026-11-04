@@ -48,29 +48,29 @@ mapsigs:
 # the 8-point table. F's count is even. K and Q keep the same bytes one
 # byte earlier, so the second row steps onto the count. KFNWWL is the
 # warmup call, 96 bytes after KFNW.
-- {name: bp_kfnw, pattern: 08223E434A536072A0, table: true}
-- {name: bp_kfnw, pattern: 5A08223E434A536072A0, table: true, add: 1}
-- {name: KFNW, pattern: 'DB00E6FCXXXXE6FD[CA/DA]1BF2FE[C0/F3]ABF2FF[C0/EB]ABDA00B878', at: 4, rows: 12, cols: 8, xtable: bp_kfnw}
-- {name: KFNWWL, pattern: 'DB00F3F8XX8BD740060243F8XXXXED0BE6FCXXXXE6FD[CA/DA]1BF2FE[C0/F3]AB', at: 18, rows: 12, cols: 8, xtable: bp_kfnw}
+- {name: ap_kfnw, pattern: 08223E434A536072A0, table: true}
+- {name: ap_kfnw, pattern: 5A08223E434A536072A0, table: true, add: 1}
+- {name: KFNW, pattern: 'DB00E6FCXXXXE6FD[CA/DA]1BF2FE[C0/F3]ABF2FF[C0/EB]ABDA00B878', at: 4, rows: 12, cols: 8, xtable: ap_kfnw}
+- {name: KFNWWL, pattern: 'DB00F3F8XX8BD740060243F8XXXXED0BE6FCXXXXE6FD[CA/DA]1BF2FE[C0/F3]AB', at: 18, rows: 12, cols: 8, xtable: ap_kfnw}
 # 4B0906018DQ. The page-0602 cluster. TLDIAPN's F2 word is the 8-point axis.
 - {name: LDEIAP, pattern: D740060243F8F321BD07, at: 6}
 - {name: UMDYLDR, pattern: D7400602D2FF0D22DA833650, at: 6}
 - {name: TLDIAPN, pattern: E6FC0522E6FD0602F2FE588CDA83, at: 2, frame: true, xat: 10}
 # DQ KFDMDADP and KFDMDARO. Page 0A02. The gear axis is the 6 points.
 # The 16-bit axis is the shared E6 FE word.
-- {name: bp_dmddx, pattern: 06010203040506, table: true}
-- {name: bp_dmddy, pattern: 080052F8B8FE480133031F05CD0C0A37, table: true}
-- {name: KFDMDARO, pattern: E6FC9820E6FD0A02E6FEB621E6FF0A02, at: 2, frame: true, rows: 8, cols: 6, ybits: 16, xtable: bp_dmddx, ytable: bp_dmddy}
-- {name: KFDMDADP, pattern: E6FC3820E6FD0A02E6FEB621E6FF0A02, at: 2, frame: true, rows: 8, cols: 6, ybits: 16, xtable: bp_dmddx, ytable: bp_dmddy}
+- {name: ap_dmddx, pattern: 06010203040506, table: true}
+- {name: ap_dmddy, pattern: 080052F8B8FE480133031F05CD0C0A37, table: true}
+- {name: KFDMDARO, pattern: E6FC9820E6FD0A02E6FEB621E6FF0A02, at: 2, frame: true, rows: 8, cols: 6, ybits: 16, xtable: ap_dmddx, ytable: ap_dmddy}
+- {name: KFDMDADP, pattern: E6FC3820E6FD0A02E6FEB621E6FF0A02, at: 2, frame: true, rows: 8, cols: 6, ybits: 16, xtable: ap_dmddx, ytable: ap_dmddy}
 # DQ. The 5C84 call. The E6 FC word is the 14 by 14 header, 30 bytes before the body.
 - {name: KFKHFM, pattern: DB00E6FC780FC2FDA6F8C2FEBDF9DA00D425, at: 4, add: 30, rows: 14, cols: 14}
 # DQ and DH KFTARX. Page 0A02. The temperature axis count is the odd byte after 50.
-- {name: bp_kftarx, pattern: 500A334D626A76839DABB8D3, table: true, add: 1}
-- {name: bp_kftarxx, pattern: 0C00A00F2017E01A401F, table: true}
-- {name: KFTARX, pattern: 'E6FC[00/01][08/EF]E6FD0A02E6FE[10/14][20/EC]E6FF0602', at: 2, frame: true, rows: 10, cols: 12, xbits: 16, ytable: bp_kftarx, xtable: bp_kftarxx}
+- {name: ap_kftarx, pattern: 500A334D626A76839DABB8D3, table: true, add: 1}
+- {name: ap_kftarxx, pattern: 0C00A00F2017E01A401F, table: true}
+- {name: KFTARX, pattern: 'E6FC[00/01][08/EF]E6FD0A02E6FE[10/14][20/EC]E6FF0602', at: 2, frame: true, rows: 10, cols: 12, xbits: 16, ytable: ap_kftarx, xtable: ap_kftarxx}
 # DQ KFLDRQ2. Page 0A02. The 4-point axis count sits one byte after 9A.
-- {name: bp_ldrq2, pattern: 9A040A142846, table: true, add: 1}
-- {name: KFLDRQ2, pattern: E6FC7612E6FD0A02E6FE7100E6FF0402, at: 2, frame: true, rows: 4, cols: 16, ytable: bp_ldrq2}
+- {name: ap_ldrq2, pattern: 9A040A142846, table: true, add: 1}
+- {name: KFLDRQ2, pattern: E6FC7612E6FD0A02E6FE7100E6FF0402, at: 2, frame: true, rows: 4, cols: 16, ytable: ap_ldrq2}
 # DQ-0060. Same 9850 call as the DA80 rows. The frame is 44 bytes before KFPBRK.
 # KFPRG is 524 on, KFURL is 680 on. KFPBRKNW is the existing anchor.
 - {name: KFPBRK, pattern: E6FC8224E6FD0702F2FEA8F8F2FFC2F9DA83104098501B45F2F80CFE, frame: true, add: 44, rows: 10, cols: 10, xbits: 16, ybits: 16}
@@ -78,9 +78,9 @@ mapsigs:
 - {name: KFURL, pattern: E6FC8224E6FD0702F2FEA8F8F2FFC2F9DA83104098501B45F2F80CFE, frame: true, add: 680, rows: 6, cols: 10, xbits: 16, ybits: 16}
 - {name: KFMSNWDK, pattern: E6FC8224E6FD0702F2FEA8F8F2FFC2F9DA83104098501B45F2F80CFE, frame: true, add: 856, rows: 16, cols: 6, xbits: 16, ybits: 16}
 # DQ. Page 0A02. LDRQ0S is the F2 word. LDRQ1ST is the 16 points after it.
-- {name: bp_rpm16, pattern: 10191F262C32383F454B5864717D8A96, table: true}
+- {name: ap_rpm16, pattern: 10191F262C32383F454B5864717D8A96, table: true}
 - {name: LDRQ0S, pattern: D7400A02F2F76014F047, at: 6}
-- {name: LDRQ1ST, pattern: D7400A02F2F76014F047, at: 6, add: 2, cols: 16, xtable: bp_rpm16}
+- {name: LDRQ1ST, pattern: D7400A02F2F76014F047, at: 6, add: 2, cols: 16, xtable: ap_rpm16}
 # DQ-0060. Page 0602, the bytes after the 04174880 marker.
 - {name: EDLDRP, pattern: D7400602C2FE0C235C7E, at: 6}
 - {name: TDLDRA, pattern: D08DD7400602C2FE1523, at: 8}
@@ -142,13 +142,13 @@ mapsigs:
 - {name: TABGSS, pattern: 0D08F2F40E9DD740060242F4183DFD01, at: 12, also: [{name: TABGSS2, add: 2}]}
 # AK-0004 and AS. The F2 operand is the tmot byte, so xat cannot read it.
 # The count byte is in front of these six points. The four far pointers are the curves.
-- {name: bp_nllm, pattern: 90ABC5D3E0ED, table: true, add: -1}
-- {name: NLLM_0_A, pattern: D4C5684DD4D56A4DD740E100F2FEDE09DA837043F7F80FA2, at: 2, deref: 1, dereffar: true, cols: 6, xtable: bp_nllm}
-- {name: NLLM_1_A, pattern: D4C5684DD4D56A4DD740E100F2FEDE09DA837043F7F80FA2, at: 2, deref: 1, derefat: 4, dereffar: true, cols: 6, xtable: bp_nllm}
-- {name: NLLM_2_A, pattern: D4C5684DD4D56A4DD740E100F2FEDE09DA837043F7F80FA2, at: 2, deref: 1, derefat: 8, dereffar: true, cols: 6, xtable: bp_nllm}
-- {name: NLLM_3_A, pattern: D4C5684DD4D56A4DD740E100F2FEDE09DA837043F7F80FA2, at: 2, deref: 1, derefat: 12, dereffar: true, cols: 6, xtable: bp_nllm}
+- {name: ap_nllm, pattern: 90ABC5D3E0ED, table: true, add: -1}
+- {name: NLLM_0_A, pattern: D4C5684DD4D56A4DD740E100F2FEDE09DA837043F7F80FA2, at: 2, deref: 1, dereffar: true, cols: 6, xtable: ap_nllm}
+- {name: NLLM_1_A, pattern: D4C5684DD4D56A4DD740E100F2FEDE09DA837043F7F80FA2, at: 2, deref: 1, derefat: 4, dereffar: true, cols: 6, xtable: ap_nllm}
+- {name: NLLM_2_A, pattern: D4C5684DD4D56A4DD740E100F2FEDE09DA837043F7F80FA2, at: 2, deref: 1, derefat: 8, dereffar: true, cols: 6, xtable: ap_nllm}
+- {name: NLLM_3_A, pattern: D4C5684DD4D56A4DD740E100F2FEDE09DA837043F7F80FA2, at: 2, deref: 1, derefat: 12, dereffar: true, cols: 6, xtable: ap_nllm}
 # 4B0906018CM. Far table entry for the 12x12 body; axes are shared flash tables.
-- {name: bp_kffwl_x, pattern: 0C181F252C36404D5B7590ABB8, table: true}
+- {name: ap_kffwl_x, pattern: 0C181F252C36404D5B7590ABB8, table: true}
 # Count is odd; the points sit on an even address.
-- {name: bp_kffwl_y, pattern: 181F252C364054617590ABB8, table: true, add: -1}
-- {name: KFFWL_0_A, pattern: 410B06024D0B0602, at: 4, far: true, rows: 12, cols: 12, xtable: bp_kffwl_x, ytable: bp_kffwl_y, also: [{name: KFFWL_1_A, add: 144}]}
+- {name: ap_kffwl_y, pattern: 181F252C364054617590ABB8, table: true, add: -1}
+- {name: KFFWL_0_A, pattern: 410B06024D0B0602, at: 4, far: true, rows: 12, cols: 12, xtable: ap_kffwl_x, ytable: ap_kffwl_y, also: [{name: KFFWL_1_A, add: 144}]}

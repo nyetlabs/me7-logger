@@ -162,6 +162,8 @@ functions:
     needle_hex:
       - "9A 04 0B XX E6 FC XX XX E6 FD 06 02"
       - "9A 04 0B 70 E6 FC XX XX"
+      # X22ka A/B. Jump bit 03, same E6 FC / E6 FD 06 02 frame as 04.
+      - "9A 03 0B XX E6 FC XX XX E6 FD 06 02"
 
   # Ignition-timing caller. config/maps.yaml names the maps at fixed distances
   # from this label. One hit on the images that have it.
@@ -255,7 +257,8 @@ functions:
 
   - name: LDRLMX_ldhbn
     needles:
-      - needle_hex: "{push:98} C2 F4 B3 F9"
+      # B3 F9 is 22m/S; B1 F9 is X22ka A/B. Same push and 5C 24 tail.
+      - needle_hex: "{push:98} C2 F4 XX F9"
       # 23g pushes one more register before the same call.
       - needle_hex: "{push:987} C2 F4 XX XX 46 F4"
       # 22N stores two bytes before that call.

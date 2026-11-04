@@ -1,0 +1,20 @@
+mapsigs:
+# X22ka A/B (early AZB). Sibling immediates of 22m / 10-common.
+- {name: SNM16OPUW, pattern: E6FCXXXXF2FD78F8F2FEXX8FDA004276F6F4XX8FE6FCBC00, add: 2}
+- {name: TABGBTS, pattern: 0D018F3AF2F4XXXXD740070242F4XXXXFD02, at: 14}
+# EXTP load of the byte before KFLAFWL (also-chain is caller-only on A/B).
+- {name: CWLAMFAW, pattern: 12A3D7400602C2F4XXXX68412D28, at: 8}
+- {name: VMAXNB, pattern: C2F4A88A2094F049D7400602C2F5XXXX48406D05, at: 14}
+- {name: KFFLLDE, pattern: 8820E6FCXXXXE6FD0602E6FE6424E6FF0602DA803A46, at: 4, frame: true, rows: 8, cols: 8, xbits: 16, ybits: 16}
+- {name: LDPBN, pattern: E6FCXXXXE6FD0602F2FE008FDA80DA44F0945C89, frame: true, xat: 10}
+# H uses C2FC3C02; A/B use C2FC3E00. Same EXTP 0702 byte load of KRKTE.
+- {name: KRKTE, pattern: D7400702C2FC3E00, at: 6}
+# DPUPS beside KUMSRL (+0x29). No E11A75FA tail; ULE jump then 0E32 pad.
+- {name: DPUPS, pattern: 43F8XXXXFD030E320D010E32}
+# LLR inlines the 0D0B/9D0C frame; table8_b prologue is not in this bin.
+- {name: KFMRESK, pattern: 9D0CE6FCXXXXE6FD3400F2FEXXXXF2FFXXXXDA005678, at: 4, xat: 16, yat: 12}
+- {name: KFMRES, pattern: 0D0BE6FCXXXXE6FD3400F2FEXXXXF2FFXXXXDA005678, at: 4, xat: 16, yat: 12}
+# Class bits. CDLATV/CDHSHE lists are in 10-common. CDLASH here: no DFFF, at:10.
+- {name: CDLASH, pattern: 64F4988DD7400602C2F4XXXX68412D05E6F44000, at: 10}
+- {name: CDLSH, pattern: FFFB64F49A8DD7400602C2F4XXXX68412D05E6F41000, at: 12}
+- {name: CDLSHV, anchor: CDLSH, add: 1}

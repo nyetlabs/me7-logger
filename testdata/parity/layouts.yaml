@@ -85,7 +85,7 @@
 25C:
   - "1037366304" # 4D1907558
   - "1037367724" # 4D1907558
-# 8D0907551A/B are dataset X22ka (early AZB). N is in 22m with G.
+# 8D0907551A/B are dataset X22ka (early NA S4 APB). N (EU AZB) is in 22m with G.
 # Both hit result_selector_sub; maps.yaml call distances differ from S/Q.
 X22ka:
   - "1037352738" # 8D0907551B

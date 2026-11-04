@@ -15,3 +15,5 @@ sets:
   - {rule: any, names: [NFSM, NFS2M, NFS2M_0_A, NFS2M_1_A]}
   - {rule: any, names: [NLLM, NLLM_0_A, NLLM_1_A, NLLM_2_A, NLLM_3_A]}
   - {rule: any, names: [NLL2M, NLL2M_0_A, NLL2M_1_A, NLL2M_2_A, NLL2M_3_A]}
+  # 4Z and similar: DAMOS splits the plain scalar into VMAXNB_0_A/_1_A.
+  - {rule: any, names: [VMAXNB, VMAXNB_0_A, VMAXNB_1_A]}

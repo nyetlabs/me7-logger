@@ -12,7 +12,7 @@ import (
 	"go.nyet.org/xdfkit/model"
 )
 
-var update = flag.Bool("update", false, "rewrite config/descriptions.yaml, config/storage.yaml, and config/units.yaml from the corpus")
+var update = flag.Bool("update", false, "rewrite descriptions/storage/units from the corpus, and the mapsig fingerprint in config_test.go")
 
 func corpusDir(t *testing.T) (root, dir string) {
 	t.Helper()

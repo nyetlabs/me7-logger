@@ -206,7 +206,8 @@ units:
 - {bits: 16, unit: "kg/h", factor: 10/100, precision: 3, maps: true, z: [
     KFMLDMX, KFMSNWDK, MLHFM, MLMAX, MLOFS], y: [
     KFWDKMSN]}
-- {bits: 16, unit: "km/h", factor: 1/128, precision: 4, maps: true, z: [VMAXNB]}
+- {bits: 16, unit: "km/h", factor: 1/128, precision: 4, maps: true, z: [
+    VMAXNB, VMAXNB_0_A, VMAXNB_1_A]}
 - {bits: 16, unit: "ms", clock: injection, precision: 4, maps: true, z: [TEMIN, TEMINVA, TVUB]}
 - {bits: 16, unit: "ms", factor: 1/375, precision: 4, maps: true, x: [FKKVS], y: [FKKVS]}
 - {bits: 16, unit: "ms/%", clock: krkte, precision: 5, maps: true, z: [KRKTE]}

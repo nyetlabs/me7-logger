@@ -170,6 +170,22 @@ func checkVehicles(c *ecucorpus.Corpus, vehicles map[string]vehicle, names []str
 			missing = true
 		}
 	}
+	// vehicles.yaml keys must resolve in corpus.tsv too: writeVehiclesJSON
+	// skips them and then refuses to write vehicles.json, leaving the page
+	// without vehicle group headers.
+	have := map[string]bool{}
+	for _, name := range names {
+		have[name] = true
+	}
+	for name := range vehicles {
+		if have[name] {
+			continue
+		}
+		if fam := c.Family(name); fam == "" || fam == "-" {
+			fmt.Fprintf(os.Stderr, "%s: no family in corpus.tsv\n", name)
+			missing = true
+		}
+	}
 	if missing {
 		return fmt.Errorf("missing vehicle or family rows")
 	}

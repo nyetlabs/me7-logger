@@ -35,12 +35,16 @@
 4D1907558-0004: {engine: 4.2T, code: BCY, vehicle: RS6, year: 2002-2004, market: EU}
 
 4Z7907551AA-0010: {engine: 2.7T, code: BEL, vehicle: allroad, year: 2004, market: NA}
+# Part list: JP allroad BES (ME7.1.1). Soft 1037366424.
+4Z7907551Q-0005: {engine: 2.7T, code: BES, vehicle: allroad, market: JP}
 4Z7907551R-0003: {engine: 2.7T, code: BEL, vehicle: "allroad, 04 A6", year: 2003, market: NA}
 # Bosch 0261208288, sw 1037368391 ident 030603. Tip and 6-speed.
 4Z7907551S-0020: {engine: 2.7T, code: BEL, vehicle: "allroad, 04 A6", year: 2003, market: NA}
 # Bosch 0261208484, sw 1037369096 ident 070404. Tip and 6-speed.
 4Z7907551T-0010: {engine: 2.7T, code: BEL, vehicle: allroad, year: 2003, market: NA}
 
+8D0907551A-0003: {engine: 2.7T, code: APB, vehicle: S4, year: 2000, gearbox: manual, market: NA}
+8D0907551B-0003: {engine: 2.7T, code: APB, vehicle: S4, year: 2000, gearbox: automatic, market: NA}
 8D0907551F-0001: {engine: 2.7T, code: ASJ, vehicle: RS4, year: 2001, gearbox: manual, market: EU}
 8D0907551G-0002: {engine: 2.7T, code: AZB, vehicle: S4, year: 2001, gearbox: manual, market: EU}
 8D0907551H-0003: {engine: 2.7T, code: APB, vehicle: S4, year: 2001, gearbox: manual, market: NA}

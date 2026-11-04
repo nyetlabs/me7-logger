@@ -63,11 +63,9 @@ absent:
     - CLRKA
     - DLBTS
     - FKHABMN
-    # Not in the 06A906032LP DAMOS (kp) export. HF and HS list KFDLULS at
-    # 0x1F135 before KFVPDKLD; LP has KFVPDKLD (0x1F6BF) and KLDLUL
-    # (0x1F741) only. NL is the same 4013.00 line and generate matches LP:
-    # KFVPDKLD and NDLDRAPU, no KFDLULS.
-    - KFDLULS
+    # KFDLULS: not block-absent. HF/HS/HN have it; LP/NL use KFVPDKLD/KLDLUL.
+    # SNM16OPUW: not absent. HS/HJ/HN/AL DAMOS use 0x130A8 (708C); BB uses
+    # 9E8C. HF's export lists 0x130CA on the same bytes (CE8C) — leave as a miss.
     - KFLBTS_0_A
     - KFMIZUNS
     - KFVPLGU
@@ -77,10 +75,6 @@ absent:
     - LDRQ1DY
     - RLSALULL
     - RLSALUN
-    # The HF DAMOS export lists it at 0x130A6, the count word, and the
-    # finder stores 0x130A8. To do: look for it by hand in WinOLS and
-    # confirm.
-    - SNM16OPUW
     - TABGSS2
   # 4Z7907551R has the full DAMOS. It has KFDLBTS, ZDLBTS, TABGBTS, and
   # DTBTS, and it does not have DLBTS. The lambts window has no
@@ -96,57 +90,30 @@ absent:
     - RLSALULL
     - TABGSS
     - TABGSS2
-    # 4Z7907551R.kp (DAMOS) has VMAXNB_0_A and VMAXNB_1_A only. AA.kp
-    # (manual) matches.
-    - VMAXNB
-  # No DAMOS export yet. No image in this block has the DA 00 42 76 call,
-  # so KFVPLGU and SNM16OPUW have no reader. DLBTS is only stored from the
-  # scanLbts arm that starts with 42 F4 FD 02. DH misses that chain. DQ
-  # takes the other arm, which does not store DLBTS. The M call
-  # 42 F4 FD 07 D7 40 .. 02 F2 F4 does not occur here.
+    # VMAXNB: not absent. R/AA DAMOS have VMAXNB_0_A/_1_A (sets.yaml any).
+  # DLBTS: lambts takes the non-store arm here. KFVPLGU: no DA 00 42 76.
+  # CLRH*: no 67 F8 11 00 reader. RLSALU*: no 74 F4 BC 8C / ASE path.
+  # NMAXF: DH/DQ/AK/AS A2L omit it (NMAX stays). DC DAMOS has it and still
+  # locates. SNM16OPUW: omitted on DC/DQ/AK/AS; DH still locates.
+  # Not absent (DH A2L / sibling DAMOS have them; a generate miss is a miss):
+  # FKKVS, KFTARX, KFNLLNST, NFS2M/NFSM family, CATR, CLAHSH2,
+  # and the CLAATR/CLAATS/CLALSH DTC class bytes (present on some parts).
   24EGKS:
     - DLBTS
     - KFVPLGU
-    - SNM16OPUW
-    # 4B0906018DH-0002.A2L lists NMAX and VMAXNB, and it does not list
-    # NMAXF. DC still locates the DB00+FD10 row.
-    - NMAXF
-    # 67 F8 11 00 is not in this block, so the rear-O2 class bytes have no reader.
     - CLRHK
     - CLRHKA
     - CLRKA
-    # The idle F2 word has no tmot axis-point table. 06 18 40 5B, E6 FE 02 03,
-    # and E6 FE E2 02 are not in the block.
-    - KFNLLNST
-    - NFSM
-    - NFS2M
-    - NFS2M_0_A
-    - NFS2M_1_A
-    # The M tail 74 F4 BC 8C is not in the block. The A8 01 site is the class-bit test.
+    - NMAXF
     - RLSALULL
     - RLSALUN
-    # DQ, AK, and AS have 9A F4 06 00 F3 F8, not the EXTP form. DC, DH, and AA locate the byte.
-    - CATR
-    # DC's call lands on an empty body. The others locate the 16 by 16 map.
-    - FKKVS
-    # DC has no 0C 00 0D 13 tail, and its page-0A02 bodies are the 0900 fill.
-    - KFTARX
-    # DC locates 1456, 1460, 1453, 1457, 1140, and 1110. DH locates 1140.
-    # AK, AS, and DQ do not have those words in the DTC index. 0156 is
-    # outside the index on all of them.
-    - CLAATR
-    - CLAATR2
-    - CLAATS
-    - CLAATS2
-    - CLAHSH2
-    - CLAHSHE2
-    - CLALSH2
+    - SNM16OPUW
   # No DAMOS export. 1037371702 is the naturally aspirated V8.
   # plsol, rlmx_w, and ldtvm are not in the routine table, so scanLdr,
   # scanLdrxn, and scanLdrapp do not open. The knock window does not
   # contain KFMIZUOF, and the only 6E 27 F6 F4 frame has no axis.
-  # DLBTS, KFVPLGU, and SNM16OPUW stay absent for the same reason as
-  # 24EGKS.
+  # DLBTS and KFVPLGU stay absent for the same reason as 24EGKS.
+  # Def lists NMAXF only (no NMAX, no VMAXNB forms).
   05A:
     - DLBTS
     - KFFLLDE
@@ -158,32 +125,38 @@ absent:
     - KFVPLGU
     - LDPBN
     - LDRXN
-    - SNM16OPUW
-    # No DAMOS export. No D867 / F6F5 DB00 NMAX pack and no XX02 VMAXNB.
     - NMAX
+    - SNM16OPUW
     - VMAXNB
+    - VMAXNB_0_A
+    - VMAXNB_1_A
   # Not in the 8D0907551F DAMOS export. That export has KFDLBTS, ZDLBTS,
-  # and TABGBTS, and it does not have these. It also has no FKKVS or KFTARX.
-  # ESKONF is not in that export either; the 0x55 check is still in the image.
-  # The export has LDRQ1DY and LDRQ1ST, and it does not list KFLDRQ1.
-  # It has KIFZGHG_0_A, KIFZGHG_1_A, and KIFZGHG_2_A, and it
-  # does not list KIFZGHG.
+  # and TABGBTS. ESKONF is not in that export either; the 0x55 check is
+  # still in the image. The export has LDRQ1DY and LDRQ1ST, and it does
+  # not list KFLDRQ1. It has KIFZGHG_0_A..2_A, and it does not list KIFZGHG.
+  # FKKVS: K/Q DAMOS have it and generate locates it on F/K/Q — not absent.
+  # KFTARX: omitted from F/K/Q DAMOS.
   23g:
     - DLBTS
-    - FKKVS
     - KFLBTS_0_A
     - KFLDRQ1
     - KFTARX
     - KFVPLGU
     - KIFZGHG
+  # Same KFLDRQ1 arm as 22m/RS4 (G/M DAMOS): LDRQ1DY and LDRQ1ST are
+  # located; the Q1 integrator is not the map. Other C/B names the RS4
+  # DAMOS has are not absent here.
+  X22ka:
+    - KFLDRQ1
   # No DAMOS export. Neither image has the DA 00 42 76 call, so KFVPLGU
   # and SNM16OPUW have no reader. The lambts window has DA 83 94 48
   # 06 F0 0C 00, so scanLbts takes the KFDLBTS arm and does not store DLBTS.
+  # 4D1/Spyker defs list NMAXF only (no NMAX, no VMAXNB forms).
   25C:
     - DLBTS
     - KFVPLGU
-    - SNM16OPUW
-    # No DAMOS export. 4D1907558.kp (manual) has neither name. The D740E100
-    # F2F5 48906D05 site decodes to page 0xE1 (0x384xxx), outside flash.
     - NMAX
+    - SNM16OPUW
     - VMAXNB
+    - VMAXNB_0_A
+    - VMAXNB_1_A

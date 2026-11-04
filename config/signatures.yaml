@@ -182,6 +182,8 @@ signatures:
 - {name: gangllr, size: 1, from: '0x804000', pattern: F3F8XXXXD740E100F7F8XXXX0D04D740E100F78EXXXXE6FC, single: true, at: 10}
 - {name: fcmEnd, size: 1, from: '0x804000', pattern: 0D0509C143FCXXXXEA804ADC, single: true, at: 6}
 - {name: fcmEnd, size: 1, from: '0x804000', pattern: 74E00D0509C143FCXXXXEA80, single: true, at: 8}
+# X22ka A/B. Tail word AE96; 22m/22N keep 4ADC / 74E0 above.
+- {name: fcmEnd, size: 1, from: '0x804000', pattern: 0D0509C143FCXXXXEA80AE96, single: true, at: 6}
 - {name: tevfakge_w, size: 2, from: '0x804000', pattern: C695F2F474E09AF402E0EA00XXXXF3F8, single: true, at: 12}
 - {name: tmotrvmx_b2w, size: 2, from: '0x804000', pattern: D740E100F7F8XXXXE6FC181D, single: true, at: 6}
 - {name: pvdkdsu_w, size: 2, from: '0x804000', pattern: 9D01E005D740E100F6F5XXXXF6F5DC93, at: 10}
