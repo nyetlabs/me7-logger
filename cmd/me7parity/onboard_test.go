@@ -11,7 +11,7 @@ import (
 	"go.nyet.org/xdfkit/canon"
 	"go.nyet.org/xdfkit/model"
 
-	"go.nyet.org/me7-logger/parity"
+	"go.nyet.org/me7-logger/info/parity"
 )
 
 func TestStageLabel(t *testing.T) {

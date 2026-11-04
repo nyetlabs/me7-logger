@@ -13,7 +13,7 @@ import (
 
 	"go.nyet.org/me7-logger/config"
 	"go.nyet.org/me7-logger/internal/ecucorpus"
-	"go.nyet.org/me7-logger/opcode"
+	"go.nyet.org/me7-logger/info/opcode"
 	"go.nyet.org/me7-logger/record"
 )
 
@@ -99,7 +99,7 @@ func TestFNamesTheMovedCalls(t *testing.T) {
 
 func tunerNames(t *testing.T) []string {
 	t.Helper()
-	b, err := os.ReadFile("../testdata/parity/names/tuner.yaml")
+	b, err := os.ReadFile("../../testdata/parity/names/tuner.yaml")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -118,7 +118,7 @@ func tunerNames(t *testing.T) []string {
 
 func TestFamilyFinderMaps(t *testing.T) {
 	caller := map[string]bool{}
-	b, err := os.ReadFile("../config/maps.yaml")
+	b, err := os.ReadFile("../../config/maps.yaml")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -359,7 +359,7 @@ func lastByte(img []byte, a *record.Axis) float64 {
 
 func parityImages(t *testing.T) []string {
 	t.Helper()
-	paths, err := ecucorpus.Open(t).List("../testdata/parity/images.yaml")
+	paths, err := ecucorpus.Open(t).List("../../testdata/parity/images.yaml")
 	if err != nil {
 		t.Fatal(err)
 	}

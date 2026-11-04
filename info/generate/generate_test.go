@@ -10,7 +10,7 @@ import (
 	"go.nyet.org/me7-logger/config"
 	"go.nyet.org/me7-logger/ecu"
 	"go.nyet.org/me7-logger/internal/heximg"
-	"go.nyet.org/me7-logger/opcode"
+	"go.nyet.org/me7-logger/info/opcode"
 	"go.nyet.org/me7-logger/record"
 )
 
@@ -334,14 +334,14 @@ func TestNoSerialImport(t *testing.T) {
 		t.Fatal(err)
 	}
 	s := string(b)
-	if strings.Contains(s, "\"go.nyet.org/me7-logger/kwp\"") || strings.Contains(s, "go.bug.st/serial") {
+	if strings.Contains(s, "\"go.nyet.org/me7-logger/log/kwp\"") || strings.Contains(s, "go.bug.st/serial") {
 		t.Fatal("generate must not open a serial port")
 	}
 }
 
 func readHex(t *testing.T, name string) []byte {
 	t.Helper()
-	img, err := heximg.Read(filepath.Join("..", "testdata", "opcode", name))
+	img, err := heximg.Read(filepath.Join("..", "..", "testdata", "opcode", name))
 	if err != nil {
 		t.Fatal(err)
 	}

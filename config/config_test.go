@@ -15,7 +15,7 @@ import (
 	"go.nyet.org/me7-logger/internal/ecucorpus"
 	"go.nyet.org/me7-logger/mapfile"
 	"go.nyet.org/me7-logger/needle"
-	"go.nyet.org/me7-logger/opcode"
+	"go.nyet.org/me7-logger/info/opcode"
 )
 
 // TestDirFor: config/ sits beside the executable's real path, so a symlink

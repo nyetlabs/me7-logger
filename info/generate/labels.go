@@ -10,7 +10,7 @@ import (
 
 	"go.nyet.org/xdfkit/model"
 
-	"go.nyet.org/me7-logger/opcode"
+	"go.nyet.org/me7-logger/info/opcode"
 )
 
 // Label is one row of the TSV ME7ImportLabelsScript reads. Size is 1 or 2

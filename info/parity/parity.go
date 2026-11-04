@@ -20,9 +20,9 @@ import (
 
 	"go.nyet.org/me7-logger/config"
 	"go.nyet.org/me7-logger/ecu"
-	"go.nyet.org/me7-logger/generate"
+	"go.nyet.org/me7-logger/info/generate"
 	"go.nyet.org/me7-logger/internal/ecucorpus"
-	"go.nyet.org/me7-logger/opcode"
+	"go.nyet.org/me7-logger/info/opcode"
 	"go.nyet.org/me7-logger/record"
 )
 

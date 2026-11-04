@@ -9,7 +9,7 @@ import (
 	kitxdf "go.nyet.org/xdfkit/xdf"
 
 	"go.nyet.org/me7-logger/config"
-	"go.nyet.org/me7-logger/opcode"
+	"go.nyet.org/me7-logger/info/opcode"
 	"go.nyet.org/me7-logger/record"
 )
 

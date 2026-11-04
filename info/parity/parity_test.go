@@ -576,7 +576,7 @@ func TestLoadNames(t *testing.T) {
 }
 
 func TestSetFamilies(t *testing.T) {
-	dir := filepath.Join("..", "testdata", "parity")
+	dir := filepath.Join("..", "..", "testdata", "parity")
 	blocks, err := loadBlocks()
 	if err != nil {
 		t.Fatal(err)
@@ -601,7 +601,7 @@ func TestSetFamilies(t *testing.T) {
 }
 
 func TestConfidenceSkipFile(t *testing.T) {
-	dir := filepath.Join("..", "testdata", "parity")
+	dir := filepath.Join("..", "..", "testdata", "parity")
 	skip, err := loadConfidenceSkip(dir)
 	if err != nil {
 		t.Fatal(err)
@@ -630,7 +630,7 @@ func TestConfidenceSkipFile(t *testing.T) {
 }
 
 func TestLayoutBlocks(t *testing.T) {
-	dir := filepath.Join("..", "testdata", "parity")
+	dir := filepath.Join("..", "..", "testdata", "parity")
 	blocks, err := loadBlocks()
 	if err != nil {
 		t.Fatal(err)
@@ -639,7 +639,7 @@ func TestLayoutBlocks(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	raw, err := os.ReadFile(filepath.Join("..", "config", "needles.yaml"))
+	raw, err := os.ReadFile(filepath.Join("..", "..", "config", "needles.yaml"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -745,7 +745,7 @@ func TestBeyondME7(t *testing.T) {
 }
 
 func TestME7InfoParity(t *testing.T) {
-	rep, err := Run(filepath.Join("..", "testdata", "parity"), ecucorpus.Open(t))
+	rep, err := Run(filepath.Join("..", "..", "testdata", "parity"), ecucorpus.Open(t))
 	if err != nil {
 		t.Fatal(err)
 	}

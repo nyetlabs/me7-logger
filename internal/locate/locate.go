@@ -13,9 +13,9 @@ import (
 	"go.nyet.org/xdfkit/model"
 
 	"go.nyet.org/me7-logger/config"
-	"go.nyet.org/me7-logger/generate"
+	"go.nyet.org/me7-logger/info/generate"
 	"go.nyet.org/me7-logger/record"
-	"go.nyet.org/me7-logger/xdf"
+	"go.nyet.org/me7-logger/info/xdf"
 )
 
 // Defs are the definition file flags shared by generate, probe, and corpus.

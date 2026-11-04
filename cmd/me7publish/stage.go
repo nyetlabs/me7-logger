@@ -17,7 +17,7 @@ import (
 
 	"go.nyet.org/me7-logger/internal/cli"
 	"go.nyet.org/me7-logger/internal/ecucorpus"
-	"go.nyet.org/me7-logger/parity"
+	"go.nyet.org/me7-logger/info/parity"
 )
 
 const stageHelp = `

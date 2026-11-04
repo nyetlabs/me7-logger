@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"go.nyet.org/me7-logger/csvlog"
-	"go.nyet.org/me7-logger/kwp"
-	"go.nyet.org/me7-logger/logcfg"
+	"go.nyet.org/me7-logger/log/csvlog"
+	"go.nyet.org/me7-logger/log/kwp"
+	"go.nyet.org/me7-logger/log/logcfg"
 	"go.nyet.org/me7-logger/record"
 )
 

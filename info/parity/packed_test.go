@@ -13,7 +13,7 @@ func TestGradePackedUsesDef(t *testing.T) {
 		ID: "KRKTE", Shape: "value", Address: 0, Data: model.Data{Bits: 8},
 	})
 	img := []byte{0x10}
-	got, err := GradePacked("../testdata/parity", []Packed{{Stem: "img", Img: img, Def: def}})
+	got, err := GradePacked("../../testdata/parity", []Packed{{Stem: "img", Img: img, Def: def}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -29,7 +29,7 @@ func TestGradePackedOracleHasNoStar(t *testing.T) {
 	def := packedModel(t, "damos", &model.Object{
 		ID: "KRKTE", Shape: "value", Address: 0, Data: model.Data{Bits: 8},
 	})
-	got, err := GradePacked("../testdata/parity", []Packed{{Stem: "img", Img: []byte{0x10}, Def: def}})
+	got, err := GradePacked("../../testdata/parity", []Packed{{Stem: "img", Img: []byte{0x10}, Def: def}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -43,7 +43,7 @@ func TestGradePackedKeepsDuplicate(t *testing.T) {
 		&model.Object{ID: "KRKTE", Shape: "value", Address: 0, Data: model.Data{Bits: 8}},
 		&model.Object{ID: "KRKTE 16", Shape: "value", Address: 1, Data: model.Data{Bits: 8}},
 	)
-	got, err := GradePacked("../testdata/parity", []Packed{{Stem: "img", Img: []byte{0x10, 0x20}, Def: def}})
+	got, err := GradePacked("../../testdata/parity", []Packed{{Stem: "img", Img: []byte{0x10, 0x20}, Def: def}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -56,7 +56,7 @@ func TestGradePackedCountsConstantCurve(t *testing.T) {
 	def := packedModel(t, "manual", &model.Object{
 		ID: "LDPBN", Shape: "value", Address: 0, Rows: 1, Cols: 1, Data: model.Data{Bits: 8},
 	})
-	got, err := GradePacked("../testdata/parity", []Packed{{Stem: "img", Img: []byte{0x10}, Def: def}})
+	got, err := GradePacked("../../testdata/parity", []Packed{{Stem: "img", Img: []byte{0x10}, Def: def}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -70,7 +70,7 @@ func TestGradePackedCountsOrdinalAxis(t *testing.T) {
 		ID: "LAMFA", Shape: "2d", Address: 0, Rows: 2, Cols: 2, Data: model.Data{Bits: 8},
 		X: &model.Axis{Source: "ordinal"}, Y: &model.Axis{Source: "ordinal"},
 	})
-	got, err := GradePacked("../testdata/parity", []Packed{{Stem: "img", Img: []byte{1, 2, 3, 4}, Def: def}})
+	got, err := GradePacked("../../testdata/parity", []Packed{{Stem: "img", Img: []byte{1, 2, 3, 4}, Def: def}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -83,7 +83,7 @@ func TestGradePackedSkipsMapWithoutAxis(t *testing.T) {
 	def := packedModel(t, "auto", &model.Object{
 		ID: "LAMFA", Shape: "2d", Address: 0, Rows: 2, Cols: 2, Data: model.Data{Bits: 8},
 	})
-	got, err := GradePacked("../testdata/parity", []Packed{{Stem: "img", Img: make([]byte, 8), Def: def}})
+	got, err := GradePacked("../../testdata/parity", []Packed{{Stem: "img", Img: make([]byte, 8), Def: def}})
 	if err != nil {
 		t.Fatal(err)
 	}

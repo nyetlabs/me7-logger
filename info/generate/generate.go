@@ -12,13 +12,13 @@ import (
 	"strings"
 
 	"go.nyet.org/me7-logger/config"
-	"go.nyet.org/me7-logger/connect"
+	"go.nyet.org/me7-logger/info/connect"
 	"go.nyet.org/me7-logger/ecu"
 	"go.nyet.org/me7-logger/ident"
-	"go.nyet.org/me7-logger/interp"
+	"go.nyet.org/me7-logger/info/interp"
 	"go.nyet.org/me7-logger/mapfile"
 	"go.nyet.org/me7-logger/needle"
-	"go.nyet.org/me7-logger/opcode"
+	"go.nyet.org/me7-logger/info/opcode"
 	"go.nyet.org/me7-logger/record"
 )
 

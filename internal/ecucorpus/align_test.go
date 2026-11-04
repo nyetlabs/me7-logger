@@ -10,9 +10,9 @@ import (
 	"go.nyet.org/xdfkit/canon"
 	"go.nyet.org/xdfkit/model"
 
-	"go.nyet.org/me7-logger/generate"
+	"go.nyet.org/me7-logger/info/generate"
 	"go.nyet.org/me7-logger/internal/ecucorpus"
-	"go.nyet.org/me7-logger/xdf"
+	"go.nyet.org/me7-logger/info/xdf"
 )
 
 // corpusCheckout is ../ecu-corpus beside this module when that manifest

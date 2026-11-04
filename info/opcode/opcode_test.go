@@ -185,7 +185,7 @@ func testPrefixes() [][]byte {
 
 func readHex(t *testing.T, name string) []byte {
 	t.Helper()
-	img, err := heximg.Read(filepath.Join("..", "testdata", "opcode", name))
+	img, err := heximg.Read(filepath.Join("..", "..", "testdata", "opcode", name))
 	if err != nil {
 		t.Fatal(err)
 	}

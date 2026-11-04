@@ -16,11 +16,11 @@ import (
 	kitxdf "go.nyet.org/xdfkit/xdf"
 
 	"go.nyet.org/me7-logger/config"
-	"go.nyet.org/me7-logger/generate"
+	"go.nyet.org/me7-logger/info/generate"
 	"go.nyet.org/me7-logger/internal/cli"
 	"go.nyet.org/me7-logger/internal/locate"
-	"go.nyet.org/me7-logger/opcode"
-	"go.nyet.org/me7-logger/place"
+	"go.nyet.org/me7-logger/info/opcode"
+	"go.nyet.org/me7-logger/info/place"
 	"go.nyet.org/me7-logger/record"
 )
 

@@ -10,7 +10,7 @@ import (
 
 	"go.nyet.org/me7-logger/internal/cli"
 	"go.nyet.org/me7-logger/internal/ecucorpus"
-	"go.nyet.org/me7-logger/parity"
+	"go.nyet.org/me7-logger/info/parity"
 )
 
 // version is set from git describe by the Makefile. Do not edit it here.

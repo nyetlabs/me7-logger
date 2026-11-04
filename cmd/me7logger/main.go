@@ -13,9 +13,9 @@ import (
 
 	"go.nyet.org/me7-logger/config"
 	"go.nyet.org/me7-logger/internal/cli"
-	"go.nyet.org/me7-logger/kwp"
-	"go.nyet.org/me7-logger/logcfg"
-	"go.nyet.org/me7-logger/logger"
+	"go.nyet.org/me7-logger/log/kwp"
+	"go.nyet.org/me7-logger/log/logcfg"
+	"go.nyet.org/me7-logger/log/logger"
 )
 
 // version is set from git describe by the Makefile. Do not edit it here.
