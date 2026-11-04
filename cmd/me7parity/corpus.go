@@ -14,7 +14,6 @@ import (
 
 	"go.nyet.org/xdfkit/canon"
 	"go.nyet.org/xdfkit/model"
-	"gopkg.in/yaml.v3"
 
 	"go.nyet.org/me7-logger/config"
 	"go.nyet.org/me7-logger/internal/cli"
@@ -128,7 +127,7 @@ func cmdCorpus(args []string) error {
 		}
 		return printGrades(rep, want)
 	}
-	refs, err := loadRefTable(*data)
+	refs, err := loadRefTable()
 	if err != nil {
 		return err
 	}
@@ -1461,22 +1460,18 @@ func located(d locate.Defs, prepare func() (string, *model.CategoryTable, error)
 	return m, nil
 }
 
-// refTable is references.yaml: the reference names our address supersedes.
-// Aliases of one map are config/sets.yaml.
+// refTable is config/sets.yaml except: the reference names our address supersedes.
+// Aliases of one map are also config/sets.yaml.
 type refTable struct {
-	Except []string `yaml:"except"`
+	Except []string
 }
 
-func loadRefTable(data string) (refTable, error) {
-	var t refTable
-	b, err := os.ReadFile(filepath.Join(data, "references.yaml"))
+func loadRefTable() (refTable, error) {
+	except, err := config.ReferenceExcept()
 	if err != nil {
-		return t, err
+		return refTable{}, err
 	}
-	if err := yaml.Unmarshal(b, &t); err != nil {
-		return t, fmt.Errorf("references.yaml: %w", err)
-	}
-	return t, nil
+	return refTable{Except: except}, nil
 }
 
 // reference compares located with the manual, DAMOS, or A2L definition prev.

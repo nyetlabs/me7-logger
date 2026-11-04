@@ -1,0 +1,103 @@
+# Cross-layout family-finder rows (was mid-40-24bcd). Loaded for every
+# block except 24BCD/24bH, which still run these from 24bcd.yaml in place.
+mapsigs:
+# Axis-point tables shared by several curves. The hit is the count byte.
+# SGA06MDUB is the gear axis of KFDMDADP and KFDMDARO. The caller reads it
+# from RAM 0x8EBE. That word is stored as 0x0500, then copied from RAM 0x8AF8.
+# The store of the header address itself has not turned up, so the table is
+# matched by these bytes. Another binary can reuse the name once its store,
+# or its own pattern, is known.
+- {name: SGA06MDUB, pattern: '06010203040506', table: true}
+- {name: ap_tmot, pattern: 0618405BXX90B806, table: true}
+- {name: ap_nmot, pattern: 100A141E28323C46, table: true}
+# 4D1907558 FWFTBRTA axis. The count sits 24 bytes in. The same bytes are on 0002.
+- {name: ap_fwftbrta, pattern: 40404040404000080B25405B687583AB8B85807C7A7876710E0B182533404D5B687583909DABB871, table: true, add: 24}
+- {name: NFSM, pattern: 060243F8BA1C9D05, at: 4, add: 1, cols: 6, xtable: ap_tmot}
+- {name: NLLM, pattern: 060243F8C11C9D05, at: 4, add: 30, cols: 6, xtable: ap_tmot}
+- {name: DWKRMSN, pattern: 0602C2F4XXXX68412D1BF2F48E9B42F4XXXX, at: 4, add: 1, cols: 16, xtable: ap_nmot}
+- {name: KRFKLN, pattern: 'FD04E11A75FA[00/F9]A50D12D7400602F3F8[88/8D]1XD740', at: 16, add: 17, cols: 16, xtable: ap_nmot}
+# 22N copy of RLSALULL. The tail matches the row above; these front bytes differ.
+- {name: NWPMBBR, pattern: F3F87AF843F8XXXX8D0AF3FA, at: 6}
+# Family-finder maps. addMap and addMapRef store this pointer.
+# addMapAt is absent: its address is the body after the counts.
+- {name: MLHFM, from: '0x820000', pattern: F2FXXXXX7C1X46FX00029DXXF0XX5C1XD4XXXXXX, at: 18, cols: 512, plain: true}
+- {name: WFRL, pattern: E6FCXXXXF2FDXXXXE6FE1F00DAXXXXXXF05X7C14, at: 2, cols: 31, plain: true}
+- {name: KFFWL_0_A, pattern: E6FCXXXXF2FDXXXXE6FE1X00DAXXXXXXXXXXXXXXXXXX, at: 20, deref: 1, dereffar: true}
+- {name: KFFWL_1_A, pattern: E6FCXXXXF2FDXXXXE6FE1X00DAXXXXXXXXXXXXXXXXXX, at: 20, deref: 1, derefat: 4, dereffar: true}
+- {name: KFFWLW, pattern: E6FCXXXXF2FDXXXXE6FE1X00DAXXXXXXXXXXXXXXXXXXXXXX, at: 18, frame: true}
+- {name: KFFWLW, pattern: E6FCXXXXF2FDXXXXE6FE1X00DAXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX, at: 34, frame: true}
+- {name: KFFWLW, pattern: E6FCXXXXE6FDF100F2FEXXXXF2FFXXXXDA005678F084E6FCXXXXE6FDF100F2FEXXXXF2FFXXXXDA005678, at: 24, xat: 36, yat: 32}
+- {name: WFRL, pattern: E6FCXXXXF2FDXXXXE6FE1A00DAXXXXXX7C14F058, at: 2, cols: 26, plain: true}
+- {name: WFRL, pattern: E6FCXXXXF2FDXXXXE6FE1F00DAXXXXXX7C14F058, at: 2, cols: 31, plain: true}
+- {name: LDRXNZK, pattern: C2F5XXXX5C858850E6FCXXXXE6FDXXXXF2FEXXXXDA80XXXX9820, at: 10, frame: true, add: 34, cols: 16, xbits: 16}
+- {name: LDRXN, pattern: C2F4XXXX5C848840E6FCXXXXE6FDXXXXF2FEXXXXDA80XXXX9820, at: 10, frame: true, add: 34, cols: 16, xbits: 16}
+# scanPed split arm. The first C2F4 call in the window is the KFPEDR pair.
+# The second call, marked by the F2 F4 prefix, is the KFPED pair. Each pair
+# is one pointer and the next word. F2 FF is the rpm column and F2 FE is the
+# pedal row. The plain names are the other arm.
+- {name: KFPEDR_0_A, open: F2F40EFEF189F19A7C85F0XXC2F4XXXX5C14D4C4XXXXE6FDXXXXF2FEXXXXF2FFXXXXDA8XXXXX, pattern: C2F4XXXX5C14D4C4XXXXE6FDXXXXF2FEXXXXF2FFXXXXDA8XXXXX, at: 8, deref: 1, xat: 20, yat: 16}
+- {name: KFPEDR_1_A, open: F2F40EFEF189F19A7C85F0XXC2F4XXXX5C14D4C4XXXXE6FDXXXXF2FEXXXXF2FFXXXXDA8XXXXX, pattern: C2F4XXXX5C14D4C4XXXXE6FDXXXXF2FEXXXXF2FFXXXXDA8XXXXX, at: 8, deref: 1, derefat: 2, xat: 20, yat: 16}
+- {name: KFPED_0_A, pattern: F2F40EFEF189F19A7C85F0XXC2F4XXXX5C14D4C4XXXXE6FDXXXXF2FEXXXXF2FFXXXXDA8XXXXX, at: 20, deref: 1, xat: 32, yat: 28}
+- {name: KFPED_1_A, pattern: F2F40EFEF189F19A7C85F0XXC2F4XXXX5C14D4C4XXXXE6FDXXXXF2FEXXXXF2FFXXXXDA8XXXXX, at: 20, deref: 1, derefat: 2, xat: 32, yat: 28}
+- {name: KFPED, absent: C2F4XXXX5C14D4C4XXXXE6FDXXXXF2FEXXXXF2FFXXXXDA8XXXXX, pattern: F6F4XXXX0D0AE6FCXXXXF2FDXXXXF2FEXXXXDA00DE73F6F4XXXX9A4X, at: 8, add: 60, rows: 16, cols: 12, xbits: 16, ybits: 16}
+- {name: KFPEDR, absent: C2F4XXXX5C14D4C4XXXXE6FDXXXXF2FEXXXXF2FFXXXXDA8XXXXX, pattern: E6FCXXXXF2FDXXXXF2FEXXXXDA00DE73F6F4XXXX0D0AE6FCXXXXF2FDXXXXF2FEXXXXDA00DE73F6F4XXXX9A4X, at: 2, add: 52, rows: 16, cols: 8, xbits: 16, ybits: 16}
+# F2 FF is the column and F2 FE is the row. FZWWLRLN's column is load and its
+# row is rpm. KFMI_UM's column is rpm and its row is load.
+- {name: FZWWLRLN, open: 'E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}X0XX0B98', pattern: 'E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:16}', at: 2, xat: 14, yat: 10}
+- {name: KFZWWLNM, open: 'E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}X0XX0B98', pattern: 'E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}', at: 2}
+- {name: KFMI_UM, open: F3FXXXXXF3FXXXXXB1X041XX, pattern: E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDA8XXXXX, at: 2, xat: 14, yat: 10}
+- {name: KFZW, open: '88X0E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}F7F8XXXXD089', pattern: 'E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}', at: 2}
+- {name: KFZW2_0_A, open: '{zwgru:F7F8}08XX', pattern: '47FXFF003DXXC2FXXXXX5C1XD4CXXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}', at: 14, deref: 1}
+- {name: KFZW2_0_A, open: '{zwgru:F7F8}98X0', pattern: '47FXFF003DXXC2FXXXXX5C1XD4CXXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}', at: 14, deref: 1}
+- {name: KFZW2_0_A, open: '{zwgru:F7F8}9AXXXXXX', pattern: '47FXFF003DXXC2FXXXXX5C1XD4CXXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}', at: 14, deref: 1}
+- {name: KFZW2_0_A, open: '{zwgru:F7F8}C2F4XXXX', pattern: '47FXFF003DXXC2FXXXXX5C1XD4CXXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}', at: 14, deref: 1}
+- {name: KFZW2_1_A, open: '{zwgru:F7F8}08XX', pattern: '47FXFF003DXXC2FXXXXX5C1XD4CXXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}', at: 14, deref: 1, derefat: 2}
+- {name: KFZW2_1_A, open: '{zwgru:F7F8}98X0', pattern: '47FXFF003DXXC2FXXXXX5C1XD4CXXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}', at: 14, deref: 1, derefat: 2}
+- {name: KFZW2_1_A, open: '{zwgru:F7F8}9AXXXXXX', pattern: '47FXFF003DXXC2FXXXXX5C1XD4CXXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}', at: 14, deref: 1, derefat: 2}
+- {name: KFZW2_1_A, open: '{zwgru:F7F8}C2F4XXXX', pattern: '47FXFF003DXXC2FXXXXX5C1XD4CXXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}', at: 14, deref: 1, derefat: 2}
+- {name: KFZW2, open: '{zwgru:F7F8}08XX', pattern: '47FXFF003DXXE6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}', at: 18}
+- {name: KFZW2, open: '{zwgru:F7F8}98X0', pattern: '47FXFF003DXXE6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}', at: 18}
+- {name: KFZW2, open: '{zwgru:F7F8}9AXXXXXX', pattern: '47FXFF003DXXE6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}', at: 18}
+- {name: KFZW2, open: '{zwgru:F7F8}C2F4XXXX', pattern: '47FXFF003DXXE6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXX{slot:17}', at: 18}
+- {name: KFLDRQ1, open: '9AXXXXXX{plsol:C2FX}{pvdkds:C2FX}20XX', pattern: E6FCXXXXE6FDXXXXE6FEXXXXE6FFXXXXDA8XXXXX, at: 2, frame: true}
+- {name: KFLDRQ1, open: '{plsol:F3FX}{pvdkds:23FX}8DXX', pattern: E6FCXXXXE6FDXXXXE6FEXXXXE6FFXXXXDA8XXXXX, at: 2, frame: true}
+- {name: KFMRESK, open: '{vfzg:F3FX}43FXXXXX9DXX', first: true, pattern: E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDAXXXXXX, at: 2}
+- {name: NFSM, open: '{dns:F7FX}0D02{dns:F78E}E6FCXXXX', first: true, pattern: E6FCXXXXE6FDXXXXF2FEXXXXDAXXXXXX8840, at: 2, frame: true}
+- {name: NFSM, open: DAXXXXXX, pattern: [E6FCXXXXE6FDXXXXD740E100F2FEXXXXDAXXXXXX, E6FCXXXXE6FDXXXXF2FEXXXXDAXXXXXX], at: 2, frame: true, also: [{name: NFS2M}, {name: NLLM}, {name: NLL2M}]}
+- {name: NLLMGFS, open: DAXXXXXX, pattern: E6FCXXXXE6FDXXXXE6FEXXXXE6FFXXXXDAXXXXXX0804, at: 2, frame: true, also: [{name: NLLMG}]}
+- {name: NFS2M_0_A, pattern: D4C4XXXXD4D4XXXXF2FEXXXXDA80XXXXF7F8XXXXE6FCXXXXE6FD0602F2FEXXXXDA80XXXXF7F8XXXXC2F4XXXX5C24D4C4XXXXD4D4XXXXF2FEXXXXDA80XXXXF7F8XXXX9A24, at: 2, deref: 1, dereffar: true, cols: 6, xtable: ap_tmot}
+- {name: NFS2M_1_A, pattern: D4C4XXXXD4D4XXXXF2FEXXXXDA80XXXXF7F8XXXXE6FCXXXXE6FD0602F2FEXXXXDA80XXXXF7F8XXXXC2F4XXXX5C24D4C4XXXXD4D4XXXXF2FEXXXXDA80XXXXF7F8XXXX9A24, at: 2, deref: 1, derefat: 4, dereffar: true, cols: 6, xtable: ap_tmot}
+- {name: NLL2M_0_A, pattern: D4C4XXXXD4D4XXXXF2FEXXXXDA80XXXXF7F8XXXXE6FCXXXXE6FD0602F2FEXXXXDA80XXXXF7F8XXXXC2F4XXXX5C24D4C4XXXXD4D4XXXXF2FEXXXXDA80XXXXF7F8XXXX9A24, at: 48, deref: 1, dereffar: true, cols: 6, xtable: ap_tmot}
+- {name: NLL2M_1_A, pattern: D4C4XXXXD4D4XXXXF2FEXXXXDA80XXXXF7F8XXXXE6FCXXXXE6FD0602F2FEXXXXDA80XXXXF7F8XXXXC2F4XXXX5C24D4C4XXXXD4D4XXXXF2FEXXXXDA80XXXXF7F8XXXX9A24, at: 48, deref: 1, derefat: 4, dereffar: true, cols: 6, xtable: ap_tmot}
+- {name: NLLM_0_A, open: DAXXXXXX, pattern: D4C5XXXXD4D5XXXXD740E100F2FEXXXXDAXXXXXX, at: 2, deref: 1, dereffar: true, also: [{name: NLL2M_0_A}]}
+- {name: NLLM_1_A, open: DAXXXXXX, pattern: D4C5XXXXD4D5XXXXD740E100F2FEXXXXDAXXXXXX, at: 2, deref: 1, derefat: 4, dereffar: true, also: [{name: NLL2M_1_A}]}
+- {name: NLLM_2_A, open: DAXXXXXX, pattern: D4C5XXXXD4D5XXXXD740E100F2FEXXXXDAXXXXXX, at: 2, deref: 1, derefat: 8, dereffar: true, also: [{name: NLL2M_2_A}]}
+- {name: NLLM_3_A, open: DAXXXXXX, pattern: D4C5XXXXD4D5XXXXD740E100F2FEXXXXDAXXXXXX, at: 2, deref: 1, derefat: 12, dereffar: true, also: [{name: NLL2M_3_A}]}
+- {name: KFPEDR, absent: C2F4XXXX5C14D4C4XXXXE6FDXXXXF2FEXXXXF2FFXXXXDA8XXXXX, open: 'E6FCXXXX{wped_w:F2FD}{slot:11}E6FCXXXX{nmot_w:F2FD}{slot:11}F6F4XXXX', pattern: E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDA8XXXXX, at: 2}
+# Rows shared by several families. They sit below the rows above so
+# those fill first.
+- {name: KFMSNWDK, pattern: E6FCXXXXF2FD4CA2F2FE, add: 48}
+- {name: KFDLULS, pattern: [C2F4XXXXF6F49AA80D0B, C2F4XXXXF6F4B6A70D0B], add: 21}
+- {name: KISRM, pattern: 'F6F4XXA1F2F7XXXXC2FC[52/D6]0D', at: 6}
+- {name: TABGSS, pattern: D7400602F2F6XXXX7C162064, at: 6}
+- {name: VMAXNB, pattern: D7400702F2F4XXXX48C06D05, at: 6, also: [{name: NMAXGA, add: -24}]}
+# scanLamfa. The pointer is the byte counts: 15 one-byte nmot points, a pad, six mrfa_w words.
+- {name: LAMFA, open: '{mrfa_w:F2F4}8840{nmot:C2F5}8850E6FXXXXXE6F5XXXX88X088X0', pattern: C2FCXXXXE6FDXXXXE6FEXXXXD740XX02C2FFXXXXDA8XXXXX, at: 2, add: 30, rows: 15, cols: 6, ybits: 8, xbits: 16}
+# scanKfzw, when the call goes to the segment 0 table. The F2 words are the axis RAM on this image.
+- {name: KFZW, open: '{zwgru:F7F8}08XX', pattern: 3D0FE6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDA00242B, at: 4, xat: 16, yat: 12}
+- {name: KFZW2, open: '{zwgru:F7F8}08XX', pattern: 47FXFF003DXXE6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDAXXXXXX, at: 8, xat: 20, yat: 16}
+# scanLdr after CWLDIMX. The F2 words beside the call are the axis RAM.
+- {name: KFLDIMX, pattern: E6FCXXXXE6FDXXXXE6FEF816E6FF0A02DA83, frame: true, xat: -18, yat: -4}
+- {name: LDIATA, pattern: E6FCXXXXE6FDXXXXF2FE0C8DDA83, frame: true, xat: 10}
+- {name: KFLDRL, pattern: E6FCXXXXE6FDXXXXE6FE0A17E6FF0A02DA83, frame: true, xat: -4, yat: -18}
+# scanLamfa, the same mrfa_w window as LAMFA. CWLAMFAW is the 66 FX compare.
+# KFLAMKRL is the one quad. DLAMTANS is the curve whose count sits five bytes before the body.
+- {name: CWLAMFAW, open: '{mrfa_w:F2F4}8840{nmot:C2F5}8850E6FXXXXXE6F5XXXX88X088X0', pattern: C2FXXXXX66FXXX002DXX, at: 2}
+- {name: KFLAMKRL, pattern: E6FCD515E6FD0602E6FE7C02E6FF0602DA83, frame: true}
+- {name: DLAMTANS, pattern: C2FCBE2CE6FDBF2CE6FE0902DA83, at: 2, add: 5, cols: 4}
+# scanLbts, the lambts_w window that takes the DA 8X branch. TABGBTS is the 42 F4 compare.
+- {name: TABGBTS, pattern: 42F4A230FD04E118, at: 2}
+# KFMIOP's other axis is an F6 F4 store, which xat cannot name.
+- {name: KFMIOP, pattern: F6F462A8E6FC5C67E6FDBC68F2FEF28CF0F4DA82, at: 6, yat: 14}
+# scanLdrxn, the calls that are not the C2F4 5C84 form. The frame is the E6FC immediate.
+- {name: LDRXN, pattern: [E6FCXXXXE6FDXXXXF2FEXXXXDA8XXXXXF094C2F4, E6FCXXXXE6FDXXXXF2FEXXXXDA8XXXXXF094F6F9, E6FCXXXXE6FDXXXXF2FEXXXXDA8XXXXXF6F4XXXX0D27], at: 2, frame: true, add: 34, cols: 16, xbits: 16}

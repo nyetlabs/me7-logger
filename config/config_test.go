@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 	"testing"
@@ -100,7 +101,7 @@ func TestShippedSignatures(t *testing.T) {
 	// Stable sequence of expanded mapsig rows (name|pattern). Catches
 	// accidental mapsig edits/reorders; bump with go test ./config -update
 	// after an intentional mapsigs.d change.
-	const want = "8e6e3b6d6f296b21267b6f526ba2ef3904f11b598cbc9a5f17088559b3522acd"
+	const want = "b6c80314fcfa70fb2c5920cd3881ab9c53695e2facf46884446bc247b5541cb3"
 	if got == want {
 		return
 	}
@@ -139,8 +140,8 @@ func TestMapSigsDirOrder(t *testing.T) {
 		}
 	}
 	sort.Strings(names)
-	if len(names) == 0 || !strings.HasPrefix(names[0], "10-") || !strings.HasPrefix(names[len(names)-1], "80-") {
-		t.Fatalf("shard names want 10-..80-, got %v", names)
+	if len(names) == 0 || !slices.Contains(names, "common.yaml") {
+		t.Fatalf("shard names want common.yaml, got %v", names)
 	}
 	parts, err := ReadMapSigs("")
 	if err != nil {
@@ -148,6 +149,49 @@ func TestMapSigsDirOrder(t *testing.T) {
 	}
 	if len(parts) != len(names) {
 		t.Fatalf("ReadMapSigs parts %d != files %d", len(parts), len(names))
+	}
+	ordered, block, err := mapSigShardNames("")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if block != "" || ordered[0] != "common.yaml" {
+		t.Fatalf("all-shard order block=%q starts with %s", block, ordered[0])
+	}
+}
+
+func TestReadMapSigsForLayout(t *testing.T) {
+	// 24BCD software number from layouts.yaml.
+	sel, err := SelectMapSigs("1037363355")
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []string{"common.yaml", "24bcd.yaml", "24bcd-nl-lp-cb.yaml"}
+	if sel.LayoutID != "1037363355" || sel.Block != "24BCD" || !slices.Equal(sel.Shards, want) {
+		t.Fatalf("24BCD %#v", sel)
+	}
+	if len(sel.Parts) != len(sel.Shards) {
+		t.Fatalf("parts %d shards %v", len(sel.Parts), sel.Shards)
+	}
+	for _, n := range sel.Shards {
+		if n == "23g.yaml" || n == "25a.yaml" || n == "family.yaml" {
+			t.Fatalf("24BCD loaded foreign shard %s", n)
+		}
+	}
+	// 23g: family before layout-specific (old 40-24bcd before 80-rest).
+	g, err := SelectMapSigs("1037354531")
+	if err != nil {
+		t.Fatal(err)
+	}
+	gWant := []string{"common.yaml", "family.yaml", "23g.yaml"}
+	if g.LayoutID != "1037354531" || g.Block != "23g" || !slices.Equal(g.Shards, gWant) {
+		t.Fatalf("23g %#v", g)
+	}
+	all, err := SelectMapSigs("no-such-id")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if all.Block != "" || len(all.Shards) <= len(want) {
+		t.Fatalf("unknown id should load all shards, got %#v", all)
 	}
 }
 

@@ -21,7 +21,6 @@ import (
 	"go.nyet.org/me7-logger/config"
 	"go.nyet.org/me7-logger/ecu"
 	"go.nyet.org/me7-logger/generate"
-	"go.nyet.org/me7-logger/ident"
 	"go.nyet.org/me7-logger/internal/ecucorpus"
 	"go.nyet.org/me7-logger/opcode"
 	"go.nyet.org/me7-logger/record"
@@ -607,7 +606,7 @@ func run(dir string, images []string, defOf func(string) string, gen imageGen) (
 	}
 	catSet := nameSet(cat)
 	measSet := nameSet(meas)
-	blocks, err := loadBlocks(dir)
+	blocks, err := loadBlocks()
 	if err != nil {
 		return nil, err
 	}
@@ -617,7 +616,7 @@ func run(dir string, images []string, defOf func(string) string, gen imageGen) (
 	}
 	tuner, axes := lists.tuner, lists.dims
 	ntier := lists.tier
-	layout, err := loadLayoutOrder(dir, blocks)
+	layout, err := loadLayoutOrder(blocks)
 	if err != nil {
 		return nil, err
 	}
@@ -1113,71 +1112,35 @@ func familiesOf(sets []config.Set, tier map[string]string, dims map[string]int) 
 // tierOrder is the priority order of a tiers map, highest first.
 var tierOrder = []string{"S", "A", "B", "C", "D"}
 
-var epkRE = regexp.MustCompile(`[0-9]+/[0-9]+/ME7[!-~]*`)
-
 // EPK is the calibration string in the image, empty when it has none.
 func EPK(img []byte) string {
-	return string(epkRE.Find(img))
+	return config.EPK(img)
 }
 
 // LayoutID is the id layouts.yaml lists an image by: the Bosch software
 // number, or the EPK string when the image carries none.
 func LayoutID(img []byte) string {
-	if sw := ident.Find(img).SWNumber; sw != "" {
-		return sw
-	}
-	return EPK(img)
+	return config.LayoutID(img)
 }
 
-// loadBlocks reads layouts.yaml, the layout ids of each code layout block.
-// A missing file returns nil.
-func loadBlocks(dir string) (map[string][]string, error) {
-	b, err := os.ReadFile(filepath.Join(dir, "layouts.yaml"))
-	if os.IsNotExist(err) {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, err
-	}
-	var blocks map[string][]string
-	if err := yaml.Unmarshal(b, &blocks); err != nil {
-		return nil, fmt.Errorf("layouts.yaml: %w", err)
-	}
-	return blocks, nil
+// loadBlocks reads config/layouts.yaml, the layout ids of each code layout block.
+func loadBlocks() (map[string][]string, error) {
+	return config.LoadLayouts()
 }
 
 // loadLayoutOrder maps each layout id to its block's index in
-// layouts-priority.yaml, highest first. A missing file returns nil.
-func loadLayoutOrder(dir string, blocks map[string][]string) (map[string]int, error) {
+// config/layouts-priority.yaml, highest first.
+func loadLayoutOrder(blocks map[string][]string) (map[string]int, error) {
 	if blocks == nil {
 		return nil, nil
 	}
-	path := filepath.Join(dir, "layouts-priority.yaml")
-	b, err := os.ReadFile(path)
-	if os.IsNotExist(err) {
-		return nil, nil
-	}
+	order, err := config.LoadLayoutsPriority(blocks)
 	if err != nil {
 		return nil, err
 	}
-	var order []string
-	if err := yaml.Unmarshal(b, &order); err != nil {
-		return nil, fmt.Errorf("layouts-priority.yaml: %w", err)
-	}
 	place := map[string]int{}
 	for i, block := range order {
-		if _, ok := blocks[block]; !ok {
-			return nil, fmt.Errorf("layouts-priority.yaml: %s is not a layout block", block)
-		}
-		if _, ok := place[block]; ok {
-			return nil, fmt.Errorf("layouts-priority.yaml: %s repeated", block)
-		}
 		place[block] = i
-	}
-	for block := range blocks {
-		if _, ok := place[block]; !ok {
-			return nil, fmt.Errorf("layouts-priority.yaml: %s is not listed", block)
-		}
 	}
 	out := map[string]int{}
 	for id, block := range blockOf(blocks) {

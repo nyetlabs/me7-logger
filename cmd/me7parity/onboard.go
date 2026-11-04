@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"go.nyet.org/me7-logger/config"
 	"go.nyet.org/me7-logger/internal/cli"
 	"go.nyet.org/me7-logger/internal/ecucorpus"
 	"go.nyet.org/me7-logger/parity"
@@ -458,7 +459,7 @@ func (o *onboard) promoteReady(names []string, submit bool) error {
 	if err != nil {
 		return err
 	}
-	blocks, err := layoutBlocks(filepath.Join(o.data, "layouts.yaml"))
+	blocks, err := layoutIDBlocks()
 	if err != nil {
 		return err
 	}
@@ -560,7 +561,7 @@ func (o *onboard) scoreNames(names []string, oracles map[string]string) ([]triag
 		return nil, err
 	}
 	defer os.RemoveAll(tmp)
-	for _, name := range []string{"names", "layouts.yaml", "layouts-priority.yaml", "datasets.yaml", "confidence.yaml"} {
+	for _, name := range []string{"names", "datasets.yaml", "confidence.yaml"} {
 		if err := os.Symlink(absJoin(o.data, name), filepath.Join(tmp, name)); err != nil {
 			return nil, err
 		}
@@ -634,7 +635,7 @@ func (o *onboard) promote(args []string) error {
 	for _, n := range scored {
 		scoredSet[n] = struct{}{}
 	}
-	blocks, err := layoutBlocks(filepath.Join(o.data, "layouts.yaml"))
+	blocks, err := layoutIDBlocks()
 	if err != nil {
 		return err
 	}
@@ -683,7 +684,11 @@ func (o *onboard) promote(args []string) error {
 		specs = append(specs, promoteSpec{name, block, id})
 	}
 	imgPath := filepath.Join(o.data, "images.yaml")
-	layPath := filepath.Join(o.data, "layouts.yaml")
+	root, err := ecucorpus.ModuleRoot()
+	if err != nil {
+		return err
+	}
+	layPath := filepath.Join(root, "config", config.LayoutsFile)
 	imgBak, err := os.ReadFile(imgPath)
 	if err != nil {
 		return err
@@ -918,23 +923,16 @@ func splice(lines []string, at int, line string) string {
 	return strings.Join(out, "\n") + "\n"
 }
 
-// layoutBlocks maps a layout id to its block label.
-func layoutBlocks(path string) (map[string]string, error) {
-	b, err := os.ReadFile(path)
+// layoutIDBlocks maps a layout id to its block label from config/layouts.yaml.
+func layoutIDBlocks() (map[string]string, error) {
+	blocks, err := config.LoadLayouts()
 	if err != nil {
 		return nil, err
 	}
 	out := map[string]string{}
-	block := ""
-	for _, line := range strings.Split(string(b), "\n") {
-		if strings.HasPrefix(line, "  - ") {
-			if id, ok := listKey(line); ok && block != "" {
-				out[id] = block
-			}
-			continue
-		}
-		if strings.HasSuffix(line, ":") && !strings.HasPrefix(line, " ") && !strings.HasPrefix(line, "#") {
-			block = strings.TrimSuffix(line, ":")
+	for block, ids := range blocks {
+		for _, id := range ids {
+			out[id] = block
 		}
 	}
 	return out, nil

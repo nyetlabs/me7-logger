@@ -23,15 +23,9 @@ const (
 
 // Sets reads sets.yaml. A name is in one set.
 func Sets() ([]Set, error) {
-	b, err := Read("", SetsFile)
+	doc, err := loadSetsDoc()
 	if err != nil {
 		return nil, err
-	}
-	var doc struct {
-		Sets []Set `yaml:"sets"`
-	}
-	if err := yaml.Unmarshal(b, &doc); err != nil {
-		return nil, fmt.Errorf("%s: %w", SetsFile, err)
 	}
 	seen := map[string]bool{}
 	for _, s := range doc.Sets {
@@ -55,4 +49,31 @@ func Sets() ([]Set, error) {
 		}
 	}
 	return doc.Sets, nil
+}
+
+// ReferenceExcept is sets.yaml except: reference names our address supersedes
+// when me7parity corpus compares an auto definition to a manual/DAMOS/A2L.
+func ReferenceExcept() ([]string, error) {
+	doc, err := loadSetsDoc()
+	if err != nil {
+		return nil, err
+	}
+	return append([]string(nil), doc.Except...), nil
+}
+
+type setsDoc struct {
+	Except []string `yaml:"except"`
+	Sets   []Set    `yaml:"sets"`
+}
+
+func loadSetsDoc() (setsDoc, error) {
+	var doc setsDoc
+	b, err := Read("", SetsFile)
+	if err != nil {
+		return doc, err
+	}
+	if err := yaml.Unmarshal(b, &doc); err != nil {
+		return doc, fmt.Errorf("%s: %w", SetsFile, err)
+	}
+	return doc, nil
 }

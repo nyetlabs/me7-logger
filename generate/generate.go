@@ -50,6 +50,12 @@ type Result struct {
 	MapNote   string
 	StubNote  string
 	Needles   []needle.Needle
+	// LayoutID is the Bosch SW number or EPK used for mapsig selection.
+	LayoutID string
+	// Layout is the layout block from layouts.yaml; empty when unknown.
+	Layout string
+	// MapShards are the mapsigs.d filenames SelectMapSigs loaded.
+	MapShards []string
 }
 
 // Generate runs the needle consumer and the opcode walk.
@@ -236,11 +242,14 @@ func Generate(opt Options) (*Result, error) {
 	if err != nil {
 		return nil, err
 	}
-	mapParts, err := config.ReadMapSigs("")
+	sel, err := config.SelectMapSigs(config.LayoutID(opt.Image))
 	if err != nil {
 		return nil, err
 	}
-	sigs, err := opcode.ParseSigs(append([][]byte{sigBody}, mapParts...)...)
+	res.LayoutID = sel.LayoutID
+	res.Layout = sel.Block
+	res.MapShards = sel.Shards
+	sigs, err := opcode.ParseSigs(append([][]byte{sigBody}, sel.Parts...)...)
 	if err != nil {
 		return nil, err
 	}

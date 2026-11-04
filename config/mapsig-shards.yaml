@@ -1,0 +1,24 @@
+# Which mapsigs.d shards run after common.yaml for each layout block.
+# common.yaml is always first. An unknown LayoutID (or a block omitted here)
+# loads every shard: common first, then the rest in name order.
+#
+# family.yaml holds cross-layout finder rows that used to sit in 40-24bcd.
+# 24BCD/24bH keep those rows inside 24bcd.yaml (same relative order).
+# family runs before layout-specific shards so shared finders win the way
+# they did when 40-24bcd preceded 80-rest.
+# Block names match config/layouts.yaml. Shard names are files in mapsigs.d/
+# without the .yaml suffix.
+shards:
+  22m: [family]
+  22N: [family, 22n]
+  X22ka: [family, x22ka]
+  X22: [family]
+  23g: [family, 23g]
+  24BCD: [24bcd, 24bcd-nl-lp-cb]
+  24bH: [24bcd, 24bh]
+  24E: [family, 24egks]
+  24G: [family, 24egks]
+  24KS: [family, 24egks]
+  05A: [family, 24egks]
+  25A: [family, 25a]
+  25C: [family, 25c]

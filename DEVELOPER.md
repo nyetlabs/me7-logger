@@ -42,7 +42,7 @@ Stage new originals under `testdata/parity/incoming/` (gitignored except its REA
 
 `me7info place` and `--5120`: [QUICKSTART.md](QUICKSTART.md) / [README.md](README.md).
 
-The generator is a masked byte search plus a few opcodes (selector, case bounds, `EXTP`), not a disassembler. A RAM address located by bytes is a row in `config/signatures.yaml`. A flash body is a row in `config/mapsigs.d/` (numbered `*.yaml` files concatenated in name order). Neither name, pattern, nor offset is a literal in Go. A row should match a code layout, not one image; check it across the corpus.
+The generator is a masked byte search plus a few opcodes (selector, case bounds, `EXTP`), not a disassembler. A RAM address located by bytes is a row in `config/signatures.yaml`. A flash body is a row in `config/mapsigs.d/` (`common.yaml` plus the layout block's shards from `config/mapsig-shards.yaml`). Neither name, pattern, nor offset is a literal in Go. A row should match a code layout, not one image; check it across the corpus.
 
 Out of scope: `.kp`, OLS, DAMOS, WinOLS, ecuxplot, `mapdump`. Do not copy NefMoto `Communication/`.
 
@@ -58,7 +58,7 @@ Files load from `config/` beside the executable (symlinks resolved) when present
 
 Flags use pflag (`internal/cli`): a long name takes two hyphens (`--user`), its one-letter short name one (`-u`), and `-user` is an error.
 
-`signatures.yaml` and `mapsigs.d/` rows run top to bottom (shards in filename order), RAM first, and the first row that hits fills a name. Prepended axis counts become rows and columns only when they account for every byte up to the body; never invent a count of 1. Only named maps reach the XDF.
+`signatures.yaml` and the selected `mapsigs.d/` shards run top to bottom (common first, then the block's list), RAM first, and the first row that hits fills a name. Prepended axis counts become rows and columns only when they account for every byte up to the body; never invent a count of 1. Only named maps reach the XDF.
 
 `config/categories.json` is the corpus `categories.json` (xdfkit `docs/corpus.md`), copied by `make corpus-bump`; a test fails when they differ. It files each XDF map under a category. The tuner XDF holds only its names plus the maps at their axis addresses; `--full-xdf` holds every named map, with the rest under `Other`. `--model` writes that full model as JSON for the corpus (`publish/README.md`).
 

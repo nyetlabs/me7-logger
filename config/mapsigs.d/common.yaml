@@ -344,3 +344,5 @@ mapsigs:
 - {name: NDLDRAPU, pattern: 060243F8XXXXFD10F3FA93A6, at: 4, add: 4, cols: 2}
 # 23g F/K/Q: no D7400602 before the C2 F4 site; same xat/yat as the D740 row.
 - {name: KFFWL_0_A, pattern: C2F4XXXX68412D06C0E45C14C2F5XX0F, add: 1, rows: 12, cols: 12, xat: -124, yat: -118}
+# M's TABGSS call. Page 0702, the 42 F4 word. TABGSS2 is two bytes later.
+- {name: TABGSS, pattern: '0D08F2F4[00/81][94/F4]D740070242F4[04/05][03/C7]FD01', at: 12, also: [{name: TABGSS2, add: 2}]}

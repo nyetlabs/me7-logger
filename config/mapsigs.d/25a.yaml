@@ -39,3 +39,7 @@ mapsigs:
 - {name: CWKONLS, pattern: 4A880060D7400602C2F4XXXX68413A8888364A880264, at: 10}
 - {name: KRALH, pattern: D7400602F3F8XXXXD740E100F3FA5F09, at: 6}
 - {name: KFVPLGU, pattern: DB00F2F4XXXX8840F2F5XXXX8850E6FCXXXXE6FD0902E6FEXXXXE6FFXXXXDA80XXXX08048840F2F4, at: 16, frame: true, rows: 16, cols: 8, ybits: 16, xat: 4, yat: 10}
+# 4Z7907551AA-0010. R's DAMOS names the LDRXN body; the table word is the header.
+- {name: LDRXN, pattern: 0B0058040A029A040A02, at: 2, far: true, add: 34, cols: 16, xbits: 16}
+# 4D1907558-0004. R's CLRKA call. The jump offset changed.
+- {name: CLRKA, pattern: DB00C2F4DE156841EA203213E6FC7E29E6FD0602, at: 4}

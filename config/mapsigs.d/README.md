@@ -1,9 +1,18 @@
 # mapsigs.d
 
-Flash signature rows. Numbered `*.yaml` files are read in filename order and
-concatenated; the first row that stores a name wins. Each shard is a full YAML
-document with a `mapsigs:` list. Do not reorder rows inside a shard, and do not
-cut inside a pattern list or `also` group.
+Flash signature rows. `common.yaml` always runs first. Other shards are
+selected by the image's layout block via `config/mapsig-shards.yaml` (see
+[docs/layout-blocks.md](../../docs/layout-blocks.md)). An unknown layout loads
+every shard. `config.SelectMapSigs` returns that list; generate stores it on
+`Result.MapShards`. Within the selected set, rows run in file order then top
+to bottom; the first row that stores a name wins.
+
+Shard names match layout blocks (`24bcd.yaml`, `23g.yaml`, …). `family.yaml`
+holds cross-layout finder rows (old mid-40-24bcd); the manifest runs it
+before layout-specific shards so shared finders still win first. A block that
+needs a second file uses a layout-prefixed suffix (`24bcd-nl-lp-cb.yaml`),
+listed after the base in the manifest. Do not reorder rows inside a shard,
+and do not cut inside a pattern list or `also` group.
 
 ```
 # Byte patterns that locate a calibration map, curve, or scalar in flash.

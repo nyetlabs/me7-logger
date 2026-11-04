@@ -577,7 +577,7 @@ func TestLoadNames(t *testing.T) {
 
 func TestSetFamilies(t *testing.T) {
 	dir := filepath.Join("..", "testdata", "parity")
-	blocks, err := loadBlocks(dir)
+	blocks, err := loadBlocks()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -606,7 +606,7 @@ func TestConfidenceSkipFile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	blocks, err := loadBlocks(dir)
+	blocks, err := loadBlocks()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -631,11 +631,11 @@ func TestConfidenceSkipFile(t *testing.T) {
 
 func TestLayoutBlocks(t *testing.T) {
 	dir := filepath.Join("..", "testdata", "parity")
-	blocks, err := loadBlocks(dir)
+	blocks, err := loadBlocks()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := loadLayoutOrder(dir, blocks); err != nil {
+	if _, err := loadLayoutOrder(blocks); err != nil {
 		t.Fatal(err)
 	}
 

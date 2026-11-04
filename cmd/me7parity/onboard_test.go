@@ -165,7 +165,7 @@ func TestGateReason(t *testing.T) {
 }
 
 func TestReference(t *testing.T) {
-	refs, err := loadRefTable("../../testdata/parity")
+	refs, err := loadRefTable()
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -24,7 +24,7 @@ import (
 	"go.nyet.org/me7-logger/needle"
 )
 
-//go:embed units.yaml needles.yaml measurements.yaml catalog aliases.yaml maps.yaml signatures.yaml mapsigs.d/*.yaml categories.json descriptions.yaml sets.yaml storage.yaml
+//go:embed units.yaml needles.yaml measurements.yaml catalog aliases.yaml maps.yaml signatures.yaml mapsigs.d/*.yaml categories.json descriptions.yaml sets.yaml storage.yaml layouts.yaml layouts-priority.yaml mapsig-shards.yaml
 var embedded embed.FS
 
 const (
@@ -45,7 +45,8 @@ const (
 	// SigFile is the RAM signature list, signatures.yaml.
 	SigFile = "signatures.yaml"
 	// MapSigDir is the flash signature directory, mapsigs.d.
-	// Numbered *.yaml files are read in name order and joined.
+	// common.yaml is always first; other shards follow mapsig-shards.yaml
+	// for the image's layout block, or every shard when the block is unknown.
 	MapSigDir = "mapsigs.d"
 	// CategoriesFile is the corpus category table, copied by make corpus-bump.
 	CategoriesFile = "categories.json"
@@ -118,50 +119,23 @@ func Read(path, name string) ([]byte, error) {
 	return b, nil
 }
 
-// ReadMapSigs returns the mapsig YAML parts in filename order. An empty path
-// or Dir()/mapsigs.d uses the shipped directory: disk when present, otherwise
-// the embedded copy. The directory must exist and contain at least one *.yaml.
+// ReadMapSigs returns every mapsig YAML part: common.yaml first, then the
+// other shards in name order. An empty path or Dir()/mapsigs.d uses
+// SelectMapSigs(""). Prefer SelectMapSigs when the image layout id is known.
 func ReadMapSigs(path string) ([][]byte, error) {
 	def := filepath.Join(Dir(), MapSigDir)
 	if path == "" || path == def {
-		if path == "" {
-			path = def
-		}
-		if st, err := os.Stat(path); err == nil && st.IsDir() {
-			return readMapSigDir(os.DirFS(path), ".")
-		} else if err != nil && !os.IsNotExist(err) {
+		sel, err := SelectMapSigs("")
+		if err != nil {
 			return nil, err
 		}
-		return readMapSigDir(embedded, MapSigDir)
+		return sel.Parts, nil
 	}
-	return readMapSigDir(os.DirFS(path), ".")
-}
-
-func readMapSigDir(fsys fs.FS, root string) ([][]byte, error) {
-	ents, err := fs.ReadDir(fsys, root)
+	names, err := listMapSigNamesFS(os.DirFS(path), ".")
 	if err != nil {
-		return nil, fmt.Errorf("config: %s: %w", MapSigDir, err)
+		return nil, err
 	}
-	var names []string
-	for _, e := range ents {
-		if e.IsDir() || !strings.HasSuffix(e.Name(), ".yaml") {
-			continue
-		}
-		names = append(names, e.Name())
-	}
-	sort.Strings(names)
-	if len(names) == 0 {
-		return nil, fmt.Errorf("config: %s: no *.yaml files", MapSigDir)
-	}
-	out := make([][]byte, 0, len(names))
-	for _, name := range names {
-		b, err := fs.ReadFile(fsys, path.Join(root, name))
-		if err != nil {
-			return nil, fmt.Errorf("config: %s/%s: %w", MapSigDir, name, err)
-		}
-		out = append(out, b)
-	}
-	return out, nil
+	return readNamedMapSigs(os.DirFS(path), ".", allMapSigOrder(names))
 }
 
 // LoadCatalog reads the result-type catalog. An empty path or Dir()/catalog

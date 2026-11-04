@@ -2,10 +2,13 @@
 
 A block is the set of images that hit the same variants of the needles in `config/needles.yaml`. A near match stays in the block. The layout id is the Bosch software number from `ident.Find`.
 
-- `testdata/parity/layouts.yaml` — images grouped by block
-- `testdata/parity/layouts-priority.yaml` — block order for finders (authoritative; not duplicated here)
+- `config/layouts.yaml` — images grouped by block (SW number or EPK)
+- `config/layouts-priority.yaml` — block order for finders (authoritative; not duplicated here)
+- `config/mapsig-shards.yaml` — which `config/mapsigs.d/` shards run after `common.yaml` for each block
 
 `me7parity onboard` assigns a new image to the scored image with the longest shared name prefix. Name tiers: [tuner-stages.md](tuner-stages.md). Engine codes are from `publish/vehicles.yaml` where a row exists.
+
+Generate loads `common.yaml` plus the block's shards via `config.SelectMapSigs`, and records the layout id, block, and shard filenames on `Result`. Blocks that share the old mid-40-24bcd finders load `family.yaml` before their layout-specific shards. An unknown layout id loads every shard (`common` first).
 
 ## Blocks
 

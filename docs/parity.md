@@ -57,7 +57,7 @@ open and block are the names that did not hit. `absent` is listed for this layou
 - Stored objects keep previous conversion, units, and layout. A raw value (factor 1, no offset, no units) takes the agreed DAMOS/A2L conversion for that name, role, and width (`config/units.yaml`). Clock names take the image clock factor. `_1_A` with no sample takes `_0_A` for that role and width.
 - Description becomes the name table; comment becomes the locating needle. Low body confidence appends a short phrase after the needle. Missing axes add `missing x axis` / `missing y axis`. Expected but missing scales add `no scale` / `no x scale` / `no y scale` (codewords, config bytes, and error classes never get a scale note).
 - Auto packs apply agreed scales before those notes. Manual packs keep a non-empty comment; DAMOS and A2L are not rewritten.
-- Replacing a manual file records it as `reference` (`except` from `testdata/parity/references.yaml`). `verified` and an existing `reference` carry over on auto regenerate.
+- Replacing a manual file records it as `reference` (`except` from `config/sets.yaml`). `verified` and an existing `reference` carry over on auto regenerate.
 
 ### status
 

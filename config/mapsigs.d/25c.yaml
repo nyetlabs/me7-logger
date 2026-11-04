@@ -1,0 +1,36 @@
+mapsigs:
+# 4D1907558-0004. The 3D0F KFZW arm is a page-0702 load. These calls are the maps.
+- {name: KFZW2, pattern: E6FCED17E6FDC42CF2FEF488F2FF0289DA00242B}
+- {name: KFZW, pattern: 0D0CE6FC2D17E6FDC42CF2FEF488F2FF0289DA00242B, at: 4}
+- {name: KFMRESK, pattern: 9D0CE6FCCA0BE6FDC22BF2FEDC88F2FFD288DA00CC2A, at: 4}
+- {name: KFMRES, pattern: 0D0BE6FCB20BE6FDC22BF2FEDC88F2FFD288DA00CC2A, at: 4}
+- {name: KFZWOP2, pattern: E6FCEE0DE6FDDA5DF2FEF088F2FF889EDA00242B, xat: 14, yat: 10}
+- {name: KFMIOP, pattern: F6F4889EE6FC7A5CE6FDDA5DF2FEF088, at: 6}
+# 4D1907558-0004. The DQ LDR calls, with the immediates that changed.
+- {name: KFLDIMX, pattern: F2F5EC888850E6FCC00AE6FD0A02E6FE540F, at: 8, frame: true, yat: 2}
+- {name: KFLDRL, pattern: F2F5EC888850E6FC120CE6FD0A02E6FE660FE6FF0A02DA83, at: 8, frame: true, xat: 2, yat: -12}
+- {name: KFLDIOPU, pattern: F2F5DE888850E6FC0823E6FD0602E6FECF00, at: 8, frame: true, yat: 2}
+- {name: NLDIAPU, pattern: B980E6FC4E0FE6FD0A02D740E100C2FEA008, at: 4, frame: true, add: 3}
+- {name: KFFLLDE, pattern: F6F46EA0F2F56CA08850F2F2E0888820E6FCA210E6FD0A02E6FE0A14, at: 18, frame: true, xat: 6, yat: 12}
+- {name: KFTARX, pattern: 0D15F2F408898840F2F5E8888850E6FCF411E6FD0A02, at: 16, frame: true, xat: 10, yat: 4}
+- {name: KFLDRAPP, pattern: 9A0112B0E6FCDC23E6FD0602C2FE1AF8C2FF8285, at: 6, frame: true, add: 18, rows: 8, cols: 8}
+# 4D1907558-0004. DH knock calls. The E6 FD word is 380B, and the F2 words are E49C and E69C.
+- {name: KFMIZUNS, pattern: 0C10E6FCE80AE6FD380BF2FEE49CF2FFE69C, at: 4, xat: 12, yat: 16}
+- {name: KFMIZUFIL, pattern: 0D0BE6FCC00AE6FD380BF2FEE49CF2FFE69C, at: 4, xat: 12, yat: 16}
+# 4D1907558-0004. The axis is the ten points in front of the body.
+- {name: KFFWTBR, pattern: F6F4A00BDB00889088808870E6FC600DE6FD0602, at: 14, frame: true, add: 20, cols: 8, rows: 10}
+- {name: FBSTABGM, pattern: F6F45A0CE6FC4638E6FD0702, at: 6, frame: true, add: 10, cols: 4, xbits: 16}
+- {name: TABGBTS, pattern: F2F46E0CD740E100F6F4720CE6FCB838E6FD0702, at: 14, frame: true, add: -14}
+- {name: KRFKLN, pattern: 9A4A0D60E6FC8F1AE6FD0602D740E100F2FEEE09, at: 6, frame: true, xat: 18, also: [{name: KRANH, add: -17}, {name: KRALH, add: -22}]}
+- {name: TMNSMN, pattern: 43F8FA0FED05F3FA2986}
+# 4D1907558-0004. DLAMTANS is the 5C54 call. DWKRMSN is the page-0602 C2 F4.
+# DPUPS is the 43 F8 FD 03 scalar. LDPBN is the F6 F4 call after KFLDHBN.
+- {name: DLAMTANS, pattern: 5C548840C2F429868840E6F4F136E6F50702, at: 12, frame: true, cols: 4}
+- {name: DWKRMSN, pattern: D7400602C2F4381A68412D1BF2F43291, at: 6, add: 1, xat: 14}
+- {name: DPUPS, pattern: 43F81A06FD03E11A75FA6898}
+- {name: LDPBN, pattern: F6F48A0DE6FCB723E6FD0602F2FEDE88, at: 6, frame: true, xat: 14}
+# 4D1907558-0004. The page-0702 call 54 bytes before CLAATR. Same cluster as 0002.
+# 4D1907558-0004. Same call as 0002, through the byte that changed.
+- {name: KFLF, pattern: 06F480018840E6FCA00EE6FD0602C2FE1AF8C2FF6BF9DA83243FC084D7400602C2F59F0E0B45F2F40EFE98501B45F2F90CFEC2F4A686, at: 8, frame: true, add: 30, rows: 12, cols: 16}
+# Five points in front of the body.
+- {name: TVUB, pattern: 'E6FE[78/7D][43/EB]C2FF[24/A7][80/F2]', cols: 5}

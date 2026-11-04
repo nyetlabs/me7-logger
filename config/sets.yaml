@@ -3,6 +3,12 @@
 # either: one address covers any name in the set.
 # both: every later name covers the plain name. One does not.
 # any: one located form closes the tuner slot.
+#
+# except: me7parity corpus --submit. Names a manual/DAMOS/A2L reference lists
+# at another address that our address supersedes; they count with the agreeing
+# names for the matched class (was testdata/parity/references.yaml).
+except:
+  - ESKONF
 sets:
   - {rule: either, names: [KFLBTS, KFLBTS_0_A]}
   - {rule: either, names: [KFFWL, KFFWL_0_A]}

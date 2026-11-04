@@ -1,0 +1,6 @@
+mapsigs:
+# 4B0906018CM. Far table entry for the 12x12 body; axes are shared flash tables.
+- {name: ap_kffwl_x, pattern: 0C181F252C36404D5B7590ABB8, table: true}
+# Count is odd; the points sit on an even address.
+- {name: ap_kffwl_y, pattern: 181F252C364054617590ABB8, table: true, add: -1}
+- {name: KFFWL_0_A, pattern: 410B06024D0B0602, at: 4, far: true, rows: 12, cols: 12, xtable: ap_kffwl_x, ytable: ap_kffwl_y, also: [{name: KFFWL_1_A, add: 144}]}

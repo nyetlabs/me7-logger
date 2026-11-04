@@ -26,7 +26,7 @@ type Packed struct {
 // Confidence reads those bodies from the image. A stem with no definition
 // is left out.
 func GradePacked(dir string, packed []Packed) ([]Image, error) {
-	blocks, err := loadBlocks(dir)
+	blocks, err := loadBlocks()
 	if err != nil {
 		return nil, err
 	}
