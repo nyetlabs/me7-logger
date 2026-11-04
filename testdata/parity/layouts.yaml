@@ -35,20 +35,23 @@
   - "1037368391" # 4Z7907551S
   - "1037369096" # 4Z7907551T
   - "1037369097" # 4Z7907551AA
-# 24E, 24G, 24K, and 24KS. 8E0909518AK is the 24H member.
+# Same needle family (was 24EGKS). Split like 24bH when DAMOS disagrees on
+# NMAXF / SNM16OPUW: DC has NMAXF only, DH/AA have SNM16 only, the rest omit both.
 # 4B0906018CM, the other 24H, is in 24bH.
-24EGKS:
+24E:
   - "1037362358" # 4B0906018DC
+24G:
   - "1037363930" # 4B0906018DH
   - "1037366494" # 8E0909518AA
   - "1037366497" # 4B0906018DH
+24KS:
   - "1037368072" # 8E0909518AK
   - "1037369011" # 8E0909518AS
   - "1037369044" # 4B0906018DQ
   - "1037369307" # 8E0909518AK
   - "1037394791" # 4B0906018DQ
   - "42/1/ME7.1.1/5/6530.01//24T/Dst04o/241002//" # 8E0909559E
-# 006410010A0, the naturally aspirated V8. Same needles as 24EGKS.
+# 006410010A0, the naturally aspirated V8. Same needles as 24E/24G/24KS.
 # The LDR finders do not open.
 05A:
   - "1037371702" # 006410010A0

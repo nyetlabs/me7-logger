@@ -260,7 +260,7 @@ mapsigs:
 - {name: NASNOTKL, pattern: C2F4XXXXC0C51B45, add: 289}
 - {name: KFMLDMX, pattern: E6FFXXXXDA00282E0806F6F4, add: 10}
 - {name: KFPBRK, pattern: F2FCXXXXF0D2F2FE, add: 46, also: [{name: KFPBRKNW, add: 290}]}
-- {name: KFWDKMSN, pattern: F2FCXXXXE6FD3827, add: 66}
+- {name: KFWDKMSN, pattern: F2FCXXXXE6FD3827, add: 66, rows: 16, cols: 6, ybits: 16, xbits: 16}
 - {name: FKKVS, pattern: [C2FFXXXXDA82EA6706F00C00F6F47C9E, C2FFXXXXDA80184F06F00C00F6F4F49E], add: 49, rows: 16, cols: 16, xbits: 16}
 - {name: DLAMTANS, pattern: C2FCXXXXE6FD2B2D, add: 5, cols: 4}
 - {name: LAMFA, pattern: C2FFXXXXDA824A6706F00C00C0845C54, add: 29, rows: 15, cols: 6, xbits: 16}

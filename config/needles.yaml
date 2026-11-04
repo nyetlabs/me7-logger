@@ -231,6 +231,8 @@ functions:
       - "8A XX 04 XX 8A XX 02 XX 9A XX 12 XX E6 F4 FF 7F"
       # 25A entry. The calls sit past the distances used on 22m.
       - "{push:9876} {extp:0206} F3 FC DF 1E"
+      # 4Z7 T: same prologue, word C521 instead of DF1E.
+      - "{push:9876} {extp:0206} F3 FC C5 21"
 
   - name: FUEDK_kfvplgu
     needle_hex: "E6 FC XX XX F2 FD XX XX F2 FE XX XX DA 00 42 76 F6 F4 XX XX F2 F5"

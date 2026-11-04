@@ -83,8 +83,8 @@ func TestInsertImageKeepsComments(t *testing.T) {
 }
 
 func TestInsertLayout(t *testing.T) {
-	in := "# blocks\n25A:\n  - \"1037366370\"\n24EGKS:\n  - \"1037366497\"\n  - \"1037369307\"\n"
-	got, err := insertLayout(in, "24EGKS", "1037369044")
+	in := "# blocks\n25A:\n  - \"1037366370\"\n24KS:\n  - \"1037366497\"\n  - \"1037369307\"\n"
+	got, err := insertLayout(in, "24KS", "1037369044")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -94,7 +94,7 @@ func TestInsertLayout(t *testing.T) {
 	if !strings.Contains(got, "# blocks\n25A:\n") {
 		t.Fatalf("comment dropped\n%s", got)
 	}
-	if _, err := insertLayout(got, "24EGKS", "1037369044"); err == nil {
+	if _, err := insertLayout(got, "24KS", "1037369044"); err == nil {
 		t.Fatal("duplicate id accepted")
 	}
 }

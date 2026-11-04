@@ -4,159 +4,135 @@
 # that block counts the name as hit for the tier grade. It still misses in the
 # tuner count. A name in an any family counts as absent only for that form.
 # The family is met when one form is located, or when every form is listed.
+#
+# Every entry needs a same-line rationale: located equivalent (_0_A / sibling
+# name) or why the map is missing (NA, no reader, not in that DAMOS). Do not
+# absent a name a sibling DAMOS in this block still lists.
 absent:
   # Not in the 8D0907551M-0002 DAMOS export, nor in G, H, or L.
-  # The export has KFZW2, NFSM, and NLLM, and NLL2M_0_A and NLL2M_1_A,
-  # so those families are located rather than listed here. The pair call
-  # and the four-curve call are not in this block.
-  # The Q1 integrator is not the KFLDRQ1 map. scanLdr stores LDRQ1DY and
-  # LDRQ1ST on this arm, and both are located.
   22m:
-    - KFLDRQ1
-    - KFZW2_0_A
-    - KFZW2_1_A
-    - NLLM_0_A
-    - NLLM_1_A
-    - NLLM_2_A
-    - NLLM_3_A
+    - KFLDRQ1 # LDRQ1DY + LDRQ1ST located; Q1 integrator is not the map
+    - KFZW2_0_A # KFZW2 located
+    - KFZW2_1_A # KFZW2 located
+    - NLLM_0_A # NLLM located
+    - NLLM_1_A # NLLM located
+    - NLLM_2_A # NLLM located
+    - NLLM_3_A # NLLM located
   # No DAMOS export yet. No map_interp_table8_b call with M's arguments on T,
   # and the 8D0907551H manual XDF does not have it.
-  # Same KFLDRQ1 arm as 22m: LDRQ1DY and LDRQ1ST are located; the Q1
-  # integrator is not the map.
   22N:
-    - KFLDRQ1
-    - KFVPLGU
+    - KFLDRQ1 # LDRQ1DY + LDRQ1ST located; Q1 integrator is not the map
+    - KFVPLGU # no DA 00 42 76 reader
   # Not in the 4B0906018CM DAMOS export. 4B0907551 S/T and 8D N are in 22m.
+  # CDLSHV / NLLM*: not absent — generate hits them on CM; CM DAMOS omits the
+  # plain NLLM names but lists no excuse to paper the generate hits.
+  # SNM16OPUW: not absent. CM DAMOS lists it; a generate miss is a miss.
   24bH:
-    - CDLSHV
-    - CLAHSHE2
-    - CLALSH2
-    - CLRHK
-    - CLRHKA
-    - CLRKA
-    - DLBTS
-    - KFLAFWL
-    - KFLAMKR
-    - KFLBTS_0_A
-    - KFVPLGU
-    # The export has no NLLM form: no plain curve and no NLLM_N_A.
-    - NLLM
-    - NLLM_0_A
-    - NLLM_1_A
-    - NLLM_2_A
-    - NLLM_3_A
-    - RLSALULL
-    - RLSALUN
-    - SNM16OPUW
-    - TABGSS2
-  # Not in the 06A906032HF DAMOS export. The NLLM family is the split
-  # curves NLLM_0_A through NLLM_3_A, so the plain name is not listed.
+    - CLAHSHE2 # CLAHSH + CLAHSHE located; *2 DTC code not in CM FCM table
+    - CLALSH2 # CLALSH located; *2 DTC code not in CM FCM table
+    - CLRHK # not in CM DAMOS; no 67 F8 11 00 reader
+    - CLRHKA # not in CM DAMOS; no CLRSHKA-class reader used here
+    - CLRKA # not in CM DAMOS; no 67 F8 11 00 reader
+    - DLBTS # KFDLBTS + ZDLBTS + TABGBTS located; lambts non-store arm
+    - KFLAFWL # KFLAFWL_0_A + KFLAFWL_1_A located; plain name not in CM DAMOS
+    - KFLAMKR # KFLAMKR_0_A + KFLAMKR_1_A located; plain name not in CM DAMOS
+    - KFLBTS_0_A # not in CM DAMOS (no KFLBTS form either)
+    - KFVPLGU # no DA 00 42 76 reader
+    - RLSALULL # KLRLSALULL located; byte form not in CM DAMOS
+    - RLSALUN # RLSALUNG_0_A/_1_A located; RLSALUN byte not in CM DAMOS
+    - TABGSS2 # TABGSS located; TABGSS2 not in CM DAMOS
+  # Not in every 06A/8N DAMOS in this block. CDLSHV, CLAATS2, RLSALULL are
+  # not absent: HN/HJ/LQ/AL DAMOS list them and generate hits them.
   24BCD:
-    - CDLSHV
-    # Not in the LQ, NL, BB, or CJ DTC index. The slot after CLAATS is
-    # 1479, not 1457. Images that have 1457 locate the class byte.
-    - CLAATS2
-    - CLAHSHE2
-    - CLALSH2
-    - CLRHK
-    - CLRHKA
-    - CLRKA
-    - DLBTS
-    - FKHABMN
-    # KFDLULS: not block-absent. HF/HS/HN have it; LP/NL use KFVPDKLD/KLDLUL.
-    # SNM16OPUW: not absent. HS/HJ/HN/AL DAMOS use 0x130A8 (708C); BB uses
-    # 9E8C. HF's export lists 0x130CA on the same bytes (CE8C) — leave as a miss.
-    - KFLBTS_0_A
-    - KFMIZUNS
-    - KFVPLGU
-    # HF/HS DAMOS has LDRQ0S and LDRQ1ST beside KFLDRQ2, and no LDRQ0DY or
-    # LDRQ1DY. The ldrq window stores those two curves only.
-    - LDRQ0DY
-    - LDRQ1DY
-    - RLSALULL
-    - RLSALUN
-    - TABGSS2
-  # 4Z7907551R has the full DAMOS. It has KFDLBTS, ZDLBTS, TABGBTS, and
-  # DTBTS, and it does not have DLBTS. The lambts window has no
-  # C2FC E6FD E6FE DA8X arm. It also has no KFMIZU map. The only
-  # 0D0B E6FC E6FD call is KFWEE / KFWEEK. The same export has
-  # KLRLSALULL, KFTABGSS, and KFTABGSS2, and it does not have the
-  # RLSALULL byte or the TABGSS scalars. ASE_rlsalun passes the curve.
+    - CLAHSHE2 # CLAHSH + CLAHSHE located; *2 code not in HF/HN FCM / DAMOS
+    - CLALSH2 # CLALSH located; *2 code not in HF/HN FCM / DAMOS
+    - CLRHK # not in HF/HN/BB DAMOS; no 67 F8 11 00 reader
+    - CLRHKA # not in HF/HN/BB DAMOS
+    - CLRKA # not in HF/HN/BB DAMOS
+    - DLBTS # KFDLBTS/TABGBTS on peers; lambts non-store arm here
+    - FKHABMN # FKHABMN_0_A + FKHABMN_1_A located; plain name not in DAMOS
+    - KFLBTS_0_A # KFLBTS located (plain); _0_A form not in HF/HN DAMOS
+    - KFMIZUNS # KFMIZUFIL + KFMIZUOF located; KFMIZUNS not in HF/HN DAMOS
+    - KFVPLGU # no DA 00 42 76 reader
+    - LDRQ0DY # LDRQ0S + KFLDRQ2 located; DY form not in HF/HS DAMOS
+    - LDRQ1DY # LDRQ1ST + KFLDRQ2 located; DY form not in HF/HS DAMOS
+    - RLSALUN # RLSALULL or KLRLSALULL located; RLSALUN byte not in DAMOS
+    - TABGSS2 # TABGSS or KFTABGSS located; TABGSS2 not in HF/HN/BB DAMOS
+  # 4Z7907551R full DAMOS: KFDLBTS/ZDLBTS/TABGBTS, no DLBTS; KFTABGSS /
+  # KFTABGSS2, no TABGSS scalars; KLRLSALULL, no RLSALULL on R (AA/S have
+  # RLSALULL — not block-absent). No KFMIZU map (KFWEE/KFWEEK at that call).
   25A:
-    - DLBTS
-    - KFMIZUFIL
-    - KFMIZUNS
-    - KFMIZUOF
-    - RLSALULL
-    - TABGSS
-    - TABGSS2
-    # VMAXNB: not absent. R/AA DAMOS have VMAXNB_0_A/_1_A (sets.yaml any).
-  # DLBTS: lambts takes the non-store arm here. KFVPLGU: no DA 00 42 76.
-  # CLRH*: no 67 F8 11 00 reader. RLSALU*: no 74 F4 BC 8C / ASE path.
-  # NMAXF: DH/DQ/AK/AS A2L omit it (NMAX stays). DC DAMOS has it and still
-  # locates. SNM16OPUW: omitted on DC/DQ/AK/AS; DH still locates.
-  # Not absent (DH A2L / sibling DAMOS have them; a generate miss is a miss):
-  # FKKVS, KFTARX, KFNLLNST, NFS2M/NFSM family, CATR, CLAHSH2,
-  # and the CLAATR/CLAATS/CLALSH DTC class bytes (present on some parts).
-  24EGKS:
-    - DLBTS
-    - KFVPLGU
-    - CLRHK
-    - CLRHKA
-    - CLRKA
-    - NMAXF
-    - RLSALULL
-    - RLSALUN
-    - SNM16OPUW
-  # No DAMOS export. 1037371702 is the naturally aspirated V8.
-  # plsol, rlmx_w, and ldtvm are not in the routine table, so scanLdr,
-  # scanLdrxn, and scanLdrapp do not open. The knock window does not
-  # contain KFMIZUOF, and the only 6E 27 F6 F4 frame has no axis.
-  # DLBTS and KFVPLGU stay absent for the same reason as 24EGKS.
-  # Def lists NMAXF only (no NMAX, no VMAXNB forms).
+    - DLBTS # KFDLBTS + ZDLBTS + TABGBTS located; lambts non-store arm
+    - KFMIZUFIL # not in R/AA/S/T DAMOS; KFWEE/KFWEEK at that call site
+    - KFMIZUNS # not in R/AA/S/T DAMOS; KFWEE/KFWEEK at that call site
+    - KFMIZUOF # not in R/AA/S/T DAMOS; KFWEE/KFWEEK at that call site
+    - KFLDRQ1 # KFLDRQ2 + LDRQ curves located; Q1 map not in R/AA/S/T DAMOS
+    - TABGSS # KFTABGSS located; scalar TABGSS not in R DAMOS
+    - TABGSS2 # KFTABGSS2 located; scalar TABGSS2 not in R DAMOS
+  # Shared 24E/24G/24KS (ex-24EGKS). NMAXF / SNM16OPUW differ by DAMOS —
+  # do not re-merge. CLRH* / RLSALU* omitted from these exports.
+  24E:
+    - DLBTS # KFLBTS_0_A + TABGBTS located; lambts non-store arm
+    - KFVPLGU # no DA 00 42 76 reader
+    - CLRHK # not in DC DAMOS; no 67 F8 11 00 reader
+    - CLRHKA # not in DC DAMOS
+    - CLRKA # not in DC DAMOS
+    - RLSALULL # not in DC DAMOS; no 74 F4 BC 8C / ASE path
+    - RLSALUN # not in DC DAMOS; no ASE_rlsalun path
+    - SNM16OPUW # NMAXF + NMAX + VMAXNB located; not in DC DAMOS
+  24G:
+    - DLBTS # KFLBTS_0_A + TABGBTS located; lambts non-store arm
+    - KFVPLGU # no DA 00 42 76 reader
+    - CLRHK # not in DH DAMOS; no 67 F8 11 00 reader
+    - CLRHKA # not in DH DAMOS
+    - CLRKA # not in DH DAMOS
+    - RLSALULL # KLRLSALULL located; byte form not in DH DAMOS
+    - RLSALUN # not in DH DAMOS; no ASE_rlsalun path
+    - NMAXF # NMAX + VMAXNB + SNM16OPUW located; not in DH/AA DAMOS
+  24KS:
+    - DLBTS # KFLBTS_0_A + TABGBTS located; lambts non-store arm
+    - KFVPLGU # no DA 00 42 76 reader
+    - CLRHK # not in DQ/AK/AS DAMOS; no 67 F8 11 00 reader
+    - CLRHKA # not in DQ/AK/AS DAMOS
+    - CLRKA # not in DQ/AK/AS DAMOS
+    - RLSALULL # not in DQ/AK/AS DAMOS; no 74 F4 BC 8C / ASE path
+    - RLSALUN # not in DQ/AK/AS DAMOS; no ASE_rlsalun path
+    - NMAXF # NMAX + VMAXNB located; not in DQ/AK/AS DAMOS
+    - SNM16OPUW # NMAX + VMAXNB located; not in DQ/AK/AS DAMOS
+  # 1037371702 naturally aspirated V8. No plsol/rlmx_w/ldtvm — LDR finders
+  # do not open. Def lists NMAXF only.
   05A:
-    - DLBTS
-    - KFFLLDE
-    - KFLDHBN
-    - KFLDIOPU
-    - KFLDRAPP
-    - KFLDRL
-    - KFMIZUOF
-    - KFVPLGU
-    - LDPBN
-    - LDRXN
-    - NMAX
-    - SNM16OPUW
-    - VMAXNB
-    - VMAXNB_0_A
-    - VMAXNB_1_A
-  # Not in the 8D0907551F DAMOS export. That export has KFDLBTS, ZDLBTS,
-  # and TABGBTS. ESKONF is not in that export either; the 0x55 check is
-  # still in the image. The export has LDRQ1DY and LDRQ1ST, and it does
-  # not list KFLDRQ1. It has KIFZGHG_0_A..2_A, and it does not list KIFZGHG.
-  # FKKVS: K/Q DAMOS have it and generate locates it on F/K/Q — not absent.
-  # KFTARX: omitted from F/K/Q DAMOS.
+    - DLBTS # TABGBTS located; lambts non-store arm
+    - KFFLLDE # NA V8; no turbo LDR/lamfa finders
+    - KFLDHBN # NA V8; no turbo
+    - KFLDIOPU # NA V8; no turbo
+    - KFLDRAPP # NA V8; no turbo
+    - KFLDRL # NA V8; no turbo
+    - KFMIZUOF # no knock KFMIZU frame
+    - KFVPLGU # no DA 00 42 76 reader
+    - LDPBN # NA V8; no turbo
+    - LDRXN # NA V8; no turbo
+    - NMAX # NMAXF located; def has NMAXF only
+    - SNM16OPUW # NMAXF located; no SNM16 reader
+    - VMAXNB # NMAXF located; def has NMAXF only
+    - VMAXNB_0_A # NMAXF located; def has NMAXF only
+    - VMAXNB_1_A # NMAXF located; def has NMAXF only
+  # Not in the 8D0907551F DAMOS export. FKKVS: K/Q have it — not absent.
   23g:
-    - DLBTS
-    - KFLBTS_0_A
-    - KFLDRQ1
-    - KFTARX
-    - KFVPLGU
-    - KIFZGHG
-  # Same KFLDRQ1 arm as 22m/RS4 (G/M DAMOS): LDRQ1DY and LDRQ1ST are
-  # located; the Q1 integrator is not the map. Other C/B names the RS4
-  # DAMOS has are not absent here.
+    - DLBTS # KFDLBTS + ZDLBTS + TABGBTS located; lambts non-store arm
+    - KFLBTS_0_A # not in F/K DAMOS (no KFLBTS form either)
+    - KFLDRQ1 # LDRQ1DY + LDRQ1ST located; Q1 map not in F DAMOS
+    - KFTARX # omitted from F/K/Q DAMOS
+    - KFVPLGU # no DA 00 42 76 reader
+    - KIFZGHG # KIFZGHG_0_A..2_A located; plain name not in F DAMOS
   X22ka:
-    - KFLDRQ1
-  # No DAMOS export. Neither image has the DA 00 42 76 call, so KFVPLGU
-  # and SNM16OPUW have no reader. The lambts window has DA 83 94 48
-  # 06 F0 0C 00, so scanLbts takes the KFDLBTS arm and does not store DLBTS.
-  # 4D1/Spyker defs list NMAXF only (no NMAX, no VMAXNB forms).
+    - KFLDRQ1 # LDRQ1DY + LDRQ1ST located; Q1 integrator is not the map
+  # 4D1/Spyker defs list NMAXF only. Lambts takes the KFDLBTS arm.
   25C:
-    - DLBTS
-    - KFVPLGU
-    - NMAX
-    - SNM16OPUW
-    - VMAXNB
-    - VMAXNB_0_A
-    - VMAXNB_1_A
+    - DLBTS # KFDLBTS + TABGBTS located; lambts KFDLBTS arm
+    - KFVPLGU # no DA 00 42 76 reader
+    - NMAX # NMAXF located; def has NMAXF only
+    - SNM16OPUW # NMAXF located; no SNM16 reader
+    - VMAXNB # NMAXF located; def has NMAXF only
+    - VMAXNB_0_A # NMAXF located; def has NMAXF only
+    - VMAXNB_1_A # NMAXF located; def has NMAXF only

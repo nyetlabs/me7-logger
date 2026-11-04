@@ -120,7 +120,7 @@ mapsigs:
 - {name: SNM16OPUW, pattern: 548CE6FCXXXXF2FD9CF8, at: 4, add: 2}
 # HF-only CE8C view (DAMOS 0x130CA) when the 708C site is absent.
 - {name: SNM16OPUW, pattern: F6F4CE8CE6FCXXXXF2FD9EF8, at: 6, add: 2}
-# 24EGKS DH: same F6F4..E6FC..F2FD9EF8 call without the leading 4276 word.
+# 24G DH/AA: same F6F4..E6FC..F2FD9EF8 call without the leading 4276 word.
 - {name: SNM16OPUW, pattern: F6F4D88CE6FCXXXXF2FD9EF8, at: 6, add: 2}
 - {name: TABGBTS, pattern: [42F4XXXXFD04E11875F82D8A, 42F4XXXXFD04E11875F85A8A]}
 - {name: TABGBTS, pattern: [42F4XXXXFD04E11875F85D8A, 42F4XXXXFD04E11875F80B8A]}
