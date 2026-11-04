@@ -318,7 +318,8 @@ mapsigs:
 - {name: TVUB, pattern: 4EA2DB008860C2F409F98840C2F400F88840E6F4XXXX, at: 20, add: 96, cols: 5}
 - {name: FBSTABGM, pattern: 070242F4XXXX3D04E08574F540A3, at: 4, add: 58, cols: 4, xbits: 16}
 - {name: FWFTBRTA, pattern: 0602C2F4XXXXF6F460A0DB00E6FCXXXX, at: 4, add: 94, cols: 14}
-- {name: KFFWTBR, pattern: 0602C2F6B00A5C86E007, at: 4, add: 84, rows: 10, cols: 8}
+# F keeps B00A; K and Q use E40A.
+- {name: KFFWTBR, pattern: [0602C2F6B00A5C86E007, 0602C2F6E40A5C86E007], at: 4, add: 84, rows: 10, cols: 8}
 - {name: NLDIAPU, pattern: 0602F3F8XXXXD7400602F3FC7D19, at: 4, add: 13, also: [{name: LDHIA}]}
 - {name: KFLDRXO, pattern: 060243F8XXXXBD019F4D, at: 4, add: 25, rows: 8, cols: 4}
 - {name: KFLDHBN, pattern: 060243F8XXXX9D040981F7F870A6, at: 4, add: 54, rows: 8, cols: 8}

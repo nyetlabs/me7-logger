@@ -144,11 +144,8 @@ mapsigs:
 - {name: TVUB, pattern: F6F24CA2DB008860C2F409F98840C2F400F88840E6F4A44F, at: 22, add: 74, cols: 5}
 # 4B0906018DQ-0060. Same skeleton as 0010, different immediates.
 - {name: LDIATA, pattern: 'D0848840E6FC[45/45][21/FD]E6FD0602F2FE[08/7D][88/FA]', at: 6, frame: true, xat: 14, also: [{name: LDHIA, add: -1}]}
-# 23g cam switchover. The E6 FC word is the body on DPP0. The column axis is
-# the 8-point table. F's count is even. K and Q keep the same bytes one
-# byte earlier, so the second row steps onto the count. KFNWWL is the
-# warmup call, 96 bytes after KFNW.
-- {name: ap_kfnw, pattern: 08223E434A536072A0, table: true}
-- {name: ap_kfnw, pattern: 5A08223E434A536072A0, table: true, add: 1}
-- {name: KFNW, pattern: 'DB00E6FCXXXXE6FD[CA/DA]1BF2FE[C0/F3]ABF2FF[C0/EB]ABDA00B878', at: 4, rows: 12, cols: 8, xtable: ap_kfnw}
-- {name: KFNWWL, pattern: 'DB00F3F8XX8BD740060243F8XXXXED0BE6FCXXXXE6FD[CA/DA]1BF2FE[C0/F3]AB', at: 18, rows: 12, cols: 8, xtable: ap_kfnw}
+# 23g cam switchover. F2 FE is the 12-point row; F2 FF is the 8-point column.
+# K and Q park the axis tables one byte earlier than F; RamAxis follows the
+# setup. KFNWWL is the warmup call, 96 bytes after KFNW.
+- {name: KFNW, pattern: 'DB00E6FCXXXXE6FD[CA/DA]1BF2FE[C0/F3]ABF2FF[C0/EB]ABDA00B878', at: 4, rows: 12, cols: 8, yat: 12, xat: 16}
+- {name: KFNWWL, pattern: 'DB00F3F8XX8BD740060243F8XXXXED0BE6FCXXXXE6FD[CA/DA]1BF2FE[C0/F3]ABF2FF[C0/EB]AB', at: 18, rows: 12, cols: 8, yat: 26, xat: 30}
