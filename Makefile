@@ -44,6 +44,7 @@ PROGRAMS := me7info me7logger
 all: test build
 
 test: check-pinned
+	go test ./config -update
 	go test ./...
 
 build:

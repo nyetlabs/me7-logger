@@ -59,6 +59,10 @@
 8D0907558E-D03: {engine: 1.8T, code: AEB, vehicle: A4, year: 1997-1999}
 8D0907558M-D01: {engine: 1.8T, code: AEB, vehicle: "A4, Passat", year: 1997-1999}
 
+# Bosch 0261207934, soft 1037366494, dataset 24G.
+8E0909518AA-0004: {engine: 1.8T, code: AWT, vehicle: A4, year: 2002-2005}
+# Bosch 0261208230, soft 1037368072, dataset 24E.
+8E0909518AK-0003: {engine: 1.8T, code: AVJ, vehicle: A4, year: 2002-2005}
 8E0909518AK-0004: {engine: 1.8T, code: AVJ, vehicle: A4, year: 2002-2005}
 8E0909518AS-0003: {engine: 1.8T, code: BEX, vehicle: A4, year: 2002-2004}
 

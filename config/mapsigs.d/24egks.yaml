@@ -17,8 +17,16 @@ mapsigs:
 - {name: TMNSMN, pattern: 43F8E71FED05F3FA2B89}
 - {name: KRALH, pattern: C2F5D31E2045C2F5BDF94054CD05E138}
 - {name: TABGBTS, pattern: '42F4[90/95][00/C1]FD04E11875F8[01/A3][88/FC]'}
+# DQ-0010 1E89; DQ-0060 1D89 (mask row above already covers 0060).
+- {name: TABGBTS, pattern: [42F4XXXXFD04E11875F81E89, 42F4XXXXFD04E11875F81D89]}
+# DQ MDIMX. Common C2F2/0600 form misses; this is C2F5 + 0800.
+- {name: MDIMX, pattern: 3D05C2F5XXXX5C85C4500800, at: 4}
 - {name: DPUPS, pattern: 43F86C10FD03E11A75FA66A0}
+# DC DAMOS 0x10E4C. Before the common KFTARX-anchor pass can invent a miss.
+- {name: DPUPS, pattern: 43F84C0EFD03E11A75FA}
 - {name: DLAMTANS, pattern: 5C548840C2F42B898840E6F46F39, at: 12, frame: true, cols: 4}
+# DC. Literal 2B/2C rows miss; C2F4 / E6F4 words moved.
+- {name: DLAMTANS, pattern: 5C548840C2F4XXXX8840E6F4XXXX, at: 12, frame: true, cols: 4}
 # DQ class bits. Page is 0602. CDLSHV is the byte after CDLSH. CDHSHE is bit 0x80.
 - {name: CDLSH, pattern: 64F4XXXXD7400602C2F4AE0168412D05E6F41000, at: 10}
 - {name: CDHSHE, pattern: '64F4[80/E5]8BD7400602C2F49E0168412D05E6F48000', at: 10}
@@ -132,7 +140,8 @@ mapsigs:
 # DQ copies of the DH LDR and ignition rows. The fourth E6FE after three 7100s is KFLDIMX.
 - {name: KFLDIMX, pattern: F2F5648C8850E6FCXXXXE6FD0A02E6FE8814, at: 8, frame: true, yat: 2}
 - {name: KFLDRL, pattern: E6FCXXXXE6FD0A02E6FE9A14E6FF0A02DA83, frame: true, xat: -4, yat: -18}
-- {name: LDIATA, pattern: D0848840E6FCXXXXE6FD0602F2FE848C, at: 6, frame: true, xat: 14, also: [{name: LDHIA, add: -1}]}
+# DQ-0010 F2FE848C; DQ-0060 F2FE8A8C.
+- {name: LDIATA, pattern: D0848840E6FCXXXXE6FD0602F2FEXX8C, at: 6, frame: true, xat: 14, also: [{name: LDHIA, add: -1}]}
 - {name: KFLDIOPU, pattern: F2F5528C8850E6FCXXXXE6FD0602E6FED700, at: 8, frame: true, yat: 2}
 - {name: NLDIAPU, pattern: B980E6FCXXXXE6FD0A02D740E100C2FE6E17, at: 4, frame: true, add: 3}
 - {name: KFMIOP, pattern: F6F452A7E6FCXXXXE6FD5C6E, at: 6, yat: 14}
@@ -144,16 +153,24 @@ mapsigs:
 - {name: KRALH, pattern: C2F5D41E2045C2F5BDF94054CD05E138}
 # KFLDHBN header is 08 08 then the same 8-bit axes CM scores with add 18.
 - {name: KFLDHBN, pattern: E6FCA63BE6FD0902C2FE9CF8D740E100C2FFE608, frame: true, add: 18, rows: 8, cols: 8}
-- {name: KFLDHBN, pattern: E6FCD616E6FD0A02C2FEA6F8D740E100C2FF1C18, frame: true, add: 18, rows: 8, cols: 8}
+# DQ-0060 ends C2FF1F18; DQ-0010 keeps 1C18. Must beat common KFTARX anchor.
+- {name: KFLDHBN, pattern: E6FCD616E6FD0A02C2FEA6F8D740E100C2FFXX18, frame: true, add: 18, rows: 8, cols: 8}
 # 16-bit axis header. The F2 word is the axis.
 - {name: FBSTABGM, pattern: 'E6FC[A0/AD][24/F6]E6FD[01/F1]02D740E100F2FE[E4/FD][0B/EF]', frame: true, add: 10, cols: 4, xbits: 16}
 # 43F8 words. The short FD03 and ED05 tails hit more than once.
 - {name: DPUPS, pattern: 43F82813FD03E11A75FA}
 - {name: TMNSMN, pattern: 43F83F22ED05F3FA5B8A}
 - {name: TMNSMN, pattern: 43F8E71FED05F3FA2C89}
-- {name: LDPBN, pattern: '7C[14/FE]88[40/EF]E6FCXXXXE6FD0602F2FE[12/1B]8C', at: 6, frame: true, xat: 14}
+# DQ-0010 F2FE528C ([12/1B] mask); DQ-0060 F2FE588C needs XX.
+- {name: LDPBN, pattern: '7C[14/FE]88[40/EF]E6FCXXXXE6FD0602F2FEXX8C', at: 6, frame: true, xat: 14}
+# DC. Unique A21B/788C immediates; body DAMOS 0x19BA2.
+- {name: LDPBN, pattern: E6FCA21BE6FD0602F2FE788C, frame: true, xat: 10}
 - {name: KFLDRAPP, pattern: 13D0E6FCXXXXE6FD0602C2FEA6F8C2FF4688, at: 4, frame: true, add: 18, rows: 8, cols: 8}
 - {name: FWFTBRTA, pattern: F7F87517E6FCXXXX, at: 6, frame: true, add: 15, cols: 14}
+# DC C2FEB5F9; DQ keeps BDF9 earlier. FWFTBRTA is 51 bytes before that body.
+- {name: KFFWTBR, pattern: 8870E6FCXXXXE6FD0602C2FEB5F9, at: 4, frame: true, add: 20, cols: 8, rows: 10}
+# DC. 51 bytes before the KFFWTBR body (also cannot set cols/plain).
+- {name: FWFTBRTA, anchor: KFFWTBR, add: -51, cols: 14, plain: true}
 # KRANH is 17 bytes before that body.
 - {name: KRFKLN, pattern: '9A[38/FE]0D[00/EF]E6FC[E1/E5][1A/FB]E6FD0602', at: 6, frame: true, xat: 18, also: [{name: KRANH, add: -17}]}
 - {name: DLAMTANS, pattern: 5C548840C2F42C898840E6F46939, at: 12, frame: true, cols: 4}
@@ -184,3 +201,77 @@ mapsigs:
 - {name: LDRQ1ST, pattern: F0740D09E6FCXXXXE6FD0702F2FEXXXXDA82XXXXF074F6F7XXXX9A401390F2F4XXXX8840F2F5XXXX8850E6FCXXXXE6FD0702E6FE7000, at: 6, frame: true, cols: 16, xbits: 16}
 - {name: KFLDRQ2, pattern: F0740D09E6FCXXXXE6FD0702F2FEXXXXDA82XXXXF074F6F7XXXX9A401390F2F4XXXX8840F2F5XXXX8850E6FCXXXXE6FD0702E6FE7000, at: 44, frame: true, rows: 4, cols: 16, ybits: 16, xbits: 16}
 - {name: LDRQ0S, pattern: D7400702F2F7XXXXF047, at: 6}
+# DH-0002/0004. Same 24G skeleton as the DQ LDR rows above.
+- {name: TABGBTS, pattern: 42F4XXXXFD04E11875F8568A}
+- {name: KFFWTBR, pattern: 8870E6FCXXXXE6FD0602C2FEB7F9, at: 4, frame: true, add: 20, cols: 8, rows: 10}
+- {name: KFLAMKRL, pattern: E6FCXXXXE6FD0602E6FE6A02E6FF0602, frame: true}
+- {name: KFLDIMX, pattern: F2F5XXXX8850E6FCXXXXE6FD0902E6FEBA25, at: 8, frame: true, yat: 2}
+- {name: KFLDIOPU, pattern: F2F5XXXX8850E6FCXXXXE6FD0602E6FECD00, at: 8, frame: true, yat: 2}
+# DH E6FE6A39; AA E6FE403E. DA83E045 marks the LDR row.
+- {name: KFLDRL, pattern: E6FCXXXXE6FD0902E6FEXXXXE6FF0902DA83E045, frame: true, xat: -4, yat: -18}
+# DH C389; AA C489.
+- {name: KFLDRAPP, pattern: 13B0E6FCXXXXE6FD0602C2FE9CF8C2FFXX89, at: 4, frame: true, add: 18, rows: 8, cols: 8}
+- {name: NLDIAPU, pattern: B980E6FCXXXXE6FD0902D740E100C2FE7008, at: 4, frame: true, add: 3}
+# DH 0C3B; AA FC3B. Body is the E6FC immediate plus 2.
+- {name: SNM16OPUW, pattern: F6F4D88CE6FCXX3BF2FD9EF8, at: 6, add: 2}
+- {name: KFMIOP, pattern: F6F4XXXXE6FCXXXXE6FDXXXXF2FEXXXXF0F4, at: 6, yat: 14}
+- {name: KRALH, pattern: C2F5XXXX2045C2F5B7F94054CD05E138}
+# DH. Same 8820/0902 frame as KFFSLDE's sibling; DAMOS names it only on -0004.
+- {name: KFFLLDE, pattern: 8820E6FCXXXXE6FD0902E6FE4C3F, at: 4, frame: true, xat: -8, yat: -2}
+# AA-0004. TABGBTS 0x1EC02. KFLDHBN XDF lists y-axis (0x28230); add 18 is the body.
+- {name: TABGBTS, pattern: 42F4XXXXFD04E11875F8578A}
+- {name: KFLDHBN, pattern: E6FCXXXXE6FD0A02C2FE9CF8D740E100C2FFE908, frame: true, add: 18, rows: 8, cols: 8}
+- {name: KFLAMKRL, pattern: E6FCXXXXE6FD0602E6FE7C02E6FF0602, frame: true}
+- {name: DPUPS, pattern: 43F8XXXXFD03E11A75FA6AA1}
+- {name: TMNSMN, pattern: 43F8XXXXED05F3FA5C8A}
+# AA. F2FE B209 is the axis; 9A3C0DF0 has no F2 and fails mapAxis.
+- {name: KRFKLN, pattern: 9A390D20E6FC4D1CE6FD0602D740E100F2FEB209, at: 6, frame: true, xat: 18, also: [{name: KRANH, add: -17}]}
+- {name: ZKWLAFWL, pattern: C2FCXXXX5C8CE6FD0080F0E4F2FF7AA2}
+- {name: KFWPLGTA, pattern: E6FCCC09E6FD0602E6FE1401E6FF0402, frame: true}
+# AA. Same 0D0C / F2FE9EF8 shape as 23g; body DAMOS-less at 0x2856a.
+- {name: LDRXN, pattern: 0D0CE6FCXXXXE6FD0A02F2FE9EF8, at: 4, frame: true, add: 34, cols: 16, xbits: 16}
+# AA. Dual-EXTP lamfa; at 24 is the far word (DH rows use at 28 from D740).
+- {name: KFLAMKR, pattern: F2F4BA098840D740E100F2F59E098850C2F22FFA5C22D4C2C25ED4D2C45EE6FE7C02, at: 24, deref: 1, dereffar: true, cols: 6, rows: 6, xat: 2, yat: 12}
+# AA. BA09 is 6-pt and D209 is 8-pt; B502 site shares axes that RamAxis rejects.
+- {name: KFLAFWL, pattern: D740E100F2F4BA098840D740E100F2F5D2098850C2F2XXXX5C22D4C2XXXXD4D2XXXXE6FE7C02, at: 28, deref: 1, dereffar: true, cols: 6, rows: 8, xat: 6, yat: 16}
+# AA. DH twin with F2F5C88C; E6FE is 2E3E on page 0902 (DH keeps BA25/0502).
+- {name: KFLDIMX, pattern: F2F5XXXX8850E6FCXXXXE6FD0902E6FE2E3E, at: 8, frame: true, yat: 2}
+# AA. F084 prefixes the shared E6FC2E2F frame.
+- {name: FBSTABGM, pattern: F084E6FC2E2FE6FD0902D740E100F2FE2C0B, at: 4, frame: true, add: 10, cols: 4, xbits: 16}
+# AA. F2F5 C00C is the column; F2F2 8609 has two F6F4 setups so no RamAxis.
+- {name: KFFLLDE, pattern: F2F5XXXX8850D740E100F2F2XXXX8820E6FCFC09E6FD0A02E6FECA0A, at: 18, frame: true, cols: 8, rows: 8, xbits: 16, xat: 2, yord: true}
+# AK-0004 / AS-0003. Same literals as 23g.yaml AK/AS rows (24KS does not load 23g).
+- {name: KFFWTBR, pattern: 8870E6FC830CE6FD0602C2FEB9F9, at: 4, frame: true, add: 20, cols: 8, rows: 10}
+- {name: FWFTBRTA, pattern: 443DD740E100F7F82F09E6FC4F2F, at: 12, frame: true, add: 36, cols: 14}
+- {name: NLDIAPU, pattern: B980E6FCF216E6FD0A02D740E100C2FE7408, at: 4, frame: true, add: 3}
+- {name: LDIATA, pattern: D0848840E6FC1723E6FD0602F2FE0C8D, at: 6, frame: true, xat: 14, also: [{name: LDHIA, add: -1}]}
+- {name: ZKWLAFWL, pattern: C2FC7B165C8CE6FD0080F0E4F2FFCAA2}
+- {name: KFLDHBN, pattern: 'E6FC[02/0B]1XE6FD0A02C2FE[00/41]F8D740E100C2FF[0E/0E][08/EE]', frame: true, add: 18, rows: 8, cols: 8}
+- {name: DPUPS, pattern: 43F8070FFD03E11A75FA9EA1}
+- {name: TMNSMN, pattern: 43F8821EED05F3FA718A}
+- {name: KRALH, pattern: C2F5F31F2045C2F5B9F94054CD05}
+- {name: KRFKLN, pattern: 9A380DC0E6FC0820E6FD0602, at: 6, frame: true, xat: 18, also: [{name: KRANH, add: -17}]}
+- {name: KFWPLGTA, pattern: F2F4188D8840F2F5148D8850C2F22EFA5C12C2F336FA00325C23D4C39C4DD4D39E4DE6FE3801, at: 28, deref: 1, dereffar: true, cols: 12, rows: 12, xat: 2, yat: 8}
+- {name: FBSTABGM, pattern: E6FC4A2FE6FD0902D740E100F2FE320C, frame: true, add: 10, cols: 4, xbits: 16}
+# AK-0003. Separate skeleton from AK-0004/AS-0003.
+- {name: TABGBTS, pattern: 42F4XXXXFD04E11875F8688A}
+- {name: FBSTABGM, pattern: F094E6FC5A2DE6FD0902D740E100F2FE160C, at: 4, frame: true, add: 10, cols: 4, xbits: 16}
+- {name: KFFWTBR, pattern: 8870E6FC330AE6FD0602C2FEB9F9, at: 4, frame: true, add: 20, cols: 8, rows: 10}
+- {name: FWFTBRTA, pattern: 443DD740E100F7F82209E6FC502D, at: 12, frame: true, add: 36, cols: 14}
+- {name: LDIATA, pattern: D0848840E6FC1D21E6FD0602F2FE048D, at: 6, frame: true, xat: 14, also: [{name: LDHIA, add: -1}]}
+- {name: NLDIAPU, pattern: B980E6FC9C11E6FD0A02D740E100C2FE7508, at: 4, frame: true, add: 3}
+- {name: KFLDRL, pattern: E6FC500EE6FD0A02E6FEB411E6FF0A02DA83E045, frame: true, xat: -4, yat: -18}
+- {name: KFLDHBN, pattern: E6FCF013E6FD0A02C2FE9CF8D740E100C2FFF508, frame: true, add: 18, rows: 8, cols: 8}
+- {name: DPUPS, pattern: 43F8070FFD03E11A75FA96A1}
+- {name: TMNSMN, pattern: 43F8881EED05F3FA6E8A}
+- {name: ZKWLAFWL, pattern: C2FC85145C8CE6FD0080F0E4F2FFB8A2}
+- {name: KRALH, pattern: C2F5FA1D2045C2F5B9F94054CD05E138}
+- {name: KRFKLN, pattern: 9A390D00E6FC2F1EE6FD0602D740E100F2FEBC09, at: 6, frame: true, xat: 18, also: [{name: KRANH, add: -17}]}
+- {name: KFLAMKR, pattern: D740E100F2F4C4098840D740E100F2F5A8098850C2F234FA5C22D4C21A50D4D21C50E6FE7C02, at: 28, deref: 1, dereffar: true, cols: 6, rows: 6, xat: 6, yat: 16}
+- {name: KFLAFWL, pattern: D740E100F2F4C4098840D740E100F2F5DC098850C2F234FA5C22D4C21250D4D21450E6FE7C02, at: 28, deref: 1, dereffar: true, cols: 6, rows: 8, xat: 6, yat: 16}
+- {name: KFWPLGTA, pattern: F2F4XXXX8840F2F50C8D8850C2F22CFA5C12C2F334FA00325C23D4C34A4DD4D34C4DE6FE3801, at: 28, deref: 1, dereffar: true, cols: 12, rows: 12, xat: 2, yat: 8}
+- {name: KFLDIMX, pattern: F2FFD4A5DA83943BF6F4D4A58840F2F5E68C8850E6FCFE0CE6FD0A02E6FEA211, at: 22, frame: true, cols: 8, rows: 16, xbits: 16, ybits: 16, xat: 2, yat: 16}
+- {name: KFFLLDE, pattern: F2F5EC0C8850D740E100F2F290098820E6FCD21CE6FD0A02E6FEA01D, at: 18, frame: true, cols: 8, rows: 8, xbits: 16, xat: 2, yord: true}
+# 8E0909559E-0004 (ME7.1.1 24T). Own skeleton; do not reuse DQ immediates.
+# TABGBTS: DA8x window, EXTP 0902, tail BEB3 (unique in corpus).
+- {name: TABGBTS, pattern: 42F4XXXXFD04E11875F8BEB3}
