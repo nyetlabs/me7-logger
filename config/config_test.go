@@ -101,7 +101,7 @@ func TestShippedSignatures(t *testing.T) {
 	// Stable sequence of expanded mapsig rows (name|pattern). Catches
 	// accidental mapsig edits/reorders; bump with go test ./config -update
 	// after an intentional mapsigs.d change.
-	const want = "6621fe4bc758d9283579b914a02e4db51e163daaf338de96d49ae479032113d0"
+	const want = "a607422c5dfaeb1946e698c6b57cf15a64b11c4fda86f764a3f59010fe2f16ed"
 	if got == want {
 		return
 	}

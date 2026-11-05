@@ -19,6 +19,8 @@ mapsigs:
 - {name: CLAATR2, anchor: fcm_cla, index: fcm_dtc, code: '1460'}
 - {name: CLAATS, anchor: fcm_cla, index: fcm_dtc, code: '1453'}
 - {name: CLAATS2, anchor: fcm_cla, index: fcm_dtc, code: '1457'}
+# No FCM 1457 (NL/LQ/CJ): DAMOS lists CLAATS2 on the CLAATS byte.
+- {name: CLAATS2, anchor: CLAATS, add: 0}
 # 22N fault path class table, read as [Rw + 0x073B]. 22N has one more path
 # before these than 22m, so each index is one past the 22m index. The rows
 # DAMOS often omits ESKONF; the checks are still in the image.
@@ -232,8 +234,8 @@ mapsigs:
 # The F048 tails are the pointer table.
 - {name: KFMIRL, pattern: 'F048004A08049860987098809890DB00[C2/CF]F4[C0/C9][80/C0]', add: 28, rows: 16, cols: 16, ybits: 16, xbits: 16}
 - {name: FBSTABGM, pattern: 42F4XXXXDD05D740070242F4782EAD02DF3D, add: 14, cols: 4, xbits: 16}
-- {name: KFVPDKSD, pattern: D4F9E6FCXXXX, at: 4}
-- {name: KFVPDKSE, pattern: F048XXXXBC58}
+# KFVPDKSD/SE: F048…BC58 and D4F9E6FC are code false positives (mem 577C).
+# Real bodies are in family shards (24egks LDRPLS E6FC/F2FE frames).
 - {name: KFMIOP, pattern: E6FCXXXXE6FD5E69F2FEC289DA83}
 - {name: FWFTBRTA, pattern: C2F4XXXX6842EA20BC05, add: 59, cols: 14}
 - {name: KFFWTBR, pattern: C2F4XXXX6842EA20BC05, add: 110, rows: 10, cols: 8}
@@ -264,7 +266,6 @@ mapsigs:
 - {name: NFSM, pattern: [43F8XXXX9D05D7400602F3F8A322, 43F8XXXX9D05D7400602F3F88925], add: 1}
 - {name: NLLM, pattern: [43F8XXXX9D05D7400602F3F8AB22, 43F8XXXX9D05D7400602F3F89125], add: 41}
 - {name: NASNOTKL, pattern: C2F4XXXXC0C51B45, add: 289}
-- {name: KFMLDMX, pattern: E6FFXXXXDA00282E0806F6F4, add: 10}
 - {name: KFPBRK, pattern: F2FCXXXXF0D2F2FE, add: 46, also: [{name: KFPBRKNW, add: 290}]}
 - {name: KFWDKMSN, pattern: F2FCXXXXE6FD3827, add: 66, rows: 16, cols: 6, ybits: 16, xbits: 16}
 - {name: FKKVS, pattern: [C2FFXXXXDA82EA6706F00C00F6F47C9E, C2FFXXXXDA80184F06F00C00F6F4F49E], add: 49, rows: 16, cols: 16, xbits: 16}

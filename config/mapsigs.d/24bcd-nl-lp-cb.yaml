@@ -1,7 +1,7 @@
 mapsigs:
 # 06A906032NL-0003 and LQ-0007. Same calls as HF-0006, with the immediates that changed.
 # F88B NL/CJ; EE8B LQ; EC8B LP. Same AB01/9F01 class bytes.
-- {name: CDLSH, pattern: FFFB64F4XX8BD7400602C2F4AB0168412D05E6F41000, at: 12}
+- {name: CDLSH, pattern: FFFB64F4XX8BD7400602C2F4AB0168412D05E6F41000, at: 12, also: [{name: CDLSHV, add: 1}]}
 - {name: CDHSHE, pattern: BFFF64F4XX8BD7400602C2F49F0168412D05E6F48000, at: 12}
 - {name: KFMRES, pattern: '0D0BE6FC[14/D4]14E6FD[2E/AF]30F2FE[A0/E5]8CF2FF[A0/F1]8C', at: 4, xat: 16, yat: 12}
 - {name: KFMRESK, pattern: '9D0CE6FC[04/84]14E6FD[2E/AF]30F2FE[A0/E5]8CF2FF[A0/F1]8C', at: 4, xat: 16, yat: 12}

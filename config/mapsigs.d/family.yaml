@@ -76,6 +76,8 @@ mapsigs:
 - {name: KFPEDR, absent: C2F4XXXX5C14D4C4XXXXE6FDXXXXF2FEXXXXF2FFXXXXDA8XXXXX, open: 'E6FCXXXX{wped_w:F2FD}{slot:11}E6FCXXXX{nmot_w:F2FD}{slot:11}F6F4XXXX', pattern: E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDA8XXXXX, at: 2}
 # Rows shared by several families. They sit below the rows above so
 # those fill first.
+# E6FF/DA00 282E reader. 8x9; without this, common KFPBRK-200 claims junk on 25A.
+- {name: KFMLDMX, pattern: E6FFXXXXDA00282E0806F6F4, add: 10, rows: 8, cols: 9, xbits: 8, ybits: 16}
 - {name: KFMSNWDK, pattern: E6FCXXXXF2FD4CA2F2FE, add: 48}
 - {name: KFDLULS, pattern: [C2F4XXXXF6F49AA80D0B, C2F4XXXXF6F4B6A70D0B], add: 21}
 - {name: KISRM, pattern: 'F6F4XXA1F2F7XXXXC2FC[52/D6]0D', at: 6}

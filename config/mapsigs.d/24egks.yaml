@@ -40,40 +40,42 @@ mapsigs:
 - {name: CWKONABG, pattern: D7400602C2F4B90168413A8888364A880168, at: 6}
 # 4B0906018DQ-0060. The 16-bit axis call is 32 bytes in front of the body.
 - {name: FKKVS, pattern: 'F6F4[02/03][A0/FE]8840C2F2A6F88820E6F4[F8/F9]35E6F50702', at: 14, frame: true, rows: 16, cols: 16, xbits: 16}
-# Same CWDLSAHK call as NL. Page 0602, the FD 09 byte. AK and AS use word FD08.
-- {name: CWDLSAHK, pattern: '8AF41000F3F8[24/24][A1/E5]D740060243F8[C0/C2][00/F0]FD09', at: 14}
-# 4B0906018DQ. The page-0602 cluster. TLDIAPN's F2 word is the 8-point axis.
-- {name: LDEIAP, pattern: D740060243F8F321BD07, at: 6}
-- {name: UMDYLDR, pattern: D7400602D2FF0D22DA833650, at: 6}
-- {name: TLDIAPN, pattern: E6FC0522E6FD0602F2FE588CDA83, at: 2, frame: true, xat: 10}
-# DQ KFDMDADP and KFDMDARO. Page 0A02. The gear axis is the 6 points.
-# The 16-bit axis is the shared E6 FE word.
+# CWDLSAHK page 0602 FD09. AK/AS FD08 elsewhere; DC/DH bitmasks; AA/AK/AS 37B3.
+# Bare F3F8XXXX…FD09 is not unique.
+- {name: CWDLSAHK, pattern: ['8AF41000F3F8[24/24][A1/E5]D740060243F8[C0/C2][00/F0]FD09', '8AF41000F3F8[15/9D][B1/FD]D740060243F8[01/95]06FD09', 8AF41000F3F837B3D740060243F8XXXXFD09], at: 14}
+# 24EGKS page-0602 LDR cluster. DQ literals wildcarded for AA/DH/AK/AS.
+- {name: LDEIAP, pattern: D740060243F8XXXXBD07, at: 6}
+- {name: UMDYLDR, pattern: D7400602D2FFXXXXDA83XXXX, at: 6}
+- {name: TLDIAPN, pattern: E6FCXXXXE6FDXXXXF2FEXXXXDA837043E4800200E6FC, at: 2, frame: true, xat: 10}
+# KFDMDADP / KFDMDARO. Gear axis 6 points; 16-bit axis is the shared E6 FE word.
 - {name: ap_dmddx, pattern: 06010203040506, table: true}
 - {name: ap_dmddy, pattern: 080052F8B8FE480133031F05CD0C0A37, table: true}
-- {name: KFDMDARO, pattern: E6FC9820E6FD0A02E6FEB621E6FF0A02, at: 2, frame: true, rows: 8, cols: 6, ybits: 16, xtable: ap_dmddx, ytable: ap_dmddy}
-- {name: KFDMDADP, pattern: E6FC3820E6FD0A02E6FEB621E6FF0A02, at: 2, frame: true, rows: 8, cols: 6, ybits: 16, xtable: ap_dmddx, ytable: ap_dmddy}
-# DQ. The 5C84 call. The E6 FC word is the 14 by 14 header, 30 bytes before the body.
-- {name: KFKHFM, pattern: DB00E6FC780FC2FDA6F8C2FEBDF9DA00D425, at: 4, add: 30, rows: 14, cols: 14}
+- {name: KFDMDARO, pattern: DA83AE3CD740E100F6F4XXXX8840D740E100F2F5XXXX8850E6FCXXXXE6FDXXXXE6FEXXXXE6FFXXXX, at: 26, frame: true, rows: 8, cols: 6, ybits: 16, xtable: ap_dmddx, ytable: ap_dmddy}
+# ADP is the third frame in the cluster (ARO + 0xC0 of E6FC space on DQ/AA).
+- {name: KFDMDADP, pattern: [E6FC3820E6FD0A02E6FEB621E6FF0A02, E6FC3C09E6FD0A02E6FECA0AE6FF0A02], at: 2, frame: true, rows: 8, cols: 6, ybits: 16, xtable: ap_dmddx, ytable: ap_dmddy}
+# KFKHFM. E6 FC word is the 14 by 14 header, 30 bytes before the body.
+- {name: KFKHFM, pattern: DB00E6FCXXXXC2FDXXXXC2FEXXXXDA00D425, at: 4, add: 30, rows: 14, cols: 14}
 # DQ and DH KFTARX. Page 0A02. The temperature axis count is the odd byte after 50.
 - {name: ap_kftarx, pattern: 500A334D626A76839DABB8D3, table: true, add: 1}
 - {name: ap_kftarxx, pattern: 0C00A00F2017E01A401F, table: true}
-- {name: KFTARX, pattern: 'E6FC[00/01][08/EF]E6FD0A02E6FE[10/14][20/EC]E6FF0602', at: 2, frame: true, rows: 10, cols: 12, xbits: 16, ytable: ap_kftarx, xtable: ap_kftarxx}
-# DQ KFLDRQ2. Page 0A02. The 4-point axis count sits one byte after 9A.
+# DQ/DH bitmasks; AA E6FC A20E / E6FE 1433 (XX frame multis with KFTARXZK).
+- {name: KFTARX, pattern: ['E6FC[00/01][08/EF]E6FD0A02E6FE[10/14][20/EC]E6FF0602', E6FCA20EE6FD0A02E6FE1433E6FF0602], at: 2, frame: true, rows: 10, cols: 12, xbits: 16, ytable: ap_kftarx, xtable: ap_kftarxx}
+# KFLDRQ2. 4-point axis count sits one byte after 9A. Page 0A02 (DQ) / 0902 (AA).
 - {name: ap_ldrq2, pattern: 9A040A142846, table: true, add: 1}
-- {name: KFLDRQ2, pattern: E6FC7612E6FD0A02E6FE7100E6FF0402, at: 2, frame: true, rows: 4, cols: 16, ytable: ap_ldrq2}
-# DQ-0060. Same 9850 call as the DA80 rows. The frame is 44 bytes before KFPBRK.
-# KFPRG is 524 on, KFURL is 680 on. KFPBRKNW is the existing anchor.
-- {name: KFPBRK, pattern: E6FC8224E6FD0702F2FEA8F8F2FFC2F9DA83104098501B45F2F80CFE, frame: true, add: 44, rows: 10, cols: 10, xbits: 16, ybits: 16}
-- {name: KFPRG, pattern: E6FC8224E6FD0702F2FEA8F8F2FFC2F9DA83104098501B45F2F80CFE, frame: true, add: 524, rows: 6, cols: 10, xbits: 16, ybits: 16}
-- {name: KFURL, pattern: E6FC8224E6FD0702F2FEA8F8F2FFC2F9DA83104098501B45F2F80CFE, frame: true, add: 680, rows: 6, cols: 10, xbits: 16, ybits: 16}
-- {name: KFMSNWDK, pattern: E6FC8224E6FD0702F2FEA8F8F2FFC2F9DA83104098501B45F2F80CFE, frame: true, add: 856, rows: 16, cols: 6, xbits: 16, ybits: 16}
-# DQ. Page 0A02. LDRQ0S is the F2 word. LDRQ1ST is the 16 points after it.
+- {name: KFLDRQ2, pattern: 68412D13F2F4XXXX8840F2F5XXXX8850E6FCXXXXE6FDXXXXE6FEXXXXE6FFXXXX, at: 18, frame: true, rows: 4, cols: 16, ytable: ap_ldrq2}
+# Same 9850 call. Frame is 44 bytes before KFPBRK; KFPRG 524, KFURL 680, KFMSNWDK 856.
+- {name: KFPBRK, pattern: E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDA83104098501B45F2F8XXXX, frame: true, add: 44, rows: 10, cols: 10, xbits: 16, ybits: 16}
+- {name: KFPRG, pattern: E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDA83104098501B45F2F8XXXX, frame: true, add: 524, rows: 6, cols: 10, xbits: 16, ybits: 16}
+- {name: KFURL, pattern: E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDA83104098501B45F2F8XXXX, frame: true, add: 680, rows: 6, cols: 10, xbits: 16, ybits: 16}
+- {name: KFMSNWDK, pattern: E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDA83104098501B45F2F8XXXX, frame: true, add: 856, rows: 16, cols: 6, xbits: 16, ybits: 16}
+# LDRQ0S is the F2 word; LDRQ1ST is the 16 points after it. Page 0A02/0902.
 - {name: ap_rpm16, pattern: 10191F262C32383F454B5864717D8A96, table: true}
-- {name: LDRQ0S, pattern: D7400A02F2F76014F047, at: 6}
-- {name: LDRQ1ST, pattern: D7400A02F2F76014F047, at: 6, add: 2, cols: 16, xtable: ap_rpm16}
-# DQ-0060. Page 0602, the bytes after the 04174880 marker.
-- {name: EDLDRP, pattern: D7400602C2FE0C235C7E, at: 6}
-- {name: TDLDRA, pattern: D08DD7400602C2FE1523, at: 8}
+- {name: LDRQ0S, pattern: D740XX02F2F7XXXXF047, at: 6}
+- {name: LDRQ1ST, pattern: D740XX02F2F7XXXXF047, at: 6, add: 2, cols: 16, xtable: ap_rpm16}
+- {name: EDLDRP, pattern: D7400602C2FEXXXX5C7E, at: 6}
+- {name: TDLDRA, pattern: E4800A00E6FCXXXXD08DD7400602C2FEXXXX, at: 16}
+# AA/DH/AK. Count+axis sit 3 bytes in front of the body (same shape as 24BCD).
+- {name: NDLDRAPU, pattern: 0400D740E100F6F4XX0CE6FCXXXX, at: 12, frame: true, add: 3, cols: 2}
 # DQ-0060. Two copies of the F2 F4 9E51 call share the address, so the
 # existing FFFF row sees two hits. The 1B13 copy is the one.
 - {name: DSLOFS, pattern: 1B13F2F20EFEF2FC0CFE6D055C2C8D037CE270C20D02E6FCFFFFF2F49E516D05004C, at: 28}
@@ -101,33 +103,32 @@ mapsigs:
 # DC and DH class bits. Page 0602. CDLSHV is the byte after CDLSH. CDHSHE is bit 0x80.
 - {name: CDLSH, pattern: 64F4XX8BD7400602C2F4AB0168412D05E6F41000, at: 10, also: [{name: CDLSHV, add: 1}]}
 - {name: CDHSHE, pattern: '64F4[B0/B9]8BD7400602C2F49D0168412D05E6F48000', at: 10}
-# DC and DH. KFMRESK is the call before KFMRES. The two F2 words are the axes.
-- {name: KFMRESK, pattern: '9D0CE6FC[0C/8D][18/F9]E6FD[54/F5][30/F1]F2FE[30/3D]8CF2FF[28/39]8C', at: 4, xat: 16, yat: 12}
-- {name: KFMRES, pattern: '0D0BE6FC[04/AD][18/F9]E6FD[54/F5][30/F1]F2FE[30/3D]8CF2FF[28/39]8C', at: 4, xat: 16, yat: 12}
+# DC/DH/AA/DQ. KFMRESK before KFMRES. XX8C covers B08C/AA8C and the DC bitmasks.
+- {name: KFMRESK, pattern: 9D0CE6FCXXXXE6FDXXXXF2FEXX8CF2FFXX8C, at: 4, xat: 16, yat: 12}
+# DC/DH bitmasks; AA B08C/AA8C (full XX8C hits twice on DH/AA).
+- {name: KFMRES, pattern: ['0D0BE6FC[04/AD][18/F9]E6FD[54/F5][30/F1]F2FE[30/3D]8CF2FF[28/39]8C', 0D0BE6FCXXXXE6FDXXXXF2FEB08CF2FFAA8C], at: 4, xat: 16, yat: 12}
 # DC and DH. The body is 30 bytes past the frame. 12 by 16. DC at 8, DH at 12.
 - {name: KFLF, pattern: 06F480018840E6FC8B09E6FD0602C2FE9CF8C2FFB5F9DA83243FC2F50DFA, at: 8, frame: true, add: 30, rows: 12, cols: 16}
-- {name: KFLF, pattern: C2F4A58806F480018840E6FC1A0AE6FD0602C2FE9CF8C2FFB7F9DA83243F, at: 12, frame: true, add: 30, rows: 12, cols: 16}
+# DH A588/1A0A; AA A688/2D0A.
+- {name: KFLF, pattern: C2F4XXXX06F480018840E6FCXXXXE6FD0602C2FE9CF8C2FFB7F9DA83243F, at: 12, frame: true, add: 30, rows: 12, cols: 16}
 # DH, AK, AS, and AA. Page 0702. The 16-bit axis is in front of the body.
 - {name: FKKVS, pattern: '8840C2F29CF88820E6F4[00/01][01/C1]E6F50702', at: 10, frame: true, rows: 16, cols: 16, xbits: 16}
-# DH. Page 0702. TABGSS2 is two bytes later.
-- {name: TABGSS, pattern: 0D08F2F4B29DD740070242F4D007FD01, at: 12, also: [{name: TABGSS2, add: 2}]}
-# DC and DH. Same CWDLSAHK call as DQ. Page 0602, the FD 09 byte.
-- {name: CWDLSAHK, pattern: '8AF41000F3F8[15/9D][B1/FD]D740060243F8[01/95]06FD09', at: 14}
+# DH B29D/D007; AA 469E/8E0A. Page 0702. TABGSS2 is two bytes later.
+- {name: TABGSS, pattern: 0D08F2F4XXXXD740070242F4XXXXFD01, at: 12, also: [{name: TABGSS2, add: 2}]}
 # DC, DH, and both DQ. First D4C5 load. The F2 word is the 6-point axis.
 - {name: NLLM_0_A, pattern: D4C5XXXXD4D5XXXXD740E100F2FEXXXXDA83XXXXF7F8XXXX, at: 2, deref: 1, dereffar: true, xat: 14, cols: 6}
 - {name: NLLM_1_A, pattern: D4C5XXXXD4D5XXXXD740E100F2FEXXXXDA83XXXXF7F8XXXX, at: 2, deref: 1, derefat: 4, dereffar: true, xat: 14, cols: 6}
 - {name: NLLM_2_A, pattern: D4C5XXXXD4D5XXXXD740E100F2FEXXXXDA83XXXXF7F8XXXX, at: 2, deref: 1, derefat: 8, dereffar: true, xat: 14, cols: 6}
 - {name: NLLM_3_A, pattern: D4C5XXXXD4D5XXXXD740E100F2FEXXXXDA83XXXXF7F8XXXX, at: 2, deref: 1, derefat: 12, dereffar: true, xat: 14, cols: 6}
-# DC and DH. The DQ KFFWL far table, with the words that changed.
-- {name: KFFWL_0_A, pattern: 'F2F4[08/09]098840F2F5[20/39]8C8850C2F2[10/DD]FA5C22D4C2[08/49][61/ED]D4D2[20/75][61/ED]E6FE[90/97][21/E5]E6FF0602DA834445', at: 20, deref: 1, dereffar: true, xat: 2, rows: 8, cols: 6, xbits: 16, yord: true, bits: 16}
-- {name: KFFWL_1_A, pattern: 'F2F4[08/09]098840F2F5[20/39]8C8850C2F2[10/DD]FA5C22D4C2[08/49][61/ED]D4D2[20/75][61/ED]E6FE[90/97][21/E5]E6FF0602DA834445', at: 20, deref: 1, derefat: 4, dereffar: true, xat: 2, rows: 8, cols: 6, xbits: 16, yord: true, bits: 16}
+# DC/DH bitmasks; AA A009/A28C/…/1433 (full XX multis on CG/CH/DC).
+- {name: KFFWL_0_A, pattern: ['F2F4[08/09]098840F2F5[20/39]8C8850C2F2[10/DD]FA5C22D4C2[08/49][61/ED]D4D2[20/75][61/ED]E6FE[90/97][21/E5]E6FF0602DA834445', F2F4A0098840F2F5A28C8850C2F230FA5C22D4C2C670D4D2C870E6FE1433E6FF0602DA834445], at: 20, deref: 1, dereffar: true, xat: 2, rows: 8, cols: 6, xbits: 16, yord: true, bits: 8}
+- {name: KFFWL_1_A, pattern: ['F2F4[08/09]098840F2F5[20/39]8C8850C2F2[10/DD]FA5C22D4C2[08/49][61/ED]D4D2[20/75][61/ED]E6FE[90/97][21/E5]E6FF0602DA834445', F2F4A0098840F2F5A28C8850C2F230FA5C22D4C2C670D4D2C870E6FE1433E6FF0602DA834445], at: 20, deref: 1, derefat: 4, dereffar: true, xat: 2, rows: 8, cols: 6, xbits: 16, yord: true, bits: 8}
 # DC. Same 4A 88 01 68 tail as DQ. The F3 FA word is the body.
 - {name: CWKONABG, pattern: D7400602F3FAB90169A23A8888364A880168, at: 6}
 # DC KFMIRL. Desired load, 16 by 16. The result limits rlsol.
 - {name: KFMIRL, pattern: E6FCD256F2FD9EF8F2FECC9FDA00DE73F084, add: 68, rows: 16, cols: 16, xbits: 16, ybits: 16}
-# DC, DH, DQ-0010, AK, and AS. The five points are 71 8E AA C7 E3, the same curve as 0060.
-- {name: TVUB, pattern: E6FEB63EC2FF9C89DA00427B, cols: 5}
-- {name: TVUB, pattern: 'E6FE[00/8B][40/E0]C2FF[22/62][88/FE]DA00982D', cols: 5}
+# DC/DQ-0010/AK/AS bitmask before XX (DQ XX is multi; DH/AA need XX for 745C/565C).
+- {name: TVUB, pattern: [E6FEB63EC2FF9C89DA00427B, 'E6FE[00/8B][40/E0]C2FF[22/62][88/FE]DA00982D', E6FEXXXXC2FFXX89DA00982D], cols: 5}
 # DC. Page 0602. TABGSS2 is two bytes later.
 - {name: TABGSS, pattern: 0D08F2F40E9DD740060242F4183DFD01, at: 12, also: [{name: TABGSS2, add: 2}]}
 # AK-0004 and AS. The F2 operand is the tmot byte, so xat cannot read it.
@@ -240,6 +241,14 @@ mapsigs:
 - {name: FBSTABGM, pattern: F084E6FC2E2FE6FD0902D740E100F2FE2C0B, at: 4, frame: true, add: 10, cols: 4, xbits: 16}
 # AA. F2F5 C00C is the column; F2F2 8609 has two F6F4 setups so no RamAxis.
 - {name: KFFLLDE, pattern: F2F5XXXX8850D740E100F2F2XXXX8820E6FCFC09E6FD0A02E6FECA0A, at: 18, frame: true, cols: 8, rows: 8, xbits: 16, xat: 2, yord: true}
+# 24G AA/DH. BGRML MLMAX; page 0702. AK/AS share the reader.
+- {name: MLMAX, pattern: 2D02F78FXXXXF3F8XXXX2D27E6FCXXXXE6FD0702F2FE9EF8DA83B83D, at: 14, frame: true}
+# 24G. KFWDKMSN header+body 9002; shared x-axis ends c05d. Table add 48 is the body.
+- {name: kfwdkmsn_24g, pattern: 10000600XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXA00F401FE02E803E204EC05D0000000000000000000000009002, table: true, add: 48}
+- {name: KFWDKMSN, anchor: kfwdkmsn_24g, add: 0, rows: 16, cols: 6, ybits: 16, xbits: 16}
+# 24G AA/DH. LDRPLS; F084 vs E6F20080 separates SD/SE. F2FE/F2FF → SNM12/SVP12.
+- {name: KFVPDKSD, pattern: E6FCXXXXE6FDXXXXF2FEC48CF2FFF68CDA82XXXXF084, at: 2, rows: 12, cols: 12, xbits: 16, ybits: 16, xat: 10, yat: 14}
+- {name: KFVPDKSE, pattern: E6FCXXXXE6FDXXXXF2FEC48CF2FFF68CDA82XXXXE6F20080, at: 2, rows: 12, cols: 12, xbits: 16, ybits: 16, xat: 10, yat: 14}
 # AK-0004 / AS-0003. Same literals as 23g.yaml AK/AS rows (24KS does not load 23g).
 - {name: KFFWTBR, pattern: 8870E6FC830CE6FD0602C2FEB9F9, at: 4, frame: true, add: 20, cols: 8, rows: 10}
 - {name: FWFTBRTA, pattern: 443DD740E100F7F82F09E6FC4F2F, at: 12, frame: true, add: 36, cols: 14}

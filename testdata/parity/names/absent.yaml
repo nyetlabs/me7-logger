@@ -83,12 +83,29 @@ absent:
   24G:
     - DLBTS # KFLBTS_0_A + TABGBTS located; lambts non-store arm
     - KFVPLGU # no DA 00 42 76 reader
+    - CLAATR # not in DH/AA defs; no 1456 in FCM
+    - CLAATR2 # not in DH/AA defs; no 1460 in FCM
+    - CLAATS # not in DH/AA defs; no 1453 in FCM
+    - CLAATS2 # not in DH/AA defs; no 1457 in FCM
+    - CLAHSHE2 # CLAHSHE located; *2 code not in DH/AA FCM
+    - CLALSH2 # CLALSH located; *2 code not in DH/AA FCM
     - CLRHK # not in DH DAMOS; no 67 F8 11 00 reader
     - CLRHKA # not in DH DAMOS
     - CLRKA # not in DH DAMOS
+    - KFNLLNST # not in DH/AA defs; nllnst_entry miss
+    - NFSM # not in DH/AA defs; LLR_nfsm ambiguous / no idle map
+    - NFS2M # NFSM family; not in DH/AA defs
+    - NFS2M_0_A # NFSM family; not in DH/AA defs
+    - NFS2M_1_A # NFSM family; not in DH/AA defs
     - RLSALULL # KLRLSALULL located; byte form not in DH DAMOS
     - RLSALUN # not in DH DAMOS; no ASE_rlsalun path
     - NMAXF # NMAX + VMAXNB + SNM16OPUW located; not in DH/AA DAMOS
+    # DH-0002 A2L (same 24G block). Keep A2L-present B/A names open.
+    - LDRQ0DY # LDRQ0S + KFLDRQ2 located; DY form not in DH A2L
+    - LDRQ1DY # LDRQ1ST + KFLDRQ2 located; DY form not in DH A2L
+    - KFNW # not in DH A2L; A2L has KFNWEGM/KFNWADE/KFNWSE/… instead
+    - KFNWWL # not in DH A2L; A2L has KFNWWLE/KFNWWLLE/KFNWLLE instead
+    - KIFZGHG # plain name not in DH A2L; A2L has KIFZGHG_0_A + KIFZGHG_1_A
   24KS:
     - DLBTS # KFLBTS_0_A + TABGBTS located; lambts non-store arm
     - KFVPLGU # no DA 00 42 76 reader
