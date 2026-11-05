@@ -761,7 +761,7 @@
 - name: CDCTEVE
   description: 'Codewort CARB: Tankentlüftungsventil Endstufe'
 - name: CDCTEVE2
-  description: 'Codewort CARB: Tankentlüftungsventil Endstufe  Bank2'
+  description: 'Codewort CARB: Tankentlüftungsventil Endstufe Bank2'
 - name: CDCTHM
   description: 'Codewort CARB: Thermostat-Diagnose THM'
 - name: CDCTKA
@@ -825,7 +825,7 @@
 - name: CDHSVE
   description: 'Codeword: DHLSE heater final stage diagnosis before cat'
 - name: CDHSVSA
-  description: Codewort Heizerdiagnose vor Kat im Schub (CDHSVsa = 0  => keine Diagnose)
+  description: Codewort Heizerdiagnose vor Kat im Schub (CDHSVsa = 0 => keine Diagnose)
 - name: CDKAAA
   description: 'Dummy: Tabellenanfang'
 - name: CDKAAV
@@ -1101,7 +1101,7 @@
 - name: CDKSGEEW
   description: 'Codewort Kunde: Steuergerät defekt (EEPROM WFS-Bereich)'
 - name: CDKSLPE
-  description: 'Codewort Kunde: Sekundärluftpumpe  (Endstufe)'
+  description: 'Codewort Kunde: Sekundärluftpumpe (Endstufe)'
 - name: CDKSLS
   description: 'Codewort Kunde: Sekundärluft-System'
 - name: CDKSLV
@@ -6799,7 +6799,7 @@
 - name: HLONLOGIN
   description: Login-Code für Heißland aktiv
 - name: HLSUKORMX
-  description: Maximalwert des Korrekturfaktors für die  LSU-Heizleistung
+  description: Maximalwert des Korrekturfaktors für die LSU-Heizleistung
 - name: HOE_LD
   description: Höhenstützstellen für LDR
 - name: HSLDSUA
@@ -8513,9 +8513,9 @@
 - name: KFWNWWKE
   description: Wichtungskennfeld für NW-Sollwinkel  Einlaßseitig
 - name: KFWNWWKE_0_A
-  description: Wichtungskennfeld für NW-Sollwinkel  Einlaßseitig
+  description: Wichtungskennfeld für NW-Sollwinkel Einlaßseitig
 - name: KFWNWWKE_1_A
-  description: Wichtungskennfeld für NW-Sollwinkel  Einlaßseitig
+  description: Wichtungskennfeld für NW-Sollwinkel Einlaßseitig
 - name: KFWPFGR
   description: Inverse pedal map for cruise control
 - name: KFWPLGTA
@@ -16793,7 +16793,7 @@
 - name: WFRL
   description: Kraftstoffwandfilmkennlinie
 - name: WHLSUKOR
-  description: Korrekturwert für die  LSU-Heizleistung
+  description: Korrekturwert für die LSU-Heizleistung
 - name: WIMAX
   description: ObererSchranke interne Reglerzustände stetige Lambdaregelung
 - name: WIMIN
