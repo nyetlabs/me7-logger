@@ -14,8 +14,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      # Fork PRs get no secrets, so they can't fetch the private corpus; their corpus tests skip.
-      HAS_CORPUS: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+      # Fork PRs get no secrets. Dependabot PRs are same-repo but run with
+      # Dependabot secrets only, so CORPUS_APP_KEY is empty there too.
+      # Both skip the private corpus; other same-repo runs still fetch it.
+      HAS_CORPUS: ${{ github.actor != 'dependabot[bot]' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
     steps:
       - uses: actions/checkout@v7
         with:
