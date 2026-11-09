@@ -41,13 +41,13 @@ LIBDIR ?= $(PREFIX)/lib/me7-logger
 BINDIR ?= $(PREFIX)/bin
 PROGRAMS := me7info me7logger
 
-all: test build
+all: build test
 
 test: check-pinned
-	go test ./config -update
 	go test ./...
 
 build:
+	go test ./config -update
 	mkdir -p build
 	go build -ldflags "-X main.version=$(VERSION)" -o build/me7info ./cmd/me7info
 	go build -ldflags "-X main.version=$(VERSION)" -o build/me7logger ./cmd/me7logger
