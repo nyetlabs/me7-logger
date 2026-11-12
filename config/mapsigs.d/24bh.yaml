@@ -6,3 +6,55 @@ mapsigs:
 - {name: KFFWL_0_A, pattern: 410B06024D0B0602, at: 4, far: true, rows: 12, cols: 12, xtable: ap_kffwl_x, ytable: ap_kffwl_y, also: [{name: KFFWL_1_A, add: 144}]}
 # CM DAMOS 0x134C0. C2FD site; 24bcd F2FD needles miss.
 - {name: SNM16OPUW, pattern: F6F4788CE6FCXXXXF2FDA0F8, at: 6, add: 2}
+# 4B0906018-0004. Same 6981/3A88/8836 check as common CWMDAPP, without DB00.
+- {name: CWMDAPP, pattern: D7400602F3F8XXXX69813A888836, at: 6}
+# B4. Same KFZW call; body+0xC0 is KFZW2 (HF/CM). Own row so axes are not
+# stolen by an earlier KFZW without xat/yat.
+- {name: KFZW2, pattern: DB008890E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDA00B878, at: 6, add: 192, xat: 18, yat: 14, rows: 16, cols: 12}
+# B4. Same 2045/4054CD05 hysteresis reader as 24bcd; E138 selects the KRALH arm.
+- {name: KRALH, pattern: C2F5XXXX2045C2F5XXXX4054CD05E138}
+# B4. 9D11/49A2 arm next to that reader (24bcd 9D11 forms miss without 49A2).
+- {name: KRANH, pattern: 43F8XXXX9D11F3FAXXXX49A2}
+# B4. Real 8x8 before common EDLDRP-114 junk; unique at 0x5fe76.
+- {name: KFLDRAPP, pattern: 9A011120E6FCXXXXC2FDXXXXC2FEXXXXDA00, at: 6, add: 18, rows: 8, cols: 8}
+# B4 LDRPID. Curve after KFLDIMX; F2FE928E is unique.
+- {name: LDIATA, pattern: E6FCXXXXE6FD0602F2FE928EDA82, frame: true}
+# B4. All-0x80 8x8 (CM WPLGTA); no E6FE3C01/AE00 table8 slot in LDRPID.
+# X count sits on an odd address; Y is a bare 8-byte table (yord).
+- {name: ap_kfwplgta_x, pattern: 0F14191E232D373F0E1B, table: true, add: -1}
+- {name: kfwplgta_24bh, pattern: 0E1B22282F3643508080808080808080, table: true, add: 8}
+- {name: KFWPLGTA, anchor: kfwplgta_24bh, add: 0, rows: 8, cols: 8, xtable: ap_kfwplgta_x, yord: true}
+# B4 LDRLMX. E6FE 860A is unique (AR uses E90A; wide XX hits odd bodies elsewhere).
+- {name: KFTARX, pattern: 0D12F2F4XXXX8840F2F5XXXX8850E6FCXXXXE6FD0602E6FE860AE6FF0602, at: 16, frame: true}
+# B4. Count+points (Shaped wants adjacent 0808; this image interleaves).
+- {name: ap_kfldhbn_y, pattern: 080D1926324B647D96, table: true}
+# Count byte is odd; hit the points and step back.
+- {name: ap_kfldhbn_x, pattern: 1B35506B85A0BBD5, table: true, add: -1}
+# B4. First 618B reader after that KFTARX (CM uses KFTARX-64).
+- {name: KFLDHBN, pattern: F1C8E6FCXXXXE6FD0602C2FE618BDA82, at: 4, frame: true, rows: 8, cols: 8, xtable: ap_kfldhbn_x, ytable: ap_kfldhbn_y}
+# B4. E6FE 2B04 unique. Frame is odd; step back. F2 axis is byte-width here (not CM's 16).
+- {name: KFFLLDE, pattern: F2F4XXXX8840F2F2XXXX8820E6FCXXXXE6FD0602E6FE2B04E6FF0502, at: 14, frame: true, add: -1, rows: 8, cols: 8, xat: 2, yord: true}
+# B4. Code sites EXTP-page the word into RAM; this .data image word does not.
+- {name: DPUPS, pattern: 0E000600D41BE000, at: 4}
+# B4/AR. KFLAMKRL body is identical to CM; no E6FC to 0xC84 (axis after body).
+- {name: ap_kflamkrl_x, pattern: 063032333A3C3D, table: true}
+- {name: ap_kflamkrl_y, pattern: 0600336699CCFF80, table: true}
+- {name: kflamkrl_24bh, pattern: 8080808080808080807A747480807A777474807A7774706D807474706D6A8074746D6967, table: true}
+- {name: KFLAMKRL, anchor: kflamkrl_24bh, add: 0, rows: 6, cols: 6, xtable: ap_kflamkrl_x, ytable: ap_kflamkrl_y}
+# B4. Same ZK reader as AR/CM; mask is C0AD not E6FDFF7F/0080.
+- {name: ZKWLAFWL, pattern: D7400602C2FCXXXX5C8CC0ADF2FE, at: 6}
+# B4. DLAMFAW; C2F5/5C75 vs AR/CM C2F3/5C53. Two copies; keep the first.
+- {name: DLAMFAW, pattern: 26F40040D7400602C2F5XXXX5C754045, at: 10}
+# B4. CWLAMFAW byte ahead of that DLAMFAW cluster (CM uses 380B…C2F5).
+- {name: CWLAMFAW, pattern: D7400602C2F4580C88408850, at: 6}
+# B4. LDPBN; F2FE6E8E (CM/24bcd use 5A8C/AE8C).
+- {name: LDPBN, pattern: F2F50CFEE6FCXXXXE6FD0602F2FE6E8E, at: 6, frame: true}
+# B4. KFLDIMX table16 (DA82 836A); AE00/0402 (CM uses 9E20/0502). Was mis-tagged KFWPLGTA.
+- {name: KFLDIMX, pattern: F2F5XXXX8850E6FC8C07E6FD0702E6FEAE00, at: 8, frame: true}
+# B4. SNM16OPUW; 5E8E/78F8 reader (CM uses 788C/A0F8).
+- {name: SNM16OPUW, pattern: 4276F6F45E8EE6FCXXXXF2FD78F8, at: 8, add: 2}
+# B4. LDRXN; DA82FA7C (24bcd wants DA80) and F2FE78F8.
+- {name: LDRXN, pattern: 9A4F13F0C2F4XXXX5C848840E6FCXXXXE6FD0602F2FE78F8, at: 14, frame: true, add: 34, cols: 16, xbits: 16}
+# B4/CH. NLDIAPU body is odd; even hit on the preceding byte, then add:1.
+- {name: nldiapu_24bh, pattern: 324B6482AF0F5041362B241B1714, table: true, add: 1}
+- {name: NLDIAPU, anchor: nldiapu_24bh, add: 0, cols: 2}

@@ -20,6 +20,7 @@ Letter suffixes are listed only when they matter for the group. The same base ca
 | 22N | 2.7T (APB) | 8D0907551 (T, AA) — identical |
 | 24BCD | 1.8T (AWP, AUM, AUQ, BEA, BAM) | 06A906032 (DL, FC, HF=AWP, HJ=AUM, HN=AUQ, HS=AWP, LP=AWP, LQ=AWP, NL=AWP, RP, TL), 8N0906018 (AL=AWP, BB=BEA, BC, BD, BH, CB=BAM, CH, CJ=BEA, Q) |
 | 24bH | 1.8T (AVJ, AWM) | 4B0906018 (CH=AVJ, CM=AWM) — split when DAMOS coverage differs from 24BCD |
+| 24b0 | 1.8T (APU) 512K | 4B0906018 letterless + AR — no DLAMTANS/TABGBTS/VMAXNB readers |
 | 24E | 1.8T (AWT) | 4B0906018DC — NMAXF in DAMOS; no SNM16OPUW |
 | 24G | 1.8T (AWT, BFB) | 4B0906018DH, 8E0909518AA — SNM16OPUW in DAMOS/generate; no NMAXF |
 | 24KS | 1.8T (AWM, AVJ, BEX) | 4B0906018DQ, 8E0909518 (AK, AS), 8E0909559E — neither NMAXF nor SNM16OPUW in DAMOS |

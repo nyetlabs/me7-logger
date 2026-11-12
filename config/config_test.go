@@ -101,7 +101,7 @@ func TestShippedSignatures(t *testing.T) {
 	// Stable sequence of expanded mapsig rows (name|pattern). Catches
 	// accidental mapsig edits/reorders; bump with go test ./config -update
 	// after an intentional mapsigs.d change.
-	const want = "a607422c5dfaeb1946e698c6b57cf15a64b11c4fda86f764a3f59010fe2f16ed"
+	const want = "20e74499a6c457d8f7e19098b4fe6a18c6e99fa245023cfd5659f76bab2e9574"
 	if got == want {
 		return
 	}
@@ -260,7 +260,7 @@ func TestShippedNeedles(t *testing.T) {
 	if strings.Contains(string(b), "function:") {
 		t.Fatal("function is the list, not a field")
 	}
-	if len(ns) != 69 {
+	if len(ns) != 70 {
 		t.Fatalf("needles %d", len(ns))
 	}
 	if ns[0].Name != "slow_init_table" {

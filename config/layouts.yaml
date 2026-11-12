@@ -11,6 +11,7 @@
 # 8N0906018CB with 06A906032HF and 06A906032HS, and 06A906032S with
 # 4B0906018Q. 8D0907551A/B are X22ka (2.7T), not the S/Q 1.8T block.
 # 24bH is the 24BCD code without maps its DAMOS export does not have.
+# 24b0 is the early 512K APU subset (letterless + AR) before CH/CM 1M code.
 # datasets.yaml is a different grouping: calibration contents, not code.
 22m:
   - "1037354144" # 4B0907551S
@@ -82,8 +83,12 @@
   - "1037378104" # 06A906032TL
 # 4B0906018CH is 24b and 4B0906018CM is 24H. Both 1.8T.
 # 4B0907551S (AZA) and T (APB) sit in 22m; needles match G.
-24bH:
+# Early 512K APU (letterless / AR). No 5C54 DLAMTANS, no FD04E118 TABGBTS,
+# no D740+F2F5 VMAXNB — those arrive with the 1M CH/CM code.
+24b0:
+  - "1037350228" # 4B0906018
   - "1037352725" # 4B0906018AR
+24bH:
   - "1037360101" # 4B0906018CH
   - "1037378160" # 4B0906018CM
 25C:

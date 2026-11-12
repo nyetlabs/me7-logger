@@ -16,7 +16,7 @@ Members keep undated names, so an XDF and its metadata file share a stem:
 - `IMAGE.kp`, `IMAGE.csv`, `IMAGE.xdf`, `IMAGE.meta.json`
 - when the image family matches `ME7`: `IMAGE-tuner.xdf`, `IMAGE-tuner.meta.json`, `IMAGE-tuner.csv`, from `xdfkit --tuner` and `categories.json`
 
-CSV is the map list only, with no reference columns. `8N0906018CB` is not published: it has no corpus definition.
+CSV is the WinOLS map list plus the scanned cell extremes (`Value min`, `Value max`, `Value min*1`, `Value max*1`). `8N0906018CB` is not published: it has no corpus definition.
 
 A definition that changed since it was stamped is published as written. The JSON in the zip is still the corpus file.
 

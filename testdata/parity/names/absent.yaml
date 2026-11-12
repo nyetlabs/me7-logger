@@ -27,6 +27,24 @@ absent:
   # CDLSHV / NLLM*: not absent — generate hits them on CM; CM DAMOS omits the
   # plain NLLM names but lists no excuse to paper the generate hits.
   # SNM16OPUW: not absent. CM DAMOS lists it; a generate miss is a miss.
+  # 512K APU. No CM/CH DAMOS for these stems; readers/cal blobs below are absent.
+  24b0:
+    - CLAHSHE2 # CLAHSH + CLAHSHE located; *2 DTC code not in FCM table
+    - CLALSH2 # CLALSH located; *2 DTC code not in FCM table
+    - CLRHK # no 67 F8 11 00 reader
+    - CLRHKA # no CLRSHKA-class reader
+    - CLRKA # no 67 F8 11 00 reader
+    - DLAMTANS # no 5C54/C2F4 E6F4 curve; no 04407590c5 cal (CM/CH only)
+    - KFLAFWL # KFLAFWL_0_A + KFLAFWL_1_A located; plain name not stored
+    - KFLAMKR # KFLAMKR_0_A + KFLAMKR_1_A located; plain name not stored
+    - KFVPLGU # no DA 00 42 76 reader
+    - RLSALULL # KLRLSALULL located; byte form not stored
+    - RLSALUN # RLSALUNG_0_A/_1_A located; RLSALUN byte not stored
+    - TABGBTS # no 42F4…FD04E118 reader; DA8X lbts arm never addConst TABGBTS
+    - TABGSS2 # TABGSS located; TABGSS2 not stored
+    - VMAXNB # no D740…F2F5…48906D05 flash form (CM/CH only)
+    - VMAXNB_0_A # no D45X…CC00 flash pair
+    - VMAXNB_1_A # no D45X…CC00 flash pair
   24bH:
     - CLAHSHE2 # CLAHSH + CLAHSHE located; *2 DTC code not in CM FCM table
     - CLALSH2 # CLALSH located; *2 DTC code not in CM FCM table

@@ -15,6 +15,7 @@ shards:
   X22: [family]
   23g: [family, 23g]
   24BCD: [24bcd, 24bcd-nl-lp-cb]
+  24b0: [24bcd, 24bh]
   24bH: [24bcd, 24bh]
   24E: [family, 24egks]
   24G: [family, 24egks]

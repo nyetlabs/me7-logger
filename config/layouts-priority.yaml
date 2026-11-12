@@ -9,6 +9,7 @@
 - 22N    # 2.7T APB. 8D0907551 T/AA only; separate needles from 22m.
 - 24BCD  # 1.8T AWP, AUM, AUQ, BAM, BEA.
 - 24bH   # 1.8T AVJ, AWM. CH/CM only.
+- 24b0   # 1.8T APU 512K. 4B0906018 letterless + AR.
 - 24E    # 1.8T AWT. 4B0906018DC; NMAXF in DAMOS, no SNM16OPUW.
 - 24G    # 1.8T AWT/BFB. DH + 8E0909518AA; SNM16OPUW in DAMOS/generate, no NMAXF.
 - 24KS   # 1.8T AWM/AVJ/BEX. DQ, AK, AS, 8E0909559E; neither NMAXF nor SNM16OPUW.

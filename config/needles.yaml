@@ -164,6 +164,8 @@ functions:
       - "9A 04 0B 70 E6 FC XX XX"
       # X22ka A/B. Jump bit 03, same E6 FC / E6 FD 06 02 frame as 04.
       - "9A 03 0B XX E6 FC XX XX E6 FD 06 02"
+      # 4B0906018-0004. No 9A 04 0B gate; DB00 opens the E6 FC curve cluster.
+      - "F3 F8 XX XX C2 F5 XX XX E4 85 XX XX 25 8F XX XX C2 F4 XX XX 48 43 BD EF DB 00 E6 FC"
 
   # Ignition-timing caller. config/maps.yaml names the maps at fixed distances
   # from this label. One hit on the images that have it.
@@ -255,7 +257,10 @@ functions:
     needle_hex: "{push:9876} {sub:4} E6 FC 44 65 F2 FD BA F9"
 
   - name: LAMFAW_lamkr
-    needle_hex: "{push:9876} {sub:2} F2 F4 XX XX 88 40 C2 F5 XX F8"
+    needles:
+      - needle_hex: "{push:9876} {sub:2} F2 F4 XX XX 88 40 C2 F5 XX F8"
+      # B4/AR: DB00 then only R9/R8; no 8870/8860 or SUB.
+      - needle_hex: "DB00 88 90 88 80 F2 F4 XX XX 88 40 C2 F5 XX F8"
 
   - name: LDRLMX_ldhbn
     needles:
