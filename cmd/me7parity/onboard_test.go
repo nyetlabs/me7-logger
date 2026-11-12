@@ -83,19 +83,26 @@ func TestInsertImageKeepsComments(t *testing.T) {
 }
 
 func TestInsertLayout(t *testing.T) {
-	in := "# blocks\n25A:\n  - \"1037366370\"\n24KS:\n  - \"1037366497\"\n  - \"1037369307\"\n"
-	got, err := insertLayout(in, "24KS", "1037369044")
+	in := "# blocks\n25A:\n  - \"1037366370\" # 4Z7907551R\n24KS:\n  - \"1037366497\" # 4B0906018DH\n  - \"1037369307\" # 8E0909518AK\n"
+	got, err := insertLayout(in, "24KS", "1037369044", "4B0906018DQ")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(got, "  - \"1037369044\"\n  - \"1037369307\"\n") {
+	if !strings.Contains(got, "  - \"1037369044\" # 4B0906018DQ\n  - \"1037369307\" # 8E0909518AK\n") {
 		t.Fatalf("got\n%s", got)
 	}
 	if !strings.Contains(got, "# blocks\n25A:\n") {
-		t.Fatalf("comment dropped\n%s", got)
+		t.Fatalf("header dropped\n%s", got)
 	}
-	if _, err := insertLayout(got, "24KS", "1037369044"); err == nil {
+	if _, err := insertLayout(got, "24KS", "1037369044", "4B0906018DQ"); err == nil {
 		t.Fatal("duplicate id accepted")
+	}
+	bare, err := insertLayout(in, "24KS", "1037369044", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(bare, "  - \"1037369044\"\n  - \"1037369307\" # 8E0909518AK\n") {
+		t.Fatalf("bare\n%s", bare)
 	}
 }
 

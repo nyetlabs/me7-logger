@@ -2,7 +2,7 @@
 
 A block is the set of images that hit the same variants of the needles in `config/needles.yaml`. A near match stays in the block. The layout id is the Bosch software number from `ident.Find`.
 
-- `config/layouts.yaml` — images grouped by block (SW number or EPK)
+- `config/layouts.yaml` — images grouped by block (SW number or EPK). The comment on each id is the ECU part number.
 - `config/layouts-priority.yaml` — block order for finders (authoritative; not duplicated here)
 - `config/mapsig-shards.yaml` — which `config/mapsigs.d/` shards run after `common.yaml` for each block
 

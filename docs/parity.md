@@ -94,7 +94,7 @@ open and block are the names that did not hit. `absent` is listed for this layou
 
 ## Onboard
 
-`me7parity onboard` scores corpus images not yet in `images.yaml`. `--submit` adds those whose ME7Info rows all match. The layout block is the scored image with the longest shared name prefix. Duplicate layout, second image of that layout, short score, or missing block: reported and left out. Under 100% ME7Info restores both YAML files and the new golden.
+`me7parity onboard` scores corpus images not yet in `images.yaml`. `--submit` adds those whose ME7Info rows all match. The layout block is the scored image with the longest shared name prefix. Each new `layouts.yaml` id is commented with that image's part number. Duplicate layout, second image of that layout, short score, or missing block: reported and left out. Under 100% ME7Info restores both YAML files and the new golden.
 
 Flash path: `<corpus>/images/<part>/NAME.bin` (`<part>` = first 9 characters of the part number); stem must be a row of `<corpus>/corpus.tsv`. Filesystem paths are rejected. `--corpus` is `XDFKIT_CORPUS`, else `./ecu-corpus`. `ME7INFO_EXE` defaults to `../ME7L/bin/ME7Info.exe`; `WINE` defaults to `wine`. An existing `.ecu` is left in place.
 

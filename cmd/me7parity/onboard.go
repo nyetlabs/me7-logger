@@ -10,9 +10,9 @@ import (
 	"strings"
 
 	"go.nyet.org/me7-logger/config"
+	"go.nyet.org/me7-logger/info/parity"
 	"go.nyet.org/me7-logger/internal/cli"
 	"go.nyet.org/me7-logger/internal/ecucorpus"
-	"go.nyet.org/me7-logger/info/parity"
 )
 
 const onboardHelp = `
@@ -704,7 +704,7 @@ func (o *onboard) promote(args []string) error {
 		if err != nil {
 			return err
 		}
-		layouts, err = insertLayout(layouts, spec.block, spec.id)
+		layouts, err = insertLayout(layouts, spec.block, spec.id, barePart(spec.name))
 		if err != nil {
 			return err
 		}
@@ -851,7 +851,8 @@ func listKey(line string) (string, bool) {
 	if !strings.HasPrefix(s, "- ") {
 		return "", false
 	}
-	s = strings.Trim(strings.TrimSpace(s[2:]), `"`)
+	s, _, _ = strings.Cut(strings.TrimSpace(s[2:]), " #")
+	s = strings.Trim(strings.TrimSpace(s), `"`)
 	return s, s != ""
 }
 
@@ -881,7 +882,7 @@ func insertSorted(text, key, line string) (string, error) {
 	return splice(lines, at, line), nil
 }
 
-func insertLayout(text, block, id string) (string, error) {
+func insertLayout(text, block, id, part string) (string, error) {
 	lines := strings.Split(strings.TrimRight(text, "\n"), "\n")
 	start := -1
 	for i, ln := range lines {
@@ -898,6 +899,9 @@ func insertLayout(text, block, id string) (string, error) {
 		end++
 	}
 	line := "  - " + strconv.Quote(id)
+	if part != "" {
+		line += " # " + part
+	}
 	at := end
 	for i := start + 1; i < end; i++ {
 		k, ok := listKey(lines[i])
