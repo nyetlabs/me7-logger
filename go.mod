@@ -5,7 +5,7 @@ go 1.26.4
 require (
 	github.com/spf13/pflag v1.1.0
 	go.bug.st/serial v1.8.0
-	go.nyet.org/xdfkit v0.1.3-0.20261112202345-8f49981218be
+	go.nyet.org/xdfkit v0.1.3-0.20261119043128-28a751deadab
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -15,6 +15,6 @@ require (
 	github.com/rogpeppe/go-internal v1.16.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.6 // indirect
 	golang.org/x/sys v0.48.0 // indirect
-	golang.org/x/text v0.43.0 // indirect
+	golang.org/x/text v0.44.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )

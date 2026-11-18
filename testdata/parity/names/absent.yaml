@@ -171,3 +171,24 @@ absent:
     - VMAXNB # NMAXF located; def has NMAXF only
     - VMAXNB_0_A # NMAXF located; def has NMAXF only
     - VMAXNB_1_A # NMAXF located; def has NMAXF only
+  # 4D0907559E. No E6FD0A02 and no plsol — LDR finders do not open. Shares
+  # 25C NMAXF-only / lambts absents.
+  25E:
+    - DLBTS # KFDLBTS + TABGBTS located; lambts KFDLBTS arm
+    - KFFLLDE # scanLdrxn; no E6FD0A02 / plsol; LDR finders do not open
+    - KFLDHBN # no E6FD0A02 / plsol; LDR finders do not open
+    - KFLDIMX # no E6FD0A02 / plsol; LDR finders do not open
+    - KFLDIOPU # no E6FD0A02 / plsol; LDR finders do not open
+    - KFLDRAPP # no E6FD0A02 / plsol; LDR finders do not open
+    - KFLDRL # no E6FD0A02 / plsol; LDR finders do not open
+    - KFVPLGU # no DA 00 42 76 reader
+    - LDHIA # no E6FD0A02 / plsol; LDR finders do not open
+    - LDIATA # no E6FD0A02 / plsol; LDR finders do not open
+    - LDPBN # no E6FD0A02 / plsol; LDR finders do not open
+    - LDRXN # no E6FD0A02 / plsol; LDR finders do not open
+    - NLDIAPU # no E6FD0A02 / plsol; LDR finders do not open
+    - NMAX # NMAXF located; def has NMAXF only
+    - SNM16OPUW # NMAXF located; no SNM16 reader
+    - VMAXNB # NMAXF located; def has NMAXF only
+    - VMAXNB_0_A # NMAXF located; def has NMAXF only
+    - VMAXNB_1_A # NMAXF located; def has NMAXF only

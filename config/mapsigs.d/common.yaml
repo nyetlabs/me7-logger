@@ -221,8 +221,11 @@ mapsigs:
 - {name: KFZWOP2, pattern: 'F1E8E6FCXXXXE6FD[54/F5]69', at: 4}
 - {name: KLDMASRL, pattern: E6FDXXXXE6FE7C1B}
 # DQ-0060. The short 3D 0F row was reading the body as a 4-point axis. These F2 words are KFZW2's axes.
+# 25C/25E 0D0C (page low 2C/2D/32). Family 88X0 is multi-E6FC in-window; DQ/AK use page 3C/39.
+# Absent: 25C page-0702 loads (1A26 / 2E29). Do not use E6FD0702 alone — DC/CM keep a real 3D0F.
+- {name: KFZW, pattern: [0D0CE6FCXXXXE6FDXX2CF2FEXXXXF2FFXXXXDA00242B, 0D0CE6FCXXXXE6FDXX2DF2FEXXXXF2FFXXXXDA00242B, 0D0CE6FCXXXXE6FDXX32F2FEXXXXF2FFXXXXDA00242B], at: 4}
 - {name: KFZW, pattern: 3D0FE6FC302AE6FDC83CF2FE708CF2FF848CDA00242B, at: 4, xat: 16, yat: 12}
-- {name: KFZW, pattern: [3D0FE6FCXXXXE6FD, 3D0FE6FCXXXXE6FD1A31], at: 4, absent: 3D0FE6FC2E29E6FD0702}
+- {name: KFZW, pattern: [3D0FE6FCXXXXE6FD, 3D0FE6FCXXXXE6FD1A31], at: 4, absent: '3D0FE6FC[0A/CB][20/F0]E6FD0702'}
 - {name: KFZW2, pattern: '3D10E6FCXXXXE6FD[18/79]3X', at: 4}
 - {name: KFZWWLNM, pattern: E6FCXXXXE6FD2E01}
 - {name: MLHFM, pattern: 8850E6FCXXXXE6FD0902E6FE6C32, at: 4, add: 4}
@@ -311,6 +314,8 @@ mapsigs:
 - {name: KFLDRQ2, pattern: E6FCXXXXE6FD0902E6FE6F00, add: 81920}
 # 76F8…AA41 is X22ka A/B; 7AF8…B644 is 22N. Mid-byte mask is multi-hit.
 - {name: KFLDHBN, pattern: [E6FCXXXXE6FD0602C2FE76F8C2FFFC8ADA80AA41, E6FCXXXXE6FD0602C2FE7AF8C2FF9487DA80B644], frame: true, add: 18, rows: 8, cols: 8}
+# 4D1907558. Header 08 08; C2 FE is 1AF8. Wins before the KFTARX anchor.
+- {name: KFLDHBN, pattern: E6FCXXXXE6FD0A02C2FE1AF8D740E100C2FF, frame: true, add: 18, rows: 8, cols: 8}
 - {name: KFLDHBN, anchor: KFTARX, add: -64, rows: 8, cols: 8}
 - {name: KFKHFM, pattern: CD0DF3F4XXXXF7F471F8F3F4D40A, at: 4, add: 77, rows: 14, cols: 14}
 - {name: SNM16OPUW, pattern: XX8DE6FCXXXXF2FD02F8F2FE968D, at: 4, add: 2}

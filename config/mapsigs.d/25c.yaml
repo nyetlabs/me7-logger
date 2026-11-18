@@ -1,36 +1,65 @@
 mapsigs:
-# 4D1907558-0004. The 3D0F KFZW arm is a page-0702 load. These calls are the maps.
-- {name: KFZW2, pattern: E6FCED17E6FDC42CF2FEF488F2FF0289DA00242B}
-- {name: KFZW, pattern: 0D0CE6FC2D17E6FDC42CF2FEF488F2FF0289DA00242B, at: 4}
-- {name: KFMRESK, pattern: 9D0CE6FCCA0BE6FDC22BF2FEDC88F2FFD288DA00CC2A, at: 4}
+# 4D1907558 / 4D0907559E. The 3D0F KFZW arm is a page-0702 load (absent in common).
+- {name: KFZW2, pattern: 8890888088708860E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDA00242B, at: 10}
+- {name: KFZW2, pattern: 88908880E6FCXXXXE6FDXXXXF2FECC8DF2FFD68DDA00242B, at: 6}
+- {name: KFMRESK, pattern: 9D0CE6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDA00CC2A, at: 4}
 - {name: KFMRES, pattern: 0D0BE6FCB20BE6FDC22BF2FEDC88F2FFD288DA00CC2A, at: 4}
+- {name: KFMRES, pattern: 0D0BE6FCXXXXE6FDXXXXF2FEC08DF2FFBC8DDA00CC2A, at: 4}
 - {name: KFZWOP2, pattern: E6FCEE0DE6FDDA5DF2FEF088F2FF889EDA00242B, xat: 14, yat: 10}
-- {name: KFMIOP, pattern: F6F4889EE6FC7A5CE6FDDA5DF2FEF088, at: 6}
-# 4D1907558-0004. The DQ LDR calls, with the immediates that changed.
-- {name: KFLDIMX, pattern: F2F5EC888850E6FCC00AE6FD0A02E6FE540F, at: 8, frame: true, yat: 2}
-- {name: KFLDRL, pattern: F2F5EC888850E6FC120CE6FD0A02E6FE660FE6FF0A02DA83, at: 8, frame: true, xat: 2, yat: -12}
-- {name: KFLDIOPU, pattern: F2F5DE888850E6FC0823E6FD0602E6FECF00, at: 8, frame: true, yat: 2}
-- {name: NLDIAPU, pattern: B980E6FC4E0FE6FD0A02D740E100C2FEA008, at: 4, frame: true, add: 3}
-- {name: KFFLLDE, pattern: F6F46EA0F2F56CA08850F2F2E0888820E6FCA210E6FD0A02E6FE0A14, at: 18, frame: true, xat: 6, yat: 12}
+- {name: KFZWOP2, pattern: F6F4XXXXE6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDA00242B, at: 6, xat: 20, yat: 16}
+- {name: KFZWOP, pattern: F1E8E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDA00242B, at: 4, xat: 16, yat: 12}
+- {name: KFMIOP, pattern: [F6F4XXXXE6FCXXXXE6FDXXXXF2FEXXXXF0F4DA82, E027F6F4XXXXE6FCXXXXE6FDXXXXF2FEXXXX], at: 6}
+# 4D1907558. DQ LDR calls; immediates vary across 0002/0004.
+- {name: KFLDIMX, pattern: F2F5XXXX8850E6FCXXXXE6FD0A02E6FEXXXXE6FF0A02DA8344450804E005, at: 8, frame: true, yat: 2}
+- {name: KFLDRL, pattern: F2F5XXXX8850E6FCXXXXE6FD0A02E6FEXXXXE6FF0A02DA83E045, at: 8, frame: true, xat: 2, yat: -12}
+- {name: KFLDIOPU, pattern: F2F5XXXX8850E6FCXXXXE6FD0602E6FEXXXXE6FF0402DA835C440804C0849850, at: 8, frame: true, yat: 2}
+- {name: NLDIAPU, pattern: B980E6FCXXXXE6FD0A02D740E100C2FEXXXX, at: 4, frame: true, add: 3}
+# 0A02 arm only. A trailing E6FD0602 fold hits odd addresses on unknown-layout images that load every shard.
+- {name: KFFLLDE, pattern: F6F4XXXXF2F5XXXX8850F2F2XXXX8820E6FCXXXXE6FD0A02E6FEXXXXE6FF0A02DA8344450804D740E100F6F4XXXXF2F5, at: 18, frame: true, xat: 6, yat: 12}
 - {name: KFTARX, pattern: 0D15F2F408898840F2F5E8888850E6FCF411E6FD0A02, at: 16, frame: true, xat: 10, yat: 4}
-- {name: KFLDRAPP, pattern: 9A0112B0E6FCDC23E6FD0602C2FE1AF8C2FF8285, at: 6, frame: true, add: 18, rows: 8, cols: 8}
+- {name: KFLDRAPP, pattern: 9A0112B0E6FCXXXXE6FD0602C2FEXXXXC2FFXXXX, at: 6, frame: true, add: 18, rows: 8, cols: 8}
 # 4D1907558-0004. DH knock calls. The E6 FD word is 380B, and the F2 words are E49C and E69C.
-- {name: KFMIZUNS, pattern: 0C10E6FCE80AE6FD380BF2FEE49CF2FFE69C, at: 4, xat: 12, yat: 16}
-- {name: KFMIZUFIL, pattern: 0D0BE6FCC00AE6FD380BF2FEE49CF2FFE69C, at: 4, xat: 12, yat: 16}
-# 4D1907558-0004. The axis is the ten points in front of the body.
-- {name: KFFWTBR, pattern: F6F4A00BDB00889088808870E6FC600DE6FD0602, at: 14, frame: true, add: 20, cols: 8, rows: 10}
+- {name: KFMIZUNS, pattern: 0C10E6FCXXXXE6FD380BF2FEE49CF2FFE69C, at: 4, xat: 12, yat: 16}
+- {name: KFMIZUFIL, pattern: 0D0BE6FCXXXXE6FD380BF2FEE49CF2FFE69C, at: 4, xat: 12, yat: 16}
+# 4D1907558: E6FC600D. 4D0907559E: 10x12, twenty-four bytes of counts and axes in front.
+- {name: KFFWTBR, pattern: F6F4XXXXDB00889088808870E6FC600DE6FD0602, at: 14, frame: true, add: 20, cols: 8, rows: 10}
+- {name: KFFWTBR, pattern: F6F4820ADB00889088808870E6FC320AE6FD0602, at: 14, frame: true, add: 24, cols: 12, rows: 10}
+# [84/DC] is A7/84 (4D1907558 / 4D0907559E).
+- {name: FWFTBRTA, pattern: 'F7F8[84/DC]08E6FCXXXXE6FD0602', at: 6, frame: true, add: 15, cols: 14}
 - {name: FBSTABGM, pattern: F6F45A0CE6FC4638E6FD0702, at: 6, frame: true, add: 10, cols: 4, xbits: 16}
-- {name: TABGBTS, pattern: F2F46E0CD740E100F6F4720CE6FCB838E6FD0702, at: 14, frame: true, add: -14}
-- {name: KRFKLN, pattern: 9A4A0D60E6FC8F1AE6FD0602D740E100F2FEEE09, at: 6, frame: true, xat: 18, also: [{name: KRANH, add: -17}, {name: KRALH, add: -22}]}
-- {name: TMNSMN, pattern: 43F8FA0FED05F3FA2986}
-# 4D1907558-0004. DLAMTANS is the 5C54 call. DWKRMSN is the page-0602 C2 F4.
-# DPUPS is the 43 F8 FD 03 scalar. LDPBN is the F6 F4 call after KFLDHBN.
-- {name: DLAMTANS, pattern: 5C548840C2F429868840E6F4F136E6F50702, at: 12, frame: true, cols: 4}
-- {name: DWKRMSN, pattern: D7400602C2F4381A68412D1BF2F43291, at: 6, add: 1, xat: 14}
-- {name: DPUPS, pattern: 43F81A06FD03E11A75FA6898}
-- {name: LDPBN, pattern: F6F48A0DE6FCB723E6FD0602F2FEDE88, at: 6, frame: true, xat: 14}
-# 4D1907558-0004. The page-0702 call 54 bytes before CLAATR. Same cluster as 0002.
-# 4D1907558-0004. Same call as 0002, through the byte that changed.
+- {name: FBSTABGM, pattern: 0D06F2F4XXXXD740E100F6F4XXXXE6FCXXXXE6FD0702, at: 16, frame: true, add: 10, cols: 4, xbits: 16}
+- {name: TABGBTS, pattern: F2F4XXXXD740E100F6F4XXXXE6FCXXXXE6FD0702F0E4DA83B83DD740E100F6F4XXXXF2F5XXXX8AF50400F2F2XXXX9AF20400E118, at: 14, frame: true, add: -14}
+# 4D0907559E: same FBSTABGM call; body is 14 bytes before the frame pointer.
+- {name: TABGBTS, pattern: 0D06F2F496A4D740E100F6F41C0BE6FC600FE6FD0702, at: 16, frame: true, add: -14}
+# 4D0907559E: count byte is odd; hit the even byte before it.
+- {name: ap_nmot_25c, pattern: A3100A141E28323C46, table: true, add: 1}
+- {name: KRFKLN, pattern: 9A4A0DXXE6FCXXXXE6FD0602D740E100F2FEXXXXDA839643, at: 6, frame: true, xat: 18, also: [{name: KRANH, add: -17}, {name: KRALH, add: -22}]}
+# 4D0907559E: F2 axis is 16-bit; use the nmot table instead.
+- {name: KRFKLN, pattern: 9A610DC0E6FCXXXXE6FD0602D740E100F2FEXXXX, at: 6, frame: true, cols: 16, xtable: ap_nmot_25c, also: [{name: KRANH, add: -17}, {name: KRALH, add: -22}]}
+- {name: TMNSMN, pattern: 43F8XXXXED05F3FAXX86}
+# DLAMTANS is the 5C54 call. DWKRMSN is the page-0602 C2 F4.
+# DPUPS XX98 is 4D1907558; 5418 is 4D0907559E (tail not 98).
+- {name: DLAMTANS, pattern: 5C548840C2F4XXXX8840E6F4XXXXE6F5XXXX, at: 12, frame: true, cols: 4}
+- {name: DWKRMSN, pattern: D7400602C2F4XXXX68412D1BF2F4XXXX, at: 6, add: 1, xat: 14}
+- {name: DPUPS, pattern: [43F8XXXXFD03E11A75FAXX98, 43F85418FD03E11A75FA]}
+- {name: LDPBN, pattern: F6F4XXXXE6FCXXXXE6FD0602F2FEXXXXDA837043C088, at: 6, frame: true, xat: 14}
+# 4D1907558. Same call as 0002, through the byte that changed.
 - {name: KFLF, pattern: 06F480018840E6FCA00EE6FD0602C2FE1AF8C2FF6BF9DA83243FC084D7400602C2F59F0E0B45F2F40EFE98501B45F2F90CFEC2F4A686, at: 8, frame: true, add: 30, rows: 12, cols: 16}
 # Five points in front of the body.
 - {name: TVUB, pattern: 'E6FE[78/7D][43/EB]C2FF[24/A7][80/F2]', cols: 5}
+# 4D1907558 / 4D0907559E. Third F2F5/E6FC site; axes follow the body.
+- {name: KFLBTS_0_A, pattern: E6FD0702F2FEXXXXD740E100F2FFXXXXDAXXXXXXD740E100F6F4XXXXD740E100F2F5XXXX88508840E6FCXXXXE6FD0602E6FEXXXXE6FF0602, at: 42, frame: true, rows: 12, cols: 16, plain: true}
+# 4D1907558-0004. Near-pointer form; body is 68 bytes after the E6FC word.
+- {name: KFMIRL, pattern: 0D09E6FCXXXXF2FDXXXXF2FE, at: 4, add: 68, rows: 16, cols: 16, xbits: 16, ybits: 16}
+# 4D0907559E. Same add; F6 F2 precedes the E6 FC word.
+- {name: KFMIRL, pattern: F6F2XXXXE6FCXXXXF2FDXXXXF2FE, at: 6, add: 68, rows: 16, cols: 16, xbits: 16, ybits: 16}
+# 4D1907558 / 4D0907559E. F7 F8 then the F2 F5 / E6 FC frame.
+- {name: KFWPLGTA, pattern: F7F8XXXXF2F4XXXX8840D740E100F2F5XXXX8850E6FCXXXXE6FDXXXXE6FEXXXXE6FFXXXX, at: 22, frame: true, rows: 8, cols: 8}
+# 4D1907558. Curve into the I-regulator; LDHIA is the byte before the body.
+- {name: LDIATA, pattern: D0848840E6FCXXXXE6FD0602F2FEXXXXDA83, at: 6, frame: true, xat: 14, also: [{name: LDHIA, add: -1}]}
+# 4D1907558-0004. F0 E4 between the frame and DA83.
+- {name: LDRXN, pattern: 0D2BF2F4XXXXD740E100F6F4XXXXE6FCXXXXE6FD0A02, at: 16, frame: true, add: 34, cols: 16, xbits: 16}
+# 4D1907558-0002. F0 84 0D 09 lead-in; same add and axis width.
+- {name: LDRXN, pattern: F0840D09E6FCXXXXE6FD0A02F2FE1CF8DA83, at: 6, frame: true, add: 34, cols: 16, xbits: 16}
+# 4D1907558. C2 F4 word is the near pointer (0EAA).
+- {name: MDIMX, pattern: C2F4XXXX5C7440849D03, at: 2}

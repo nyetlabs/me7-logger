@@ -28,6 +28,7 @@ Letter suffixes are listed only when they matter for the group. The same base ca
 | 05A | 4.2 (no code) | 006410010A0 — same needles as 24E/24G/24KS; LDR finders do not open |
 | 23g | 2.7T (ASJ, AZR) | 8D0907551 (F=ASJ; K, Q=AZR) |
 | 25C | 4.2T (BCY) | 4D1907558 |
+| 25E | 4.2T (BCY) | 4D0907559E — no E6FD0A02/plsol; LDR finders do not open |
 | X22ka | 2.7T (AZB) | 8D0907551 (A, B) — `result_selector_sub`; N is in 22m |
 | X22 | 1.8T (APH) | 06A906032 (S=APH), 4B0906018 (Q) — `result_selector_sub` |
 

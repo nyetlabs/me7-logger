@@ -1,6 +1,10 @@
 mapsigs:
 - {name: DWKRMSN, pattern: D7400602C2F4921E68412D1BF2F49C9A, at: 6, add: 1, xat: 14}
 - {name: KFMIZUFIL, pattern: 0D0BE6FC0A1FE6FD9800F2FE9A8C, at: 4, xat: 12, yat: 16}
+# AK-0004 / AS. Page 8E00 (DQ keeps 9800 above).
+- {name: KFMIZUNS, pattern: 0C20E6FCE51DE6FD8E00, at: 4, xat: 12, yat: 16}
+- {name: KFMIZUFIL, pattern: 0D0BE6FCA51DE6FD8E00F2FE1C8D, at: 4, xat: 12, yat: 16}
+- {name: KFMIZUOF, pattern: B8A8E6FC251EE6FD8E00, at: 4, xat: 14}
 - {name: ZKWLAFWL, pattern: C2FC6A145C8CE6FD0080F0E4F2FF94A1}
 - {name: KFLDIMX, pattern: F2F56A8C8850E6FCE40FE6FD0A02E6FE8814, at: 8, frame: true, yat: 2}
 - {name: KFLDIOPU, pattern: F2F5588C8850E6FCB221E6FD0602E6FED700, at: 8, frame: true, yat: 2}

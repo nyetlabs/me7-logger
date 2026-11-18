@@ -94,6 +94,9 @@
 25C:
   - "1037366304" # 4D1907558
   - "1037367724" # 4D1907558
+# 4D0907559E (BCY S6). EPK 23h; no E6FD0A02 / plsol — LDR finders do not open.
+25E:
+  - "1037360170" # 4D0907559E
 # 8D0907551A/B are dataset X22ka (early NA S4 APB). N (EU AZB) is in 22m with G.
 # Both hit result_selector_sub; maps.yaml call distances differ from S/Q.
 X22ka:

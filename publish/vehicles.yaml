@@ -33,6 +33,8 @@
 4B0907551S-0001: {engine: 2.7T, code: AZA, vehicle: A6, year: 2001, market: EU}
 4B0907551T-0001: {engine: 2.7T, code: APB, vehicle: A6, year: 2001, gearbox: automatic, market: NA}
 
+4D0907559E-0002: {engine: 4.2T, code: BCY, vehicle: S6, year: 2001, gearbox: manual, market: EU}
+
 4D1907558-0002: {engine: 4.2T, code: BCY, vehicle: RS6, year: 2002-2004, market: EU}
 4D1907558-0004: {engine: 4.2T, code: BCY, vehicle: RS6, year: 2002-2004, market: EU}
 
