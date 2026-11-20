@@ -1439,7 +1439,7 @@ func FillAuto(dir string) (int, error) {
 		if err := canon.Unmarshal(b, &m); err != nil {
 			return 0, fmt.Errorf("%s: %w", e.Name(), err)
 		}
-		if m.Provenance == nil || m.Provenance.Origin != "auto" {
+		if m.Provenance == nil || m.Provenance.Origin != "detected" {
 			continue
 		}
 		n := ApplyScales(&m)

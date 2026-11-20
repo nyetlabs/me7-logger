@@ -154,7 +154,7 @@ func BuildStorage(dir string) ([]byte, error) {
 			return nil, fmt.Errorf("%s: %w", e.Name(), err)
 		}
 		origin := pack.Provenance.Origin
-		if origin != "damos" && origin != "a2l" && origin != "auto" {
+		if origin != "damos" && origin != "a2l" && origin != "detected" {
 			continue
 		}
 		stem := strings.TrimSuffix(e.Name(), ".json")
@@ -162,7 +162,7 @@ func BuildStorage(dir string) ([]byte, error) {
 		if i := strings.LastIndexByte(part, '-'); i > 0 {
 			part = part[:i]
 		}
-		if origin == "auto" {
+		if origin == "detected" {
 			img, err := os.ReadFile(filepath.Join(dir, "images", ecucorpus.Group(stem), stem+".bin"))
 			if err != nil {
 				continue

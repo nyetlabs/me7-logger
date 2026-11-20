@@ -67,7 +67,7 @@ func TestLintHold(t *testing.T) {
 	addr := model.Addr(0x20)
 	m := &model.Model{
 		Schema:     model.SchemaID,
-		Provenance: &model.Provenance{Format: "image", Origin: "auto", SHA256: strings.Repeat("ab", 32)},
+		Provenance: &model.Provenance{Format: "image", Origin: "detected", SHA256: strings.Repeat("ab", 32)},
 		Objects: []*model.Object{{
 			Key: "KFDMDARO", ID: "KFDMDARO", Shape: "1d", Address: 0x10,
 			Rows: 1, Cols: 4, Data: model.Data{Bits: 8},

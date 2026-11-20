@@ -349,7 +349,7 @@ $cols = [
 		if (k === 'stage' || k === 'source') {
 			const order = {
 				stage: {'1': 1, '2': 2, '3-': 3, '3': 4, '3+': 5, 'S+': 6},
-				source: {verified: 1, DAMOS: 2, matched: 3, manual: 4, auto: 5},
+				source: {verified: 1, DAMOS: 2, matched: 3, handmade: 4, detected: 5},
 			}[k];
 			return (order[val(a, k)] || 0) - (order[val(b, k)] || 0);
 		}
@@ -466,12 +466,12 @@ $cols = [
 <li><code>verified</code> - A person checked every definition against the image.</li>
 <li><code>DAMOS</code> - From the Bosch DAMOS or A2L. Canonical.</li>
 <li><code>matched</code> - Found by program, and every name in the reference it replaced is at the same address, apart from known exceptions such as <code>ESKONF</code>.</li>
-<li><code>manual</code> - Made by hand, and no one has verified it.</li>
-<li><code>auto</code> - Found by program, with no reference or one that only partly agrees.</li>
+<li><code>handmade</code> - Made by hand, and no one has verified it.</li>
+<li><code>detected</code> - Found by program, with no reference or one that only partly agrees.</li>
 </ul>
 <h2>Confidence</h2>
 <ul>
-<li>How many located tuner bodies hold up (monotonic axes, peer agreement). Shown for <code>auto</code>, <code>matched</code>, <code>manual</code>, and <code>verified</code> in the locate set.</li>
+<li>How many located tuner bodies hold up (monotonic axes, peer agreement). Shown for <code>detected</code>, <code>matched</code>, <code>handmade</code>, and <code>verified</code> in the locate set.</li>
 <li><code>-</code> outside that set, and for <code>DAMOS</code>: those columns are not a locate score.</li>
 </ul>
 <h2>Inside a zip</h2>

@@ -80,7 +80,7 @@ Images are in the private [ecu-corpus](https://github.com/nyetlabs/ecu-corpus) s
 
 `me7parity --data testdata/parity` prints the report from shipped config only. `make test` fails only when an image is below 100% against its legacy `ecu/me7info/<image>.ecu`; every other score is coverage.
 
-Each image's definition is its corpus model JSON. Fix definitions in the corpus, not here. `provenance.origin` `damos`/`a2l` is the reference, and a different address is a miss. `manual` or unset is an oracle only: disagreements still hit and are listed under `manual xdf disagrees`. `auto` is read and left out of both sections. Hits, tiers, and confidence are in `docs/parity.md`.
+Each image's definition is its corpus model JSON. Fix definitions in the corpus, not here. `provenance.origin` `damos`/`a2l` is the reference, and a different address is a miss. `handmade` or unset is an oracle only: disagreements still hit and are listed under `handmade xdf disagrees`. `detected` is read and left out of both sections. Hits, tiers, and confidence are in `docs/parity.md`.
 
 ## Documentation
 

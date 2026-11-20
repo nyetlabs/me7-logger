@@ -18,7 +18,7 @@ Each score is hits/total and a percent. No arguments: every image. `me7parity re
 | axis | axes present on maps that hit / axes those maps list (scalar adds nothing) |
 | confidence | bodies that hold up / names that hit |
 | block | hits in the other names file for this layout block (blank when none) |
-| xdf damos / xdf manual | maps (and axes) in that definition found at the same address (axes also need count and width) |
+| xdf damos / xdf handmade | maps (and axes) in that definition found at the same address (axes also need count and width) |
 
 ### A names hit
 
@@ -38,7 +38,7 @@ Each score is hits/total and a percent. No arguments: every image. `me7parity re
 
 ### Named-row extras
 
-open and block are the names that did not hit. `absent` is listed for this layout block (counts toward the grade). `met by <form>` means that family slot is already filled. A tuner name at another address still hits in names and is listed under "manual xdf disagrees".
+open and block are the names that did not hit. `absent` is listed for this layout block (counts toward the grade). `met by <form>` means that family slot is already filled. A tuner name at another address still hits in names and is listed under "handmade xdf disagrees".
 
 ## Corpus
 
@@ -47,31 +47,31 @@ open and block are the names that did not hit. `absent` is listed for this layou
 `--grades` prints name, stage, confidence, and source for the download page (no submit). `--staged` reads each zip's definition instead of locating maps again.
 
 - Stage: D→1, C→2, B→3-, A→3, S→3+; open D is `-`.
-- Source (xdfkit `docs/model.md`): `verified` (`provenance.verified`); `DAMOS` (origin `damos`/`a2l`); `manual`; `matched` (auto whose `reference` agrees outside `except`); `auto` otherwise.
+- Source (xdfkit `docs/model.md`): `verified` (`provenance.verified`); `DAMOS` (origin `damos`/`a2l`); `handmade`; `matched` (detected whose `reference` agrees outside `except`); `detected` otherwise.
 - Confidence gate: high bodies must be more than half the tuner names that scored; a zero denominator fails. xdfkit does not read tiers.
-- Under a named row: manual, open, and block (same marks as the report). Non-parity definitions with placeholder keys are listed with tier `-` and confidence `-`.
+- Under a named row: handmade, open, and block (same marks as the report). Non-parity definitions with placeholder keys are listed with tier `-` and confidence `-`.
 
 ### What `--submit` writes
 
 - Stamp digests cover the document without `stamp` (`stamp.tool` alone does not change the file). An identical row is still stored when digests differ (`forced`); origin stays.
 - Stored objects keep previous conversion, units, and layout. A raw value (factor 1, no offset, no units) takes the agreed DAMOS/A2L conversion for that name, role, and width (`config/units.yaml`). Clock names take the image clock factor. `_1_A` with no sample takes `_0_A` for that role and width.
 - Description becomes the name table; comment becomes the locating needle. Low body confidence appends a short phrase after the needle. Missing axes add `missing x axis` / `missing y axis`. Expected but missing scales add `no scale` / `no x scale` / `no y scale` (codewords, config bytes, and error classes never get a scale note).
-- Auto packs apply agreed scales before those notes. Manual packs keep a non-empty comment; DAMOS and A2L are not rewritten.
-- Replacing a manual file records it as `reference` (`except` from `config/sets.yaml`). `verified` and an existing `reference` carry over on auto regenerate.
+- Detected packs apply agreed scales before those notes. Handmade packs keep a non-empty comment; DAMOS and A2L are not rewritten.
+- Replacing a handmade file records it as `reference` (`except` from `config/sets.yaml`). `verified` and an existing `reference` carry over on detected regenerate.
 
 ### status
 
 | Mark | Meaning |
 | --- | --- |
-| `eligible` | stored; origin becomes `auto` |
+| `eligible` | stored; origin becomes `detected` |
 | `identical` | same names; description, comment, and layout would stay |
 | `forced` | names match; stamp digests of the merged model differ; origin stays |
 | `verified` | `provenance.verified`; existing objects stay; missing located names added (`verified, +N`) |
 | `origin damos` / `origin a2l` | left in place; edit JSON by hand |
 | `origin unset` | no provenance origin; left in place |
-| `manual short NAME` | that manual name was not located; other deltas may still write; origin stays `manual` |
-| `manual disagrees NAME` | more than one located address; partial write keeps `manual` |
-| `grade -` | name grade below D; `manual` scores without waiting for a grade |
+| `handmade short NAME` | that handmade name was not located; other deltas may still write; origin stays `handmade` |
+| `handmade disagrees NAME` | more than one located address; partial write keeps `handmade` |
+| `grade -` | name grade below D; `handmade` scores without waiting for a grade |
 | `confidence N/M` | high bodies half or fewer |
 | `axis NAME` | axis turns and is not all zeros |
 | `body NAME` | body unreadable |
@@ -85,12 +85,12 @@ open and block are the names that did not hit. `absent` is listed for this layou
 | --- | --- |
 | `+N` | names added (`eligible`) |
 | `~N` | descriptions, comments, addresses, or layouts brought in line |
-| `~N +N` | both, while a short name remains; origin stays `manual` |
-| `layout N` | auto file held back; `--submit` writes only located layouts onto raw objects |
+| `~N +N` | both, while a short name remains; origin stays `handmade` |
+| `layout N` | detected file held back; `--submit` writes only located layouts onto raw objects |
 | `key N` | placeholder keys cleared |
 | `force` | stamp digests differ; `--submit` writes the merged model |
 
-`eligible` is a full cover: every current name at the same address and at least one new name, or an empty definition that passed the grade. A matching name set whose description or comment would change is also eligible (`~N`). Both `KFPED_0_A` and `KFPED_1_A` cover a manual `KFPED` (same for `KFPEDR`); one variant does not, and a located `KFPED` does not cover a manual `KFPED_0_A`.
+`eligible` is a full cover: every current name at the same address and at least one new name, or an empty definition that passed the grade. A matching name set whose description or comment would change is also eligible (`~N`). Both `KFPED_0_A` and `KFPED_1_A` cover a handmade `KFPED` (same for `KFPEDR`); one variant does not, and a located `KFPED` does not cover a handmade `KFPED_0_A`.
 
 ## Onboard
 

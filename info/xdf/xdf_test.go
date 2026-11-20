@@ -172,7 +172,7 @@ func TestModelTableDims(t *testing.T) {
 	if o := m.Objects[7]; o.Rows != 8 || o.Cols != 6 || o.Data.Bits != 16 || *o.X.Address != 0x17F00 || o.Y.Source != "ordinal" {
 		t.Fatalf("%+v", o)
 	}
-	if p := m.Provenance; p.Format != "image" || p.Origin != "auto" || len(p.SHA256) != 64 {
+	if p := m.Provenance; p.Format != "image" || p.Origin != "detected" || len(p.SHA256) != 64 {
 		t.Fatalf("%+v", p)
 	}
 }

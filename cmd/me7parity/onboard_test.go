@@ -119,7 +119,7 @@ func TestGateReason(t *testing.T) {
 	if got := gateReason("D", high, nil, false, ""); got != "" {
 		t.Fatalf("missing def: %s", got)
 	}
-	if got := gateReason("S+", high, nil, true, "auto"); got != "" {
+	if got := gateReason("S+", high, nil, true, "detected"); got != "" {
 		t.Fatalf("located: %s", got)
 	}
 	if got := gateReason("-", high, nil, false, ""); got != "grade -" {
@@ -131,13 +131,13 @@ func TestGateReason(t *testing.T) {
 	if got := gateReason("D", parity.Fraction{}, nil, false, ""); got != "confidence 0/0" {
 		t.Fatalf("empty: %s", got)
 	}
-	if got := gateReason("-", high, nil, true, "manual"); got != "" {
+	if got := gateReason("-", high, nil, true, "handmade"); got != "" {
 		t.Fatalf("manual does not wait for D: %s", got)
 	}
-	if got := gateReason("D", half, nil, true, "manual"); got != "confidence 37/74" {
+	if got := gateReason("D", half, nil, true, "handmade"); got != "confidence 37/74" {
 		t.Fatalf("manual confidence: %s", got)
 	}
-	if got := gateReason("C", high, nil, true, "manual"); got != "" {
+	if got := gateReason("C", high, nil, true, "handmade"); got != "" {
 		t.Fatalf("manual: %s", got)
 	}
 	if got := gateReason("A", high, nil, true, "damos"); got != "origin damos" {
@@ -150,23 +150,23 @@ func TestGateReason(t *testing.T) {
 		"KFZW":  {Reason: "axis"},
 		"LAMFA": {Reason: "axis-zeros"},
 	}
-	if got := gateReason("D", high, turned, true, "auto"); got != "axis KFZW" {
+	if got := gateReason("D", high, turned, true, "detected"); got != "axis KFZW" {
 		t.Fatalf("hard axis: %s", got)
 	}
-	if got := gateReason("D", high, map[string]parity.Conf{"LAMFA": {Reason: "axis-zeros"}}, true, "auto"); got != "" {
+	if got := gateReason("D", high, map[string]parity.Conf{"LAMFA": {Reason: "axis-zeros"}}, true, "detected"); got != "" {
 		t.Fatalf("soft zeros: %s", got)
 	}
-	if got := gateReason("D", high, map[string]parity.Conf{"KFZW": {Reason: "shape"}}, true, "auto"); got != "" {
+	if got := gateReason("D", high, map[string]parity.Conf{"KFZW": {Reason: "shape"}}, true, "detected"); got != "" {
 		t.Fatalf("soft shape: %s", got)
 	}
-	if got := gateReason("D", high, map[string]parity.Conf{"KFZW": {Reason: "body"}}, true, "auto"); got != "body KFZW" {
+	if got := gateReason("D", high, map[string]parity.Conf{"KFZW": {Reason: "body"}}, true, "detected"); got != "body KFZW" {
 		t.Fatalf("hard body: %s", got)
 	}
 	both := map[string]parity.Conf{
 		"KFZW":  {Reason: "body"},
 		"LAMFA": {Reason: "axis"},
 	}
-	if got := gateReason("D", high, both, true, "auto"); got != "axis LAMFA" {
+	if got := gateReason("D", high, both, true, "detected"); got != "axis LAMFA" {
 		t.Fatalf("axis before body: %s", got)
 	}
 }
@@ -195,9 +195,9 @@ func TestReference(t *testing.T) {
 	if reference(prev, loc, refs) != nil {
 		t.Fatal("reference without provenance")
 	}
-	prev.Provenance = &model.Provenance{Format: "kp", Origin: "manual", File: "h.kp", SHA256: strings.Repeat("a", 64), Verified: true}
+	prev.Provenance = &model.Provenance{Format: "kp", Origin: "handmade", File: "h.kp", SHA256: strings.Repeat("a", 64), Verified: true}
 	r := reference(prev, loc, refs)
-	if r.Origin != "manual" || r.File != "h.kp" || r.Agree != [2]int{3, 5} || !slices.Equal(r.Except, []string{"ESKONF"}) || !slices.Equal(r.Unreferenced, []string{"KFMIRL"}) || r.Agreed() {
+	if r.Origin != "handmade" || r.File != "h.kp" || r.Agree != [2]int{3, 5} || !slices.Equal(r.Except, []string{"ESKONF"}) || !slices.Equal(r.Unreferenced, []string{"KFMIRL"}) || r.Agreed() {
 		t.Fatalf("%+v", r)
 	}
 	path := filepath.Join(t.TempDir(), "d.json")
@@ -212,7 +212,7 @@ func TestReference(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if p := got.Provenance; p.Origin != "auto" || !p.Verified || p.Reference.Agree != r.Agree || prev.Provenance.Origin != "manual" {
+	if p := got.Provenance; p.Origin != "detected" || !p.Verified || p.Reference.Agree != r.Agree || prev.Provenance.Origin != "handmade" {
 		t.Fatalf("%+v", p)
 	}
 }
@@ -224,15 +224,15 @@ func TestSourceClass(t *testing.T) {
 		p    *model.Provenance
 		want string
 	}{
-		{nil, "auto"},
-		{&model.Provenance{Origin: "manual", Verified: true}, "verified"},
-		{&model.Provenance{Origin: "auto", Verified: true}, "verified"},
+		{nil, "detected"},
+		{&model.Provenance{Origin: "handmade", Verified: true}, "verified"},
+		{&model.Provenance{Origin: "detected", Verified: true}, "verified"},
 		{&model.Provenance{Origin: "damos"}, "DAMOS"},
 		{&model.Provenance{Origin: "a2l"}, "DAMOS"},
-		{&model.Provenance{Origin: "manual"}, "manual"},
-		{&model.Provenance{Origin: "auto", Reference: agreed}, "matched"},
-		{&model.Provenance{Origin: "auto", Reference: partial}, "auto"},
-		{&model.Provenance{Origin: "auto"}, "auto"},
+		{&model.Provenance{Origin: "handmade"}, "handmade"},
+		{&model.Provenance{Origin: "detected", Reference: agreed}, "matched"},
+		{&model.Provenance{Origin: "detected", Reference: partial}, "detected"},
+		{&model.Provenance{Origin: "detected"}, "detected"},
 	} {
 		if got := parity.SourceClass(c.p); got != c.want {
 			t.Errorf("%+v: %s, want %s", c.p, got, c.want)
@@ -268,16 +268,16 @@ func TestHandCover(t *testing.T) {
 		t.Fatalf("new %+v", merged.Objects[1].Value)
 	}
 	moved := modelOf(pubObj("KFZW", 0x300, 1, ""), pubObj("LAMFA", 0x200, 1, ""))
-	if got, _, _ := coverAll(manual, moved); got != "manual disagrees KFZW" {
+	if got, _, _ := coverAll(manual, moved); got != "handmade disagrees KFZW" {
 		t.Fatalf("moved: %s", got)
 	}
 	short := modelOf(pubObj("LAMFA", 0x200, 1, ""))
 	two := modelOf(pubObj("KFZW", 0x100, 0.75, "grad KW"), pubObj("LAMFA", 0x180, 1, "%%"))
-	if got, _, _ := coverAll(two, short); got != "manual short KFZW" {
+	if got, _, _ := coverAll(two, short); got != "handmade short KFZW" {
 		t.Fatalf("short: %s", got)
 	}
 	reason, n, notes := coverAll(two, modelOf(pubObj("OTHER", 0x1, 1, "")))
-	if reason != "manual short KFZW" || n != 1 || len(notes) != 3 || notes[0].line() != "short KFZW 0x100" || notes[1].line() != "short LAMFA 0x180" || notes[2].line() != "added OTHER 0x1" {
+	if reason != "handmade short KFZW" || n != 1 || len(notes) != 3 || notes[0].line() != "short KFZW 0x100" || notes[1].line() != "short LAMFA 0x180" || notes[2].line() != "added OTHER 0x1" {
 		t.Fatalf("detail %s +%d %+v", reason, n, notes)
 	}
 	if _, n, notes = coverAll(manual, covered); n != 1 || len(notes) != 1 || notes[0].line() != "added LAMFA 0x200" {
@@ -311,7 +311,7 @@ func TestHandCover(t *testing.T) {
 	locatedMoved.Objects[0].Description = "optimal"
 	locatedMoved.Objects[0].Comment = "needle"
 	reason, _, notes = coverAll(shortMoved, locatedMoved)
-	if reason != "manual short LAMFA" || moveCount(notes) != 1 || !hasShort(notes) || partialDelta(1, 1) != "~1 +1" {
+	if reason != "handmade short LAMFA" || moveCount(notes) != 1 || !hasShort(notes) || partialDelta(1, 1) != "~1 +1" {
 		t.Fatalf("short correction %s %+v", reason, notes)
 	}
 	fixed := applyMoves(shortMoved, locatedMoved, notes)
@@ -329,7 +329,7 @@ func TestHandCover(t *testing.T) {
 		t.Fatal("base mutated")
 	}
 	autoPrev := modelOf(pubObj("KFZW", 0x100, 1, ""))
-	autoPrev.Provenance = &model.Provenance{Origin: "auto"}
+	autoPrev.Provenance = &model.Provenance{Origin: "detected"}
 	autoPrev.Objects[0].Comment = "old-needle"
 	autoLoc := modelOf(pubObj("KFZW", 0x100, 1, ""))
 	autoLoc.Objects[0].Comment = "map_interp_table8"
@@ -435,16 +435,16 @@ func TestHandCover(t *testing.T) {
 		t.Fatalf("unlocated %+v", gotKeys["LAMFA"])
 	}
 	one := modelOf(pubObj("KFPED_0_A", 0x100, 1, ""), pubObj("LAMFA", 0x180, 1, ""))
-	if got, _, _ := coverAll(pedalManual, one); got != "manual short KFPED" {
+	if got, _, _ := coverAll(pedalManual, one); got != "handmade short KFPED" {
 		t.Fatalf("one variant: %s", got)
 	}
 	movedPair := modelOf(pubObj("KFPED_0_A", 0x300, 1, ""), pubObj("KFPED_1_A", 0x200, 1, ""), pubObj("LAMFA", 0x180, 1, ""))
-	if got, _, _ := coverAll(pedalManual, movedPair); got != "manual disagrees KFPED" {
+	if got, _, _ := coverAll(pedalManual, movedPair); got != "handmade disagrees KFPED" {
 		t.Fatalf("pair moved: %s", got)
 	}
 	plain := modelOf(pubObj("KFPED", 0x100, 1, ""))
 	variantManual := modelOf(pubObj("KFPED_0_A", 0x100, 0.5, "Nm"))
-	if got, _, _ := coverAll(variantManual, plain); got != "manual short KFPED_0_A" {
+	if got, _, _ := coverAll(variantManual, plain); got != "handmade short KFPED_0_A" {
 		t.Fatalf("plain does not cover the variant: %s", got)
 	}
 	kept := modelOf(pubObj("KFPED_0_A", 0x100, 0.5, "Nm"), pubObj("LAMFA", 0x180, 1, ""))
@@ -485,7 +485,7 @@ func TestHandCover(t *testing.T) {
 }
 
 func TestMergeKeptRelayout(t *testing.T) {
-	for _, origin := range []string{"auto", "manual"} {
+	for _, origin := range []string{"detected", "handmade"} {
 		prev := modelOf(pubObj("KFMIRL", 0x100, 1, ""), pubObj("KFZW", 0x200, 0.75, "grad KW"))
 		prev.Provenance = &model.Provenance{Format: "image", Origin: origin, SHA256: strings.Repeat("ab", 32)}
 		loc := modelOf(pubObj("KFMIRL", 0x100, 1, ""), pubObj("KFZW", 0x200, 1, ""))
@@ -497,7 +497,7 @@ func TestMergeKeptRelayout(t *testing.T) {
 			t.Fatal(err)
 		}
 		want := 0
-		if origin == "auto" {
+		if origin == "detected" {
 			want = 16
 		}
 		if merged.Objects[0].Data.Bits != want || merged.Objects[1].Data.Bits != 0 {
@@ -540,7 +540,7 @@ func pubObj(key string, addr uint32, factor float64, units string) *model.Object
 func TestApplyForce(t *testing.T) {
 	dir := t.TempDir()
 	same := modelOf(pubObj("KFZW", 0x100, 0.75, "grad KW"))
-	same.Provenance = &model.Provenance{Format: "image", Origin: "auto", SHA256: strings.Repeat("ab", 32)}
+	same.Provenance = &model.Provenance{Format: "image", Origin: "detected", SHA256: strings.Repeat("ab", 32)}
 	path := filepath.Join(dir, "same.json")
 	b, err := canon.MarshalStamped(same, "xdfkit 0.9.9-dirty")
 	if err != nil {

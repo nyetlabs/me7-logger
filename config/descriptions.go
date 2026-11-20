@@ -112,7 +112,7 @@ func BuildDescriptions(dir string) ([]byte, error) {
 		if err := json.Unmarshal(b, &pack); err != nil {
 			return nil, fmt.Errorf("%s: %w", e.Name(), err)
 		}
-		if pack.Provenance.Origin == "auto" {
+		if pack.Provenance.Origin == "detected" {
 			continue
 		}
 		mFile := e.Name() == mPack

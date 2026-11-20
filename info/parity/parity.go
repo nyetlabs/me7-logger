@@ -35,9 +35,9 @@ import (
 // maps that scored, and a hit matches that image's XDF. Confidence is the
 // body-byte result for the names that row scored.
 // Axis on an XDF or Manual row is every axis in that file.
-// XDF rows score DAMOS sourced corpus definitions. Manual rows score manual
-// ones, which are oracles, not targets. Origin auto is not an oracle.
-// Disagree lists tuner names located at an address a manual definition
+// XDF rows score DAMOS sourced corpus definitions. Manual rows score handmade
+// ones, which are oracles, not targets. Origin detected is not an oracle.
+// Disagree lists tuner names located at an address a handmade definition
 // does not have. Those names still hit.
 type Report struct {
 	ME7Info  []Image
@@ -49,7 +49,7 @@ type Report struct {
 }
 
 // Disagreement is one tuner name whose located body is not at any of the
-// manual XDF's addresses for that name. Addresses are file offsets.
+// handmade XDF's addresses for that name. Addresses are file offsets.
 type Disagreement struct {
 	Image, Name string
 	Ours        uint32
@@ -207,7 +207,7 @@ func (r *Report) Text() string {
 		if len(lines) > 0 {
 			lines = append(lines, line{})
 		}
-		lines = append(lines, line{label: "xdf manual", head: true, xdf: true})
+		lines = append(lines, line{label: "xdf handmade", head: true, xdf: true})
 		for _, im := range r.Manual {
 			lines = append(lines, line{label: "  " + stemName(im.Name), frac: im.Fraction, axis: im.Axis, xdf: true})
 		}
@@ -372,7 +372,7 @@ func (r *Report) Text() string {
 		}
 	}
 	if len(r.Disagree) > 0 {
-		b.WriteString("\nmanual xdf disagrees\n")
+		b.WriteString("\nhandmade xdf disagrees\n")
 		for _, d := range r.Disagree {
 			xs := make([]string, len(d.XDF))
 			for i, a := range d.XDF {
@@ -394,22 +394,22 @@ func StageLabel(tier string) string {
 	return map[string]string{"": "-", "-": "-", "D": "1", "C": "2", "B": "3-", "A": "3", "S": "3+", "S+": "S+"}[tier]
 }
 
-// SourceClass is the publish Source column: verified, DAMOS, matched, manual,
-// or auto.
+// SourceClass is the publish Source column: verified, DAMOS, matched, handmade,
+// or detected.
 func SourceClass(p *model.Provenance) string {
 	switch {
 	case p == nil:
-		return "auto"
+		return "detected"
 	case p.Verified:
 		return "verified"
 	case p.Origin == "damos" || p.Origin == "a2l":
 		return "DAMOS"
-	case p.Origin == "manual":
-		return "manual"
+	case p.Origin == "handmade":
+		return "handmade"
 	case p.Reference.Agreed():
 		return "matched"
 	}
-	return "auto"
+	return "detected"
 }
 
 // Detail is the report for stems, plus the tuner and block names those
@@ -673,7 +673,7 @@ func run(dir string, images []string, defOf func(string) string, gen imageGen) (
 			blk := block[LayoutID(img)]
 			want := lists.forBlock(blk)
 			scored := tunerMaps(want, axes, maps, oracle)
-			if kind == manualXDF {
+			if kind == handmadeXDF {
 				rep.Disagree = append(rep.Disagree, disagreements(base, want, scored, xrows)...)
 			}
 			gone := absent[blk]
@@ -813,14 +813,14 @@ func nameSet(names []string) map[string]struct{} {
 
 // The oracle kinds.
 const (
-	damosXDF  = "damos"
-	manualXDF = "manual"
+	damosXDF    = "damos"
+	handmadeXDF = "handmade"
 )
 
 // loadOracle reads the image's corpus definition at path and returns its
 // kind, or "" when path is "" or the origin is located. Its provenance
-// origin (xdfkit docs/corpus.md) damos or a2l is damosXDF; manual, or none,
-// is manualXDF. auto is a program's placement, so it is not scored.
+// origin (xdfkit docs/corpus.md) damos or a2l is damosXDF; handmade, or none,
+// is handmadeXDF. detected is a program's placement, so it is not scored.
 func loadOracle(path string) (maps []Map, axes []Axis, rows []refRow, kind string, prov *model.Provenance, err error) {
 	if path == "" {
 		return nil, nil, nil, "", nil, nil
@@ -836,9 +836,9 @@ func loadOracle(path string) (maps []Map, axes []Axis, rows []refRow, kind strin
 	switch origin := originOf(prov); origin {
 	case "damos", "a2l":
 		kind = damosXDF
-	case "manual", "":
-		kind = manualXDF
-	case "auto":
+	case "handmade", "":
+		kind = handmadeXDF
+	case "detected":
 		return nil, nil, nil, "", prov, nil
 	default:
 		return nil, nil, nil, "", prov, fmt.Errorf("%s: unknown origin %q", path, origin)

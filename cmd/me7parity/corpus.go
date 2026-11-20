@@ -29,14 +29,14 @@ An identical row is stored when its stamp digests differ. stamp.tool
 is not one of those digests, so a tool name or version does not count.
 Origin stays.
 With no NAME, every image is listed. A named row also prints
-manual, open, and block.
+handmade, open, and block.
 
 Columns are status, tier, delta, and confidence.
 Status and delta marks are in docs/parity.md.
 --grades prints name, stage, confidence, and source, and does not submit.
 --staged reads each zip's definition instead of locating maps again.
 Stage is the tuner tier: D is 1, C is 2, B is 3-, A is 3, S is 3+.
-An open D is -. Source is verified, DAMOS, matched, manual, or auto
+An open D is -. Source is verified, DAMOS, matched, handmade, or detected
 (docs/parity.md).
 
 The corpus is --corpus, else CORPUS, else ../ecu-corpus when that
@@ -167,7 +167,7 @@ func cmdCorpus(args []string) error {
 			item.reason = gateReason(im.Tier, im.Confidence, im.ConfByName, item.def != "", item.origin)
 		}
 		delta := "-"
-		if item.reason == "" && (item.origin == "manual" || item.origin == "auto") {
+		if item.reason == "" && (item.origin == "handmade" || item.origin == "detected") {
 			loc, err := located(d, prepare, c, name)
 			if err != nil {
 				return err
@@ -511,7 +511,7 @@ func printDetail(lines []pubLine) {
 		}
 		fmt.Printf("\n%s\n", ln.name)
 		if len(ln.notes) > 0 {
-			fmt.Println("manual")
+			fmt.Println("handmade")
 			for _, n := range ln.notes {
 				fmt.Printf("  %s\n", n.line())
 			}
@@ -544,10 +544,10 @@ func openLine(n parity.OpenName) string {
 }
 
 // gateReason is empty when the image may be submitted, or when origin
-// manual or auto still has to pass coverAll. Hard fails are a turned
+// handmade or detected still has to pass coverAll. Hard fails are a turned
 // non-zero axis (axis NAME) or an unreadable body (body NAME). Soft low
 // confidence (shape, all-zero axis, zero body, peer miss) still uses the
-// Hit/Total gate. Grade "-" passes only for manual. damos, a2l, and an
+// Hit/Total gate. Grade "-" passes only for handmade. damos, a2l, and an
 // unset origin do not.
 func gateReason(tier string, conf parity.Fraction, byName map[string]parity.Conf, hasDef bool, origin string) string {
 	if status := hardConf(byName); status != "" {
@@ -556,13 +556,13 @@ func gateReason(tier string, conf parity.Fraction, byName map[string]parity.Conf
 	if conf.Total == 0 || conf.Hit*2 <= conf.Total {
 		return fmt.Sprintf("confidence %d/%d", conf.Hit, conf.Total)
 	}
-	if hasDef && origin != "manual" && origin != "auto" {
+	if hasDef && origin != "handmade" && origin != "detected" {
 		if origin == "" {
 			origin = "unset"
 		}
 		return "origin " + origin
 	}
-	if origin == "manual" {
+	if origin == "handmade" {
 		return ""
 	}
 	switch tier {
@@ -614,7 +614,7 @@ func (n coverNote) line() string {
 	case "short":
 		return fmt.Sprintf("short %s %s", n.key, addrText(n.manual))
 	case "disagrees":
-		return fmt.Sprintf("disagrees %s manual %s located %s", n.key, addrText(n.manual), addrsText(n.have))
+		return fmt.Sprintf("disagrees %s handmade %s located %s", n.key, addrText(n.manual), addrsText(n.have))
 	default:
 		return fmt.Sprintf("added %s %s", n.key, addrsText(n.have))
 	}
@@ -664,7 +664,7 @@ func coverAll(prev, located *model.Model) (string, int, []coverNote) {
 		if len(addrs) == 0 {
 			notes = append(notes, coverNote{op: "short", key: k, manual: o.Address})
 			if reason == "" {
-				reason = "manual short " + k
+				reason = "handmade short " + k
 			}
 			continue
 		}
@@ -678,7 +678,7 @@ func coverAll(prev, located *model.Model) (string, int, []coverNote) {
 		if !match {
 			notes = append(notes, coverNote{op: "disagrees", key: k, manual: o.Address, have: addrs})
 			if reason == "" {
-				reason = "manual disagrees " + k
+				reason = "handmade disagrees " + k
 			}
 		}
 	}
@@ -915,7 +915,7 @@ func mergeKept(prev, located *model.Model) (*model.Model, error) {
 }
 
 func isAuto(m *model.Model) bool {
-	return m != nil && m.Provenance != nil && m.Provenance.Origin == "auto"
+	return m != nil && m.Provenance != nil && m.Provenance.Origin == "detected"
 }
 
 // finishScales fills agreed scales on auto packs, then annotates confidence
@@ -1474,11 +1474,11 @@ func loadRefTable() (refTable, error) {
 	return refTable{Except: except}, nil
 }
 
-// reference compares located with the manual, DAMOS, or A2L definition prev.
-// It is nil when prev is auto or has no provenance.
+// reference compares located with the handmade, DAMOS, or A2L definition prev.
+// It is nil when prev is detected or has no provenance.
 func reference(prev, located *model.Model, t refTable) *model.Reference {
 	p := prev.Provenance
-	if p == nil || p.Origin == "auto" {
+	if p == nil || p.Origin == "detected" {
 		return nil
 	}
 	idx, err := mapSets()
@@ -1558,7 +1558,7 @@ func writePublished(path string, m *model.Model, keepOrigin bool, ref *model.Ref
 		if m.Provenance != nil {
 			p = *m.Provenance
 		}
-		p.Origin = "auto"
+		p.Origin = "detected"
 		if ref != nil {
 			p.Reference = ref
 		}
