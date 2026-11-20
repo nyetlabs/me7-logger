@@ -160,6 +160,23 @@ absent:
     - KFTARX # omitted from F/K/Q DAMOS
     - KFVPLGU # no DA 00 42 76 reader
     - KIFZGHG # KIFZGHG_0_A..2_A located; plain name not in F DAMOS
+  # 06A906032S DAMOS: no KFVPLGU / VMAXNB*; NMAX+NMAXF present. Q shares the block.
+  # LDRLMX_ldhbn is short (two DA00AE6C calls) — KFLDHBN/LDPBN/LDRXN need mapsigs, not maps.yaml ats.
+  X22:
+    - KFVPLGU # not in S DAMOS; DA004276 site is a curve, not the boost-ratio map
+    - VMAXNB # NMAX + NMAXF located; not in S DAMOS
+    - VMAXNB_0_A # NMAX + NMAXF located; not in S DAMOS
+    - VMAXNB_1_A # NMAX + NMAXF located; not in S DAMOS
+    # CLAHSH/CLAHSHE/CLAHSHE2/CLALSH located via fcm_dtc table needle; these codes are not in that table.
+    - CLAATR # no 1456 in FCM table
+    - CLAATR2 # no 1460 in FCM table
+    - CLAATS # no 1453 in FCM table
+    - CLAATS2 # no 1457 in FCM table
+    - CLAHSH2 # no 1140 in FCM table
+    - CLALSH2 # CLALSH located; *2 code not in FCM table
+    - CLRHKA # CLRHK located; no 3D07 D740E100 CLRSHKA-class reader
+    - KFNLLNST # not in S DAMOS; nllnst_entry miss
+    - RLSALUN # not in S DAMOS; no ASE_rlsalun path
   X22ka:
     - KFLDRQ1 # LDRQ1DY + LDRQ1ST located; Q1 integrator is not the map
   # 4D1/Spyker defs list NMAXF only. Lambts takes the KFDLBTS arm.

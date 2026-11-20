@@ -117,11 +117,18 @@ func mapHits(img []byte, dpp [4]uint16, rows []MapSig, known map[string]uint32, 
 	for _, row := range rows {
 		if row.Code != 0 {
 			base, ok := have[row.Anchor]
-			tab, tok := have[row.Index]
-			if !ok || !tok {
+			if !ok {
 				continue
 			}
-			if path, ok := pathOf(img, out[tab].Addr, paths[row.Anchor], row.Code); ok {
+			var tabAddr uint32
+			if idx, tok := have[row.Index]; tok {
+				tabAddr = out[idx].Addr
+			} else if a, ok := tabs[row.Index]; ok {
+				tabAddr = a
+			} else {
+				continue
+			}
+			if path, ok := pathOf(img, tabAddr, paths[row.Anchor], row.Code); ok {
 				add(row.Name, out[base].Addr+uint32(path), 0, row, 0, 0)
 			}
 			continue

@@ -36,6 +36,10 @@ maps:
   at: ['0x48', '0x8A', '0x5DE', '0x620', '0x46', '0x84']
   interp: map_interp_table8
 - name: KFZW
+  caller: ZWGRU_ign_zw
+  at: '0x5A8'
+  interp: map_interp_table8_twin
+- name: KFZW
   caller: ZWGRU_ign_zw_dc
   at: '0x50'
   interp: map_interp_table8_twin

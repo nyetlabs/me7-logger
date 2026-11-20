@@ -1,0 +1,59 @@
+mapsigs:
+# 4B0906018P/Q / 06A906032S. Pointer lands on the trailing axis; body is 16x12 back.
+# Call F2FF is a 6-point word — yord for the rpm axis (16).
+- {name: KFZW2, pattern: 88908880E6FCXXXXE6FDXXXXF2FEXXXXF2FFXXXXDA005678, at: 6, add: -193, rows: 16, cols: 12, xat: 14, yord: true}
+# P 9E2F / Q 8E2F.
+- {name: DPUPS, pattern: 43F8XXXXFD03XE2F0D01XE2F}
+# Same 24bh knock readers.
+- {name: KRALH, pattern: C2F5XXXX2045C2F5XXXX4054CD05E138}
+- {name: KRANH, pattern: 43F8XXXX9D11F3FAXXXX49A2}
+# F084 DA00DE73 sites land on KFWDKMSN-style 16x6 headers. The F6F2 site is 16x12.
+- {name: KFMIRL, pattern: F6F2XXXXE6FCXXXXF2FD84F8F2FEXXXXDA00DE73, at: 6, add: 60, rows: 16, cols: 12, xbits: 16, ybits: 16}
+# Curve header 10 00 then body; E6FC 9A00/9800 is the count word.
+- {name: SNM16OPUW, pattern: 4276F6F4XXXXE6FC9X00F2FDXXF8, at: 8, add: 2, cols: 16, xbits: 16}
+# Exhaust BTS trip (S FD025F36 / P+Q FD025F15).
+- {name: TABGBTS, pattern: [D740060242F4XXXXFD025F15, D740060242F4XXXXFD025F36], at: 6}
+# LDRLMX / LDRPID twins from 06A906032S.
+- {name: LDPBN, pattern: F2F50CFEE6FCXXXXE6FD0602F2FE, at: 6, frame: true, cols: 8, xbits: 16}
+- {name: LDIATA, pattern: C0848840E6FCXXXXE6FD0602F2FEXXXXDA82, at: 6, frame: true, cols: 8, xbits: 16}
+# Body at E6FC; nmot count is even; tsel count is odd so hit the points and step back.
+- {name: ap_kfldhbn_nmot, pattern: 081926323F4B647D9608, table: true}
+- {name: ap_kfldhbn_tsel, pattern: 334D68839DABC5E0, table: true, add: -1}
+- {name: KFLDHBN, pattern: XX8E8840F2F2XXXX8820E6FCXXXXE6FD0602E6FEXXXXE6FF0502, at: 12, frame: true, rows: 8, cols: 8, xbits: 8, ybits: 8, xtable: ap_kfldhbn_nmot, ytable: ap_kfldhbn_tsel}
+- {name: KFLDIMX, pattern: F2F5XXXX8850E6FCXXXXE6FD0702E6FEBX00E6FF0402, at: 8, frame: true, rows: 16, cols: 8}
+# Family wants DA80; Q uses DA82. Second C2F4 after the twin is LDRXN (body 66 before LDRXNZK).
+- {name: LDRXN, pattern: C2F4XXXX5C848840E6FCXXXXE6FD0702F2FE84F8DA82XXXX9820, at: 10, frame: true, add: 34, cols: 16, xbits: 16}
+# C: KRKTE byte after EXTP 0602 (x22ka uses 0702/C2FC). Q BE0C is even (16-bit);
+# P 650C / S 9B0C are odd — C2FA byte load, bits 8 (same as storage for S).
+- {name: KRKTE, pattern: D7400602C2FABE0C, at: 6}
+- {name: KRKTE, pattern: [D7400602C2FA650C, D7400602C2FA9B0C], at: 6, bits: 8}
+# C: page reader (P 3200 / Q 3400 / S 5600).
+- {name: KFMRESK, pattern: 9D0CE6FCXXXXE6FDXX00F2FEXXXXF2FFXXXXDA005678, at: 4, xat: 16, yat: 12}
+- {name: KFMRES, pattern: 0D0BE6FCXXXXE6FDXX00F2FEXXXXF2FFXXXXDA005678, at: 4, xat: 16, yat: 12}
+# C: FKKVS; 8-bit y then 16-bit x in front of the body (add 49).
+- {name: FKKVS, pattern: D7400602C2FFXXXXDA82AA8C06F00C00F6F4, at: 6, add: 49, rows: 16, cols: 16, xbits: 16, ybits: 8}
+# C: TABGSS / TABGSS2 (DC twin; page 0602).
+- {name: TABGSS, pattern: 0D08F2F4XXXXD740060242F4XXXXFD01, at: 12, also: [{name: TABGSS2, add: 2}]}
+# C: KFLF (24egks twin; C2FE82F8 / DA826483).
+- {name: KFLF, pattern: 06F480018840E6FCXXXXE6FD0602C2FE82F8C2FFA5F9DA826483, at: 8, frame: true, add: 30, rows: 12, cols: 16}
+# C: TVUB; P DC1D / Q F21D.
+- {name: TVUB, pattern: E6FEXXXXC2FFXX8ADA00427B, cols: 5, xbits: 8}
+# C: CATR (2D02 trip).
+- {name: CATR, pattern: C2F4DC4368412D020F0A0D010E0A, at: 2}
+# C: CWDLSAHK (P F3F8…6981 / Q F3FA…69A1). Common F3FA-only misses P.
+- {name: CWDLSAHK, pattern: F3FXXXXX69XX2D029F140D089A1406F0F2F4XXXX8AF40290258F, at: 2}
+# C: class bits. Open sits after DB00 (DB00-as-open closes the window on itself).
+# Two chains share the window; first:true keeps the earlier site. XXBB is 8EBB/68BB.
+- {name: CDHSHE, open: 28028400XXBBE6FC, first: true, pattern: C2F4XXXX68412D05E6F48000, at: 2}
+- {name: CDLSHV, open: 28028400XXBBE6FC, first: true, pattern: FBFF64F4XX8DD7400602C2F4XXXX68412D04E084, at: 12}
+- {name: CDLSH, open: 28028400XXBBE6FC, first: true, pattern: FFFB64F4XX8DD7400602C2F4XXXX68412D05E6F41000, at: 12}
+- {name: CDLATV, open: 28028400XXBBE6FC, first: true, pattern: EFFF64F4XX8DD7400602C2F4XXXX68412D05E6F42000, at: 12}
+- {name: CDLASH, open: 28028400XXBBE6FC, first: true, pattern: DFFF64F4XX8DD7400602C2F4XXXX68412D05E6F44000, at: 12}
+# C: NLLM; same body as NFSM. P count is even (0618…); Q count is odd (18… + add -1).
+- {name: ap_nllm, pattern: 06182C405B83AB06, table: true}
+- {name: ap_nllm, pattern: 182C405B83AB06, table: true, add: -1}
+- {name: NLLM, pattern: [E6FC4718E6FD0602F2FE888EDA82, E6FCA317E6FD0602F2FE828EDA82], at: 2, frame: true, cols: 6, xtable: ap_nllm}
+# C: fcm_cla; P 534C / Q 414C / S FF4C.
+- {name: fcm_cla, open: '{fcmEnd:F3F8}47F81400FDXX', pattern: F4A4XX4CEA20, count: 46F4XXXXXDXX}
+# C: fcm_dtc body. Common D740…3D05E6FX / 3D09E6FX miss; the path0/path1 marker is unique on Q/S.
+- {name: fcm_dtc, pattern: 17151715171517151411141114111411, table: true}

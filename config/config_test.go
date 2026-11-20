@@ -101,7 +101,7 @@ func TestShippedSignatures(t *testing.T) {
 	// Stable sequence of expanded mapsig rows (name|pattern). Catches
 	// accidental mapsig edits/reorders; bump with go test ./config -update
 	// after an intentional mapsigs.d change.
-	const want = "0395f015e1c13b9d521cf234a18b023a027bf1ba56e0bc0374131d7e1afb513a"
+	const want = "76a1a5d02c562db098d67d0d9b459845b2529eee6ab58516f182f41541f545e8"
 	if got == want {
 		return
 	}
@@ -334,11 +334,12 @@ func TestShippedMaps(t *testing.T) {
 		got[c.Name] = append(got[c.Name], c.At)
 		switch c.Name {
 		case "KFZW", "KFZW2", "KFZWWLNM":
-			if c.Name == "KFZW" && c.Caller == "ZWGRU_ign_zw_dc" {
-				if c.Interp != "map_interp_table8_twin" || c.At != 0x50 {
-					t.Fatalf("%+v", c)
+			if c.Name == "KFZW" && c.Interp == "map_interp_table8_twin" {
+				if (c.Caller == "ZWGRU_ign_zw_dc" && c.At == 0x50) ||
+					(c.Caller == "ZWGRU_ign_zw" && c.At == 0x5A8) {
+					break
 				}
-				break
+				t.Fatalf("%+v", c)
 			}
 			if c.Interp != "map_interp_table8" {
 				t.Fatalf("%+v", c)

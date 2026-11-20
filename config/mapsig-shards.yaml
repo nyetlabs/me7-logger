@@ -12,7 +12,7 @@ shards:
   22m: [family]
   22N: [family, 22n]
   X22ka: [family, x22ka]
-  X22: [family]
+  X22: [family, x22]
   23g: [family, 23g]
   24BCD: [24bcd, 24bcd-nl-lp-cb]
   24b0: [24bcd, 24bh]
