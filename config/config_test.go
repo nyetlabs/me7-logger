@@ -558,7 +558,7 @@ func TestShippedMeasures(t *testing.T) {
 		case "B_ldipos":
 			flag = m
 		case "B_ar":
-			if !m.Bit || m.Needle == nil || m.Needle.BackUp != -2 || m.Bitmask != 0x0200 || len(m.Needle.Pats) != 2 {
+			if !m.Bit || m.Needle == nil || m.Needle.BackUp != -2 || m.Bitmask != 0x0200 || len(m.Needle.Pats) != 3 || m.Needle.Pattern[0] != 0xF0 {
 				t.Fatalf("B_ar %+v", m)
 			}
 		case "misol_w":
@@ -568,7 +568,7 @@ func TestShippedMeasures(t *testing.T) {
 	if stubs != 1 {
 		t.Fatalf("stubs %d", stubs)
 	}
-	if dzwb.Stub || dzwb.Needle == nil || dzwb.Needle.Function || len(dzwb.Needle.Pats) != 0 || dzwb.Needle.BackUp != -4 || dzwb.Size != 1 || dzwb.A != -0.75 || !dzwb.Signed {
+	if dzwb.Stub || dzwb.Needle == nil || dzwb.Needle.Function || len(dzwb.Needle.Pats) != 2 || dzwb.Needle.Pattern[0] != 0xAD || dzwb.Needle.BackUp != -4 || dzwb.Size != 1 || dzwb.A != -0.75 || !dzwb.Signed {
 		t.Fatalf("dzwb %+v", dzwb)
 	}
 	if wkrdy.Signed || wkrdy.A != -0.75 || wkrdy.Unit != "°KW" {
