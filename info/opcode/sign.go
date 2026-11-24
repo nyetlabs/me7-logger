@@ -642,11 +642,7 @@ func PtrAt(img []byte, addr uint32, dpp [4]uint16) uint32 {
 		return 0
 	}
 	mem := binary.LittleEndian.Uint16(img[off : off+2])
-	if off >= 6 && img[off-6] == 0xD7 && img[off-5]&0xC0 == 0x40 {
-		page := binary.LittleEndian.Uint16(img[off-4 : off-2])
-		return (uint32(page) << 14) | uint32(mem&0x3FFF)
-	}
-	return Physical(dpp, mem, -1)
+	return Physical(dpp, mem, ExtpPage(img, off))
 }
 
 func findLast(img []byte, start, end uint32, pattern string) uint32 {

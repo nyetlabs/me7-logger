@@ -35,6 +35,14 @@ func Physical(dpp [4]uint16, mem uint16, extpPage int) uint32 {
 	return (uint32(dpp[idx]) << 14) | uint32(off)
 }
 
+// ExtpPage is the EXTP page six bytes before label, or -1.
+func ExtpPage(img []byte, label int) int {
+	if label < 6 || label > len(img) || img[label-6] != 0xD7 || img[label-5]&0xC0 != 0x40 {
+		return -1
+	}
+	return int(binary.LittleEndian.Uint16(img[label-4 : label-2]))
+}
+
 // FindDPP returns the most common MOV DPP0..DPP3,#imm block whose DPP0 is not 0.
 // File offsets of every copy of that block are returned too. DPP0 = 0 is the
 // reset block; the runtime value is written later.

@@ -9,8 +9,8 @@ import (
 
 	"go.nyet.org/me7-logger/config"
 	"go.nyet.org/me7-logger/ecu"
-	"go.nyet.org/me7-logger/internal/heximg"
 	"go.nyet.org/me7-logger/info/opcode"
+	"go.nyet.org/me7-logger/internal/heximg"
 	"go.nyet.org/me7-logger/record"
 )
 
@@ -188,6 +188,36 @@ func TestUserNeedle(t *testing.T) {
 		return
 	}
 	t.Fatal("dzwb missing")
+}
+
+func TestExtpOperandPage(t *testing.T) {
+	dir := t.TempDir()
+	body := "measurements:\n  - name: dzwb\n    needle_hex: \"E1 00 F6 8E XX XX\"\n"
+	if err := os.WriteFile(filepath.Join(dir, "extp.yaml"), []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	// F6 8E FC 07 is 0x3847FC when EXTP #0xE1 precedes it, else a DPP0 operand.
+	for _, tc := range []struct {
+		img  []byte
+		addr uint32
+	}{
+		{[]byte{0xD7, 0x40, 0xE1, 0x00, 0xF6, 0x8E, 0xFC, 0x07}, 0x3847FC},
+		{[]byte{0xE1, 0x00, 0xF6, 0x8E, 0xFC, 0x07}, 0x8107FC},
+	} {
+		res, err := Generate(Options{Image: tc.img, ImageName: "t.bin", Scale: "off", UserDir: dir})
+		if err != nil {
+			t.Fatal(err)
+		}
+		var got uint32
+		for _, it := range res.File.Items {
+			if it.Name == "dzwb" {
+				got = it.Addr
+			}
+		}
+		if got != tc.addr {
+			t.Fatalf("%#x", got)
+		}
+	}
 }
 
 func TestMeasureBitWord(t *testing.T) {

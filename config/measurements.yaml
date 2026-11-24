@@ -10,6 +10,7 @@
 #             A later pattern is another layout. Earlier patterns stay first.
 # back_up     Bytes from the hit back to the operand. Omitted means -4,
 #             which lands on that word. Write it when the landing differs.
+#             An EXTP #1 immediately before that word selects its page.
 # bit         The match is an 8A or 9A. The address is 0xFD00 plus twice
 #             the following byte.
 # size        Width in bytes. Omitted means 2.
@@ -100,10 +101,10 @@ measurements:
 - {name: dmaufr_w, signed: true, conversion: twice, comment: delta torque rise, needle_hex: [52 A9 22 F5 XX XX 9D 01, 2C A8 22 F5 XX XX 9D 01 E0 05 1B 54 F2 F5 0C FE F2 F4 0E FE B8 40 C4 50 02 00 F3 F8 0F 8B]}
 - {name: dmllr_w, unit: '%', signed: true, conversion: twice, comment: desired torque change from the idle speed control (PD-part), needle_hex: [02 A8 F6 F4 XX XX 0D 14, F2 A7 F2 FF F0 A7, F0 CE F2 FD XX XX 02 FD 76 A7]}
 # Raw byte. The usual 8-bit percent is 3/4.
-- {name: dmrkh, size: 1, unit: '%', factor: 1.0, comment: torque reserve for catalyzer heating, needle_hex: 0D 04 F3 F8 XX XX 49 80}
+- {name: dmrkh, size: 1, unit: '%', factor: 1.0, comment: torque reserve for catalyzer heating, needle_hex: [0D 04 F3 F8 XX XX 49 80, E1 00 C2 FE XX XX DA 80 9A 3D F7 F8 C9]}
 # Raw word. The usual percent word is 100/65536.
 - {name: dmrkh_w, unit: '%', factor: 1, comment: torque reserve for catalyzer heating, needle_hex: [7C 85 F6 F4 XX XX 0D 0C, 7C 85 F6 F4 XX XX C2 FC 56 F9]}
-- {name: dmrkt_w, unit: '%', comment: Torque reserve during quicktest, needle_hex: 2D 1A F2 F4 XX XX 3D 17}
+- {name: dmrkt_w, unit: '%', comment: Torque reserve during quicktest, needle_hex: [2D 1A F2 F4 XX XX 3D 17, E1 00 F2 F4 XX XX 3D 17 F2 F4 48]}
 - {name: dmrllr_w, unit: '%', conversion: twice, comment: torque reserve for idle speed control, needle_hex: [0D 02 F2 F4 XX XX F0 94 42 F9, 0D 02 F2 F4 XX XX F0 94 D7 40 E1 00 42 F9 12 0C]}
 - {name: dmzms_w, signed: true, conversion: torque, comment: difference between internal nominal engine torque and permissible nominal torque, needle_hex: [00 80 F6 F5 XX XX 9A 52, 00 80 F2 FE 44 A9, 0D 05 F2 F4 XX XX 48 40 DD 01 AF 55]}
 - {name: dzwb, size: 1, conversion: retard, needle_hex: [AD 8C F3 F8 XX XX 49 80, E2 8B F3 F8 XX XX 49 80 BD 0D]}
@@ -128,13 +129,13 @@ measurements:
 - {name: mdzw_max_w, conversion: torque, comment: 'max(mizsol_w, mizwmn_w, misol_w)', needle_hex: [11 80 F2 F4 XX XX 42 F4, 11 D0 F2 F4 XX XX 42 F4 90 A8]}
 - {name: mibas_w, conversion: torque, comment: indicated basic torque, needle_hex: [EC A9 42 F4 XX XX 9D 05, 66 A9 F6 8E 68 A9 0D 25, 9A A8 42 F4 XX XX 9D 05]}
 - {name: mibeg_w, unit: '%', comment: limit torque, needle_hex: [F8 A9 F6 FC XX XX F2 F4, 34 A9 F6 8E 46 A9, 06 0C F6 FC XX XX F2 F4 20 A8]}
-- {name: mibgr_w, unit: '%', comment: Indicated desired torque for gear-dependent limiting of the clutch torque, needle_hex: [0A A9 42 F4 XX XX 9D 03, 08 00 F2 FE 0C AA]}
+- {name: mibgr_w, unit: '%', comment: Indicated desired torque for gear-dependent limiting of the clutch torque, needle_hex: [0A A9 42 F4 XX XX 9D 03, 08 00 F2 FE 0C AA, E1 00 42 F4 XX XX 9D 03 F2 FC E6]}
 - {name: miextv_w, unit: '%', comment: external torque demand from stalling protection, needle_hex: [7E 91 F6 F4 XX XX F3 F8, 00 80 F2 FE 48 A9, 28 90 F6 F4 XX XX F3 F8]}
 - {name: miistoar_w, unit: '%', comment: Istmoment ohne Antiruckel-Anteil, needle_hex: [F4 A8 F2 F5 XX XX 1B 54, 0E FE F2 F4 18 AA, 7C 15 F2 F2 XX XX 7C 12 20 25 8D 04 7D 06 E6 F2 FF 7F 0D 03 6D 02 E6 F2 00 80 F6 F2 F0 A7]}
 - {name: milres_w, unit: '%', comment: torque request for air path including all torque reserves, needle_hex: [E8 AB 42 F5 XX XX 3D 04, 0E FE F6 F5 60 A9, 82 AA 42 F5 XX XX 3D 04]}
 - {name: milsol_w, unit: '%', comment: 'torque request for air path capped by miszull?', needle_hex: [7A 91 42 F5 XX XX 8D 02, 62 A9 F6 8E 64 A9 0D 25, 24 90 42 F5 XX XX]}
 - {name: milsolv_w, unit: '%', comment: 'torque request for air path?', needle_hex: [F0 49 F6 F4 XX XX 8A 52, F0 49 F6 F4 XX XX 8A 55]}
-- {name: mimax_w, unit: '%', alias: TorqueLimit, comment: maximum attainable indicated torque, needle_hex: 0D F8 F2 F4 XX XX 7C 84}
+- {name: mimax_w, unit: '%', alias: TorqueLimit, comment: maximum attainable indicated torque, needle_hex: [0D F8 F2 F4 XX XX 7C 84, E1 00 F2 F4 XX XX 7C 84 F7 F8 66]}
 - {name: mimsr_w, unit: '%', comment: desired indicated torque from MSR, needle_hex: [46 A9 42 F4 XX XX 8D 03, F4 A9 F6 F4 CA A9]}
 - {name: minmx_w, unit: '%', comment: indicated nominal torque for NMAX limiting, needle_hex: [0C AA 42 FC XX XX FD 02, AC A9 F2 FF AA A9, 0E 0C 42 FC XX XX FD 02 F2 FC 76 A8]}
 - {name: miopt_w, unit: '%', comment: optimum indicated torque, needle_hex: [4E A9 F2 F4 XX XX C2 F5, 9A A9 F6 F2 6C A9, 28 A8 F2 F4 XX XX C2 F5 E9 8B]}
@@ -142,7 +143,7 @@ measurements:
 - {name: miszull_w, unit: '%', comment: 'maximum permissible indicated torque for air path?', needle_hex: [EE A9 F6 F4 XX XX F6 F4, E0 14 02 F4 EA A9, 9C A8 F6 F4 XX XX F6 F4]}
 - {name: mitebg_milres_flag, size: 1, bitmask: '0x0001', comment: CWTEZW=odd and mitebg_w = milres_w, needle_hex: [FE 00 65 F8 XX XX 8A 2B, E1 18 75 F8 XX XX 0D 09 E7 F8 FE 00 65 F8 32 A8]}
 - {name: mitebg_w, unit: '%', comment: torque value for minimum charge canister purge, needle_hex: [5C A9 F2 F4 XX XX 42 F4, 36 A8 F2 F4 XX XX 42 F4 E4 A7]}
-- {name: mivmx_w, unit: '%', comment: indicated nominal torque for VMAX control, needle_hex: 2D 05 42 FC XX XX FD 02}
+- {name: mivmx_w, unit: '%', comment: indicated nominal torque for VMAX control, needle_hex: [2D 05 42 FC XX XX FD 02, E1 00 F6 8F XX XX DB 00 F7 8E]}
 - {name: mizsol_div_redist_0_w, conversion: torque, comment: mizsol divisor when redist = 0, needle_hex: [F4 A9 82 00 XX XX 82 00, FF FF F6 F4 XX XX 06 F0 08 00 DB 00 28 04 9A 55 04 F0]}
 - {name: mizsol_div_redist_ne_0_w, conversion: torque, comment: mizsol divisor when redist <> 0, needle_hex: [92 8B 2D 10 F2 F4 XX XX A8 20, 0F 8B 2D 10 F2 F4 XX XX A8 20], back_up: -6}
 - {name: mizsol_w, conversion: torque, comment: indicated resultant nominal torque for ignition angle intervention, needle_hex: [BC F9 F6 F5 XX XX F2 F2, 14 A9 F6 8E 52 A9, 38 F9 F6 F5 XX XX F2 F2 38 F9]}

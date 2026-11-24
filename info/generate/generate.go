@@ -12,13 +12,13 @@ import (
 	"strings"
 
 	"go.nyet.org/me7-logger/config"
-	"go.nyet.org/me7-logger/info/connect"
 	"go.nyet.org/me7-logger/ecu"
 	"go.nyet.org/me7-logger/ident"
+	"go.nyet.org/me7-logger/info/connect"
 	"go.nyet.org/me7-logger/info/interp"
+	"go.nyet.org/me7-logger/info/opcode"
 	"go.nyet.org/me7-logger/mapfile"
 	"go.nyet.org/me7-logger/needle"
-	"go.nyet.org/me7-logger/info/opcode"
 	"go.nyet.org/me7-logger/record"
 )
 
@@ -182,7 +182,7 @@ func Generate(opt Options) (*Result, error) {
 				continue
 			}
 			mem := binary.LittleEndian.Uint16(opt.Image[labels[0] : labels[0]+2])
-			addr = opcode.Physical(dpp, mem, -1)
+			addr = opcode.Physical(dpp, mem, opcode.ExtpPage(opt.Image, labels[0]))
 		}
 		sz := m.Size
 		if sz == 0 {
@@ -302,7 +302,7 @@ func joinCase(cases []opcode.Case, joined map[int]struct{}, img []byte, label in
 		return 0, opcode.Case{}, false
 	}
 	mem := binary.LittleEndian.Uint16(img[label : label+2])
-	addr := opcode.Physical(dpp, mem, -1)
+	addr := opcode.Physical(dpp, mem, opcode.ExtpPage(img, label))
 	if addr == 0 {
 		return 0, opcode.Case{}, false
 	}
