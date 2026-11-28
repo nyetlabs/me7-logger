@@ -6,15 +6,16 @@
 
 Each score is hits/total and a percent. No arguments: every image. `me7parity report NAME` limits the report, lists misses under open and block, and lists xdfkit lint findings (rule, id, message). A finding is not applied.
 
-`ecu me7info` is the only hard mark: 100% means every row of that image's legacy ME7Info file matched.
+`ecu me7info` is the only hard mark: 100% means every row of that image's legacy ME7Info file matched. An image with no file is still listed. Its ecu-specific score is blank. The tier, vs corpus, and extras still show what was located.
 
 | Column | Meaning |
 | --- | --- |
 | vs ecu-specific | matched rows / rows in the file; `(+N)` is catalog names located here that the file does not name |
+| tier | on `ecu me7info`, after the ecu-specific percent. D, C, B, A, A+. D is the plot columns, C adds timing, B adds fueling, A is every extras name, A+ is every catalog name. `-` means D is open. Blank when `names/memory.yaml` is absent. A name at one address counts, including a second row there. A second address does not |
 | vs corpus | catalog names located on this image / the full catalog |
 | extras | measurement-list names located on this image |
 | names | hits in `names/tuner.yaml` |
-| tier | highest complete tier, D through S+; `-` means D is open; `*` means below S (except DAMOS/A2L) |
+| tier | on `names`. Highest complete map tier, D through S+; `-` means D is open; `*` means below S (except DAMOS/A2L) |
 | axis | axes present on maps that hit / axes those maps list (scalar adds nothing) |
 | confidence | bodies that hold up / names that hit |
 | block | hits in the other names file for this layout block (blank when none) |
@@ -67,7 +68,7 @@ open and block are the names that did not hit. `absent` is listed for this layou
 | `identical` | same names; description, comment, and layout would stay |
 | `forced` | names match; stamp digests of the merged model differ; origin stays |
 | `verified` | `provenance.verified`; existing objects stay; missing located names added (`verified, +N`) |
-| `origin damos` / `origin a2l` | left in place; edit JSON by hand |
+| `origin damos` / `origin a2l` | canonical file stays. An open map grade or confidence 0/0 does not hold it |
 | `origin unset` | no provenance origin; left in place |
 | `handmade short NAME` | that handmade name was not located; other deltas may still write; origin stays `handmade` |
 | `handmade disagrees NAME` | more than one located address; partial write keeps `handmade` |

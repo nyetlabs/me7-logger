@@ -1,0 +1,11 @@
+# Stages 1, 2, 3 are ecu me7info tiers D, C, B. any is one slot.
+stages:
+  1:
+    names: [nmot_w, gangi, wped_w, wdkba, rl_w, tmot, tans]
+    any:
+      - [vfzg, vfil_w, vfzroh_w]
+      - [ub, wub]
+  2:
+    names: [zwout, zwist, wkr_0]
+  3:
+    names: [lamsoni_w, lamsbg_w, te_w, ti_b1, mshfm_w]

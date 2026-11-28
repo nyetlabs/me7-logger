@@ -93,16 +93,15 @@ units:
     KFMIZUFIL, KFMIZUNS]}
 - {bits: 8, unit: "Grad C", factor: 3/4, offset: 48, min: -48, max: 143.25, precision: 2, z: [
     TMNSMN, TMOTNMX], x: [
-    DLAMTANS, FWFTBRTA, KFFLLDE, KFFWL_0_A, KFFWL_1_A, KFLDHBN, KFLDRXO, KFNLLNST, KFTARX,
-    KFTARXZK, KFWPLGTA, KFZWWLNM, LDHIA, LDIATA, NASNOTKL, NFS2M, NFS2M_0_A, NFS2M_1_A, NFSM,
-    NLL2M, NLL2M_0_A, NLL2M_1_A, NLL2M_2_A, NLL2M_3_A, NLLM, NLLM_0_A, NLLM_1_A, NLLM_2_A,
-    NLLM_3_A], y: [
-    KFFLLDE, KFFWL_0_A, KFFWL_1_A, KFLAFWL, KFTARX, KFTARXZK, KFWPLGTA]}
+    DLAMTANS, FWFTBRTA, KFFLLDE, KFFWL_0_A, KFFWL_1_A, KFLDHBN, KFLDRXO, KFTARX, KFTARXZK,
+    KFWPLGTA, KFZWWLNM, LDHIA, LDIATA, NASNOTKL, NFS2M, NFS2M_0_A, NFS2M_1_A, NFSM, NLL2M,
+    NLL2M_0_A, NLL2M_1_A, NLL2M_2_A, NLL2M_3_A, NLLM, NLLM_0_A, NLLM_1_A, NLLM_2_A, NLLM_3_A], y: [
+    KFFLLDE, KFFWL_0_A, KFFWL_1_A, KFLAFWL, KFNLLNST, KFTARX, KFTARXZK, KFWPLGTA]}
 - {bits: 8, unit: "Grad KW", factor: 3/4, precision: 3, z: [KRDWA]}
 - {bits: 8, unit: "Upm", factor: 40, min: 0, max: 10200, precision: 1, z: [
     KRANH, LDHIA, NASNOTKL, NDLDRAPU, NLDIAPU, NWPMBBR], x: [
     DWKRMSN, FKKVS, KFFWTBR, KFLBTS_0_A, KFMDZOF_UM, KFMIZUFIL, KFMIZUNS, KFMIZUOF, KFMI_UM,
-    KFMLDMX, KFMPED_UM, KLDMASRL, KRALH, KRANH, KRFKLN, LAMFA, LDORXN, LDPBN, LDRQ0DY, LDRQ1DY,
+    KFMLDMX, KFMPED_UM, KLDMASRL, KRALH, KRANH, KRFKLN, LDORXN, LDPBN, LDRQ0DY, LDRQ1DY,
     LDRQ1ST, RLSALUN, TLDIAPN, WDKUGDN], y: [
     FKKVS, FZWWLRLN, KFDLULS, KFFWLW, KFKHFM, KFLAMKR, KFLDHBN, KFLDIOPU, KFLDRAPP, KFLDRQ1,
     KFLDRQ2, KFLDRXO, KFLF, KFMLDMX, KFNW, KFNWWL, KFTSRL, KFVPDKLD, KFZW, KFZW2, KFZWWLNM,
@@ -111,7 +110,7 @@ units:
 - {bits: 8, unit: "grad KW", factor: 3/4, precision: 3, z: [
     KFZW, KFZW2, KFZWOP, KFZWOP2, KFZWWLNM]}
 - {bits: 8, unit: "hPa", factor: 10, precision: 1, z: [
-    DPUPS, EDLDRP, LDEIAP, LDPBN, UMDYLDR], x: [
+    DPUPS, EDLDRP, LDEIAP, LDPBN, PUE, UMDYLDR], x: [
     KFDLULS, KFLDRQ1, KFLDRQ2]}
 - {bits: 16, unit: "", factor: 1/4}
 - {bits: 16, unit: "%", factor: 100/0x10000, precision: 4, z: [
@@ -137,7 +136,8 @@ units:
 - {bits: 16, name: twice, unit: "", factor: 200/0x10000}
 - {bits: 8, unit: "%", factor: 0.0976470588235294, precision: 3, maps: true, z: [KFMRES, KFMRESK]}
 - {bits: 8, unit: "%", factor: 50/128, precision: 3, maps: true, z: [
-    KFLDRAPP, KFMDZOF_UM, KFMIZUFIL, KFMIZUNS, KFMIZUOF, KFMI_UM, KFMPED_UM, KLDMASRL, MDIMX], y: [
+    KFLDRAPP, KFMDZOF_UM, KFMIZUFIL, KFMIZUNS, KFMIZUOF, KFMI_UM, KFMPED_UM, KLDMASRL, MDIMX,
+    WDKUGDN], y: [
     KFMDZOF_UM, KFMIZUOF]}
 - {bits: 8, unit: "%", factor: 64/100, precision: 3, maps: true, z: [KFLDIOPU, LDIATA]}
 - {bits: 8, unit: "% DK", factor: 100/255, precision: 3, maps: true, x: [KFVPDKLD]}
@@ -149,6 +149,7 @@ units:
     ESKONF], x: [
     KFDMDADP, KFDMDARO], y: [
     KFDMDADP, KFDMDARO]}
+- {bits: 8, unit: "1/min", factor: 40, precision: 1, maps: true, x: [LAMFA]}
 - {bits: 8, unit: "U/min", factor: 10, precision: 1, maps: true, z: [
     KFNLLNST, NFS2M, NFS2M_0_A, NFS2M_1_A, NFSM, NLL2M, NLL2M_0_A, NLL2M_1_A, NLL2M_2_A,
     NLL2M_3_A, NLLM, NLLM_0_A, NLLM_1_A, NLLM_2_A, NLLM_3_A]}
@@ -164,15 +165,14 @@ units:
     KFLDIOPU, KFVPLGU, NDLDRAPU, NLDIAPU]}
 - {bits: 8, unit: "kg/h", factor: 8, maps: true, z: [KFMLDMX]}
 - {bits: 8, unit: "km/h", factor: 5/4, precision: 2, maps: true, z: [VNMX, VWPMBBR]}
-- {bits: 8, unit: "mbar", factor: 2.2002200220022003, offset: -559.8459845984598, maps: true, z: [
-    PUE]}
 - {bits: 8, unit: "ms", factor: 0.010667, precision: 3, maps: true, z: [TVUB]}
 - {bits: 8, unit: "ms", factor: 10/100, precision: 3, maps: true, z: [KFTSRL]}
 - {bits: 8, unit: "ms/%", clock: krkte, precision: 3, maps: true, z: [KRKTE]}
 - {bits: 8, unit: "s", factor: 5/100, precision: 4, maps: true, z: [
     TDLDRA, TDLDRA2, TLDIAPN, TULV1]}
-- {bits: 8, unit: "s", factor: 1, precision: 2, maps: true, y: [KFNLLNST]}
+- {bits: 8, unit: "s", factor: 1, precision: 2, maps: true, x: [KFNLLNST]}
 - {bits: 8, unit: "s", factor: 2560/100, reciprocal: true, precision: 3, maps: true, z: [ZKWLAFWL]}
+- {bits: 16, unit: "", factor: 16/0x10000, precision: 5, maps: true, z: [DLAMFAW]}
 - {bits: 16, unit: "", factor: 0.001, precision: 5, maps: true, z: [AIMVM]}
 - {bits: 16, unit: "%", factor: 200/0x10000, precision: 4, maps: true, z: [
     KFPED, KFPEDR, KFPEDR_0_A, KFPEDR_1_A, KFPED_0_A, KFPED_1_A], x: [
@@ -197,9 +197,12 @@ units:
     FHOKH], x: [
     KFVPDKSD, KFVPDKSE]}
 - {bits: 16, unit: "-", factor: 19/256, precision: 4, maps: true, z: [KIFZGHG]}
+- {bits: 16, unit: "1/min", factor: 1/4, precision: 3, maps: true, x: [WDKUGDN]}
 - {bits: 16, unit: "Grad C", factor: 5/256, offset: 50, precision: 2, maps: true, z: [
     TABGBTS, TABGSS, TABGSS2], x: [
     FBSTABGM]}
+- {bits: 16, unit: "Grad C", factor: 3/128, offset: 273.15, precision: 1, maps: true, x: [
+    FWFTBRTA]}
 - {bits: 16, unit: "Grad KW", factor: 3/16, precision: 3, maps: true, x: [KFFLLDE]}
 - {bits: 16, unit: "V", factor: 640/0x10000, precision: 4, maps: true, x: [MLHFM]}
 - {bits: 16, unit: "cm**3/min", factor: 0.011902037188391277, precision: 4, maps: true, z: [KVB]}
@@ -212,6 +215,6 @@ units:
 - {bits: 16, unit: "ms", factor: 1/375, precision: 4, maps: true, x: [FKKVS], y: [FKKVS]}
 - {bits: 16, unit: "ms/%", clock: krkte, precision: 5, maps: true, z: [KRKTE]}
 - {bits: 16, unit: "s", factor: 1/100, precision: 4, maps: true, z: [ITNMXH, TNMXH]}
-- {bits: 16, unit: "s", factor: 655360/100, reciprocal: true, precision: 3, maps: true, z: [
+- {bits: 16, unit: "s", factor: 655360/100, reciprocal: true, precision: 7, maps: true, z: [
     ZKLAMFAW]}
 - {bits: 16, unit: "°KW", factor: 128/0x10000, precision: 4, maps: true, y: [KFPRG, KFURL]}

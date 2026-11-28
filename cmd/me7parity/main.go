@@ -8,9 +8,9 @@ import (
 
 	"github.com/spf13/pflag"
 
+	"go.nyet.org/me7-logger/info/parity"
 	"go.nyet.org/me7-logger/internal/cli"
 	"go.nyet.org/me7-logger/internal/ecucorpus"
-	"go.nyet.org/me7-logger/info/parity"
 )
 
 // version is set from git describe by the Makefile. Do not edit it here.
@@ -77,8 +77,9 @@ Prints the parity report. Each score is hits/total and a percent.
 With no arguments every image is listed. me7parity report NAME
 limits the report and lists the names that missed.
 
-ecu me7info   ME7Info rows. 100% is the only hard mark.
-names         tuner names: tier, axis, confidence, block.
+ecu me7info   ME7Info rows, and the memory tier (D through A+).
+              100% is the only hard mark. An image with no file is still listed.
+names         tuner map names: tier, axis, confidence, block.
 xdf damos     DAMOS or A2L maps at the same address.
 xdf handmade  the same columns for a handmade definition.
 

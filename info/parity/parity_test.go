@@ -217,11 +217,14 @@ func TestRunLayout(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(got.ME7Info) != 1 || got.ME7Info[0].Name != "a.bin" || got.ME7Info[0].String() != "50.0% (1/2)" {
+	if len(got.ME7Info) != 2 || got.ME7Info[0].Name != "a.bin" || got.ME7Info[0].String() != "50.0% (1/2)" {
 		t.Fatalf("me7info %+v", got.ME7Info)
 	}
 	if got.ME7Info[0].Corpus.Hit != 1 || got.ME7Info[0].Corpus.Total <= 1 {
 		t.Fatalf("catalog %+v", got.ME7Info[0].Corpus)
+	}
+	if got.ME7Info[1].Name != "b.bin" || got.ME7Info[1].Total != 0 || got.ME7Info[1].Corpus.Total == 0 {
+		t.Fatalf("no oracle %+v", got.ME7Info[1])
 	}
 	if len(got.Extras) != 2 || got.Extras[0].Name != "a.bin" || got.Extras[0].Hit != 1 || got.Extras[1].Hit != 2 {
 		t.Fatalf("extras %+v", got.Extras)
@@ -251,10 +254,14 @@ func TestSortImages(t *testing.T) {
 
 func TestReportText(t *testing.T) {
 	rep := &Report{
-		ME7Info: []Image{{
-			Name: "a.bin", Fraction: Fraction{1, 2}, Beyond: 3, Corpus: Fraction{2, 10},
-		}},
-		Extras: []Image{{Name: "a.bin", Fraction: Fraction{1, 4}}},
+		ME7Info: []Image{
+			{Name: "a.bin", Fraction: Fraction{1, 2}, Beyond: 3, Corpus: Fraction{2, 10}, Ram: "A+"},
+			{Name: "b.bin", Corpus: Fraction{1, 10}, Ram: "D"},
+		},
+		Extras: []Image{
+			{Name: "a.bin", Fraction: Fraction{1, 4}},
+			{Name: "b.bin", Fraction: Fraction{2, 4}},
+		},
 		Tuner: []Image{
 			{
 				Name: "a.bin", Fraction: Fraction{1, 2}, Tier: "S",
@@ -268,8 +275,9 @@ func TestReportText(t *testing.T) {
 	}
 	got := rep.Text()
 	want := "" +
-		"ecu me7info   vs ecu-specific     vs corpus       extras\n" +
-		"  a          1/2 (+3)   50.0%  2/10   20.0%  1/4   25.0%\n" +
+		"ecu me7info   vs ecu-specific  tier     vs corpus       extras\n" +
+		"  a          1/2 (+3)   50.0%  A+    2/10   20.0%  1/4   25.0%\n" +
+		"  b                         -  D     1/10   10.0%  2/4   50.0%\n" +
 		"\n" +
 		"names                     tier         axis   confidence         block\n" +
 		"  a          1/2   50.0%  S     1/2   50.0%  1/1  100.0%  3/40    7.5%\n" +
@@ -749,13 +757,24 @@ func TestME7InfoParity(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(rep.ME7Info) == 0 {
-		t.Fatal("no ME7Info image")
+	if len(rep.ME7Info) == 0 || len(rep.ME7Info) != len(rep.Tuner) {
+		t.Fatalf("me7info %d tuner %d", len(rep.ME7Info), len(rep.Tuner))
 	}
+	bare := 0
 	for _, im := range rep.ME7Info {
+		if im.Total == 0 {
+			bare++
+			if im.Corpus.Total == 0 {
+				t.Errorf("%s corpus empty", im.Name)
+			}
+			continue
+		}
 		if im.Hit != im.Total {
 			t.Errorf("%s %s", im.Name, im.Fraction)
 		}
+	}
+	if bare == 0 {
+		t.Fatal("image with no ME7Info file missing from the table")
 	}
 }
 
@@ -765,5 +784,38 @@ func TestFraction(t *testing.T) {
 	}
 	if (Fraction{}).String() != "0.0% (0/0)" {
 		t.Fatal((Fraction{}).String())
+	}
+}
+
+func TestRAMGrade(t *testing.T) {
+	stages, err := loadMemory(filepath.Join("..", "..", "testdata", "parity"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(stages) != 3 {
+		t.Fatalf("stages %d", len(stages))
+	}
+	if g := ramGrade(stages, nil, Fraction{}, Fraction{}); g != "-" {
+		t.Fatalf("open %q", g)
+	}
+	names := append(append([]string{}, stages[0].names...), stages[0].any[0][0], stages[0].any[1][0])
+	var items []record.Item
+	for _, n := range names {
+		items = append(items, record.Item{Name: n, Addr: 0x10, ResultType: 1})
+	}
+	items = append(items, record.Item{Name: names[0], Addr: 0x10, ResultType: 2})
+	located := ramAddrs(items)
+	if g := ramGrade(stages, located, Fraction{}, Fraction{}); g != "D" {
+		t.Fatalf("stage 1 %q", g)
+	}
+	if g := ramGrade(stages, located, Fraction{4, 4}, Fraction{1, 9}); g != "A" {
+		t.Fatalf("extras %q", g)
+	}
+	if g := ramGrade(stages, located, Fraction{4, 4}, Fraction{9, 9}); g != "A+" {
+		t.Fatalf("catalog %q", g)
+	}
+	items = append(items, record.Item{Name: names[0], Addr: 0x20, ResultType: 1})
+	if g := ramGrade(stages, ramAddrs(items), Fraction{}, Fraction{}); g != "-" {
+		t.Fatalf("second address %q", g)
 	}
 }

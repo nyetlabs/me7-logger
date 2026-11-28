@@ -19,6 +19,13 @@
 06A906032NL-0003: {engine: 1.8T, code: AWP, vehicle: "Golf, Jetta", year: 2002+, gearbox: automatic}
 06A906032S-0004: {engine: 1.8T, code: APH, vehicle: Beetle, year: 1999-2000, gearbox: automatic}
 
+# 2.5 NA R5, 110 kW, 6-speed automatic. US New Beetle and convertible.
+# BPR is SULEV (0GT). BPS is Tier 2 (7GJ). Banner is NB R5 AT; B says NB/C.
+07K906032B-7615: {engine: "2.5", code: BPS, vehicle: Beetle, year: 2006-2007, gearbox: automatic, market: NA}
+07K906032AA-8837: {engine: "2.5", code: BPR, vehicle: Beetle, year: 2007, gearbox: automatic, market: NA}
+07K906032AA-9792: {engine: "2.5", code: BPR, vehicle: Beetle, year: 2007, gearbox: automatic, market: NA}
+07K906032BQ-1864: {engine: "2.5", code: BPR, vehicle: Beetle, year: 2008, gearbox: automatic, market: NA}
+
 # Bosch 0261206042, sw 1037350228. 150 hp.
 4B0906018-0004: {engine: 1.8T, code: APU, vehicle: A4, year: 1997-2000}
 4B0906018P-0006: {engine: 1.8T, code: ATW, vehicle: "A4, Passat", year: 2000-2002, gearbox: manual, market: NA}

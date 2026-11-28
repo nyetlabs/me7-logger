@@ -143,6 +143,9 @@ func TestGateReason(t *testing.T) {
 	if got := gateReason("A", high, nil, true, "damos"); got != "origin damos" {
 		t.Fatalf("damos: %s", got)
 	}
+	if got := gateReason("-", parity.Fraction{}, map[string]parity.Conf{"KFZW": {Reason: "axis"}}, true, "a2l"); got != "origin a2l" {
+		t.Fatalf("canonical: %s", got)
+	}
 	if got := gateReason("-", high, nil, true, ""); got != "origin unset" {
 		t.Fatalf("unset: %s", got)
 	}

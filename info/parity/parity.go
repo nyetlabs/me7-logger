@@ -21,8 +21,8 @@ import (
 	"go.nyet.org/me7-logger/config"
 	"go.nyet.org/me7-logger/ecu"
 	"go.nyet.org/me7-logger/info/generate"
-	"go.nyet.org/me7-logger/internal/ecucorpus"
 	"go.nyet.org/me7-logger/info/opcode"
+	"go.nyet.org/me7-logger/internal/ecucorpus"
 	"go.nyet.org/me7-logger/record"
 )
 
@@ -83,8 +83,12 @@ type Image struct {
 	// ConfByName is per tuner name on a Tuner row after confidence scoring.
 	ConfByName map[string]Conf
 	Block      Fraction
-	Open       []OpenName
-	BlockOpen  []OpenName
+	// Ram is the memory tier on an ME7Info row: D, C, B, A, A+, or "-"
+	// while D is open. Empty when names/memory.yaml is absent. Text
+	// prints it as tier, after the ecu-specific percent.
+	Ram       string
+	Open      []OpenName
+	BlockOpen []OpenName
 }
 
 // OpenName is a tuner or block name the image did not locate, or a table
@@ -174,7 +178,7 @@ func (r *Report) Text() string {
 		for _, im := range r.ME7Info {
 			lines = append(lines, line{
 				label: "  " + stemName(im.Name), frac: im.Fraction, corpus: im.Corpus,
-				beyond: im.Beyond, extras: extraBy[im.Name], me7info: true,
+				beyond: im.Beyond, extras: extraBy[im.Name], tier: im.Ram, me7info: true,
 			})
 		}
 	}
@@ -279,6 +283,13 @@ func (r *Report) Text() string {
 	if extrasW < 3 {
 		extrasW = 3
 	}
+	showTier := false
+	for _, ln := range lines {
+		if ln.me7info && ln.tier != "" {
+			showTier = true
+			break
+		}
+	}
 	if len(r.ME7Info) > 0 && nameW < len("ecu me7info") {
 		nameW = len("ecu me7info")
 	}
@@ -313,6 +324,9 @@ func (r *Report) Text() string {
 			me7Start := nameW + 2
 			me7Span := countW + beyondW + 11
 			corpusStart := me7Start + me7Span + 2
+			if showTier {
+				corpusStart += len("tier") + 2
+			}
 			corpusSpan := 8 + corpusW
 			end := corpusStart + corpusSpan
 			if showExtras {
@@ -321,6 +335,9 @@ func (r *Report) Text() string {
 			hdr := []byte(strings.Repeat(" ", end))
 			copy(hdr, ln.label)
 			copy(hdr[me7Start+me7Span-len("vs ecu-specific"):], "vs ecu-specific")
+			if showTier {
+				copy(hdr[me7Start+me7Span+2:], "tier")
+			}
 			copy(hdr[corpusStart+corpusSpan-len("vs corpus"):], "vs corpus")
 			if showExtras {
 				copy(hdr[end-len("extras"):], "extras")
@@ -344,9 +361,18 @@ func (r *Report) Text() string {
 			if ln.extras.Total > 0 {
 				extraPct = ln.extras.percent()
 			}
-			fmt.Fprintf(&b, "%-*s  %*s (%*s)  %6s  %*s  %6s  %*s  %6s\n",
-				nameW, ln.label, countW, counts[i], beyondW, beyonds[i], ln.frac.percent(),
+			tail := fmt.Sprintf("%*s  %6s  %*s  %6s",
 				corpusW, corpus[i], ln.corpus.percent(), extrasW, extras[i], extraPct)
+			if showTier {
+				tail = fmt.Sprintf("%-4s  ", ln.tier) + tail
+			}
+			if ln.frac.Total == 0 {
+				fmt.Fprintf(&b, "%-*s  %*s  %s\n",
+					nameW, ln.label, countW+beyondW+11, "-", tail)
+			} else {
+				fmt.Fprintf(&b, "%-*s  %*s (%*s)  %6s  %s\n",
+					nameW, ln.label, countW, counts[i], beyondW, beyonds[i], ln.frac.percent(), tail)
+			}
 		case ln.tuner:
 			confPct := ""
 			if ln.conf.Total > 0 {
@@ -614,6 +640,10 @@ func run(dir string, images []string, defOf func(string) string, gen imageGen) (
 	if err != nil {
 		return nil, err
 	}
+	memStages, err := loadMemory(dir)
+	if err != nil {
+		return nil, err
+	}
 	tuner, axes := lists.tuner, lists.dims
 	ntier := lists.tier
 	layout, err := loadLayoutOrder(blocks)
@@ -649,17 +679,25 @@ func run(dir string, images []string, defOf func(string) string, gen imageGen) (
 			return nil, fmt.Errorf("%s: %w", base, err)
 		}
 		names := itemNames(items)
+		extra := Fraction{}
 		if len(meas) > 0 {
-			rep.Extras = append(rep.Extras, Image{Name: base, Fraction: cover(meas, [][]string{names})})
+			extra = cover(meas, [][]string{names})
+			rep.Extras = append(rep.Extras, Image{Name: base, Fraction: extra})
 		}
-		if frac, beyond, ok, err := scoreME7(dir, stem, items, catSet, measSet); err != nil {
+		frac, beyond, ok, err := scoreME7(dir, stem, items, catSet, measSet)
+		if err != nil {
 			return nil, err
-		} else if ok {
-			rep.ME7Info = append(rep.ME7Info, Image{
-				Name: base, Fraction: frac, Beyond: beyond,
-				Corpus: cover(cat, [][]string{names}),
-			})
 		}
+		corp := cover(cat, [][]string{names})
+		row := Image{
+			Name: base, Corpus: corp,
+			Ram: ramGrade(memStages, ramAddrs(items), extra, corp),
+		}
+		if ok {
+			row.Fraction = frac
+			row.Beyond = beyond
+		}
+		rep.ME7Info = append(rep.ME7Info, row)
 		def := defOf(stem)
 		xmaps, xaxes, xrows, kind, prov, err := loadOracle(def)
 		if err != nil {
@@ -924,6 +962,7 @@ const (
 	namesDir   = "names"
 	tunerList  = "tuner"
 	absentFile = "absent.yaml"
+	memoryFile = "memory.yaml"
 )
 
 // nameLists is every names/*.yaml list. tuner is tuner.yaml. byBlock is the
@@ -981,7 +1020,7 @@ func loadNames(dir string, blocks map[string][]string) (nameLists, error) {
 	}
 	for _, p := range paths {
 		base := filepath.Base(p)
-		if base == tunerList+".yaml" || base == absentFile {
+		if base == tunerList+".yaml" || base == absentFile || base == memoryFile {
 			continue
 		}
 		list, block, tier, err := loadNameList(p)
@@ -1239,6 +1278,122 @@ func nameGrade(tierOf map[string]string, rest []string, families []family, hit f
 	return grade
 }
 
+// ramStage is one memory-location stage. any is one slot each.
+type ramStage struct {
+	names []string
+	any   [][]string
+}
+
+// loadMemory reads names/memory.yaml. A missing file leaves the tier column blank.
+func loadMemory(dir string) ([]ramStage, error) {
+	b, err := os.ReadFile(filepath.Join(dir, namesDir, memoryFile))
+	if os.IsNotExist(err) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	var doc struct {
+		Stages map[int]struct {
+			Names []string   `yaml:"names"`
+			Any   [][]string `yaml:"any"`
+		} `yaml:"stages"`
+	}
+	if err := yaml.Unmarshal(b, &doc); err != nil {
+		return nil, fmt.Errorf("%s: %w", memoryFile, err)
+	}
+	if len(doc.Stages) == 0 {
+		return nil, fmt.Errorf("%s: want stages", memoryFile)
+	}
+	keys := make([]int, 0, len(doc.Stages))
+	for k := range doc.Stages {
+		keys = append(keys, k)
+	}
+	slices.Sort(keys)
+	seen := map[string]bool{}
+	var out []ramStage
+	for i, k := range keys {
+		if k != i+1 {
+			return nil, fmt.Errorf("%s: stage %d", memoryFile, k)
+		}
+		s := doc.Stages[k]
+		var st ramStage
+		add := func(n string) error {
+			if n == "" || seen[n] {
+				return fmt.Errorf("%s: %q repeated", memoryFile, n)
+			}
+			seen[n] = true
+			return nil
+		}
+		for _, n := range s.Names {
+			if err := add(n); err != nil {
+				return nil, err
+			}
+			st.names = append(st.names, n)
+		}
+		for _, fam := range s.Any {
+			if len(fam) == 0 {
+				return nil, fmt.Errorf("%s: empty any", memoryFile)
+			}
+			for _, n := range fam {
+				if err := add(n); err != nil {
+					return nil, err
+				}
+			}
+			st.any = append(st.any, fam)
+		}
+		if len(st.names) == 0 && len(st.any) == 0 {
+			return nil, fmt.Errorf("%s: stage %d is empty", memoryFile, k)
+		}
+		out = append(out, st)
+	}
+	return out, nil
+}
+
+// ramGrade is D, C, B for stages 1-3, A for a full extras list, A+ for a
+// full catalog, or "-" while D is open. No stages leaves the column blank.
+func ramGrade(stages []ramStage, located map[string]map[uint32]struct{}, extras, corpus Fraction) string {
+	if len(stages) == 0 {
+		return ""
+	}
+	letter := []string{"D", "C", "B"}
+	grade := "-"
+	for i, s := range stages {
+		if i >= len(letter) || !ramStageMet(s, located) {
+			break
+		}
+		grade = letter[i]
+	}
+	if extras.Total > 0 && extras.Hit == extras.Total {
+		grade = "A"
+	}
+	if corpus.Total > 0 && corpus.Hit == corpus.Total {
+		grade = "A+"
+	}
+	return grade
+}
+
+func ramStageMet(s ramStage, located map[string]map[uint32]struct{}) bool {
+	for _, n := range s.names {
+		if len(located[n]) != 1 {
+			return false
+		}
+	}
+	for _, fam := range s.any {
+		met := false
+		for _, n := range fam {
+			if len(located[n]) == 1 {
+				met = true
+				break
+			}
+		}
+		if !met {
+			return false
+		}
+	}
+	return true
+}
+
 // familyMet is true when one member is located, or every member is absent.
 // A pair slot is met by the plain name alone, or by both variants when the
 // plain name is not located. One variant does not meet it, and the plain
@@ -1362,6 +1517,23 @@ func itemNames(items []record.Item) []string {
 		if it.Name != "" {
 			out = append(out, it.Name)
 		}
+	}
+	return out
+}
+
+// ramAddrs is the addresses stored for each measurement name.
+func ramAddrs(items []record.Item) map[string]map[uint32]struct{} {
+	out := map[string]map[uint32]struct{}{}
+	for _, it := range items {
+		if it.Name == "" {
+			continue
+		}
+		set := out[it.Name]
+		if set == nil {
+			set = map[uint32]struct{}{}
+			out[it.Name] = set
+		}
+		set[it.Addr] = struct{}{}
 	}
 	return out
 }

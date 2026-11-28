@@ -144,3 +144,16 @@ func TestPtrAtExtp(t *testing.T) {
 		t.Fatalf("got %#x", got)
 	}
 }
+
+func TestSignAddr(t *testing.T) {
+	for _, addr := range []uint32{0x380000, 0x387FFF, 0xF0000, 0xF1E40, 0xF7FFF, 0xC000, 0xDFFF, 0xE000, 0xE06A, 0xFFFF} {
+		if !signAddr(addr) {
+			t.Fatalf("%#x", addr)
+		}
+	}
+	for _, addr := range []uint32{0, 0xBFFF, 0xE0000, 0xF8000, 0x814000} {
+		if signAddr(addr) {
+			t.Fatalf("%#x", addr)
+		}
+	}
+}

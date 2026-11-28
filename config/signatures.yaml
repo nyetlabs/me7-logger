@@ -217,3 +217,29 @@ signatures:
 - {name: uhfm_w, size: 2, from: '0x804000', pattern: F2FXXXXX7C1X5C1XD4XXXXXX, single: true, at: 2}
 # signVars on 06A906032BB. The first hit is the F6 F4 word.
 - {name: uhfm_w, size: 2, from: '0x804000', pattern: DB00F2FXXXXX66FXFF03F6FXXXXXDB00, at: 12}
+# S11038 meas_dispatch. 8837 addresses are the A2L words. 9792 is the same
+# instruction with the operand shifted. nmot_w has no memory operand.
+- {name: wdkba, size: 1, from: '0x820000', pattern: XX627C78EA00XXXXC2FCXX48, single: true, at: 10}
+- {name: wped_w, size: 2, from: '0x820000', pattern: C2FCXX48DA82XXXXEA00XXXXF2FCXX5E, single: true, at: 14}
+- {name: tmot, size: 1, from: '0x820000', pattern: FFFFF086EA00XXXXE15CF7FCXX4BE1A2F7F2XX4BC2FCXX49, single: true, at: 22}
+- {name: tans, size: 1, from: '0x820000', pattern: F7F8XX4BEA00XXXXE15CF7FCXX4BE1A2F7F2XX4BC2FCXX49, single: true, at: 22}
+- {name: ub, size: 1, from: '0x820000', pattern: F7F2XX4BF3F4XX48, single: true, at: 6}
+- {name: vfzg, size: 1, from: '0x820000', pattern: E7F27D00F7F2XX4BD7403D00F3F4XX02, single: true, at: 14}
+- {name: wub, size: 1, from: '0x820000', pattern: F7F2XX4BF3F40645, single: true, at: 6}
+- {name: vfil_w, size: 2, from: '0x820000', pattern: C2FCXX03DA82XXXXF7F8XX4BEA00XXXXF2FCXXXX, single: true, at: 18}
+- {name: gangi, size: 1, from: '0x820000', pattern: F78EXX4BD7403D00F3F2XX02, single: true, at: 10}
+- {name: vfzroh_w, size: 2, from: '0x820000', pattern: 880746F8FF0FEAA0XXXX46F801F0EAD0XXXXE10CEA00XXXXF2FCXXXX, single: true, at: 26}
+- {name: rl_w, size: 2, from: '0x820000', pattern: F7F4XX4BEA00XXXXF2F8XXE1, single: true, at: 10}
+# BQ meas_dispatch. A2L addresses. The AA rows above do not hit this image.
+- {name: nmot_w, size: 2, from: '0x804000', pattern: DA81E44DE6FCEE57F2FDD8E0, single: true, at: 10}
+- {name: wdkba, size: 1, from: '0x820000', pattern: F01CF1C2EA000258C2FCDC48, single: true, at: 10}
+- {name: wped_w, size: 2, from: '0x820000', pattern: DA830A06EA0024D1F2FC605F, single: true, at: 10}
+- {name: tmot, size: 1, from: '0x820000', pattern: FFFFF08CEA002CB0C2FC114A, single: true, at: 10}
+- {name: tans, size: 1, from: '0x820000', pattern: DA836C00EA0024D1C2FC004A, single: true, at: 10}
+- {name: ub, size: 1, from: '0x820000', pattern: DA833206EA0024D1C2F89748, single: true, at: 10}
+- {name: wub, size: 1, from: '0x820000', pattern: DA836C00EA0024D1C2F80745, single: true, at: 10}
+- {name: vfil_w, size: 2, from: '0x820000', pattern: DA836C00EA0024D1F2FC165F, single: true, at: 10}
+- {name: vfzroh_w, size: 2, from: '0x820000', pattern: DA83DA06EA0024D1F2FC1A5F, single: true, at: 10}
+- {name: rl_w, size: 2, from: '0x820000', pattern: F6F63E0FEA0024D1F2F8D6E1, single: true, at: 10}
+- {name: vfzg, size: 1, from: '0x820000', pattern: F6F63E0FEA0024D1D7403D00C2F8F202, single: true, at: 14}
+- {name: gangi, size: 1, from: '0x820000', pattern: EA2004D1EA0014D1D7403D00C2F8F402, single: true, at: 14}

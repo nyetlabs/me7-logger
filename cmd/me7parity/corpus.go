@@ -16,10 +16,10 @@ import (
 	"go.nyet.org/xdfkit/model"
 
 	"go.nyet.org/me7-logger/config"
+	"go.nyet.org/me7-logger/info/parity"
 	"go.nyet.org/me7-logger/internal/cli"
 	"go.nyet.org/me7-logger/internal/ecucorpus"
 	"go.nyet.org/me7-logger/internal/locate"
-	"go.nyet.org/me7-logger/info/parity"
 )
 
 const corpusHelp = `
@@ -544,12 +544,16 @@ func openLine(n parity.OpenName) string {
 }
 
 // gateReason is empty when the image may be submitted, or when origin
-// handmade or detected still has to pass coverAll. Hard fails are a turned
-// non-zero axis (axis NAME) or an unreadable body (body NAME). Soft low
-// confidence (shape, all-zero axis, zero body, peer miss) still uses the
-// Hit/Total gate. Grade "-" passes only for handmade. damos, a2l, and an
-// unset origin do not.
+// handmade or detected still has to pass coverAll. A DAMOS or A2L file is
+// canonical: locate confidence and an open map grade do not hold it, and
+// the confidence column can stay 0/0. Hard fails are a turned non-zero
+// axis (axis NAME) or an unreadable body (body NAME). Soft low confidence
+// (shape, all-zero axis, zero body, peer miss) still uses the Hit/Total
+// gate. Grade "-" passes only for handmade. An unset origin does not.
 func gateReason(tier string, conf parity.Fraction, byName map[string]parity.Conf, hasDef bool, origin string) string {
+	if hasDef && (origin == "damos" || origin == "a2l") {
+		return "origin " + origin
+	}
 	if status := hardConf(byName); status != "" {
 		return status
 	}

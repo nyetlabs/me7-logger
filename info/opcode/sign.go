@@ -8,8 +8,8 @@ import (
 )
 
 // Named is one variable the dedicated signature pass located.
-// The address is kept only when it is RAM 0x380000–0x387FFF, near RAM
-// 0xC000–0xDFFF, or SFR 0xE000–0xFFFF.
+// The address is kept only when it is RAM 0x380000–0x387FFF, the S11038
+// DPP1 window 0xF0000–0xF7FFF, near RAM 0xC000–0xDFFF, or SFR 0xE000–0xFFFF.
 // A name the selector already stored is not overwritten; the caller drops it.
 type Named struct {
 	Name string
@@ -623,6 +623,10 @@ func fnwue(img []byte, dpp [4]uint16, start, end uint32, add func(string, uint32
 
 func signAddr(addr uint32) bool {
 	if addr >= 0x380000 && addr <= 0x387FFF {
+		return true
+	}
+	// DPP1 0x003C and an EXTP of page 0x3D. Standard DPP1 does not land here.
+	if addr >= 0xF0000 && addr <= 0xF7FFF {
 		return true
 	}
 	if addr >= 0xC000 && addr <= 0xDFFF {
